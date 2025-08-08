@@ -1,0 +1,1001 @@
+<template>
+  <div class="user-container">
+    <div class="serach-box">
+      <div class="search-input" style="margin-left: 10px">
+        <span>用户名称</span>
+        <el-input v-model="param.username" placeholder="请输入..." />
+      </div>
+      <div class="search-input">
+        <span>IMEI号</span>
+        <el-input v-model="param.imei" placeholder="请输入..." />
+      </div>
+      <div class="search-input">
+        <span>表号</span>
+        <el-input v-model="param.water_meter_uid" type="number" placeholder="请输入..." />
+      </div>
+      <div class="buttons">
+        <div class="sercah-btn" @click="search">
+          <img src="@/assets/yonghu/icon16.png" alt="" style="margin-left: 12px" />
+          <span style="font-size: 16px; margin-left: 15%">搜索</span>
+        </div>
+        <div class="clear-btn" @click="clear">
+          <img src="@/assets/yonghu/icon4.png" alt="" style="margin-left: 12px" />
+          <span style="font-size: 16px; margin-left: 15%; color: #5a5a5a">清空</span>
+        </div>
+      </div>
+    </div>
+    <div class="user-info">
+      <div class="command-box">
+        <div class="add-btn" style="margin-left: 10px" @click="add_dialogFormVisible = true">
+          <img src="@/assets/yonghu/icon13.png" alt="" style="margin-left: 8px" />
+          <span style="font-size: 16px; margin-left: 8px; color: #5a5a5a">新增</span>
+        </div>
+        <div class="delete-btn" style="margin-left: 10px" @click="delete_btn_click">
+          <img src="@/assets/yonghu/icon4.png" alt="" style="margin-left: 8px" />
+          <span style="font-size: 16px; margin-left: 8px; color: #5a5a5a">删除</span>
+        </div>
+        <div class="command-btn" style="margin-left: 10px; width: 110px" @click="valve_dialogFormVisible = true">
+          <img src="@/assets/yonghu/icon17.png" alt="" style="margin-left: 8px; margin-top: 3px" />
+          <span style="font-size: 16px; margin-left: 8px; color: #5a5a5a">关阀控制</span>
+        </div>
+        <div class="recharge-btn" style="margin-left: 10px" @click="recharge_btn_click">
+          <img src="@/assets/yonghu/icon6.png" alt="" style="margin-left: 8px" />
+          <span style="font-size: 16px; margin-left: 8px; color: #5a5a5a">充值</span>
+        </div>
+        <div class="recharge-record-btn" style="margin-left: 10px; width: 110px" @click="recharge_record_btn_click">
+          <img src="@/assets/yonghu/icon7.png" alt="" style="margin-left: 8px" />
+          <span style="font-size: 16px; margin-left: 8px; color: #5a5a5a">充值记录</span>
+        </div>
+        <!--<div class="export-in-btn" style="margin-left: 10px" @click="triggerFileInput">
+          <img src="@/assets/yonghu/icon1.png" alt="" style="margin-left: 7px" />
+          <span style="font-size: 16px; margin-left: 10px; color: #5a5a5a">导入</span>
+          <input ref="fileInput" type="file" accept=".xls,.xlsx" style="display: none" @change="exportIn" />
+        </div>-->
+        <div class="export-out-btn" style="margin-left: 10px" @click="exportExcel">
+          <img src="@/assets/yonghu/icon2.png" alt="" style="margin-left: 7px" />
+          <span style="font-size: 16px; margin-left: 10px; color: #5a5a5a">导出</span>
+        </div>
+        <div class="reflush" style="margin-left: 10px" @click="reflush">
+          <img src="@/assets/yonghu/icon15.png" alt="" />
+        </div>
+      </div>
+      <div class="user-list">
+        <div class="quyu-box">
+          <el-input v-model="filterText" placeholder="请输入关键字检索" style="height: 32px; margin-bottom: 10px" />
+          <el-tree ref="treeRef" node-key="id" :data="quyu_data" :props="defaultProps" default-expand-all :filter-node-method="filterNode" @node-click="handleNodeClick" />
+        </div>
+        <div class="user-table">
+          <el-table
+            ref="multipleTableRef"
+            :data="yonghuData"
+            row-key="index"
+            style="width: auto; height: 100%; table-layout: fixed; overflow-x: auto; overflow-y: auto"
+            border
+            :header-cell-style="{ background: '#46B97E', color: '#FFFFFF' }"
+            @selection-change="handleSelectionChange"
+            id="yonghu-table"
+          >
+            <el-table-column type="selection" :selectable="selectable" width="55" align="center" fixed="left" />
+            <el-table-column property="index" label="序号" width="160" align="center" fixed="left" />
+            <el-table-column property="uuid" label="用户号" width="200" align="center" />
+            <el-table-column label="用户名称" width="200" align="center">
+              <template #default="scope">
+                <span @click="handleUserInfo(scope.row)" style="color: #46b97e; display: block; width: 100%; text-align: center">{{ scope.row.user_name }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column property="user_address" label="用户地址" width="280" align="center" />
+            <el-table-column property="user_region" label="所属区域" width="280" align="center" />
+            <el-table-column property="phone" label="联系电话" width="280" align="center" />
+            <el-table-column property="meterCode" label="表号" width="280" align="center" />
+            <el-table-column property="imei" label="IMEI号" width="280" align="center" />
+            <el-table-column property="water_meter_type" label="水表类型" width="240" align="center" />
+            <el-table-column property="water_meter_price_type" label="价格类型" width="240" align="center" />
+            <el-table-column label="余额/元" width="240" align="center">
+              <template #default="scope">
+                <span @click="handleYue(scope.row)" style="color: #46b97e; display: block; width: 100%; text-align: center">{{ scope.row.balance }}</span>
+              </template></el-table-column
+            >
+            <el-table-column property="sms_config_name" label="短信配置" width="240" align="center"></el-table-column>
+            <el-table-column property="approver1" label="开户审批人1" width="180" align="center" />
+            <el-table-column property="approver2" label="开户审批人2" width="180" align="center" />
+            <el-table-column property="approver3" label="开户审批人3" width="180" align="center" />
+          </el-table>
+        </div>
+      </div>
+      <div class="page-box">
+        <div class="demo-pagination-block">
+          <el-pagination v-model:current-page="currentPage" v-model:page-size="pageSize" :page-sizes="[5, 10, 15]" layout="total, prev, pager, next, jumper" :total="total" />
+        </div>
+      </div>
+    </div>
+
+    <!-- 点击用户名称弹出框 -->
+    <userInfoVue
+      v-if="user_info_dialogFormVisible"
+      :user_info_dialogFormVisible="user_info_dialogFormVisible"
+      :quyu_data="quyu_data"
+      :data="multipleSelection[0]"
+      @close="closeUserInfoDialog"
+    ></userInfoVue>
+
+    <!-- 抄表记录弹出框 -->
+    <chabiaoRecord v-if="chaobiao_dialogFormVisible" :chaobiao_dialogFormVisible="chaobiao_dialogFormVisible" :data="multipleSelection[0]" @close="chaobiao_dialogFormVisible = false"></chabiaoRecord>
+
+    <!-- 交易记录弹出框 -->
+    <transactionRecord
+      v-if="transaction_dialogFormVisible"
+      :transaction_dialogFormVisible="transaction_dialogFormVisible"
+      :data="multipleSelection[0]"
+      @close="transaction_dialogFormVisible = false"
+    ></transactionRecord>
+
+    <!-- 新增按钮弹出框 -->
+    <addVue v-if="add_dialogFormVisible" :add_dialogFormVisible="add_dialogFormVisible" :quyu_data="quyu_data" @close="closeAddDialog"></addVue>
+
+    <!-- 删除按钮弹出框 -->
+    <deleteVue v-if="delete_dialogFormVisible" :delete_dialogFormVisible="delete_dialogFormVisible" :data="multipleSelection" @close="closeDeleteDialog"></deleteVue>
+
+    <!-- 关阀控制弹出框 -->
+    <valveVue v-if="valve_dialogFormVisible" :valve_dialogFormVisible="valve_dialogFormVisible" :quyu_data="quyu_data" @close="closeValveDialog"></valveVue>
+
+    <!-- 换表弹出框 -->
+    <changeVue v-if="change_dialogFormVisible" :change_dialogFormVisible="change_dialogFormVisible" :data="multipleSelection[0]" @close="closeChangeDialog"></changeVue>
+
+    <!-- 换表记录弹出框 -->
+    <changeRecord
+      v-if="change_record_dialogFormVisible"
+      :change_record_dialogFormVisible="change_record_dialogFormVisible"
+      :quyu_data="quyu_data"
+      :data="multipleSelection[0]"
+      @close="closeChangeRecordDialog"
+    ></changeRecord>
+
+    <!-- 充值弹出框 -->
+    <rechargeVue v-if="recharge_dialogFormVisible" :recharge_dialogFormVisible="recharge_dialogFormVisible" :data="multipleSelection[0]" @close="closeRechargeDialog"></rechargeVue>
+
+    <!-- 充值记录弹出框 -->
+    <rechargeRecordVue
+      v-if="recharge_record_dialogFormVisible"
+      :recharge_record_dialogFormVisible="recharge_record_dialogFormVisible"
+      :quyu_data="quyu_data"
+      :data="multipleSelection[0]"
+      @close="closeRechargeRecordDialog"
+    ></rechargeRecordVue>
+
+    <!-- 命令下发弹出框-太阳能 -->
+    <commandVue
+      v-if="command_dialogFormVisible"
+      :command_dialogFormVisible="command_dialogFormVisible"
+      :commandType="commandType"
+      :data="multipleSelection[0]"
+      @close="command_dialogFormVisible = false"
+    ></commandVue>
+  </div>
+</template>
+
+<script>
+import commandVue from "@/components/userManage/command.vue";
+import rechargeVue from "@/components/userManage/recharge.vue";
+import rechargeRecordVue from "@/components/userManage/rechargeRecord.vue";
+import changeVue from "@/components/userManage/change.vue";
+import addVue from "@/components/userManage/add.vue";
+import deleteVue from "@/components/userManage/delete.vue";
+import valveVue from "@/components/userManage/valve.vue";
+import changeRecord from "@/components/userManage/changeRecord.vue";
+import userInfoVue from "@/components/userManage/userInfo.vue";
+import chabiaoRecord from "@/components/userManage/chaobiaoRecord.vue";
+import transactionRecord from "@/components/userManage/transactionRecord.vue";
+
+import service from "@/api/request";
+import { ElMessage } from "element-plus";
+import axios from "axios";
+
+export default {
+  components: {
+    commandVue,
+    rechargeVue,
+    rechargeRecordVue,
+    changeVue,
+    changeRecord,
+    addVue,
+    deleteVue,
+    userInfoVue,
+    chabiaoRecord,
+    transactionRecord,
+    valveVue,
+  },
+  data() {
+    return {
+      param: {
+        username: "",
+        imei: "",
+        water_meter_uid: null,
+        time: {
+          type: "",
+          accurateTime: "",
+        },
+      },
+      currentPage: 1,
+      pageSize: 50,
+      total: null,
+
+      filterText: "",
+      treeRef: null,
+      commandTreeRef: null,
+      defaultProps: {
+        label: "label",
+      },
+      quyu_data: [],
+
+      quyu_selected: null,
+
+      yonghuData: [],
+
+      multipleSelection: [], //存储当前勾选的行的数据信息
+      commandType: "",
+
+      //导出数据文件名称
+      fileName: "用户数据列表",
+
+      //弹出框显示与否
+      user_info_dialogFormVisible: false,
+      chaobiao_dialogFormVisible: false,
+      transaction_dialogFormVisible: false,
+      add_dialogFormVisible: false,
+      delete_dialogFormVisible: false,
+      change_dialogFormVisible: false,
+      change_record_dialogFormVisible: false,
+      recharge_dialogFormVisible: false,
+      recharge_record_dialogFormVisible: false,
+      command_dialogFormVisible: false,
+      valve_dialogFormVisible: false,
+    };
+  },
+  watch: {
+    filterText(val) {
+      if (this.treeRef) {
+        this.$nextTick(() => {
+          this.treeRef.filter(val);
+        });
+      }
+    },
+    currentPage() {
+      this.search();
+    },
+    multipleSelection() {
+      console.log(this.multipleSelection);
+    },
+  },
+  mounted() {
+    this.$nextTick(() => {
+      this.treeRef = this.$refs.treeRef;
+    });
+    this.getUserInfo();
+    this.getRegionData();
+  },
+  methods: {
+    filterNode(value, data) {
+      if (!value) return true;
+      return data.label.includes(value);
+    },
+    handleNodeClick(data) {
+      this.quyu_selected = data;
+      console.log(this.quyu_selected);
+      let region = data.label;
+      const nonEmptyParams = this.filterNonEmptyParams({ ...this.param, region });
+      // 初始化查询字符串
+      let queryString = "";
+      // 如果有非空参数，则发起请求
+      if (Object.keys(nonEmptyParams).length > 0) {
+        // 遍历 nonEmptyParams 对象，将键值对拼接成查询字符串
+        for (const key in nonEmptyParams) {
+          if (nonEmptyParams.hasOwnProperty(key)) {
+            const value = nonEmptyParams[key];
+            // 如果查询字符串不为空，添加 & 符号分隔参数
+            if (queryString) {
+              queryString += `&${key}=${encodeURIComponent(value)}`;
+            } else {
+              // 第一个参数前添加 ? 符号
+              queryString += `?${key}=${encodeURIComponent(value)}`;
+            }
+          }
+        }
+      }
+      // 拼接完整的 URL
+      const url = `/userManage/userCharge/showUserMeters/${this.currentPage}${queryString}`;
+      console.log(url);
+      service
+        .get(url)
+        .then((response) => {
+          if (response.code === 200) {
+            console.log(response.data.userInfoData);
+            this.yonghuData = response.data.userInfoData;
+            this.total = response.data.totalElements;
+          } else {
+            ElMessage.error(response.msg);
+          }
+        })
+        .catch((error) => {
+          // 提取错误信息
+          const errorMessage = error.response?.data?.msg || "请求发生错误";
+          ElMessage.error(errorMessage);
+        });
+    },
+    selectable() {
+      return true; // 目前允许所有行选择，你可以加上你的业务逻辑
+    },
+    handleSelectionChange(val) {
+      this.multipleSelection = val;
+      if (this.multipleSelection.length > 0) {
+        const firstRow = this.multipleSelection[0];
+        service.get(`/userManage/meterRead/getMeterVendor/?imei=${firstRow.imei}`).then((response) => {
+          if (response.code === 200) {
+            this.commandType = response.msg;
+          } else {
+            ElMessage.error(response.msg);
+          }
+        });
+      }
+    },
+    handleUserInfo(row) {
+      this.user_info_dialogFormVisible = true;
+      this.multipleSelection[0] = row;
+    },
+    handleChaoBiaoTime(row) {
+      this.chaobiao_dialogFormVisible = true;
+      this.multipleSelection[0] = row;
+    },
+    handleYue(row) {
+      this.transaction_dialogFormVisible = true;
+      this.multipleSelection[0] = row;
+    },
+    delete_btn_click() {
+      if (this.multipleSelection.length > 0) {
+        this.delete_dialogFormVisible = true;
+      } else {
+        ElMessage.error("请选择要删除的数据");
+      }
+    },
+    recharge_btn_click() {
+      if (this.multipleSelection.length > 0) {
+        this.recharge_dialogFormVisible = true;
+      } else {
+        ElMessage.error("请选择要充值的数据");
+      }
+    },
+    recharge_record_btn_click() {
+      this.recharge_record_dialogFormVisible = true;
+    },
+    change_btn_click() {
+      if (this.multipleSelection.length > 0) {
+        this.change_dialogFormVisible = true;
+      }
+    },
+    change_record_btn_click() {
+      this.change_record_dialogFormVisible = true;
+    },
+    closeUserInfoDialog() {
+      this.user_info_dialogFormVisible = false;
+      this.multipleSelection = [];
+      this.reflush();
+    },
+    closeAddDialog() {
+      this.add_dialogFormVisible = false;
+      this.multipleSelection = [];
+      this.reflush();
+    },
+    closeDeleteDialog() {
+      this.delete_dialogFormVisible = false;
+      this.multipleSelection = [];
+      this.reflush();
+    },
+    closeValveDialog() {
+      this.valve_dialogFormVisible = false;
+      this.multipleSelection = [];
+      this.reflush();
+    },
+    closeChangeDialog() {
+      this.change_dialogFormVisible = false;
+      this.multipleSelection = [];
+      this.reflush();
+    },
+    closeChangeRecordDialog() {
+      this.change_record_dialogFormVisible = false;
+      this.multipleSelection = [];
+      this.reflush();
+    },
+    closeRechargeDialog() {
+      this.recharge_dialogFormVisible = false;
+      this.multipleSelection = [];
+      this.reflush();
+    },
+    closeRechargeRecordDialog() {
+      this.recharge_record_dialogFormVisible = false;
+      this.multipleSelection = [];
+      this.reflush();
+    },
+    getUserInfo() {
+      service
+        .get(`/userManage/userCharge/showUserMeters/${this.currentPage}`)
+        .then((response) => {
+          if (response.code === 200) {
+            this.yonghuData = response.data.userInfoData;
+            // this.yonghuData.forEach((item) => {
+            //   item.lasted_meter_reading_time = item.lasted_meter_reading_time.replace("T", " ");
+            // });
+            this.total = response.data.totalElements;
+            console.log(this.yonghuData);
+          } else {
+            ElMessage.error(response.msg);
+          }
+        })
+        .catch((error) => {
+          ElMessage.error(error);
+        });
+    },
+    reflush() {
+      this.param = {
+        username: "",
+        imei: "",
+        water_meter_uid: null,
+        time: {
+          type: "",
+          accurateTime: "",
+        },
+      };
+      this.$refs.treeRef.setCurrentKey(null);
+      this.quyu_selected = null;
+      service
+        .get("/userManage/userCharge/showUserMeters/1")
+        .then((response) => {
+          this.yonghuData = response.data.userInfoData;
+          // this.yonghuData.forEach((item) => {
+          //   item.lasted_meter_reading_time = item.lasted_meter_reading_time.replace("T", " ");
+          // });
+          this.total = response.data.totalElements;
+          this.currentPage = 1;
+        })
+        .catch((error) => {
+          ElMessage.error("获取用户数据失败");
+        });
+    },
+    getRegionData() {
+      service
+        .get("/device_display/getAllTown")
+        .then((response) => {
+          if (response.code === 200) {
+            this.quyu_data = response.data.map((item) => {
+              return {
+                id: item.id,
+                value: item.id,
+                label: item.name,
+              };
+            });
+          }
+        })
+        .catch((error) => {
+          ElMessage.error("获取区域数据失败");
+        });
+    },
+    clear() {
+      this.param = {
+        userName: "",
+        imeiHao: "",
+        biaohao: "",
+        time: {
+          type: "",
+          accurateTime: "",
+        },
+      };
+    },
+    // 过滤掉值为空的参数
+    filterNonEmptyParams(params) {
+      const filteredParams = {};
+      for (const key in params) {
+        if (params.hasOwnProperty(key)) {
+          const value = params[key];
+          if (typeof value === "object") {
+            if (key === "time" && value.accurateTime) {
+              let formattedTime = "";
+              let type = null;
+              switch (value.type) {
+                case "year":
+                  formattedTime = `${value.accurateTime}-01-01 00:00:00`;
+                  type = 1;
+                  break;
+                case "month":
+                  formattedTime = `${value.accurateTime}-01 00:00:00`;
+                  type = 2;
+                  break;
+                case "day":
+                  formattedTime = `${value.accurateTime} 00:00:00`;
+                  type = 3;
+                  break;
+              }
+              if (formattedTime) {
+                // 将处理好的时间以 record_time 字段添加到过滤后的参数中
+                filteredParams["record_time_type"] = type;
+                filteredParams["record_time"] = formattedTime;
+              }
+            } else {
+              const subFiltered = this.filterNonEmptyParams(value);
+              if (Object.keys(subFiltered).length > 0) {
+                filteredParams[key] = subFiltered;
+              }
+            }
+          } else if (value !== "") {
+            filteredParams[key] = value;
+          }
+        }
+      }
+      return filteredParams;
+    },
+    search() {
+      const nonEmptyParams = this.filterNonEmptyParams(this.param);
+      if (this.quyu_selected !== null) {
+        nonEmptyParams.region = this.quyu_selected.label;
+      }
+      // 如果有非空参数，则发起请求
+      if (Object.keys(nonEmptyParams).length > 0) {
+        // 初始化查询字符串
+        let queryString = "";
+        // 遍历 nonEmptyParams 对象，将键值对拼接成查询字符串
+        for (const key in nonEmptyParams) {
+          if (nonEmptyParams.hasOwnProperty(key)) {
+            const value = nonEmptyParams[key];
+            // 如果查询字符串不为空，添加 & 符号分隔参数
+            if (queryString) {
+              queryString += `&${key}=${encodeURIComponent(value)}`;
+            } else {
+              // 第一个参数前添加 ? 符号
+              queryString += `?${key}=${encodeURIComponent(value)}`;
+            }
+          }
+        }
+        // 拼接完整的 URL
+        const url = `/userManage/userCharge/showUserMeters/${this.currentPage}${queryString}`;
+        console.log(url);
+        service
+          .get(url)
+          .then((response) => {
+            if (response.code === 200) {
+              console.log(response.data.userInfoData);
+              this.yonghuData = response.data.userInfoData;
+              this.total = response.data.totalElements;
+            } else {
+              ElMessage.error(response.msg);
+            }
+          })
+          .catch((error) => {
+            // 提取错误信息
+            const errorMessage = error.response?.data?.msg || "请求发生错误";
+            ElMessage.error(errorMessage);
+          });
+      } else {
+        ElMessage.error("请输入搜索条件");
+      }
+    },
+    // 触发文件输入框点击
+    triggerFileInput() {
+      this.$refs.fileInput.value = ""; // 清空文件输入框，确保每次点击都能触发 @change
+      this.$refs.fileInput.click();
+    },
+    // 处理文件上传
+    async exportIn() {
+      const fileInput = this.$refs.fileInput;
+      const file = fileInput.files[0];
+
+      if (!file) {
+        ElMessage.warning("请选择要上传的文件");
+        return;
+      }
+
+      // 文件类型验证
+      const allowedTypes = ["application/vnd.ms-excel", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"];
+      if (!allowedTypes.includes(file.type)) {
+        ElMessage.warning("仅支持上传 .xls 或 .xlsx 文件");
+        return;
+      }
+
+      // 文件大小限制（例如 10MB）
+      // const maxSize = 10 * 1024 * 1024; // 10MB
+      // if (file.size > maxSize) {
+      //   ElMessage.warning("文件大小不能超过 10MB");
+      //   return;
+      // }
+
+      const formData = new FormData();
+      formData.append("file", file);
+
+      try {
+        const response = await service.post("/userManage/userCharge/importUserMetersList", formData);
+        ElMessage.success("导入成功");
+        fileInput.value = ""; // 清空文件输入框
+        this.reflush();
+      } catch (error) {
+        const errorMessage = error.response?.data?.message || error.message || "未知错误";
+        ElMessage.error("导入失败: " + errorMessage);
+        console.error("上传失败:", error);
+      }
+    },
+    exportExcel() {
+      // 调用后端接口
+      axios({
+        url: "/userManage/userCharge/exportUserMetersReport", // 后端接口地址
+        method: "GET",
+        responseType: "blob", // 指定响应类型为二进制流
+      })
+        .then((response) => {
+          if (response.status !== 200) {
+            throw new Error("导出失败: " + response.statusText);
+          }
+
+          // 获取 Blob 对象
+          const blob = new Blob([response.data], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+
+          if (blob.size === 0) {
+            alert("内容为空，无法下载");
+            return;
+          }
+
+          // 创建一个链接元素
+          const link = document.createElement("a");
+          link.href = window.URL.createObjectURL(blob); // 创建 Blob URL
+          link.download = "用户数据列表.xlsx"; // 设置下载文件名
+          document.body.appendChild(link);
+          link.click(); // 触发下载
+          document.body.removeChild(link); // 移除链接元素
+          window.URL.revokeObjectURL(link.href); // 释放 Blob URL
+        })
+        .catch((error) => {
+          console.error("导出失败:", error);
+          ElMessage.error("导出失败: " + error.message);
+        });
+    },
+  },
+};
+</script>
+
+<style scoped>
+:deep(.el-table__body tr:nth-child(odd)) {
+  background-color: #edf8f2;
+}
+
+:deep(.el-table__body tr:nth-child(even)) {
+  background-color: #ffffff;
+}
+
+:deep(.el-table__body tr:hover > td) {
+  background-color: #fbf2cb !important;
+}
+
+/* 修改勾选框选中时的背景颜色和边框颜色 */
+:deep(.el-checkbox__input.is-checked .el-checkbox__inner) {
+  background-color: #45bb81;
+  border-color: #45bb81;
+}
+
+:deep(.el-checkbox__input.is-checked .el-checkbox__inner::after) {
+  border-color: #fff;
+}
+
+:deep(.el-input) {
+  --el-color-primary: #46b97e;
+}
+
+:deep(.el-select) {
+  --el-color-primary: #46b97e;
+}
+
+:deep(.el-select .el-select__wrapper) {
+  height: 35px;
+}
+
+:deep(.el-pagination) {
+  --el-color-primary: #46b97e;
+}
+
+:deep(.el-tree) {
+  --el-fill-color-light: #46b97e;
+  --el-fill-color-blank: #e8f3ed;
+  --el-text-color-primary: #fff;
+  overflow-y: auto;
+}
+
+:deep(.el-tree-node__content) {
+  height: 40px;
+  line-height: 40px;
+  border-radius: 5px;
+  margin: 0 10px;
+}
+
+/* 设置鼠标滑过选项时的字体颜色 */
+:deep(.el-tree-node__content:hover) {
+  color: #fff;
+}
+
+.user-container {
+  display: flex;
+  flex-direction: column;
+  align-content: center;
+  justify-content: center;
+  width: 94%;
+  height: 98%;
+  padding: 0px 20px;
+}
+
+.user-container > * {
+  padding: 0px 10px;
+  border: 1px solid #e9e9e9;
+  border-radius: 5px;
+  width: 99.3%;
+  background-color: #fff;
+}
+
+.serach-box {
+  margin-top: 15px;
+  margin-bottom: 20px;
+  height: 98px;
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+.search-input {
+  display: flex;
+  justify-content: flex-start;
+  justify-content: center; /* 确保子元素在父容器中垂直居中 */
+  flex-direction: column;
+  width: 20%;
+  height: 100%;
+  margin-right: 20px;
+}
+
+.search-input > span {
+  font-size: 14px;
+  margin-bottom: 5px;
+}
+
+.time-input {
+  display: flex;
+  width: 100%;
+}
+
+.time-input > * {
+  width: 50%;
+  margin-right: 20px;
+}
+
+.buttons {
+  display: flex;
+  width: 240px;
+  height: 100%;
+  align-items: center;
+  position: absolute;
+  right: 20px;
+}
+
+.buttons > * {
+  width: 120px;
+  margin-right: 30px;
+}
+
+.sercah-btn,
+.clear-btn {
+  display: flex;
+  align-items: center;
+  height: 32px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.3s;
+  color: #fff;
+}
+
+.sercah-btn {
+  background-color: #45ba7e;
+}
+.clear-btn {
+  background-color: #fff;
+  border: 2px solid #f2f2f2;
+  margin-right: 0px;
+}
+
+.user-info {
+  height: calc(100% - 135px);
+  margin-bottom: 0px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.command-box {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 40px;
+  /* margin-top: 20px; */
+  margin-bottom: 20px;
+  position: absolute;
+  top: 20px;
+}
+
+.command-box > * {
+  margin-right: 20px;
+}
+
+.add-btn,
+.delete-btn,
+.command-btn,
+.recharge-btn,
+.recharge-record-btn,
+.water-meter-btn,
+.water-meter-record-btn,
+.export-in-btn,
+.export-out-btn {
+  display: flex;
+  align-items: center;
+  width: 80px; /* 设置按钮的宽度 */
+  height: 32px; /* 设置按钮的高度 */
+  color: white;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.3s;
+  font-size: 14px;
+  background-color: #fff;
+  border: 2px solid #f2f2f2;
+}
+
+.reflush {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 35px; /* 设置按钮的宽度 */
+  height: 32px; /* 设置按钮的高度 */
+  color: white;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.3s;
+  font-size: 14px;
+  background-color: #fff;
+  border: 2px solid #f2f2f2;
+}
+
+.user-list {
+  width: 100%;
+  height: calc(100% - 150px);
+  display: flex;
+  margin-top: 15px;
+}
+
+.quyu-box {
+  width: 200px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: #fafafa;
+  border-radius: 5px;
+  padding: 10px;
+  margin-right: 20px;
+}
+
+.quyu-box > * {
+  width: 100%;
+  margin-bottom: 5px;
+}
+
+.quyu-box > .el-tree {
+  height: 100%;
+  width: 100%;
+  align-items: center;
+}
+
+.quyu-box > .el-input ::placeholder {
+  text-align: center;
+}
+
+.user-table {
+  width: 80%;
+  height: calc(100%-10px);
+  flex-grow: 1;
+}
+
+.page-box {
+  width: 100%;
+  height: 65px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: absolute;
+  bottom: 0;
+}
+
+.title {
+  width: 100%;
+  background-color: #fff;
+  border-radius: 5px 5px 0 0;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+  height: 45px;
+  line-height: 45px;
+  text-align: center;
+  display: flex;
+  justify-content: space-between;
+}
+
+.delete-content {
+  width: 94%;
+  background-color: #fff;
+  border-radius: 5px;
+  margin-top: 25px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.delete-content {
+  height: 150px;
+}
+
+.btn {
+  width: 100%;
+  height: 40px;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  margin-top: 15px;
+}
+
+.confirm-btn,
+.cancel-btn {
+  height: 35px;
+  width: 90px;
+  cursor: pointer;
+  border: 1px solid #f2f2f2;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+}
+
+.confirm-btn {
+  background-color: #45ba7e;
+  margin-right: 15px;
+  color: #fff;
+}
+
+.cancel-btn {
+  background-color: #fff;
+  margin-right: 5%;
+}
+
+.delete-dialog,
+.add-dialog,
+.user-info-dialog,
+.change-dialog,
+.change-record-dialog,
+.recharge-dialog,
+.recharge-record-dialog,
+.chaobiao-record-dialog,
+.transaction-record-dialog,
+.command-dialog {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 199;
+  background-color: rgb(31 33 38 / 15%);
+}
+</style>
+
+<style lang="scss" scoped>
+:deep(.el-tree) {
+  .is-current {
+    > .el-tree-node__content {
+      background-color: var(--el-tree-node-hover-bg-color);
+      color: white;
+    }
+  }
+}
+</style>
