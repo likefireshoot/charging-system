@@ -312,7 +312,7 @@ async function goRegister() {
     return;
   }
   registerParam.staffPostsId = 0;
-  registerParam.staffCharacterId = 0;
+  registerParam.staffCharacterId = 8;
   registerParam.staffAddr = "湖北省武汉市";
   console.log(registerParam);
   proxy.ajax
