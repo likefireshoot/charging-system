@@ -25,7 +25,7 @@
         <div class="search-input" style="margin-left: 10px">
           <span>角色</span>
           <el-select v-model="params.staffCharacterId">
-            <el-option v-for="item in rolesList" :key="item.id" :label="item.name" :value="item.id"></el-option>
+            <el-option v-for="item in rolesList" :key="item.id" :label="item.name" :value="item.value"></el-option>
           </el-select>
         </div>
       </div>
@@ -42,23 +42,15 @@
     </div>
     <div class="yuangong-info">
       <div class="command-box">
-        <div class="add-btn" style="width: 110px; margin-left: 10px" @click="add_dialogFormVisible = true" v-if="staffPermissionIds.includes(30)">
+        <div class="add-btn" style="width: 110px; margin-left: 10px" @click="add_dialogFormVisible = true" v-if="companyId === 1">
           <img src="@/assets/yuangong/icon6.png" alt="" style="margin-left: 8px" />
           <span style="font-size: 16px; margin-left: 10px; color: #5a5a5a">新增水厂</span>
         </div>
-        <div class="add-btn" style="width: 110px; margin-left: 10px" @click="addRegion_dialogFormVisible = true" v-if="staffPermissionIds.includes(31)">
-          <img src="@/assets/yuangong/icon6.png" alt="" style="margin-left: 8px" />
-          <span style="font-size: 16px; margin-left: 10px; color: #5a5a5a">新增区域</span>
-        </div>
-        <div class="add-btn" style="width: 110px; margin-left: 10px" @click="deleteRegion_dialogFormVisible = true" v-if="staffPermissionIds.includes(32)">
-          <img src="@/assets/yuangong/icon4.png" alt="" style="margin-left: 8px" />
-          <span style="font-size: 16px; margin-left: 10px; color: #5a5a5a">删除区域</span>
-        </div>
-        <div class="delete-btn" style="margin-left: 10px" @click="delete_click" v-if="staffPermissionIds.includes(33)">
+        <div class="delete-btn" style="margin-left: 10px" @click="delete_click">
           <img src="@/assets/yuangong/icon4.png" alt="" style="margin-left: 8px" />
           <span style="font-size: 16px; margin-left: 10px; color: #5a5a5a">删除</span>
         </div>
-        <div class="edit-btn" style="margin-left: 10px" @click="edit_click" v-if="staffPermissionIds.includes(34)">
+        <div class="edit-btn" style="margin-left: 10px" @click="edit_click">
           <img src="@/assets/yuangong/icon3.png" alt="" style="margin-left: 8px" />
           <span style="font-size: 16px; margin-left: 10px; color: #5a5a5a">编辑</span>
         </div>
@@ -96,7 +88,7 @@
           <el-table-column property="staffPhone" label="手机号" :width="phoneWidth" align="center" />
           <el-table-column property="companyName" label="所属水厂" :width="companyWidth" align="center" />
           <el-table-column property="staffPostsId" label="职位" :width="postWidth" align="center" />
-          <el-table-column property="roleName" label="角色" :width="roleWidth" align="center" />
+          <el-table-column property="staffCharacterId" label="角色" :width="roleWidth" align="center" />
           <!-- <el-table-column property="password" label="登录密码" :width="passwordWidth" align="center" /> -->
           <!-- <el-table-column property="lastLoginTime" label="上次登录时间" :width="lastLoginTimeWidth" align="center" /> -->
         </el-table>
@@ -137,83 +129,75 @@
         </div>
       </div>
     </div>
-    <!-- 新增区域 -->
-    <div class="add-dialog" v-if="addRegion_dialogFormVisible">
-      <div class="add-dialog-content">
+    <!-- 新增按钮弹出框 -->
+    <!-- <div class="edit-dialog" v-if="add_dialogFormVisible">
+      <div class="edit-dialog-content">
         <div class="title">
           <div style="margin-left: 10px; display: flex; align-items: center">
-            <img src="@/assets/fapiao/icon8.png" alt="" style="margin-right: 10px" />
-            <span style="font-size: 18px">新增区域</span>
+            <img src="@/assets/yuangong/icon6.png" alt="" style="margin-right: 10px" />
+            <span style="font-size: 18px">新增</span>
           </div>
-          <div style="margin-right: 10px; cursor: pointer" @click="addRegion_dialogFormVisible = false">
+          <div style="margin-right: 10px; cursor: pointer" @click="add_dialogFormVisible = false">
             <img src="@/assets/close.png" alt="" />
           </div>
         </div>
-        <div class="add-content">
-          <div class="add-input" v-if="companyId === 1" style="margin-right: 7%">
-            <span>水厂名称</span>
-            <el-select v-model="addRegion.companyId">
-              <el-option v-for="item in companyList" :key="item.id" :label="item.name" :value="item.id"></el-option>
+        <div class="edit-content">
+          <div class="edit-input">
+            <span>账户</span>
+            <el-input v-model="addData.account" />
+          </div>
+          <div class="edit-input">
+            <span>员工名称</span>
+            <el-input v-model="addData.workerName" />
+          </div>
+          <div class="edit-input" style="margin-right: 0">
+            <span>性别</span>
+            <el-select v-model="addData.gender">
+              <el-option label="男" value="1"></el-option>
+              <el-option label="女" value="2"></el-option>
             </el-select>
           </div>
-          <div class="add-input">
-            <span>区域名称</span>
-            <el-input v-model="addRegion.regionName" placeholder="请输入..." />
+          <div class="edit-input">
+            <span>员工住址</span>
+            <el-input v-model="addData.address" />
+          </div>
+          <div class="edit-input">
+            <span>手机号</span>
+            <el-input v-model="addData.phone" />
+          </div>
+          <div class="edit-input" style="margin-right: 0">
+            <span>职位</span>
+            <el-select v-model="addData.post">
+              <el-option v-for="item in postsList" :key="item.id" :label="item.name" :value="item.id"></el-option>
+            </el-select>
+          </div>
+          <div class="edit-input">
+            <span>角色</span>
+            <el-select v-model="addData.role">
+              <el-option v-for="item in rolesList" :key="item.id" :label="item.name" :value="item.id"></el-option>
+            </el-select>
+          </div>
+          <div class="edit-input">
+            <span>登录密码</span>
+            <el-input v-model="addData.password" />
+          </div>
+          <div class="edit-input" style="margin-right: 0">
+            <span>确认登陆密码</span>
+            <el-input v-model="addData.againPassword" />
           </div>
         </div>
         <div class="btn">
-          <div class="confirm-btn" @click="addRegion_confirm">
+          <div class="confirm-btn" @click="addConfirm">
             <el-icon style="margin-left: 15%"><Check /></el-icon>
             <span style="font-size: 16px; margin-left: 15%">确认</span>
           </div>
-          <div class="cancel-btn" @click="addRegion_dialogFormVisible = false">
+          <div class="cancel-btn" @click="add_cancel">
             <el-icon style="margin-left: 15%; color: #45ba7e"><Close /></el-icon>
             <span style="font-size: 16px; margin-left: 15%; color: #5a5a5a">取消</span>
           </div>
         </div>
       </div>
-    </div>
-    <!-- 删除区域 -->
-    <div class="add-dialog" v-if="deleteRegion_dialogFormVisible">
-      <div class="add-dialog-content">
-        <div class="title">
-          <div style="margin-left: 10px; display: flex; align-items: center">
-            <img src="@/assets/fapiao/icon8.png" alt="" style="margin-right: 10px" />
-            <span style="font-size: 18px">新增区域</span>
-          </div>
-          <div style="margin-right: 10px; cursor: pointer" @click="cancelDeleteRegion">
-            <img src="@/assets/close.png" alt="" />
-          </div>
-        </div>
-        <div class="add-content">
-          <div class="add-input" v-if="companyId === 1" style="margin-right: 7%">
-            <span>水厂名称</span>
-            <el-select v-model="deleteRegion.companyId">
-              <el-option v-for="item in companyList" :key="item.id" :label="item.name" :value="item.id"></el-option>
-            </el-select>
-          </div>
-          <div class="add-input">
-            <span>区域名称</span>
-            <el-select v-model="deleteRegion.regionIds" multiple clearable collapse-tags placeholder="请选择区域" popper-class="custom-header" :max-collapse-tags="1">
-              <template #header>
-                <el-checkbox class="user-checkbox" v-model="checkAll" :indeterminate="indeterminate" @change="handleCheckAll"> 全选 </el-checkbox>
-              </template>
-              <el-option v-for="item in regionList" :key="item.id" :label="item.label" :value="item.id" />
-            </el-select>
-          </div>
-        </div>
-        <div class="btn">
-          <div class="confirm-btn" @click="deleteRegion_confirm">
-            <el-icon style="margin-left: 15%"><Check /></el-icon>
-            <span style="font-size: 16px; margin-left: 15%">确认</span>
-          </div>
-          <div class="cancel-btn" @click="cancelDeleteRegion">
-            <el-icon style="margin-left: 15%; color: #45ba7e"><Close /></el-icon>
-            <span style="font-size: 16px; margin-left: 15%; color: #5a5a5a">取消</span>
-          </div>
-        </div>
-      </div>
-    </div>
+    </div> -->
     <!-- 删除按钮弹出框 -->
     <div class="delete-dialog" v-if="delete_dialogFormVisible">
       <div class="delete-dialog-content">
@@ -275,14 +259,14 @@
           </div>
           <div class="edit-input">
             <span>角色</span>
-            <el-select v-model="editData.roleName">
+            <el-select v-model="editData.staffCharacterId">
               <el-option v-for="item in rolesList" :key="item.id" :label="item.name" :value="item.name"></el-option>
             </el-select>
           </div>
           <div class="edit-input" v-if="companyId === 1" style="margin-right: 0">
             <span>所属水厂</span>
             <el-select v-model="editData.companyName">
-              <el-option v-for="item in companyList" :key="item.id" :label="item.name" :value="item.name"></el-option>
+              <el-option v-for="item in companyList" :key="item.id" :value="item.id" :label="item.name"></el-option>
             </el-select>
           </div>
           <!-- <div class="edit-input">
@@ -327,17 +311,7 @@ export default {
         pageSize: 50,
       },
       companyId: JSON.parse(sessionStorage.getItem("userData")).companyId, // 所属水厂ID
-      staffPermissionIds: JSON.parse(sessionStorage.getItem("userData")).staffPermissionIds,
       addCompanyName: null, // 新增水厂名称
-      addRegion: {
-        companyId: null,
-        regionName: null,
-      },
-      deleteRegion: {
-        companyId: "",
-        regionIds: [],
-      },
-
       postsList: [
         {
           id: 1,
@@ -350,11 +324,32 @@ export default {
           value: 0,
         },
       ],
-      rolesList: [],
+      rolesList: [
+        {
+          id: 1,
+          name: "管理员",
+          value: 1,
+        },
+        {
+          id: 2,
+          name: "普通员工",
+          value: 0,
+        },
+      ],
       companyList: [],
       employeeData: [],
       multipleSelection: [],
-
+      // addData: {
+      //   account: null,
+      //   workerName: null,
+      //   gender: null,
+      //   address: null,
+      //   phone: null,
+      //   post: null,
+      //   role: null,
+      //   password: null,
+      //   againPassword: null,
+      // },
       editData: {
         staffName: null,
         companyName: null,
@@ -363,7 +358,7 @@ export default {
         staffPostsId: null,
         // password: null,
         // againPassword: null,
-        roleName: null,
+        staffCharacterId: null,
         staffId: null,
       },
 
@@ -391,8 +386,6 @@ export default {
       delete_dialogFormVisible: false,
       add_dialogFormVisible: false,
       edit_dialogFormVisible: false,
-      addRegion_dialogFormVisible: false,
-      deleteRegion_dialogFormVisible: false,
 
       //表格勾选行
       selection: [],
@@ -400,10 +393,6 @@ export default {
         id: null,
         username: null,
       },
-      checkAll: false,
-      indeterminate: false,
-      regionList: [],
-      flag: 0,
     };
   },
   watch: {
@@ -412,59 +401,39 @@ export default {
         this.getEmployeeData();
       },
     },
-    "deleteRegion.regionIds": {
-      handler(val) {
-        if (val.length === 0) {
-          this.checkAll = false;
-          this.indeterminate = false;
-        } else if (val.length === this.regionList.length) {
-          this.checkAll = true;
-          this.indeterminate = false;
-        } else {
-          this.indeterminate = true;
-        }
-      },
-    },
-    "deleteRegion.companyId": {
+    edit_dialogFormVisible: {
       handler() {
-        if (this.flag == 0) {
-          this.getRegionData();
-        }
+        let params = {};
+        params.pageNo = this.params.pageNo;
+        params.pageSize = this.params.pageSize;
+        // params.companyId = this.companyId;
+        params.staffName = this.multipleSelection[0].staffName;
+        params.staffId = this.multipleSelection[0].staffId;
+        service
+          .post("/staff/queryStaff", params)
+          .then((response) => {
+            if (response.code === 200) {
+              this.editData = response.data.records[0];
+              if (this.editData.staffPostsId === 1) {
+                this.editData.staffPostsId = "经理";
+              } else {
+                this.editData.staffPostsId = "员工";
+              }
+              if (this.editData.staffCharacterId === 1) {
+                this.editData.staffCharacterId = "管理员";
+              } else {
+                this.editData.staffCharacterId = "普通员工";
+              }
+              console.log(this.editData);
+            } else {
+              ElMessage.error(response.msg);
+            }
+          })
+          .catch((error) => {
+            ElMessage.error(error);
+          });
       },
     },
-    // edit_dialogFormVisible: {
-    //   handler() {
-    //     let params = {};
-    //     params.pageNo = this.params.pageNo;
-    //     params.pageSize = this.params.pageSize;
-    //     // params.companyId = this.companyId;
-    //     params.staffName = this.multipleSelection[0].staffName;
-    //     params.staffId = this.multipleSelection[0].staffId;
-    //     service
-    //       .post("/staff/queryStaff", params)
-    //       .then((response) => {
-    //         if (response.code === 200) {
-    //           this.editData = response.data.records[0];
-    //           if (this.editData.staffPostsId === 1) {
-    //             this.editData.staffPostsId = "经理";
-    //           } else {
-    //             this.editData.staffPostsId = "员工";
-    //           }
-    //           if (this.editData.staffCharacterId === 1) {
-    //             this.editData.staffCharacterId = "管理员";
-    //           } else {
-    //             this.editData.staffCharacterId = "普通员工";
-    //           }
-    //           console.log(this.editData);
-    //         } else {
-    //           ElMessage.error(response.msg);
-    //         }
-    //       })
-    //       .catch((error) => {
-    //         ElMessage.error(error);
-    //       });
-    //   },
-    // },
   },
   computed: {
     // 每列的百分比宽度
@@ -472,11 +441,11 @@ export default {
       return {
         selection: 5,
         index: 7,
-        account: 11,
+        account: 9,
         worker_name: 10,
         company: 10,
         address: 20,
-        phone: 14,
+        phone: 18,
         post: 10,
         role: 10,
         //password: 10,
@@ -495,7 +464,6 @@ export default {
     if (this.parentContainer) {
       this.resizeObserver.observe(this.parentContainer);
     }
-    this.getRoleList();
     this.getCompanyList();
     this.getEmployeeData();
     this.userData = sessionStorage.getItem("userData");
@@ -513,14 +481,6 @@ export default {
     },
     handleSelectionChange(val) {
       this.multipleSelection = val;
-    },
-    handleCheckAll(val) {
-      this.indeterminate = false;
-      if (val) {
-        this.deleteRegion.regionIds = this.regionList.map((_) => _.id);
-      } else {
-        this.deleteRegion.regionIds = [];
-      }
     },
     // 计算列宽的函数
     calculateColumnWidths() {
@@ -556,44 +516,6 @@ export default {
       } else {
         ElMessage.error("请选择需要编辑的员工数据");
       }
-    },
-    getRoleList() {
-      service
-        .get("/role/roles")
-        .then((res) => {
-          if (res.code === 200) {
-            this.rolesList = res.data.map((item) => ({
-              id: item.roleId,
-              name: item.roleName,
-            }));
-          }
-        })
-        .catch((err) => {
-          ElMessage.error(err);
-        });
-    },
-    getRegionData() {
-      let url = `/getRegion?companyId=${this.deleteRegion.companyId}`;
-      service
-        .get(`${url}`, {
-          headers: {
-            Authorization: this.token,
-          },
-        })
-        .then((response) => {
-          if (response.code === 200) {
-            this.regionList = response.data.map((item) => {
-              return {
-                id: item.regionId,
-                value: item.regionId,
-                label: item.regionName,
-              };
-            });
-          }
-        })
-        .catch((error) => {
-          ElMessage.error("获取区域数据失败");
-        });
     },
     getCompanyList() {
       service
@@ -751,64 +673,76 @@ export default {
           ElMessage.error(error);
         });
     },
-    addRegion_confirm() {
-      if (this.companyId == 1) {
-      } else {
-        this.addRegion.companyId = this.companyId;
-      }
-      if (this.addRegion.companyId == null || this.addRegion.companyId == "") {
-        ElMessage.error("所属水厂不能为空！");
-        return;
-      }
-      if (this.addRegion.regionName == null || this.addRegion.regionName == "") {
-        ElMessage.error("区域名称不能为空！");
-      }
-      service
-        .get(`/addRegion?companyId=${this.addRegion.companyId}&regionName=${this.addRegion.regionName}`)
-        .then((response) => {
-          if (response.code == 200) {
-            ElMessage.success("区域添加成功");
-            this.addRegion_dialogFormVisible = false;
-          }
-        })
-        .catch((err) => {
-          ElMessage.error("区域添加失败");
-        });
-    },
-    deleteRegion_confirm() {
-      this.flag = 1;
-      if (!this.deleteRegion.regionIds || this.deleteRegion.regionIds.length === 0) {
-        ElMessage.error("区域名称不能为空！");
-        this.flag = 1;
-        return;
-      }
-
-      service
-        .get(`/deleteRegion?regionIds=${this.deleteRegion.regionIds}`)
-        .then((res) => {
-          if (res.code == 200) {
-            ElMessage.success("删除成功");
-            this.deleteRegion_dialogFormVisible = false;
-            this.deleteRegion.companyId = null;
-            this.deleteRegion.regionIds = [];
-          }
-        })
-        .catch((err) => {
-          ElMessage.error("删除失败");
-        })
-        .finally(() => {
-          this.flag = 1;
-        });
-    },
-    cancelDeleteRegion() {
-      this.flag = 1;
-      this.deleteRegion_dialogFormVisible = false;
-      this.deleteRegion.companyId = null;
-      this.deleteRegion.regionIds = [];
-      this.$nextTick(() => {
-        this.flag = 0;
-      });
-    },
+    // addConfirm() {
+    //   const validations = [
+    //     {
+    //       condition: this.addData.account === null,
+    //       message: "员工账户不能为空！",
+    //     },
+    //     {
+    //       condition: this.addData.workerName === null,
+    //       message: "员工名称不能为空！",
+    //     },
+    //     {
+    //       condition: this.addData.gender === null,
+    //       message: "员工性别不能为空！",
+    //     },
+    //     {
+    //       condition: this.addData.address === null,
+    //       message: "员工住址不能为空！",
+    //     },
+    //     {
+    //       condition: this.addData.phone === null,
+    //       message: "员工手机号不能为空！",
+    //     },
+    //     {
+    //       condition: !/^1[3-9]\d{9}$/.test(this.addData.phone),
+    //       message: "员工手机号格式不正确！",
+    //     },
+    //     {
+    //       condition: this.addData.post === null,
+    //       message: "员工职位不能为空！",
+    //     },
+    //     {
+    //       condition: this.addData.role === null,
+    //       message: "员工角色不能为空！",
+    //     },
+    //     {
+    //       condition: this.addData.password === null,
+    //       message: "员工登录密码不能为空！",
+    //     },
+    //     {
+    //       condition: this.addData.againPassword === null,
+    //       message: "请再次输入密码",
+    //     },
+    //     {
+    //       condition: this.addData.password !== this.addData.againPassword,
+    //       message: "两次输入的密码不一致！",
+    //     },
+    //   ];
+    //   for (const validation of validations) {
+    //     if (validation.condition) {
+    //       ElMessage.error(validation.message);
+    //       return;
+    //     }
+    //   }
+    //   ElMessage.success("编添加成功");
+    //   this.add_dialogFormVisible = false;
+    // },
+    // add_cancel() {
+    //   this.add_dialogFormVisible = false;
+    //   this.addData = {
+    //     account: null,
+    //     workerName: null,
+    //     gender: null,
+    //     address: null,
+    //     phone: null,
+    //     post: null,
+    //     role: null,
+    //     password: null,
+    //     againPassword: null,
+    //   };
+    // },
     editConfirm() {
       const validations = [
         {
@@ -837,7 +771,7 @@ export default {
           message: "员工职位不能为空！",
         },
         {
-          condition: this.editData.roleName === null || this.editData.roleName === "",
+          condition: this.editData.staffCharacterId === null || this.editData.staffCharacterId === "",
           message: "员工角色不能为空！",
         },
       ];
@@ -851,7 +785,7 @@ export default {
       let params = {
         pageNo: this.params.pageNo,
         pageSize: this.params.pageSize,
-        companyId: null,
+        companyId: this.editData.companyId,
         staffName: this.editData.staffName,
         staffAddr: this.editData.staffAddr,
         staffPhone: this.editData.staffPhone,
@@ -866,13 +800,8 @@ export default {
         }
       }
       for (let i = 0; i < this.rolesList.length; i++) {
-        if (this.editData.roleName === this.rolesList[i].name) {
-          params.staffCharacterId = this.rolesList[i].id;
-        }
-      }
-      for (let i = 0; i < this.companyList.length; i++) {
-        if (this.editData.companyName === this.companyList[i].name) {
-          params.companyId = this.companyList[i].id;
+        if (this.editData.staffCharacterId === this.rolesList[i].name) {
+          params.staffCharacterId = this.rolesList[i].value;
         }
       }
       console.log(params);
@@ -1313,7 +1242,7 @@ export default {
   display: flex;
   justify-content: center; /* 确保子元素在父容器中垂直居中 */
   flex-direction: column;
-  width: 45%;
+  width: 60%;
   height: 100%;
 }
 

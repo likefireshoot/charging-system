@@ -146,7 +146,7 @@ export default {
       };
       console.log(requestData);
       service
-        .get(`/userManage/meterRead/valveShutMethodUpdate?valveShutMethod=${requestData.valveShutMethod}&regionId=${requestData.regionId}`)
+        .get(`/userManage/meterRead/valveOpenMethodUpdate?valveOpenMethod=${requestData.valveShutMethod}&regionId=${requestData.regionId}`)
         .then((res) => {
           if (res.code == 200) {
             ElMessage.success("设置成功");

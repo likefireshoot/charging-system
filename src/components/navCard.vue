@@ -20,8 +20,8 @@
         <img src="@/assets/menu/icon21.png" alt="" style="margin-left: 40px; width: 25px; height: 25px; cursor: pointer" @click="handleEditUserInfo" />
       </div>
 
-      <div class="navList">
-        <template v-for="(item, index) in navList" :key="index">
+      <div class="navLists">
+        <template v-for="(item, index) in navLists" :key="index">
           <a class="item" :class="navIndex == index ? 'on' : ''" @click.stop="toggleSubMenu(item, index)" :style="{ cursor: item.children && item.children.length > 0 ? 'pointer' : 'default' }">
             <div class="imgBox">
               <img :src="item.icon" alt="" />
@@ -70,8 +70,8 @@
         </div>
       </div>
 
-      <div class="navList">
-        <template v-for="(item, index) in navList" :key="index">
+      <div class="navLists">
+        <template v-for="(item, index) in navLists" :key="index">
           <a class="item" :class="navIndex == index ? 'on' : ''" @click.stop="handleMenuClick(item, index)">
             <div class="imgBox">
               <img :src="item.icon" alt="" />
@@ -180,7 +180,7 @@ const staffPermissionIds = computed(() => {
 
 let navLists = reactive([
   { id: 0, name: "首页", icon: require("@/assets/menu/icon1.png"), icon2: require("@/assets/menu/icon2.png"), path: "/homePage" },
-  { id: 2, name: "用户管理", icon: require("@//assets/menu/icon3.png"), icon2: require("@/assets/menu/icon4.png"), path: "/userManage" },
+  { id: 2, name: "用户管理", icon: require("@/assets/menu/icon3.png"), icon2: require("@/assets/menu/icon4.png"), path: "/userManage" },
   {
     id: 4,
     name: "报表统计",
@@ -347,13 +347,13 @@ const userInfoData = reactive({
 const companyList = reactive([]);
 const watchRoute = () => {
   console.log(route, "route");
-  console.log(navList, "navList");
-  console.log(navList.findIndex((item) => item.path === route.fullPath));
+  console.log(navLists, "navLists");
+  console.log(navLists.findIndex((item) => item.path === route.fullPath));
 
   if (route.matched.length === 2) {
     store.commit(
       "setNavIndex",
-      navList.findIndex((item) => item.path === route.fullPath)
+      navLists.findIndex((item) => item.path === route.fullPath)
     );
   } else if (route.matched.length === 3) {
     const findIndexFn = (arr) => {
@@ -374,8 +374,8 @@ const watchRoute = () => {
       return indexArr;
     };
     store.commit("setNavIndex", null);
-    // console.log(findIndexFn(navList), "findIndexFn(navList)");
-    const indexArr = findIndexFn(navList);
+    // console.log(findIndexFn(navLists), "findIndexFn(navLists)");
+    const indexArr = findIndexFn(navLists);
     subNavIndex.value = indexArr.join("-");
     subNavOpen[subNavIndex.value[0]] = true;
   }
@@ -388,7 +388,7 @@ watch(route, (to, from) => {
 if (route.matched.length === 2) {
   store.commit(
     "setNavIndex",
-    navList.findIndex((item) => item.path === route.fullPath)
+    navLists.findIndex((item) => item.path === route.fullPath)
   );
 } else if (route.matched.length === 3) {
   const findIndexFn = (arr) => {
@@ -409,8 +409,8 @@ if (route.matched.length === 2) {
     return indexArr;
   };
   store.commit("setNavIndex", null);
-  // console.log(findIndexFn(navList), "findIndexFn(navList)");
-  const indexArr = findIndexFn(navList);
+  // console.log(findIndexFn(navLists), "findIndexFn(navLists)");
+  const indexArr = findIndexFn(navLists);
   subNavIndex.value = indexArr.join("-");
   subNavOpen[subNavIndex.value[0]] = true;
 }
@@ -680,7 +680,8 @@ const slide = ref(true);
     }
   }
 
-  .navList {
+  .navList,
+  .navLists {
     flex: 1;
     overflow: auto;
     .item {

@@ -415,20 +415,31 @@ export default {
         .then((res) => {
           if (res.code === 200) {
             const list = Array.isArray(res.data?.list) ? res.data.list : [];
-            this.roleData = list.map((role) => {
-              const originalPermissionContent = role.permissions?.map((p) => p.permissionName).join("、") || "";
-              return {
-                ...role,
-                permissionContent: "首页、用户管理、报表统计、通知管理、通知管理-短信记录、" + originalPermissionContent,
-                permissionIds: role.permissions?.map((p) => p.permissionId) || [],
-              };
+            this.roleData = list.map((role, idx) => {
+              try {
+                const originalPermissionContent = role.permissions?.map((p) => p.permissionName).join("、") || "";
+                const permissionIds = role.permissions?.map((p) => p.permissionId) || [];
+                console.log(originalPermissionContent);
+                console.log(permissionIds);
+
+                return {
+                  ...role,
+                  permissionContent: "首页、用户管理、报表统计、通知管理、通知管理-短信记录、" + originalPermissionContent,
+                  permissionIds,
+                };
+              } catch (e) {
+                console.error("第", idx, "条数据出错:", role, e);
+                throw e; // 继续往外抛，让外层 catch 触发
+              }
             });
+            console.log("123");
             this.total = res.data.total;
+            console.log("123");
             this.params.pageNo = res.data.currentPages;
           }
         })
         .catch((err) => {
-          ElMessage.error(err);
+          ElMessage.error("1");
         });
     },
     search() {
