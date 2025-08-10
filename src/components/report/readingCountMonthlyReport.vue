@@ -482,7 +482,7 @@ export default {
           this.monthtongbichart_option.xAxis.data = reportTimeStarts;
 
           //获取图例（环比）
-          const fristItem0 = response.data.hreports[0].date;
+          const fristItem0 = response.data.wdrList[0].date;
           if (fristItem0) {
             const year = fristItem0.slice(0, 4);
             const month = fristItem0.slice(5, 7);

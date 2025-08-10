@@ -84,7 +84,7 @@
           <el-table-column property="imei" label="IMEI号" :width="imeiWidth" align="center" />
           <el-table-column property="companyName" label="所属水厂" :width="companyWidth" align="center" />
           <el-table-column property="operationName" label="操作类别" :width="operateTypeWidth" align="center" />
-          <el-table-column property="operationContent" label="操作时间" :width="operateTimeWidth" align="center" />
+          <el-table-column property="createTime" label="操作时间" :width="operateTimeWidth" align="center" />
           <el-table-column property="operationContent" label="操作内容" :width="operateContentWidth" align="center" />
         </el-table>
       </div>

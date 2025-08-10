@@ -519,7 +519,17 @@ export default {
 
       try {
         const response = await service.post("/userManage/userCharge/importMeterChangeRecord", formData);
-        ElMessage.success("导入成功");
+        if (response.code === 200) {
+          if (Array.isArray(response.data) && response.data.length) {
+            // 取出所有 index，去重、排序
+            const indexList = [...new Set(response.data.map((e) => e.index))].sort((a, b) => a - b);
+            // 拼成中文描述
+            const msg = `第 ${indexList.join("、")} 条导入失败`;
+            ElMessage.warning(msg);
+          } else {
+            ElMessage.success("导入成功");
+          }
+        }
         fileInput.value = ""; // 清空文件输入框
         this.reflush();
       } catch (error) {
@@ -541,7 +551,7 @@ export default {
       }
       // 调用后端接口
       axios({
-        url: "/userManage/userCharge/exportRechargeRecord", // 后端接口地址
+        url: "/userManage/meterRead/exportChangeMeterRecord", // 后端接口地址
         method: "GET",
         responseType: "blob", // 指定响应类型为二进制流
         params: {

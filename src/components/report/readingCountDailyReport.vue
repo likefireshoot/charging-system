@@ -94,7 +94,7 @@ export default {
         tooltip: {
           trigger: "item",
           formatter: function (params) {
-            return params.name + ": " + params.value + "元";
+            return params.name + ": " + params.value + "吨";
           },
         },
         series: [

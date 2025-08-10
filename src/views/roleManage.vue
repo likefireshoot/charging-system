@@ -46,10 +46,10 @@
           <span style="font-size: 16px; margin-left: 10px; color: #5a5a5a">导入</span>
           <input ref="fileInput" type="file" accept=".xls,.xlsx" style="display: none" />
         </div> -->
-        <div class="export-out-btn" style="margin-left: 10px" @click="exportExcel">
+        <!-- <div class="export-out-btn" style="margin-left: 10px" @click="exportExcel">
           <img src="@/assets/yuangong/icon2.png" alt="" style="margin-left: 7px" />
           <span style="font-size: 16px; margin-left: 10px; color: #5a5a5a">导出</span>
-        </div>
+        </div> -->
         <div class="reflush" style="margin-left: 10px" @click="reflush">
           <img src="@/assets/yonghu/icon15.png" alt="" />
         </div>
