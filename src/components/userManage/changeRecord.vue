@@ -521,11 +521,12 @@ export default {
         const response = await service.post("/userManage/userCharge/importMeterChangeRecord", formData);
         if (response.code === 200) {
           if (Array.isArray(response.data) && response.data.length) {
-            // 取出所有 index，去重、排序
-            const indexList = [...new Set(response.data.map((e) => e.index))].sort((a, b) => a - b);
-            // 拼成中文描述
-            const msg = `第 ${indexList.join("、")} 条导入失败`;
-            ElMessage.warning(msg);
+            // 按 index 升序排序，再拼接
+            const tips = response.data
+              .sort((a, b) => a.index - b.index)
+              .map((item) => `第 ${item.index} 条数据因 ${item.errMsg} 导入失败`)
+              .join("；");
+            ElMessage.warning(tips);
           } else {
             ElMessage.success("导入成功");
           }
