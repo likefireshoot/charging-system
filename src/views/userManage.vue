@@ -438,7 +438,7 @@ export default {
       this.multipleSelection = val;
     },
     handleUserInfo(row) {
-      if (staffPermissionIds.includes(17)) {
+      if (this.staffPermissionIds.includes(17)) {
         this.user_info_dialogFormVisible = true;
         this.multipleSelection[0] = row;
       }

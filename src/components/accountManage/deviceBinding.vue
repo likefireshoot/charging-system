@@ -81,6 +81,7 @@
 </template>
 
 <script>
+import debounce from "lodash/debounce";
 import service from "@/api/request";
 import { ElMessage } from "element-plus";
 
@@ -94,7 +95,7 @@ export default {
   data() {
     return {
       addData: {
-        //companyId: null, // 新增水厂字段
+        companyId: null, // 新增水厂字段
         //regionName: "",
         userId: "",
         userName: "",
@@ -126,26 +127,29 @@ export default {
       approver_list: [],
     };
   },
-  mounted() {
-    this.getCompanyList();
-    this.getPriceList();
-    this.getSmsConfigList();
-    this.getApproverList();
-    this.getRegionData();
-  },
+  // mounted() {
+  //   //this.getCompanyList();
+  //   // this.getPriceList();
+  //   // this.getSmsConfigList();
+  //   // this.getApproverList();
+  //   //this.getRegionData();
+  // },
   watch: {
-    "addData.companyId": function (newVal) {
-      if (newVal) {
-        this.getPriceList();
-        this.getSmsConfigList();
-        this.getApproverList();
-        this.addData.regionName = ""; // 清空所属区域
-        this.getRegionData();
-      }
-    },
+    // "addData.companyId": function (newVal) {
+    //   if (newVal) {
+    //     this.getPriceList();
+    //     this.getSmsConfigList();
+    //     this.getApproverList();
+    //     this.addData.regionName = ""; // 清空所属区域
+    //     this.getRegionData();
+    //   }
+    // },
     "addData.userId": function (newVal) {
-      if (newVal) {
-        this.getUserName();
+      console.log("用户号变化:", newVal);
+      if (newVal && newVal.trim() !== "" && newVal != null) {
+        this.debouncedGetUserName();
+      } else {
+        this.addData.userName = "";
       }
     },
   },
@@ -237,7 +241,7 @@ export default {
     },
     getApproverList() {
       let token = JSON.parse(sessionStorage.getItem("userData")).token;
-      let params = { pageNo: 1, pageSize: 1000, companyId: this.addData.companyId };
+      let params = { pageNo: 1, pageSize: 1000, companyId: this.addData.companyId, staffCharacterId: 7 };
       service
         .post("/staff/queryStaff", params, {
           headers: {
@@ -259,18 +263,25 @@ export default {
           ElMessage.error(error);
         });
     },
+    debouncedGetUserName: debounce(function () {
+      this.getUserName();
+    }, 1500), // 1500ms 内无输入才触发
     getUserName() {
       service
         .get(`/userManage/userCharge/getUserName/${this.addData.userId}`)
         .then((response) => {
           if (response.code === 200) {
-            this.addData.userName = response.data;
+            this.addData.userName = response.data.userName;
+            this.addData.companyId = response.data.companyId; // 设置所属水厂ID
+            this.getPriceList();
+            this.getSmsConfigList();
+            this.getApproverList();
           } else {
-            ElMessage.warning(response.msg);
+            ElMessage.warning("用户号为" + this.addData.userId + "的用户不存在");
           }
         })
         .catch((error) => {
-          ElMessage.warning("获取用户名称失败");
+          ElMessage.warning("用户号为" + this.addData.userId + "的用户不存在");
         });
     },
     handleCommit() {

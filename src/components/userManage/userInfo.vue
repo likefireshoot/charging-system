@@ -45,14 +45,14 @@
         </div>
         <div class="user-info-input">
           <span>水表价格类型</span>
-          <el-select v-model="userInfoData.priceName">
-            <el-option v-for="item in price_list" :key="item.id" :label="item.label" :value="item.label"></el-option>
+          <el-select v-model="userInfoData.priceId">
+            <el-option v-for="item in price_list" :key="item.id" :label="item.label" :value="item.id"></el-option>
           </el-select>
         </div>
         <div class="user-info-input">
           <span>短信配置</span>
-          <el-select v-model="userInfoData.sms_config">
-            <el-option v-for="item in sms_config_list" :key="item.id" :label="item.label" :value="item.label"></el-option>
+          <el-select v-model="userInfoData.smsConfigId">
+            <el-option v-for="item in sms_config_list" :key="item.id" :label="item.label" :value="item.id"></el-option>
           </el-select>
         </div>
         <div class="user-info-input">
@@ -158,6 +158,8 @@ export default {
     "userInfoData.companyId": function (newVal) {
       if (newVal && this.flag === 1) {
         this.userInfoData.regionName = ""; // 清空区域选择
+        this.userInfoData.priceName = ""; // 清空价格类型选择
+        this.userInfoData.sms_config = ""; // 清空短信配置选择
         this.getRegionData();
         this.getPriceList();
         this.getSmsConfigList();
@@ -182,8 +184,8 @@ export default {
       this.userInfoData.userPhone = this.data.phone;
       this.userInfoData.meterCode = this.data.meterCode;
       this.userInfoData.meterType = this.data.meterType;
-      this.userInfoData.priceName = this.data.priceName;
-      this.userInfoData.sms_config = this.data.smsConfigName;
+      this.userInfoData.priceId = this.data.priceId;
+      this.userInfoData.smsConfigId = this.data.smsConfigId;
       this.userInfoData.approver_1 = this.data.approver1;
       this.userInfoData.approver_2 = this.data.approver2;
       this.userInfoData.approver_3 = this.data.approver3;
@@ -325,11 +327,11 @@ export default {
           message: "用户联系电话格式不正确！",
         },
         {
-          condition: this.userInfoData.priceName === null || this.userInfoData.priceName === "",
+          condition: this.userInfoData.priceId === null || this.userInfoData.priceId === "",
           message: "水表价格类型不能为空！",
         },
         {
-          condition: this.userInfoData.sms_config === null || this.userInfoData.sms_config === "",
+          condition: this.userInfoData.smsConfigId === null || this.userInfoData.smsConfigId === "",
           message: "短信配置类型不能为空！",
         },
         {
@@ -352,22 +354,22 @@ export default {
         }
       }
 
-      console.log(this.price_list);
-      // 遍历 price_list 查找匹配的 label
-      for (let i = 0; i < this.price_list.length; i++) {
-        if (this.price_list[i].label === this.userInfoData.priceName) {
-          this.userInfoData.priceId = this.price_list[i].id;
-          break; // 找到匹配项后跳出循环
-        }
-      }
+      // console.log(this.price_list);
+      // // 遍历 price_list 查找匹配的 label
+      // for (let i = 0; i < this.price_list.length; i++) {
+      //   if (this.price_list[i].label === this.userInfoData.priceName) {
+      //     this.userInfoData.priceId = this.price_list[i].id;
+      //     break; // 找到匹配项后跳出循环
+      //   }
+      // }
 
-      // 遍历 sms_config_list 查找匹配的 label
-      for (let i = 0; i < this.sms_config_list.length; i++) {
-        if (this.sms_config_list[i].label === this.userInfoData.sms_config) {
-          this.userInfoData.smsConfigId = this.sms_config_list[i].id;
-          break; // 找到匹配项后跳出循环
-        }
-      }
+      // // 遍历 sms_config_list 查找匹配的 label
+      // for (let i = 0; i < this.sms_config_list.length; i++) {
+      //   if (this.sms_config_list[i].label === this.userInfoData.sms_config) {
+      //     this.userInfoData.smsConfigId = this.sms_config_list[i].id;
+      //     break; // 找到匹配项后跳出循环
+      //   }
+      // }
 
       let dataParams = {
         userId: this.data.userId,

@@ -482,6 +482,7 @@ export default {
         amountThirdEnd: null,
         priceThird: null,
         companyId: JSON.parse(sessionStorage.getItem("userData")).companyId,
+        priceId: null,
       },
       viewData: {},
       total: null,
@@ -514,32 +515,6 @@ export default {
     };
   },
   watch: {
-    edit_dialogFormVisible: {
-      handler() {
-        let params = {};
-        params.priceId = this.multipleSelection[0].priceId;
-        params.priceName = this.multipleSelection[0].priceName;
-        params.pageNo = this.params.pageNo;
-        params.pageSize = this.params.pageSize;
-        params.companyId = this.companyId;
-        service
-          .post("/price/queryPriceMg", params)
-          .then((response) => {
-            if (response.code === 200) {
-              this.editData = response.data.records[0];
-              console.log(response.data.records[0]);
-              // this.editData.companyId = JSON.parse(sessionStorage.getItem("userData")).companyId;
-              console.log(this.editData);
-              console.log(typeof this.editData.amountZeroEnd);
-            } else {
-              ElMessage.error(response.msg);
-            }
-          })
-          .catch((error) => {
-            ElMessage.error(error);
-          });
-      },
-    },
     "params.pageNo": {
       handler() {
         this.getPriceData();
@@ -574,6 +549,7 @@ export default {
       }
     },
     "editData.amountZeroEnd": function (newVal) {
+      if (!this.editData) return; // 如果 editData 还未初始化，直接返回
       if (parseFloat(newVal) === 0) {
         this.editData.amountFirstStart = "0";
       } else {
@@ -581,16 +557,19 @@ export default {
       }
     },
     "editData.amountFirstEnd": function (newVal) {
+      if (!this.editData) return; // 如果 editData 还未初始化，直接返回
       if (parseInt(this.editData.stepNumber) > 1) {
         this.editData.amountSecondStart = (parseFloat(newVal) + 0.01).toFixed(2);
       }
     },
     "editData.amountSecondEnd": function (newVal) {
+      if (!this.editData) return; // 如果 editData 还未初始化，直接返回
       if (parseInt(this.editData.stepNumber) > 2) {
         this.editData.amountThirdStart = (parseFloat(newVal) + 0.01).toFixed(2);
       }
     },
     "editData.stepNumber": function (newVal) {
+      if (!this.editData) return; // 如果 editData 还未初始化，直接返回
       if (parseInt(newVal) === 1) {
         this.editData.amountSecondStart = 0;
         this.editData.amountSecondEnd = 0;
@@ -698,6 +677,7 @@ export default {
     edit_click() {
       if (this.multipleSelection.length > 0) {
         this.edit_dialogFormVisible = true;
+        this.editData = this.multipleSelection[0];
       } else {
         ElMessage.error("请选择需要编辑的数据");
       }

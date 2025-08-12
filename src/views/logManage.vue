@@ -287,6 +287,7 @@ export default {
         staffName: this.params.staffName,
         // companyId: this.params.company ? this.params.company : this.companyId, // 所属水厂ID
         operationBelong: this.params.operationBelong,
+        userId: this.params.userId, // 用户号
       };
       if (this.companyId === 1) {
         if (this.params.company) {

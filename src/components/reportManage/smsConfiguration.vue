@@ -686,6 +686,14 @@ export default {
     },
 
     addConfirm() {
+      if (this.companyId === 1) {
+        if (this.addData.companyId === null || this.addData.companyId === "") {
+          ElMessage.error("所属水厂不能为空！");
+          return;
+        }
+      } else {
+        this.addData.companyId = this.companyId; // 设置所属水厂ID
+      }
       const validations = [
         { condition: this.addData.smsConfigName === null || this.addData.smsConfigName === "", message: "短信配置名称不能为空！" },
         { condition: this.addData.smsSendType === null || this.addData.smsSendType === "", message: "发送方式不能为空！" },
