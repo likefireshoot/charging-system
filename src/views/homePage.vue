@@ -385,8 +385,7 @@ export default {
   },
   async mounted() {
     await this.getTotal();
-    // 计算占比
-    this.updateChartData();
+    this.bingtuChart();
 
     this.getWeekData();
     this.getMonthData();
@@ -419,10 +418,6 @@ export default {
         this.shebeiStatus.abnormal_percent = "0%";
       }
     },
-    updateChartData() {
-      this.bingtuchart_option.series[0].data[0].value = this.shebeiStatus.normal;
-      this.bingtuchart_option.series[0].data[1].value = this.shebeiStatus.abnormal;
-    },
     debounce(func, delay) {
       let timer = null;
       return function () {
@@ -437,6 +432,8 @@ export default {
     // 使用防抖函数来包装 resize 操作
     bingtuChart() {
       this.bingtuchart = markRaw(echarts.init(document.getElementById("bingtu")));
+      this.bingtuchart_option.series[0].data[0].value = this.shebeiStatus.normal;
+      this.bingtuchart_option.series[0].data[1].value = this.shebeiStatus.abnormal;
       this.bingtuchart.setOption(this.bingtuchart_option);
 
       // 创建 ResizeObserver 实例来监听 weekshouyi div 大小变化
@@ -632,8 +629,14 @@ export default {
       this.$router.push({ name: "warningManage" });
     },
     getWaringNum() {
+      let params = { companyId: "" };
+      if (this.companyId === 1) {
+        params.companyId = ""; // 所属水厂ID
+      } else {
+        params.companyId = this.companyId; // 所属水厂ID
+      }
       service
-        .get("/warning/getIndexWarningInfo")
+        .get(`/warning/getIndexWarningInfo?companyId=${params.companyId}`)
         .then((response) => {
           if (response.code === 200) {
             this.shebeiWarning.qianfeiUser = response.data.arrearsUserCount;
