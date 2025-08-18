@@ -114,23 +114,23 @@
               @selection-change="handleSelectionChange"
               id="change-record-table"
             >
-              <el-table-column type="selection" :selectable="selectable" width="55" align="center" fixed="left" />
-              <el-table-column property="theId" label="序号" width="100" align="center" fixed="left" />
-              <el-table-column property="userId" label="用户号" width="200" align="center" />
-              <el-table-column property="userName" label="用户名称" width="200" align="center" />
-              <el-table-column property="userAddr" label="用户地址" width="240" align="center" />
-              <el-table-column property="regionName" label="所属区域" width="240" align="center" />
-              <el-table-column property="companyName" label="所属水厂" width="240" align="center" />
-              <el-table-column property="userPhone" label="联系电话" width="240" align="center" />
-              <el-table-column property="oldMeterCode" label="旧表号" width="240" align="center" />
-              <el-table-column property="oldImei" label="旧IMEI号" width="240" align="center" />
-              <el-table-column property="oldMeterType" label="旧表类型" width="240" align="center" />
+              <el-table-column type="selection" :selectable="selectable" min-width="55" align="center" fixed="left" />
+              <!-- <el-table-column property="theId" label="序号" width="100" align="center" fixed="left" /> -->
+              <el-table-column property="userId" label="用户号" min-width="100" align="center" fixed="left" />
+              <el-table-column property="userName" label="用户名称" min-width="160" align="center" />
+              <el-table-column property="userAddr" label="用户地址" min-width="200" align="center" />
+              <el-table-column property="regionName" label="所属区域" min-width="200" align="center" />
+              <!-- <el-table-column property="companyName" label="所属水厂" width="240" align="center" /> -->
+              <el-table-column property="userPhone" label="联系电话" min-width="180" align="center" />
+              <el-table-column property="oldMeterCode" label="旧表号" min-width="200" align="center" />
+              <!-- <el-table-column property="oldImei" label="旧IMEI号" width="240" align="center" /> -->
+              <el-table-column property="oldMeterType" label="旧表类型" min-width="200" align="center" />
               <!-- <el-table-column property="bef_replace_meter_type" label="旧表价格类型" width="120" align="center" /> -->
-              <el-table-column property="newMeterCode" label="新表号" width="240" align="center" />
-              <el-table-column property="newImei" label="新IMEI号" width="240" align="center" />
-              <el-table-column property="newMeterType" label="新表类型" width="240" align="center" />
+              <el-table-column property="newMeterCode" label="新表号" min-width="200" align="center" />
+              <!-- <el-table-column property="newImei" label="新IMEI号" width="240" align="center" /> -->
+              <el-table-column property="newMeterType" label="新表类型" min-width="200" align="center" />
               <!-- <el-table-column property="af_replace_meter_price_type" label="新表价格类型" width="120" align="center" /> -->
-              <el-table-column property="createTime" label="换表日期" width="250" align="center" />
+              <el-table-column property="createTime" label="换表日期" min-width="250" align="center" />
             </el-table>
           </div>
         </div>

@@ -82,22 +82,22 @@
               @selection-change="handleSelectionChange"
               id="transaction-record-table"
             >
-              <el-table-column type="selection" :selectable="selectable" width="55" align="center" fixed="left" />
-              <el-table-column property="theId" label="序号" width="100" align="center" fixed="left" />
-              <el-table-column property="userId" label="用户号" width="240" align="center" />
-              <el-table-column property="userName" label="用户名称" width="240" align="center" />
-              <el-table-column property="regionName" label="所属区域" width="240" align="center" />
-              <el-table-column property="companyName" label="所属水厂" width="240" align="center" />
-              <el-table-column property="userPhone" label="联系电话" width="240" align="center" />
-              <el-table-column property="meterCode" label="表号" width="240" align="center" />
-              <el-table-column property="imei" label="IMEI号" width="240" align="center" />
-              <el-table-column property="meterType" label="水表类型" width="240" align="center" />
-              <el-table-column property="payerPhone" label="缴费人手机号" width="240" align="center" />
-              <el-table-column property="rechargeType" label="交易方式" width="240" align="center" />
-              <el-table-column property="rechargeAmount" label="交易金额" width="240" align="center" />
-              <el-table-column property="oldBalance" label="充值前余额/元" width="240" align="center" />
-              <el-table-column property="newBalance" label="充值后余额/元" width="240" align="center" />
-              <el-table-column property="createTime" label="交易时间" width="240" align="center" />
+              <el-table-column type="selection" :selectable="selectable" min-width="55" align="center" fixed="left" />
+              <!-- <el-table-column property="theId" label="序号" width="100" align="center" fixed="left" /> -->
+              <el-table-column property="userId" label="用户号" min-width="100" align="center" fixed="left" />
+              <el-table-column property="userName" label="用户名称" min-width="160" align="center" />
+              <el-table-column property="regionName" label="所属区域" min-width="200" align="center" />
+              <!-- <el-table-column property="companyName" label="所属水厂" width="240" align="center" /> -->
+              <el-table-column property="userPhone" label="联系电话" min-width="200" align="center" />
+              <el-table-column property="meterCode" label="表号" min-width="200" align="center" />
+              <!-- <el-table-column property="imei" label="IMEI号" width="240" align="center" /> -->
+              <el-table-column property="meterType" label="水表类型" min-width="160" align="center" />
+              <el-table-column property="payerPhone" label="缴费人手机号" min-width="160" align="center" />
+              <el-table-column property="rechargeType" label="交易方式" min-width="160" align="center" />
+              <el-table-column property="rechargeAmount" label="交易金额" min-width="160" align="center" />
+              <el-table-column property="oldBalance" label="充值前余额/元" min-width="160" align="center" />
+              <el-table-column property="newBalance" label="充值后余额/元" min-width="160" align="center" />
+              <el-table-column property="createTime" label="交易时间" min-width="240" align="center" />
             </el-table>
           </div>
         </div>
