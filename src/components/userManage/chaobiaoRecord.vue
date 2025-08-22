@@ -184,8 +184,8 @@ export default {
       this.chaobiaoData.imei = this.data.imei;
       this.startData.meterCode = this.data.meterCode;
       this.startData.imei = this.data.imei;
-      this.chaobiaoData.companyId = this.companyId;
-      this.startData.companyId = this.companyId;
+      this.chaobiaoData.companyId = this.data.companyId;
+      this.startData.companyId = this.data.companyId;
     },
     getChaboBiaoRecordData() {
       const nonEmptyParams = this.filterNonEmptyParams(this.startData);
