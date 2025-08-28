@@ -739,7 +739,8 @@ const slide = ref(true);
   .arrow-icon {
     width: 20px; /* 修改宽度为20px */
     height: 20px; /* 修改高度为20px */
-    margin-left: 40%;
+    // margin-left: 40%;
+    margin-left: auto; /* 使用自动左边距将箭头推到右侧 */
     transition: transform 0.3s ease;
   }
   .subNavList {

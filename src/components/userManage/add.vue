@@ -204,8 +204,9 @@ export default {
       approver_list: [],
       changshang_list: [
         { id: 1, label: "信驰", value: 1 },
-        { id: 2, label: "集万迅", value: 2 },
+        { id: 2, label: "集万讯", value: 2 },
         { id: 3, label: "太阳能", value: 3 },
+        { id: 4, label: "圣鑫", value: 4 },
       ],
       companyList: [],
       rules: {
