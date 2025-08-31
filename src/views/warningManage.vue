@@ -85,7 +85,7 @@
           <el-table
             ref="multipleTableRef"
             :data="jinggaoData"
-            row-key="imei"
+            row-key="theId"
             style="width: auto; height: 100%; table-layout: fixed; overflow-x: auto; overflow-y: auto"
             border
             :header-cell-style="{ background: '#46B97E', color: '#FFFFFF' }"
@@ -93,9 +93,7 @@
             id="jinggao-table"
           >
             <el-table-column type="selection" :width="selectionWidth" align="center" fixed="left" />
-            <el-table-column label="序号" :width="idWidth" align="center" fixed="left" #default="scope">
-              {{ scope.$index + 1 + (params.pageNo - 1) * params.pageSize }}
-            </el-table-column>
+            <el-table-column property="theId" label="序号" :width="idWidth" align="center" fixed="left"> </el-table-column>
             <el-table-column property="userId" label="用户号" :width="idWidth" align="center" />
             <el-table-column property="userName" label="用户名称" :width="userNameWidth" align="center" />
             <el-table-column property="userAddr" label="用户地址" :width="addressWidth" align="center" />
@@ -367,6 +365,9 @@ export default {
         .post("/warning/queryWarning", nonEmptyParams)
         .then((response) => {
           if (response.code === 200) {
+            response.data.records.map((v, i) => {
+              v.theId = this.params.pageSize * (response.data.current - 1) + i + 1;
+            });
             this.jinggaoData = response.data.records;
             this.total = response.data.total;
             this.params.pageNo = response.data.current;
@@ -483,6 +484,9 @@ export default {
         })
         .then((response) => {
           if (response.code === 200) {
+            response.data.records.map((v, i) => {
+              v.theId = this.params.pageSize * (response.data.current - 1) + i + 1;
+            });
             this.jinggaoData = response.data.records;
             this.total = response.data.total;
             this.params.pageNo = response.data.current;
@@ -546,6 +550,9 @@ export default {
         .post("/warning/queryWarning", params)
         .then((response) => {
           if (response.code === 200) {
+            response.data.records.map((v, i) => {
+              v.theId = this.params.pageSize * (response.data.current - 1) + i + 1;
+            });
             this.jinggaoData = response.data.records;
             this.total = response.data.total;
             this.params.pageNo = response.data.current;

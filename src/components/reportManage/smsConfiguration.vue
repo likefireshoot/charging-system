@@ -661,7 +661,7 @@ export default {
       if (this.multipleSelection.length > 0) {
         this.delete_dialogFormVisible = true;
       } else {
-        ElMessage.error("请选择需要删除的数据");
+        ElMessage.warning("请选择需要删除的数据");
       }
     },
 
@@ -670,7 +670,7 @@ export default {
         this.editData = this.multipleSelection[0];
         this.edit_dialogFormVisible = true;
       } else {
-        ElMessage.error("请选择需要编辑的数据");
+        ElMessage.warning("请选择需要编辑的数据");
       }
     },
 

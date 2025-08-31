@@ -359,7 +359,7 @@ export default {
       if (this.multipleSelection.length > 0) {
         this.delete_dialogFormVisible = true;
       } else {
-        ElMessage.error("请选择需要删除的数据");
+        ElMessage.warning("请选择需要删除的角色数据");
       }
     },
     edit_click() {
@@ -371,7 +371,7 @@ export default {
         this.editData.permissionList = this.multipleSelection[0].permissionIds;
         console.log(this.editData);
       } else {
-        ElMessage.error("请选择需要编辑的员工数据");
+        ElMessage.warning("请选择需要编辑的角色数据");
       }
     },
     getCompanyList() {

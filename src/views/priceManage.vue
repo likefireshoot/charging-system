@@ -671,7 +671,7 @@ export default {
       if (this.multipleSelection.length > 0) {
         this.delete_dialogFormVisible = true;
       } else {
-        ElMessage.error("请选择需要删除的数据");
+        ElMessage.warning("请选择需要删除的数据");
       }
     },
     edit_click() {
@@ -679,7 +679,7 @@ export default {
         this.edit_dialogFormVisible = true;
         this.editData = this.multipleSelection[0];
       } else {
-        ElMessage.error("请选择需要编辑的数据");
+        ElMessage.warning("请选择需要编辑的数据");
       }
     },
     // 计算列宽的函数

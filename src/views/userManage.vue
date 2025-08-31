@@ -455,21 +455,21 @@ export default {
       if (this.multipleSelection.length > 0) {
         this.delete_dialogFormVisible = true;
       } else {
-        ElMessage.error("请选择要删除的数据");
+        ElMessage.warning("请选择要删除的数据");
       }
     },
     change_balance_btn_click() {
       if (this.multipleSelection.length > 0) {
         this.changeBalance_dialogFormVisible = true;
       } else {
-        ElMessage.error("请选择要调整余额的数据");
+        ElMessage.warning("请选择要调整余额的数据");
       }
     },
     recharge_btn_click() {
       if (this.multipleSelection.length > 0) {
         this.recharge_dialogFormVisible = true;
       } else {
-        ElMessage.error("请选择要充值的数据");
+        ElMessage.warning("请选择要充值的数据");
       }
     },
     recharge_record_btn_click() {
@@ -478,6 +478,9 @@ export default {
     change_btn_click() {
       if (this.multipleSelection.length > 0) {
         this.change_dialogFormVisible = true;
+      } else {
+        ElMessage.warning("请选择要换表的数据");
+        return;
       }
     },
     change_record_btn_click() {

@@ -276,7 +276,7 @@ export default {
       if (this.multipleSelection.length > 0) {
         this.delete_dialogFormVisible = true;
       } else {
-        ElMessage.error("请选择要删除的数据");
+        ElMessage.warning("请选择要删除的数据");
       }
     },
 

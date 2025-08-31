@@ -57,6 +57,10 @@
         </div>
         <div class="transaction-list">
           <div class="command-buttons">
+            <div class="export-out-btn" style="margin-right: 10px; width: 100px" @click="receipt">
+              <img src="@/assets/yonghu/icon26.png" alt="" style="margin-left: 7px" />
+              <span style="font-size: 16px; margin-left: 10px; color: #5a5a5a">开收据</span>
+            </div>
             <!-- <div class="export-in-btn" style="margin-right: 10px" @click="triggerFileInput">
               <img src="@/assets/yonghu/icon1.png" alt="" style="margin-left: 7px" />
               <span style="font-size: 16px; margin-left: 10px; color: #5a5a5a">导入</span>
@@ -389,6 +393,64 @@ export default {
         const errorMessage = error.response?.data?.message || error.message || "未知错误";
         ElMessage.error("导入失败: " + errorMessage);
         console.error("上传失败:", error);
+      }
+    },
+    receipt() {
+      let params = {
+        userId: "",
+        date: "",
+        userName: "",
+        userAddress: "",
+        operator: "",
+        beforeAmount: 0,
+        amount: 0,
+        afterAmount: 0,
+      };
+      if (this.multipleSelection.length === 0) {
+        ElMessage.warning("请至少选择一条记录");
+        return;
+      } else {
+        params.userId = this.multipleSelection[0].userId;
+        params.date = this.multipleSelection[0].createTime.replace("T", " ");
+        params.userName = this.multipleSelection[0].userName;
+        params.userAddress = this.data.userAddr;
+        params.operator = JSON.parse(sessionStorage.getItem("userData")).staffName;
+        params.beforeAmount = this.multipleSelection[0].oldBalance;
+        params.amount = this.multipleSelection[0].rechargeAmount;
+        params.afterAmount = this.multipleSelection[0].newBalance;
+        console.log(params);
+        // 调用后端接口
+        axios({
+          url: "/userManage/userCharge/receipt", // 后端接口地址
+          method: "POST",
+          responseType: "blob", // 指定响应类型为二进制流
+          data: params,
+        })
+          .then((response) => {
+            if (response.status !== 200) {
+              throw new Error("导出失败: " + response.statusText);
+            }
+
+            // 获取 Blob 对象
+            const blob = new Blob([response.data], { type: "application/pdf" });
+            if (blob.size === 0) {
+              ElMessage.warning("内容为空，无法下载");
+              return;
+            }
+
+            // 创建一个链接元素
+            const link = document.createElement("a");
+            link.href = window.URL.createObjectURL(blob); // 创建 Blob URL
+            link.download = this.multipleSelection[0].userName + "-收据.pdf"; // 设置下载文件名
+            document.body.appendChild(link);
+            link.click(); // 触发下载
+            document.body.removeChild(link); // 移除链接元素
+            window.URL.revokeObjectURL(link.href); // 释放 Blob URL
+          })
+          .catch((error) => {
+            console.error("导出失败:", error);
+            ElMessage.error("导出失败: " + error.message);
+          });
       }
     },
     exportExcel() {
