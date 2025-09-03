@@ -178,8 +178,8 @@
       <div class="add-dialog-content">
         <div class="title">
           <div style="margin-left: 10px; display: flex; align-items: center">
-            <img src="@/assets/fapiao/icon8.png" alt="" style="margin-right: 10px" />
-            <span style="font-size: 18px">新增区域</span>
+            <img src="@/assets/yuangong/icon4.png" alt="" style="margin-right: 10px" />
+            <span style="font-size: 18px">删除区域</span>
           </div>
           <div style="margin-right: 10px; cursor: pointer" @click="cancelDeleteRegion">
             <img src="@/assets/close.png" alt="" />
@@ -412,6 +412,14 @@ export default {
         this.getEmployeeData();
       },
     },
+    deleteRegion_dialogFormVisible: {
+      handler() {
+        if (this.companyId !== 1) {
+          this.deleteRegion.companyId = this.companyId;
+          this.getRegionData();
+        }
+      },
+    },
     "deleteRegion.regionIds": {
       handler(val) {
         if (val.length === 0) {
@@ -432,39 +440,6 @@ export default {
         }
       },
     },
-    // edit_dialogFormVisible: {
-    //   handler() {
-    //     let params = {};
-    //     params.pageNo = this.params.pageNo;
-    //     params.pageSize = this.params.pageSize;
-    //     // params.companyId = this.companyId;
-    //     params.staffName = this.multipleSelection[0].staffName;
-    //     params.staffId = this.multipleSelection[0].staffId;
-    //     service
-    //       .post("/staff/queryStaff", params)
-    //       .then((response) => {
-    //         if (response.code === 200) {
-    //           this.editData = response.data.records[0];
-    //           if (this.editData.staffPostsId === 1) {
-    //             this.editData.staffPostsId = "经理";
-    //           } else {
-    //             this.editData.staffPostsId = "员工";
-    //           }
-    //           if (this.editData.staffCharacterId === 1) {
-    //             this.editData.staffCharacterId = "管理员";
-    //           } else {
-    //             this.editData.staffCharacterId = "普通员工";
-    //           }
-    //           console.log(this.editData);
-    //         } else {
-    //           ElMessage.error(response.msg);
-    //         }
-    //       })
-    //       .catch((error) => {
-    //         ElMessage.error(error);
-    //       });
-    //   },
-    // },
   },
   computed: {
     // 每列的百分比宽度
