@@ -48,19 +48,19 @@
           <img src="@/assets/yonghu/icon1.png" alt="" style="margin-left: 7px" />
           <span style="font-size: 16px; margin-left: 10px; color: #5a5a5a">用户导入模板</span>
         </div>
-        <div class="export-in-btn" style="margin-left: 5px; width: 110px" @click="triggerFileInput" v-if="staffPermissionIds.includes(5)">
+        <div class="export-in-btn" style="margin-left: 5px; width: 110px" @click="triggerUserImport" v-if="staffPermissionIds.includes(5)">
           <img src="@/assets/yonghu/icon1.png" alt="" style="margin-left: 7px" />
           <span style="font-size: 16px; margin-left: 5px; color: #5a5a5a">用户导入</span>
-          <input ref="fileInput" type="file" accept=".xls,.xlsx" style="display: none" @change="exportIn" />
+          <input ref="userFileInput" type="file" accept=".xls,.xlsx" style="display: none" @change="exportIn" />
         </div>
         <div class="export-out-btn" style="margin-left: 5px; width: 145px" @click="bindingDownload" v-if="staffPermissionIds.includes(5)">
           <img src="@/assets/yonghu/icon1.png" alt="" style="margin-left: 7px" />
           <span style="font-size: 16px; margin-left: 10px; color: #5a5a5a">绑定导入模板</span>
         </div>
-        <div class="export-in-btn" style="margin-left: 5px; width: 110px" @click="triggerFileInput" v-if="staffPermissionIds.includes(5)">
+        <div class="export-in-btn" style="margin-left: 5px; width: 110px" @click="triggerBindImport" v-if="staffPermissionIds.includes(5)">
           <img src="@/assets/yonghu/icon1.png" alt="" style="margin-left: 7px" />
           <span style="font-size: 16px; margin-left: 5px; color: #5a5a5a">绑定导入</span>
-          <input ref="fileInput" type="file" accept=".xls,.xlsx" style="display: none" @change="bindingExportIn" />
+          <input ref="bindFileInput" type="file" accept=".xls,.xlsx" style="display: none" @change="bindingExportIn" />
         </div>
         <div class="export-out-btn" style="margin-left: 5px" @click="exportExcel">
           <img src="@/assets/yonghu/icon2.png" alt="" style="margin-left: 7px" />
@@ -600,13 +600,18 @@ export default {
         });
     },
     // 触发文件输入框点击
-    triggerFileInput() {
-      this.$refs.fileInput.value = ""; // 清空文件输入框，确保每次点击都能触发 @change
-      this.$refs.fileInput.click();
+    triggerUserImport() {
+      this.$refs.userFileInput.value = "";
+      this.$refs.userFileInput.click();
+    },
+
+    triggerBindImport() {
+      this.$refs.bindFileInput.value = "";
+      this.$refs.bindFileInput.click();
     },
     // 处理文件上传
     async exportIn() {
-      const fileInput = this.$refs.fileInput;
+      const fileInput = this.$refs.userFileInput;
       const file = fileInput.files[0];
 
       if (!file) {
@@ -657,7 +662,7 @@ export default {
       }
     },
     async bindingExportIn() {
-      const fileInput = this.$refs.fileInput;
+      const fileInput = this.$refs.bindFileInput;
       const file = fileInput.files[0];
 
       if (!file) {
