@@ -3,6 +3,10 @@
   padding: 0;
 }
 
+* {
+  user-select: text !important;
+}
+
 html {
   height: 100%;
   body {
@@ -15,7 +19,6 @@ html {
     user-select: none;
   }
 }
-
 
 a {
   cursor: pointer;

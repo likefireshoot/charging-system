@@ -77,6 +77,7 @@ service.interceptors.response.use(
   (response) => {
     closeToast();
 
+    console.log(response, "response");
     const res = response.data;
     if (res.code == 500) {
       ElMessage.error("系统错误" + 500);
@@ -89,6 +90,8 @@ service.interceptors.response.use(
 
     if (res.code == 200) {
       return Promise.resolve(res);
+    } else if (response.request.responseType === "blob" && response.status == 200) {
+      return Promise.resolve(response);
     } else {
       ElMessage.error(res.msg);
       return Promise.reject(new Error(res.msg || "Error"));

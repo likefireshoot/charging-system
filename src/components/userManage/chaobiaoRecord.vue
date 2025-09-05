@@ -238,7 +238,7 @@ export default {
     reflush() {
       this.clear();
       service
-        .get(`/userManage/meterRead/showReadMeterRecords/1?meterCode=${this.data.meterCode}&imei=${this.data.imei}&companyId=${this.companyId}`)
+        .get(`/userManage/meterRead/showReadMeterRecords/1?meterCode=${this.data.meterCode}&imei=${this.data.imei}&companyId=${this.data.companyId}`)
         .then((response) => {
           if (response.code === 200) {
             response.data.userInfoData.map((v, i) => {
@@ -382,19 +382,25 @@ export default {
       formData.append("companyId", companyId);
 
       try {
-        const response = await service.post("/userManage/userCharge/importMeterReportRecord", formData);
-        if (response.code === 200) {
-          if (Array.isArray(response.data) && response.data.length) {
-            // 按 index 升序排序，再拼接
-            const tips = response.data
-              .sort((a, b) => a.index - b.index)
-              .map((item) => `第 ${item.index} 条数据因 ${item.errMsg} 导入失败`)
-              .join("；");
-            ElMessage.warning(tips);
-          } else {
-            ElMessage.success("导入成功");
-          }
+        const response = await service.post("/userManage/userCharge/importMeterReportRecord", formData, { responseType: "blob" });
+        // 获取 Blob 对象
+        const blob = new Blob([response.data], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+
+        if (blob.size === 0) {
+          ElMessage.success("导入成功");
+          fileInput.value = ""; // 清空文件输入框
+          this.reflush();
+          return;
         }
+
+        // 创建一个链接元素
+        const link = document.createElement("a");
+        link.href = window.URL.createObjectURL(blob); // 创建 Blob URL
+        link.download = "抄表记录导入数据失败列表.xlsx"; // 设置下载文件名
+        document.body.appendChild(link);
+        link.click(); // 触发下载
+        document.body.removeChild(link); // 移除链接元素
+        window.URL.revokeObjectURL(link.href); // 释放 Blob URL
         fileInput.value = ""; // 清空文件输入框
         this.reflush();
       } catch (error) {

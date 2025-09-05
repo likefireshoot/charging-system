@@ -497,7 +497,6 @@ export default {
         })
         .then((response) => {
           if (response.code === 200) {
-            console.log(response.data.userInfoData);
             response.data.list.map((v, i) => {
               v.theId = this.pageSize * (response.data.currentPages - 1) + i + 1;
             });
@@ -626,33 +625,31 @@ export default {
         return;
       }
 
-      // 文件大小限制（例如 10MB）
-      // const maxSize = 10 * 1024 * 1024; // 10MB
-      // if (file.size > maxSize) {
-      //   ElMessage.warning("文件大小不能超过 10MB");
-      //   return;
-      // }
-
       const formData = new FormData();
       const companyId = this.companyId;
       formData.append("file", file);
       formData.append("companyId", companyId);
       try {
-        const response = await service.post("/userManage/userCharge/importUser", formData);
+        const response = await service.post("/userManage/userCharge/importUser", formData, { responseType: "blob" });
         console.log(response);
-        if (response.code === 200) {
-          if (Array.isArray(response.data) && response.data.length) {
-            // 按 index 升序排序，再拼接
-            const tips = response.data
-              .sort((a, b) => a.index - b.index)
-              .map((item) => `第 ${item.index} 条数据因 ${item.errMsg} 导入失败`)
-              .join("；");
-            ElMessage.warning(tips);
-          } else {
-            ElMessage.success("导入成功");
-          }
+        // 获取 Blob 对象
+        const blob = new Blob([response.data], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+
+        if (blob.size === 0) {
+          ElMessage.success("导入成功");
+          fileInput.value = ""; // 清空文件输入框
+          this.reflush();
+          return;
         }
 
+        // 创建一个链接元素
+        const link = document.createElement("a");
+        link.href = window.URL.createObjectURL(blob); // 创建 Blob URL
+        link.download = "开户导入数据失败列表.xlsx"; // 设置下载文件名
+        document.body.appendChild(link);
+        link.click(); // 触发下载
+        document.body.removeChild(link); // 移除链接元素
+        window.URL.revokeObjectURL(link.href); // 释放 Blob URL
         fileInput.value = ""; // 清空文件输入框
         this.reflush();
       } catch (error) {
@@ -689,21 +686,26 @@ export default {
       formData.append("file", file);
       formData.append("companyId", companyId);
       try {
-        const response = await service.post("/userManage/userCharge/importUserMeterBind", formData);
-        console.log(response);
-        if (response.code === 200) {
-          if (Array.isArray(response.data) && response.data.length) {
-            // 按 index 升序排序，再拼接
-            const tips = response.data
-              .sort((a, b) => a.index - b.index)
-              .map((item) => `第 ${item.index} 条数据因 ${item.errMsg} 导入失败`)
-              .join("；");
-            ElMessage.warning(tips);
-          } else {
-            ElMessage.success("导入成功");
-          }
+        const response = await service.post("/userManage/userCharge/importUserMeterBind", formData, { responseType: "blob" });
+
+        // 获取 Blob 对象
+        const blob = new Blob([response.data], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+
+        if (blob.size === 0) {
+          ElMessage.success("导入成功");
+          fileInput.value = ""; // 清空文件输入框
+          this.reflush();
+          return;
         }
 
+        // 创建一个链接元素
+        const link = document.createElement("a");
+        link.href = window.URL.createObjectURL(blob); // 创建 Blob URL
+        link.download = "绑定导入数据失败列表.xlsx"; // 设置下载文件名
+        document.body.appendChild(link);
+        link.click(); // 触发下载
+        document.body.removeChild(link); // 移除链接元素
+        window.URL.revokeObjectURL(link.href); // 释放 Blob URL
         fileInput.value = ""; // 清空文件输入框
         this.reflush();
       } catch (error) {
