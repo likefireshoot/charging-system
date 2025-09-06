@@ -196,7 +196,7 @@ export default {
 
       // 数据初始化后，再执行四个异步函数
       try {
-        Promise.all([this.getPriceList(), this.getSmsConfigList(), this.getApproverList(), this.getCompanyList()]).then(() => {
+        Promise.all([this.getPriceList(), this.getSmsConfigList(), this.getApproverList(), this.getCompanyList(), this.getRegionData()]).then(() => {
           console.log("所有数据加载完成");
           this.flag = 1;
         });
