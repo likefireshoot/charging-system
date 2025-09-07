@@ -73,6 +73,10 @@
             <el-option v-for="item in approver_list" :key="item.id" :label="item.label" :value="item.label"> </el-option>
           </el-select>
         </div>
+        <div class="user-info-input" style="width: 98%">
+          <span>开户时间</span>
+          <el-date-picker v-model="userInfoData.createTime" type="date" placeholder="选择日期" style="flex-grow: 1; width: 24.5%; max-height: 35px" format="YYYY-MM-DD" value-format="YYYY-MM-DD" />
+        </div>
       </div>
       <div class="btn">
         <div class="confirm-btn" @click="handleCommit">
@@ -121,6 +125,7 @@ export default {
         approver_3: "",
         company: null, // 新增水厂字段
         companyId: null,
+        createTime: "",
       },
       flag: 0,
       companyId: JSON.parse(sessionStorage.getItem("userData")).companyId,
@@ -191,6 +196,7 @@ export default {
       this.userInfoData.approver_3 = this.data.approver3;
       this.userInfoData.company = this.data.companyName;
       this.userInfoData.companyId = this.data.companyId; // 关键：确保companyId先被赋值
+      this.userInfoData.createTime = this.data.createTime;
 
       console.log("初始化数据完成:", this.userInfoData);
 
@@ -346,6 +352,10 @@ export default {
           condition: this.userInfoData.approver_3 === null || this.userInfoData.approver_3 === "",
           message: "开户审批人3不能为空！",
         },
+        {
+          condition: this.userInfoData.createTime === null || this.userInfoData.createTime === "",
+          message: "开户时间不能为空！",
+        },
       ];
       for (const validation of validations) {
         if (validation.condition) {
@@ -385,6 +395,7 @@ export default {
         priceId: this.userInfoData.priceId,
         meterType: this.userInfoData.meterType,
         companyId: this.userInfoData.companyId,
+        createTime: this.userInfoData.createTime,
       };
 
       console.log(dataParams);
@@ -420,14 +431,14 @@ export default {
 
 .user-info-dialog-content {
   width: 70%;
-  height: 380px;
+  height: 450px;
   border: 1px solid #fafafa;
   background-color: #fafafa;
   border-radius: 5px;
   position: absolute;
   left: 50%;
   top: 50%;
-  margin-top: -155px;
+  margin-top: -225px;
   transform: translateX(-50%);
   display: flex;
   flex-direction: column;

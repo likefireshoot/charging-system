@@ -101,7 +101,7 @@
             <el-table-column property="approver1" label="开户审批人1" min-width="180" align="center" />
             <el-table-column property="approver2" label="开户审批人2" min-width="180" align="center" />
             <el-table-column property="approver3" label="开户审批人3" min-width="180" align="center" />
-            <!-- <el-table-column property="creatTime" label="开户时间" width="260" align="center"> </el-table-column> -->
+            <el-table-column property="createTime" label="开户时间" min-width="200" align="center"> </el-table-column>
           </el-table>
         </div>
       </div>

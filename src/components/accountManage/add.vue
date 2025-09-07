@@ -35,6 +35,10 @@
           <span>联系电话</span>
           <el-input v-model="addData.userPhone" class="input-item" />
         </div>
+        <div class="edit-input" style="margin-right: 1%">
+          <span>开户时间</span>
+          <el-date-picker v-model="addData.createTime" type="date" placeholder="选择日期" style="flex-grow: 1; width: 100%; max-height: 35px" format="YYYY-MM-DD" value-format="YYYY-MM-DD" />
+        </div>
       </div>
       <div class="btn">
         <div class="confirm-btn" @click="handleCommit">
@@ -69,6 +73,7 @@ export default {
         regionName: "",
         companyId: null, // 新增水厂字段
         userPhone: "",
+        createTime: "",
       },
       companyId: JSON.parse(sessionStorage.getItem("userData")).companyId,
       price_list: [],
@@ -146,7 +151,7 @@ export default {
       let formData = {};
       formData = this.addData;
       if (this.companyId !== 1) {
-        formData.companyId = this.companyId; 
+        formData.companyId = this.companyId;
       }
 
       // 定义字段名映射，将属性名映射为友好的显示名称
@@ -156,6 +161,7 @@ export default {
         regionName: "所属区域",
         userPhone: "联系电话",
         companyId: "所属水厂",
+        createTime: "开户时间",
       };
 
       // 递归遍历对象属性
@@ -276,6 +282,49 @@ export default {
 .edit-input > .el-input {
   height: 35px;
   width: 100%;
+}
+
+.demo-date-picker {
+  display: flex;
+  width: 100%;
+  padding: 0;
+  flex-wrap: wrap;
+}
+
+.demo-date-picker .block {
+  padding: 1.5rem 0;
+  text-align: center;
+  border-right: solid 1px var(--el-border-color);
+  flex: 1;
+  min-width: 300px;
+}
+
+.demo-date-picker .block:last-child {
+  border-right: none;
+}
+
+.demo-date-picker .demonstration {
+  display: block;
+  color: var(--el-text-color-secondary);
+  font-size: 14px;
+  margin-bottom: 1rem;
+}
+
+.edit-input > .el-date-picker {
+  height: 35px;
+  width: 100%;
+}
+
+/* 外层容器 */
+:deep(.el-date-editor.el-input) {
+  height: 35px !important;
+}
+
+/* 内部输入框 */
+:deep(.el-input__wrapper) {
+  height: 35px !important;
+  min-height: 35px !important;
+  padding: 0 8px !important;
 }
 
 .input-item {
