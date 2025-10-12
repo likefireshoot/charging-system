@@ -286,6 +286,11 @@ export default {
     },
     handleCommit() {
       let missingFields = [];
+      Object.keys(this.addData).forEach((key) => {
+        if (typeof this.addData[key] === "string") {
+          this.addData[key] = this.addData[key].trim();
+        }
+      });
       let formData = {
         userId: this.addData.userId,
         meterCode: this.addData.meterCode,

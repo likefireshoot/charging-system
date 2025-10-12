@@ -733,6 +733,11 @@ export default {
           return;
         }
       }
+      Object.keys(this.addData).forEach((key) => {
+        if (typeof this.addData[key] === "string") {
+          this.addData[key] = this.addData[key].trim();
+        }
+      });
       //this.addData.companyId = JSON.parse(sessionStorage.getItem("userData")).companyId;
       const filteredParams = Object.fromEntries(Object.entries(this.addData).filter(([_, value]) => value !== null && value !== ""));
       service
@@ -824,6 +829,11 @@ export default {
         }
       }
       console.log(this.editData);
+      Object.keys(this.editData).forEach((key) => {
+        if (typeof this.editData[key] === "string") {
+          this.editData[key] = this.editData[key].trim();
+        }
+      });
       let params = {
         smsConfigId: this.editData.smsConfigId,
         smsConfigName: this.editData.smsConfigName,
@@ -929,6 +939,11 @@ export default {
           return;
         }
       }
+      Object.keys(this.waterOutageData).forEach((key) => {
+        if (typeof this.waterOutageData[key] === "string") {
+          this.waterOutageData[key] = this.waterOutageData[key].trim();
+        }
+      });
       let params = {
         userIds: this.waterOutageData.userList,
         startTime: this.waterOutageData.time[0],

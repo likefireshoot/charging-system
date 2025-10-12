@@ -486,6 +486,11 @@ async function getCompanyList() {
 
 async function handleEditUserInfo() {
   await getCompanyList();
+  Object.keys(userData.value).forEach((key) => {
+    if (typeof userData.value[key] === "string") {
+      userData.value[key] = userData.value[key].trim();
+    }
+  });
   const params = {
     pageNo: 1,
     pageSize: 10,

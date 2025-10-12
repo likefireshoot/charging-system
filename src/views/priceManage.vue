@@ -769,6 +769,11 @@ export default {
       }
       this.addData.companyId = JSON.parse(sessionStorage.getItem("userData")).companyId;
       console.log(this.addData);
+      Object.keys(this.addData).forEach((key) => {
+        if (typeof this.addData[key] === "string") {
+          this.addData[key] = this.addData[key].trim();
+        }
+      });
       service
         .post("/price/addPriceMg", this.addData)
         .then((response) => {
@@ -789,6 +794,11 @@ export default {
       if (!this.validateEditData()) {
         return;
       }
+      Object.keys(this.editData).forEach((key) => {
+        if (typeof this.editData[key] === "string") {
+          this.editData[key] = this.editData[key].trim();
+        }
+      });
       service
         .post("/price/editPriceMg", this.editData)
         .then((response) => {

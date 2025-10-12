@@ -198,6 +198,11 @@ export default {
     // },
     handleCommit() {
       let missingFields = [];
+      Object.keys(this.changeData).forEach((key) => {
+        if (typeof this.changeData[key] === "string") {
+          this.changeData[key] = this.changeData[key].trim();
+        }
+      });
       let formData = {
         userId: this.changeData.userId,
         userName: this.changeData.userName,

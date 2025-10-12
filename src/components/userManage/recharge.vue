@@ -105,6 +105,11 @@ export default {
     },
     handleConfirm() {
       let missingFields = [];
+      Object.keys(this.rechargeData).forEach((key) => {
+        if (typeof this.rechargeData[key] === "string") {
+          this.rechargeData[key] = this.rechargeData[key].trim();
+        }
+      });
       const formData = this.rechargeData;
       console.log(formData);
 

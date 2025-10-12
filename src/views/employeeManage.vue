@@ -706,6 +706,7 @@ export default {
         });
     },
     add_confirm() {
+      this.addCompanyName = this.addCompanyName ? this.addCompanyName.trim() : this.addCompanyName;
       if (this.addCompanyName === null || this.addCompanyName === "") {
         ElMessage.error("水厂名称不能为空！");
         return;
@@ -738,6 +739,7 @@ export default {
       if (this.addRegion.regionName == null || this.addRegion.regionName == "") {
         ElMessage.error("区域名称不能为空！");
       }
+      this.addRegion.regionName = this.addRegion.regionName ? this.addRegion.regionName.trim() : this.addRegion.regionName;
       service
         .get(`/addRegion?companyId=${this.addRegion.companyId}&regionName=${this.addRegion.regionName}`)
         .then((response) => {
@@ -823,6 +825,11 @@ export default {
         }
       }
       console.log(this.editData);
+      Object.keys(this.editData).forEach((key) => {
+        if (typeof this.editData[key] === "string") {
+          this.editData[key] = this.editData[key].trim();
+        }
+      });
       let params = {
         pageNo: this.params.pageNo,
         pageSize: this.params.pageSize,

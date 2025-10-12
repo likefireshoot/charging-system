@@ -308,17 +308,6 @@ export default {
         warningTime: 13,
         warningType: 9,
       };
-      // return {
-      //   selection: 5,
-      //   id: 6,
-      //   userName: 10,
-      //   address: 13,
-      //   quyu: 12,
-      //   phone: 12,
-      //   imeihao: 12,
-      //   warningTime: 15,
-      //   warningType: 12,
-      // };
     },
   },
   mounted() {

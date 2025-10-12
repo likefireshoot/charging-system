@@ -381,6 +381,11 @@ export default {
       //   }
       // }
 
+      Object.keys(this.userInfoData).forEach((key) => {
+        if (typeof this.userInfoData[key] === "string") {
+          this.userInfoData[key] = this.userInfoData[key].trim();
+        }
+      });
       let dataParams = {
         userId: this.data.userId,
         userName: this.userInfoData.userName,

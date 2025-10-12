@@ -392,6 +392,7 @@ export default {
           this.reflush();
           return;
         }
+        ElMessage.warning("部分数据导入失败，等待下载失败列表");
 
         // 创建一个链接元素
         const link = document.createElement("a");

@@ -486,6 +486,11 @@ export default {
         ElMessage.error("权限内容不能为空！");
         return;
       }
+      Object.keys(this.addData).forEach((key) => {
+        if (typeof this.addData[key] === "string") {
+          this.addData[key] = this.addData[key].trim();
+        }
+      });
       let params = {
         roleName: this.addData.roleName,
         permissionIds: this.addData.permissionList,

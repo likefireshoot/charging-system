@@ -149,6 +149,12 @@ export default {
     handleCommit() {
       let missingFields = [];
       let formData = {};
+      Object.keys(this.addData).forEach((key) => {
+        if (typeof this.addData[key] === "string") {
+          this.addData[key] = this.addData[key].trim();
+        }
+      });
+      
       formData = this.addData;
       if (this.companyId !== 1) {
         formData.companyId = this.companyId;
