@@ -51,6 +51,10 @@
           <img src="@/assets/yonghu/icon4.png" alt="" style="margin-left: 8px" />
           <span style="font-size: 16px; margin-left: 8px; color: #5a5a5a">删除</span>
         </div>
+        <div class="command-btn" style="margin-left: 10px; width: 110px" @click="handleCommand">
+          <img src="@/assets/yonghu/icon5.png" alt="" style="margin-left: 8px" />
+          <span style="font-size: 16px; margin-left: 8px; color: #5a5a5a">命令下发</span>
+        </div>
         <div class="command-btn" style="margin-left: 5px; width: 110px" @click="valveOpen_dialogFormVisible = true" v-if="staffPermissionIds.includes(7)">
           <img src="@/assets/yonghu/icon18.png" alt="" style="margin-left: 8px; margin-top: 3px" />
           <span style="font-size: 16px; margin-left: 8px; color: #5a5a5a">开阀控制</span>
@@ -227,18 +231,78 @@
     ></rechargeRecordVue>
 
     <!-- 命令下发弹出框-太阳能 -->
-    <commandVue
-      v-if="command_dialogFormVisible"
-      :command_dialogFormVisible="command_dialogFormVisible"
+    <commandTaiYangNengVue
+      v-if="command_dialogFormVisible_taiyangneng"
+      :command_dialogFormVisible="command_dialogFormVisible_taiyangneng"
       :commandType="commandType"
       :data="multipleSelection[0]"
-      @close="command_dialogFormVisible = false"
-    ></commandVue>
+      @close="closeCommandDialog"
+    ></commandTaiYangNengVue>
+
+    <!-- 命令下发弹出框-信驰 -->
+    <commandXinchiVue
+      v-if="command_dialogFormVisible_xinchi"
+      :command_dialogFormVisible="command_dialogFormVisible_xinchi"
+      :commandType="commandType"
+      :data="multipleSelection[0]"
+      @close="closeCommandDialog"
+    ></commandXinchiVue>
+
+    <!-- 命令下发弹出框-旧信驰 -->
+    <commandOldXinchi
+      v-if="command_dialogFormVisible_old_xinchi"
+      :command_dialogFormVisible="command_dialogFormVisible_old_xinchi"
+      :commandType="commandType"
+      :data="multipleSelection[0]"
+      @close="closeCommandDialog"
+    ></commandOldXinchi>
+
+    <!-- 命令下发弹出框-集万讯 -->
+    <commandJiWanXun
+      v-if="command_dialogFormVisible_jiwanxun"
+      :command_dialogFormVisible="command_dialogFormVisible_jiwanxun"
+      :commandType="commandType"
+      :data="multipleSelection[0]"
+      @close="closeCommandDialog"
+    ></commandJiWanXun>
+
+    <!-- 命令下发弹出框-圣鑫 -->
+    <commandShengXin
+      v-if="command_dialogFormVisible_shengxin"
+      :command_dialogFormVisible="command_dialogFormVisible_shengxin"
+      :commandType="commandType"
+      :data="multipleSelection[0]"
+      @close="closeCommandDialog"
+    ></commandShengXin>
+
+    <!-- 命令下发弹出框-卓正 -->
+    <commandZhuoZheng
+      v-if="command_dialogFormVisible_zhuozheng"
+      :command_dialogFormVisible="command_dialogFormVisible_zhuozheng"
+      :commandType="commandType"
+      :data="multipleSelection[0]"
+      @close="closeCommandDialog"
+    ></commandZhuoZheng>
+
+    <!-- 命令下发弹出框-千宝通 -->
+    <commandQianBaoTong
+      v-if="command_dialogFormVisible_qianbaotong"
+      :command_dialogFormVisible="command_dialogFormVisible_qianbaotong"
+      :commandType="commandType"
+      :data="multipleSelection[0]"
+      @close="closeCommandDialog"
+    ></commandQianBaoTong>
   </div>
 </template>
 
 <script>
-import commandVue from "@/components/userManage/command.vue";
+import commandTaiYangNengVue from "@/components/userManage/command_taiyangneng.vue";
+import commandXinchiVue from "@/components/userManage/command_xinchi.vue";
+import commandQianBaoTong from "@/components/userManage/command_qianbaotong.vue";
+import commandZhuoZheng from "@/components/userManage/command_zhuozheng.vue";
+import commandJiWanXun from "@/components/userManage/command_jiwanxun.vue";
+import commandShengXin from "@/components/userManage/command_shengxin.vue";
+import commandOldXinchi from "@/components/userManage/command_old_xinchi.vue";
 import rechargeVue from "@/components/userManage/recharge.vue";
 import rechargeRecordVue from "@/components/userManage/rechargeRecord.vue";
 import changeVue from "@/components/userManage/change.vue";
@@ -258,7 +322,6 @@ import axios from "axios";
 
 export default {
   components: {
-    commandVue,
     rechargeVue,
     rechargeRecordVue,
     changeVue,
@@ -271,6 +334,13 @@ export default {
     valveVue,
     valueOpenVue,
     changeBalanceVue,
+    commandTaiYangNengVue,
+    commandXinchiVue,
+    commandShengXin,
+    commandZhuoZheng,
+    commandQianBaoTong,
+    commandJiWanXun,
+    commandOldXinchi,
   },
   data() {
     return {
@@ -334,7 +404,13 @@ export default {
       change_record_dialogFormVisible: false,
       recharge_dialogFormVisible: false,
       recharge_record_dialogFormVisible: false,
-      command_dialogFormVisible: false,
+      command_dialogFormVisible_taiyangneng: false,
+      command_dialogFormVisible_xinchi: false,
+      command_dialogFormVisible_qianbaotong: false,
+      command_dialogFormVisible_zhuozheng: false,
+      command_dialogFormVisible_jiwanxun: false,
+      command_dialogFormVisible_shengxin: false,
+      command_dialogFormVisible_old_xinchi: false,
       valve_dialogFormVisible: false,
       valveOpen_dialogFormVisible: false,
       changeBalance_dialogFormVisible: false,
@@ -485,6 +561,54 @@ export default {
     },
     change_record_btn_click() {
       this.change_record_dialogFormVisible = true;
+    },
+    async handleCommand() {
+      // const ok = await this.fetchCommandType();
+      // if (!ok) return;
+      if (this.multipleSelection.length === 0) {
+        ElMessage.warning("请选择要下发命令的数据");
+        return;
+      }
+      this.commandType = this.multipleSelection[0].meterVendor;
+      console.log(this.commandType);
+
+      switch (this.commandType) {
+        case "太阳能":
+          this.command_dialogFormVisible_taiyangneng = true;
+          break;
+        case "信驰":
+          this.command_dialogFormVisible_xinchi = true;
+          break;
+        case "旧信驰":
+          this.command_dialogFormVisible_old_xinchi = true;
+          break;
+        case "卓正":
+          this.command_dialogFormVisible_zhuozheng = true;
+          break;
+        case "千宝通":
+          this.command_dialogFormVisible_qianbaotong = true;
+          break;
+        case "集万讯":
+          this.command_dialogFormVisible_jiwanxun = true;
+          break;
+        case "圣鑫":
+          this.command_dialogFormVisible_shengxin = true;
+          break;
+        default:
+          ElMessage.error(this.commandType + " 为未知设备厂商，无法下发命令");
+      }
+    },
+    closeCommandDialog() {
+      this.command_dialogFormVisible_taiyangneng = false;
+      this.command_dialogFormVisible_xinchi = false;
+      this.command_dialogFormVisible_qianbaotong = false;
+      this.command_dialogFormVisible_zhuozheng = false;
+      this.command_dialogFormVisible_jiwanxun = false;
+      this.command_dialogFormVisible_shengxin = false;
+      this.command_dialogFormVisible_old_xinchi = false;
+      this.multipleSelection = [];
+      this.commandType = "";
+      this.reflush();
     },
     closeUserInfoDialog() {
       this.user_info_dialogFormVisible = false;

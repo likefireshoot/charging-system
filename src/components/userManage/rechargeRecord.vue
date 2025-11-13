@@ -85,6 +85,10 @@
               <img src="@/assets/yonghu/icon26.png" alt="" style="margin-left: 7px" />
               <span style="font-size: 16px; margin-left: 10px; color: #5a5a5a">开收据</span>
             </div>
+            <div class="export-out-btn" style="margin-right: 10px; width: 115px" @click="reset">
+              <img src="@/assets/yonghu/icon27.png" alt="" style="margin-left: 7px" />
+              <span style="font-size: 16px; margin-left: 10px; color: #5a5a5a">撤销充值</span>
+            </div>
             <!-- <div class="export-out-btn" style="margin-right: 10px; width: 110px">
               <img src="@/assets/yonghu/icon1.png" alt="" style="margin-left: 7px" />
               <span style="font-size: 16px; margin-left: 10px; color: #5a5a5a">模板下载</span>
@@ -554,6 +558,28 @@ export default {
             ElMessage.error("导出失败: " + error.message);
           });
       }
+    },
+    reset() {
+      if (this.multipleSelection.length === 0) {
+        ElMessage.warning("请至少选择一条记录");
+        return;
+      }
+      let id = this.multipleSelection[0].rechargeRecordId;
+      let url = `/userManage/userCharge/cancelRecharge/${id}`;
+      axios
+        .post(`${url}`)
+        .then((response) => {
+          if (response.data.code === 200) {
+            ElMessage.success("撤销成功");
+            this.reflush();
+          } else {
+            ElMessage.error(response.data.msg);
+          }
+        })
+        .catch((error) => {
+          console.error("撤销失败:", error);
+          ElMessage.error("撤销失败: " + error.message);
+        });
     },
     exportExcel() {
       let companyId = "";

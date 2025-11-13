@@ -53,10 +53,11 @@ export default {
     handleDeleteCommit() {
       let userIds = [];
       this.data.forEach((item) => {
-        userIds.push(item.userId);
+        const user = `${item.companyId},${item.userId}`;
+        userIds.push(user);
       });
       service
-        .delete(`/userManage/userCharge/deleteUsers?userIds=${userIds}`)
+        .post("/userManage/userCharge/deleteUsers", { userIds: userIds })
         .then((response) => {
           if (response.code === 200) {
             ElMessage.success("删除成功");

@@ -9,7 +9,7 @@
             <el-option v-for="item in companyList" :key="item.id" :value="item.id" :label="item.name"></el-option>
           </el-select>
         </div>
-        <div class="search-input" style="margin-left: 10px; width: 30%">
+        <div class="search-input" style="margin-left: 10px">
           <span>操作类别</span>
           <el-select v-model="params.operationId" placeholder="请选择">
             <el-option v-for="item in operateType" :key="item.value" :label="item.label" :value="item.value"></el-option>

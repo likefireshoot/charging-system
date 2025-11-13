@@ -11,18 +11,12 @@
         </div>
       </div>
       <div class="device-add-content">
-        <!-- <div class="edit-input" style="margin-right: 1%; width: 24%">
+        <div class="edit-input" style="margin-right: 1%">
           <span>所属水厂</span>
           <el-select v-model="addData.companyId" class="input-item">
             <el-option v-for="item in companyList" :key="item.id" :label="item.name" :value="item.id" :disabled="companyId !== 1"> </el-option>
           </el-select>
         </div>
-        <div class="edit-input" style="margin-right: 1%; width: 24%">
-          <span>所属区域</span>
-          <el-select v-model="addData.regionName" class="input-item">
-            <el-option v-for="item in quyu_data" :key="item.id" :label="item.label" :value="item.label"> </el-option>
-          </el-select>
-        </div> -->
         <div class="edit-input" style="margin-right: 1%">
           <span>用户号</span>
           <el-input v-model="addData.userId" class="input-item"></el-input>
@@ -127,29 +121,27 @@ export default {
       approver_list: [],
     };
   },
-  // mounted() {
-  //   //this.getCompanyList();
-  //   // this.getPriceList();
-  //   // this.getSmsConfigList();
-  //   // this.getApproverList();
-  //   //this.getRegionData();
-  // },
+  mounted() {
+    this.getCompanyList();
+    // this.getPriceList();
+    // this.getSmsConfigList();
+    // this.getApproverList();
+    //this.getRegionData();
+  },
   watch: {
-    // "addData.companyId": function (newVal) {
-    //   if (newVal) {
-    //     this.getPriceList();
-    //     this.getSmsConfigList();
-    //     this.getApproverList();
-    //     this.addData.regionName = ""; // 清空所属区域
-    //     this.getRegionData();
-    //   }
-    // },
-    "addData.userId": function (newVal) {
-      console.log("用户号变化:", newVal);
-      if (newVal && newVal.trim() !== "" && newVal != null) {
-        this.debouncedGetUserName();
-      } else {
+    "addData.companyId": function (newVal) {
+      if (newVal) {
         this.addData.userName = "";
+        this.addData.userId = "";
+      }
+    },
+    "addData.userId": function (newVal) {
+      if (this.addData.companyId != null) {
+        if (newVal && newVal.trim() !== "" && newVal != null) {
+          this.debouncedGetUserName();
+        } else {
+          this.addData.userName = "";
+        }
       }
     },
   },
@@ -268,7 +260,7 @@ export default {
     }, 1500), // 1500ms 内无输入才触发
     getUserName() {
       service
-        .get(`/userManage/userCharge/getUserName/${this.addData.userId}`)
+        .get(`/userManage/userCharge/getUserName/${this.addData.companyId}/${this.addData.userId}`)
         .then((response) => {
           if (response.code === 200) {
             this.addData.userName = response.data.userName;
@@ -292,6 +284,7 @@ export default {
         }
       });
       let formData = {
+        companyId: this.addData.companyId,
         userId: this.addData.userId,
         meterCode: this.addData.meterCode,
         priceId: this.addData.priceId,

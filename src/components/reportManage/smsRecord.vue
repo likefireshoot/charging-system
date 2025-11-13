@@ -8,7 +8,7 @@
             <el-option v-for="item in companyList" :key="item.id" :value="item.id" :label="item.name"></el-option>
           </el-select>
         </div>
-        <div class="search-input" style="margin-left: 10px; width: 25%">
+        <div class="search-input" style="margin-left: 10px">
           <span>所属区域</span>
           <el-select v-model="params.regionName" placeholder="请选择...">
             <el-option v-for="item in quyu_data" :key="item.id" :label="item.label" :value="item.label"> </el-option>

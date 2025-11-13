@@ -65,6 +65,7 @@ export default {
   data() {
     return {
       rechargeData: {
+        companyId: "",
         userId: "",
         userName: "",
         meterCode: "",
@@ -81,6 +82,7 @@ export default {
       this.$emit("close");
     },
     assignmentData() {
+      this.rechargeData.companyId = this.data.companyId;
       this.rechargeData.userId = this.data.userId;
       this.rechargeData.userName = this.data.userName;
       this.rechargeData.balance = this.data.balance;
@@ -94,6 +96,7 @@ export default {
         }
       });
       let params = {
+        companyId: this.rechargeData.companyId,
         userId: this.rechargeData.userId,
         meterCode: this.rechargeData.meterCode,
         newBalance: this.rechargeData.newBalance,
@@ -115,8 +118,8 @@ export default {
 
             if (key === "newBalance" && value !== null && value !== "") {
               const numValue = parseFloat(value);
-              if (isNaN(numValue) || numValue <= 0) {
-                ElMessage.error("调整后的余额必须为正数");
+              if (isNaN(numValue)) {
+                ElMessage.error("调整后的余额必须为有效数值");
                 return false; // ❗返回 false 表示校验失败
               }
             }
