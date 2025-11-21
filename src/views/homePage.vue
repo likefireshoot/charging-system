@@ -55,35 +55,35 @@
         </div>
         <div class="shebei-warning-list">
           <div class="shebei-warning-item">
-            <img src="@/assets/shouye/icon1.png" alt="" />
+            <img src="@/assets/shouye/icon1.png" @click="toWarnPath('欠费用户')" alt="" />
             <div class="shebei-warning-item-text">
               <span style="font-size: 16px">欠费用户</span>
               <span style="font-size: 18px; font-family: 'Microsoft YaHei'; font-weight: bold; margin-top: 5px">{{ shebeiWarning.qianfeiUser }}</span>
             </div>
           </div>
           <div class="shebei-warning-item">
-            <img src="@/assets/shouye/icon2.png" alt="" />
+            <img src="@/assets/shouye/icon2.png"  @click="toWarnPath('水表0用量用户')" alt="" />
             <div class="shebei-warning-item-text">
               <span style="font-size: 16px">水表0用量用户</span>
               <span style="font-size: 18px; font-family: 'Microsoft YaHei'; font-weight: bold; margin-top: 5px">{{ shebeiWarning.zerouserL }}</span>
             </div>
           </div>
           <div class="shebei-warning-item">
-            <img src="@/assets/shouye/icon3.png" alt="" />
+            <img src="@/assets/shouye/icon3.png" @click="toWarnPath('水表大用量用户')" alt="" />
             <div class="shebei-warning-item-text">
               <span style="font-size: 16px">大用量异常用户</span>
               <span style="font-size: 18px; font-family: 'Microsoft YaHei'; font-weight: bold; margin-top: 5px">{{ shebeiWarning.dayongliang }}</span>
             </div>
           </div>
           <div class="shebei-warning-item">
-            <img src="@/assets/shouye/icon4.png" alt="" />
+            <img src="@/assets/shouye/icon4.png" @click="toWarnPath('数据长时间未上报')" alt="" />
             <div class="shebei-warning-item-text">
               <span style="font-size: 16px">数据持续未上报</span>
               <span style="font-size: 18px; font-family: 'Microsoft YaHei'; font-weight: bold; margin-top: 5px">{{ shebeiWarning.weishangbao }}</span>
             </div>
           </div>
           <div class="shebei-warning-item">
-            <img src="@/assets/shouye/icon5.png" alt="" />
+            <img src="@/assets/shouye/icon5.png" @click="toWarnPath('设备异常')" alt="" />
             <div class="shebei-warning-item-text">
               <span style="font-size: 16px">设备异常</span>
               <span style="font-size: 18px; font-family: 'Microsoft YaHei'; font-weight: bold; margin-top: 5px">{{ shebeiWarning.shebeiyichang }}</span>
@@ -408,6 +408,10 @@ export default {
     // });
   },
   methods: {
+    toWarnPath(val){
+      this.$router.push({ path: '/warningManage', query: { warningType: val } })
+       
+    },
     // 计算占比的方法
     calculatePercentages() {
       if (this.total_num > 0) {

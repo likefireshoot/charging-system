@@ -131,6 +131,21 @@
               <el-table-column property="newMeterType" label="新表类型" min-width="200" align="center" />
               <!-- <el-table-column property="af_replace_meter_price_type" label="新表价格类型" width="120" align="center" /> -->
               <el-table-column property="createTime" label="换表日期" min-width="250" align="center" />
+              <el-table-column property="createTime" label="换表日期" min-width="250" align="center" />
+
+              <el-table-column label="操作" width="150" align="center">
+                  <template #default="{ row }">
+                    <!-- 撤回按钮 -->
+                    <el-button
+                      size="small"
+                      :type="row.isWithdraw === 1 ? 'info' : 'success'"
+                      :disabled="row.isWithdraw === 1"
+                      @click="withdraw(row.meterChangeRecordId)"
+                    >
+                      {{ row.isWithdraw === 1 ? '已撤回' : '撤回' }}
+                    </el-button>
+                  </template>
+                </el-table-column>
             </el-table>
           </div>
         </div>
@@ -206,6 +221,23 @@ export default {
     this.getRegionData();
   },
   methods: {
+    withdraw(meterChangeRecordId){
+      console.log(meterChangeRecordId)
+      let url = `/userManage/meterRead/withdrawChangeMeter/`+meterChangeRecordId; // 所属水厂ID
+      service
+        .get(url)
+        .then((res) => {
+          if (res.code === 200) {
+            ElMessage.success("撤回成功");
+            this.getChangeRecordData();
+          } else {
+            ElMessage.error(res.msg);
+          }
+        })
+        .catch((err) => {
+          ElMessage.error(err);
+        });
+    },
     selectable() {
       return true; // 目前允许所有行选择，你可以加上你的业务逻辑
     },

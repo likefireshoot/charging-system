@@ -32,7 +32,8 @@ module.exports = defineConfig({
         // target: 'http://81.69.29.7:9882/',
         // target: 'http://124.221.3.13:9882/',
         //target: "https://sushijie.mynatapp.cc",
-        target: "http://jingzhoudb.mynatapp.cc",
+        // target: "http://jingzhoudb.mynatapp.cc",
+        target: "http://localhost:8080",
         changeOrigin: true,
         pathRewrite: {
           "^/api": "",

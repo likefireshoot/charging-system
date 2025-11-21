@@ -12,8 +12,8 @@
         <el-select v-model="params.warningType">
           <el-option label="欠费用户" value="欠费用户"></el-option>
           <el-option label="水表0用量用户" value="水表0用量用户"></el-option>
-          <el-option label="大用量异常用户" value="大用量异常用户"></el-option>
-          <el-option label="数据持续未上报" value="数据持续未上报"></el-option>
+          <el-option label="水表大用量用户" value="水表大用量用户"></el-option>
+          <el-option label="数据长时间未上报" value="数据长时间未上报"></el-option>
           <el-option label="设备异常" value="设备异常"></el-option>
         </el-select>
       </div>
@@ -311,6 +311,8 @@ export default {
     },
   },
   mounted() {
+    
+      
     this.$nextTick(() => {
       this.treeRef = this.$refs.treeRef;
     });
@@ -326,6 +328,12 @@ export default {
     this.resizeObserver = new ResizeObserver(this.calculateColumnWidths);
     if (this.parentContainer) {
       this.resizeObserver.observe(this.parentContainer);
+    }
+    if(this.$route.query.warningType!=""){
+          this.params.warningType = this.$route.query.warningType
+           this.$store.commit("setNavIndex", 6);
+          // console.log("--------------------------------------------------")
+          // console.log(this.params)
     }
     this.getCompanyList();
     this.getRegionData();
@@ -648,7 +656,7 @@ export default {
           ElMessage.error(error);
         });
     },
-  },
+  }
 };
 </script>
 
