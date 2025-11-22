@@ -47,7 +47,8 @@
           <img src="@/assets/yonghu/icon13.png" alt="" style="margin-left: 8px" />
           <span style="font-size: 16px; margin-left: 8px; color: #5a5a5a">新增</span>
         </div> -->
-        <div class="delete-btn" style="margin-left: 5px" @click="delete_btn_click" v-if="staffPermissionIds.includes(6)">
+        <div class="delete-btn" style="margin-left: 5px" @click="delete_btn_click"
+          v-if="staffPermissionIds.includes(6)">
           <img src="@/assets/yonghu/icon4.png" alt="" style="margin-left: 8px" />
           <span style="font-size: 16px; margin-left: 8px; color: #5a5a5a">删除</span>
         </div>
@@ -55,31 +56,38 @@
           <img src="@/assets/yonghu/icon5.png" alt="" style="margin-left: 8px" />
           <span style="font-size: 16px; margin-left: 8px; color: #5a5a5a">命令下发</span>
         </div>
-        <div class="command-btn" style="margin-left: 5px; width: 110px" @click="valveOpen_dialogFormVisible = true" v-if="staffPermissionIds.includes(7)">
+        <div class="command-btn" style="margin-left: 5px; width: 110px" @click="valveOpen_dialogFormVisible = true"
+          v-if="staffPermissionIds.includes(7)">
           <img src="@/assets/yonghu/icon18.png" alt="" style="margin-left: 8px; margin-top: 3px" />
           <span style="font-size: 16px; margin-left: 8px; color: #5a5a5a">开阀控制</span>
         </div>
-        <div class="command-btn" style="margin-left: 5px; width: 110px" @click="valve_dialogFormVisible = true" v-if="staffPermissionIds.includes(8)">
+        <div class="command-btn" style="margin-left: 5px; width: 110px" @click="valve_dialogFormVisible = true"
+          v-if="staffPermissionIds.includes(8)">
           <img src="@/assets/yonghu/icon17.png" alt="" style="margin-left: 8px; margin-top: 3px" />
           <span style="font-size: 16px; margin-left: 8px; color: #5a5a5a">关阀控制</span>
         </div>
-        <div class="recharge-btn" style="margin-left: 5px; width: 110px" @click="change_balance_btn_click" v-if="staffPermissionIds.includes(9)">
+        <div class="recharge-btn" style="margin-left: 5px; width: 110px" @click="change_balance_btn_click"
+          v-if="staffPermissionIds.includes(9)">
           <img src="@/assets/yonghu/icon20.png" alt="" style="margin-left: 8px" />
           <span style="font-size: 16px; margin-left: 8px; color: #5a5a5a">余额调整</span>
         </div>
-        <div class="recharge-btn" style="margin-left: 5px" @click="recharge_btn_click" v-if="staffPermissionIds.includes(10)">
+        <div class="recharge-btn" style="margin-left: 5px" @click="recharge_btn_click"
+          v-if="staffPermissionIds.includes(10)">
           <img src="@/assets/yonghu/icon6.png" alt="" style="margin-left: 8px" />
           <span style="font-size: 16px; margin-left: 8px; color: #5a5a5a">充值</span>
         </div>
-        <div class="recharge-record-btn" style="margin-left: 5px; width: 110px" @click="recharge_record_btn_click" v-if="staffPermissionIds.includes(11)">
+        <div class="recharge-record-btn" style="margin-left: 5px; width: 110px" @click="recharge_record_btn_click"
+          v-if="staffPermissionIds.includes(11)">
           <img src="@/assets/yonghu/icon7.png" alt="" style="margin-left: 8px" />
           <span style="font-size: 16px; margin-left: 8px; color: #5a5a5a">充值记录</span>
         </div>
-        <div class="water-meter-btn" style="margin-left: 5px" @click="change_btn_click" v-if="staffPermissionIds.includes(13)">
+        <div class="water-meter-btn" style="margin-left: 5px" @click="change_btn_click"
+          v-if="staffPermissionIds.includes(13)">
           <img src="@/assets/yonghu/icon8.png" alt="" style="margin-left: 8px" />
           <span style="font-size: 16px; margin-left: 8px; color: #5a5a5a">换表</span>
         </div>
-        <div class="water-meter-record-btn" style="margin-left: 5px; width: 110px" @click="change_record_btn_click" v-if="staffPermissionIds.includes(14)">
+        <div class="water-meter-record-btn" style="margin-left: 5px; width: 110px" @click="change_record_btn_click"
+          v-if="staffPermissionIds.includes(14)">
           <img src="@/assets/yonghu/icon9.png" alt="" style="margin-left: 8px" />
           <span style="font-size: 16px; margin-left: 8px; color: #5a5a5a">换表记录</span>
         </div>
@@ -96,6 +104,21 @@
           <img src="@/assets/yonghu/icon2.png" alt="" style="margin-left: 7px" />
           <span style="font-size: 16px; margin-left: 10px; color: #5a5a5a">导出</span>
         </div>
+        <div class="export-out-btn" style="margin-left: 5px; width: 155px" @click="common_meter_template_click">
+          <img src="@/assets/yonghu/icon1.png" alt="" style="margin-left: 7px" />
+          <span style="font-size: 16px; margin-left: 10px; color: #5a5a5a">普表用水量模板</span>
+        </div>
+        <div class="export-in-btn" style="margin-left: 5px; width: 150px" @click="triggerCommonMeterImport">
+          <img src="@/assets/yonghu/icon1.png" alt="" style="margin-left: 7px" />
+          <span style="font-size: 16px; margin-left: 5px; color: #5a5a5a">普表用水量导入</span>
+          <input ref="commonMeterInput" type="file" accept=".xls,.xlsx" style="display: none"
+            @change="common_meter_click" />
+        </div>
+        <div class="export-in-btn" style="margin-left: 5px; width: 150px" @click="multi_edit_meter_price">
+          <img src="@/assets/jiage/icon3.png" alt="" style="margin-left: 7px" />
+          <span style="font-size: 16px; margin-left: 5px; color: #5a5a5a">批量修改水价</span>
+        </div>
+
         <div class="reflush" style="margin-left: 5px" @click="reflush">
           <img src="@/assets/yonghu/icon15.png" alt="" />
         </div>
@@ -103,19 +126,14 @@
       <div class="user-list">
         <div class="quyu-box">
           <el-input v-model="filterText" placeholder="请输入关键字检索" style="height: 32px; margin-bottom: 10px" />
-          <el-tree ref="treeRef" node-key="id" :data="quyu_data" :props="defaultProps" default-expand-all :filter-node-method="filterNode" @node-click="handleNodeClick" />
+          <el-tree ref="treeRef" node-key="id" :data="quyu_data" :props="defaultProps" default-expand-all
+            :filter-node-method="filterNode" @node-click="handleNodeClick" />
         </div>
         <div class="user-table">
-          <el-table
-            ref="multipleTableRef"
-            :data="yonghuData"
-            row-key="imei"
-            style="width: auto; height: 100%; table-layout: fixed; overflow-x: auto; overflow-y: auto"
-            border
-            :header-cell-style="{ background: '#46B97E', color: '#FFFFFF' }"
-            @selection-change="handleSelectionChange"
-            id="yonghu-table"
-          >
+          <el-table ref="multipleTableRef" :data="yonghuData" row-key="imei"
+            style="width: auto; height: 100%; table-layout: fixed; overflow-x: auto; overflow-y: auto" border
+            :header-cell-style="{ background: '#46B97E', color: '#FFFFFF' }" @selection-change="handleSelectionChange"
+            id="yonghu-table">
             <el-table-column type="selection" :selectable="selectable" min-width="55" align="center" fixed="left" />
             <!-- <el-table-column label="序号" width="160" align="center" fixed="left" #default="scope">
               {{ scope.$index + 1 + (currentPage - 1) * pageSize }}
@@ -123,15 +141,17 @@
             <el-table-column property="userId" label="用户号" min-width="100" align="center" fixed="left" />
             <el-table-column label="用户名称" min-width="160" align="center">
               <template #default="scope">
-                <span @click="handleUserInfo(scope.row)" style="color: #46b97e; display: block; width: 100%; text-align: center">{{ scope.row.userName }}</span>
+                <span @click="handleUserInfo(scope.row)"
+                  style="color: #46b97e; display: block; width: 100%; text-align: center">{{ scope.row.userName
+                  }}</span>
               </template>
             </el-table-column>
             <el-table-column property="meterCode" label="表号" min-width="180" align="center" />
             <el-table-column label="余额/元" min-width="160" align="center">
               <template #default="scope">
-                <span @click="handleYue(scope.row)" style="color: #46b97e; display: block; width: 100%; text-align: center">{{ scope.row.balance }}</span>
-              </template></el-table-column
-            >
+                <span @click="handleYue(scope.row)"
+                  style="color: #46b97e; display: block; width: 100%; text-align: center">{{ scope.row.balance }}</span>
+              </template></el-table-column>
             <el-table-column property="newReading" label="水表读数/吨" min-width="160" align="center" />
             <el-table-column property="valveStatus" label="阀门状态" min-width="160" align="center" />
             <el-table-column property="battery" label="电池电量" min-width="160" align="center" />
@@ -140,13 +160,17 @@
                 <div style="display: flex; align-items: center; justify-content: center">
                   <span>抄表时间</span>
                   <div style="display: flex; flex-direction: column; margin-left: 10px; border: none">
-                    <div :class="['asc-icon', { active: sortOrder === 'asc' }]" style="cursor: pointer; width: 12px; height: 12px; border: none" @click="ascClick" />
-                    <div :class="['desc-icon', { active: sortOrder === 'desc' }]" style="cursor: pointer; width: 12px; height: 12px; border: none" @click="descClick" />
+                    <div :class="['asc-icon', { active: sortOrder === 'asc' }]"
+                      style="cursor: pointer; width: 12px; height: 12px; border: none" @click="ascClick" />
+                    <div :class="['desc-icon', { active: sortOrder === 'desc' }]"
+                      style="cursor: pointer; width: 12px; height: 12px; border: none" @click="descClick" />
                   </div>
                 </div>
               </template>
               <template #default="scope">
-                <span @click="handleChaoBiaoTime(scope.row)" style="color: #46b97e; display: block; width: 100%; text-align: center">{{ scope.row.updateTime }}</span>
+                <span @click="handleChaoBiaoTime(scope.row)"
+                  style="color: #46b97e; display: block; width: 100%; text-align: center">{{ scope.row.updateTime
+                  }}</span>
               </template>
             </el-table-column>
             <!-- <el-table-column property="imei" label="IMEI号" width="280" align="center" /> -->
@@ -166,136 +190,128 @@
       </div>
       <div class="page-box">
         <div class="demo-pagination-block">
-          <el-pagination v-model:current-page="currentPage" v-model:page-size="pageSize" :page-sizes="[5, 10, 15]" layout="total, prev, pager, next, jumper" :total="total" />
+          <el-pagination v-model:current-page="currentPage" v-model:page-size="pageSize" :page-sizes="[5, 10, 15]"
+            layout="total, prev, pager, next, jumper" :total="total" />
         </div>
       </div>
     </div>
 
     <!-- 点击用户名称弹出框 -->
-    <userInfoVue
-      v-if="user_info_dialogFormVisible"
-      :user_info_dialogFormVisible="user_info_dialogFormVisible"
-      :quyu_data="quyu_data"
-      :data="multipleSelection[0]"
-      @close="closeUserInfoDialog"
-    ></userInfoVue>
+    <userInfoVue v-if="user_info_dialogFormVisible" :user_info_dialogFormVisible="user_info_dialogFormVisible"
+      :quyu_data="quyu_data" :data="multipleSelection[0]" @close="closeUserInfoDialog"></userInfoVue>
 
     <!-- 抄表记录弹出框 -->
-    <chabiaoRecord v-if="chaobiao_dialogFormVisible" :chaobiao_dialogFormVisible="chaobiao_dialogFormVisible" :data="multipleSelection[0]" @close="chaobiao_dialogFormVisible = false"></chabiaoRecord>
+    <chabiaoRecord v-if="chaobiao_dialogFormVisible" :chaobiao_dialogFormVisible="chaobiao_dialogFormVisible"
+      :data="multipleSelection[0]" @close="chaobiao_dialogFormVisible = false"></chabiaoRecord>
 
     <!-- 交易记录弹出框 -->
-    <transactionRecord v-if="transaction_dialogFormVisible" :transaction_dialogFormVisible="transaction_dialogFormVisible" :data="multipleSelection[0]" @close="closeTransaction"></transactionRecord>
+    <transactionRecord v-if="transaction_dialogFormVisible"
+      :transaction_dialogFormVisible="transaction_dialogFormVisible" :data="multipleSelection[0]"
+      @close="closeTransaction"></transactionRecord>
 
     <!-- 新增按钮弹出框 -->
-    <addVue v-if="add_dialogFormVisible" :add_dialogFormVisible="add_dialogFormVisible" :quyu_data="quyu_data" @close="closeAddDialog"></addVue>
+    <addVue v-if="add_dialogFormVisible" :add_dialogFormVisible="add_dialogFormVisible" :quyu_data="quyu_data"
+      @close="closeAddDialog"></addVue>
 
     <!-- 删除按钮弹出框 -->
-    <deleteVue v-if="delete_dialogFormVisible" :delete_dialogFormVisible="delete_dialogFormVisible" :data="multipleSelection" @close="closeDeleteDialog"></deleteVue>
+    <deleteVue v-if="delete_dialogFormVisible" :delete_dialogFormVisible="delete_dialogFormVisible"
+      :data="multipleSelection" @close="closeDeleteDialog"></deleteVue>
 
     <!-- 开阀控制弹出框 -->
-    <valueOpenVue v-if="valveOpen_dialogFormVisible" :valveOpen_dialogFormVisible="valveOpen_dialogFormVisible" :quyu_data="quyu_data" @close="closeValveOpenDialog"></valueOpenVue>
+    <valueOpenVue v-if="valveOpen_dialogFormVisible" :valveOpen_dialogFormVisible="valveOpen_dialogFormVisible"
+      :quyu_data="quyu_data" @close="closeValveOpenDialog"></valueOpenVue>
 
     <!-- 关阀控制弹出框 -->
-    <valveVue v-if="valve_dialogFormVisible" :valve_dialogFormVisible="valve_dialogFormVisible" :quyu_data="quyu_data" @close="closeValveDialog"></valveVue>
+    <valveVue v-if="valve_dialogFormVisible" :valve_dialogFormVisible="valve_dialogFormVisible" :quyu_data="quyu_data"
+      @close="closeValveDialog"></valveVue>
 
     <!-- 换表弹出框 -->
-    <changeVue v-if="change_dialogFormVisible" :change_dialogFormVisible="change_dialogFormVisible" :data="multipleSelection[0]" @close="closeChangeDialog"></changeVue>
+    <changeVue v-if="change_dialogFormVisible" :change_dialogFormVisible="change_dialogFormVisible"
+      :data="multipleSelection[0]" @close="closeChangeDialog"></changeVue>
 
     <!-- 换表记录弹出框 -->
-    <changeRecord
-      v-if="change_record_dialogFormVisible"
-      :change_record_dialogFormVisible="change_record_dialogFormVisible"
-      :quyu_data="quyu_data"
-      :data="multipleSelection[0]"
-      @close="closeChangeRecordDialog"
-    ></changeRecord>
+    <changeRecord v-if="change_record_dialogFormVisible"
+      :change_record_dialogFormVisible="change_record_dialogFormVisible" :quyu_data="quyu_data"
+      :data="multipleSelection[0]" @close="closeChangeRecordDialog"></changeRecord>
 
     <!-- 余额调整弹出框 -->
-    <changeBalanceVue
-      v-if="changeBalance_dialogFormVisible"
-      :changeBalance_dialogFormVisible="changeBalance_dialogFormVisible"
-      :data="multipleSelection[0]"
-      @close="closeChangeBalanceDialog"
-    ></changeBalanceVue>
+    <changeBalanceVue v-if="changeBalance_dialogFormVisible"
+      :changeBalance_dialogFormVisible="changeBalance_dialogFormVisible" :data="multipleSelection[0]"
+      @close="closeChangeBalanceDialog"></changeBalanceVue>
 
     <!-- 充值弹出框 -->
-    <rechargeVue v-if="recharge_dialogFormVisible" :recharge_dialogFormVisible="recharge_dialogFormVisible" :data="multipleSelection[0]" @close="closeRechargeDialog"></rechargeVue>
+    <rechargeVue v-if="recharge_dialogFormVisible" :recharge_dialogFormVisible="recharge_dialogFormVisible"
+      :data="multipleSelection[0]" @close="closeRechargeDialog"></rechargeVue>
 
     <!-- 充值记录弹出框 -->
-    <rechargeRecordVue
-      v-if="recharge_record_dialogFormVisible"
-      :recharge_record_dialogFormVisible="recharge_record_dialogFormVisible"
-      :quyu_data="quyu_data"
-      :data="multipleSelection[0]"
-      @close="closeRechargeRecordDialog"
-    ></rechargeRecordVue>
+    <rechargeRecordVue v-if="recharge_record_dialogFormVisible"
+      :recharge_record_dialogFormVisible="recharge_record_dialogFormVisible" :quyu_data="quyu_data"
+      :data="multipleSelection[0]" @close="closeRechargeRecordDialog"></rechargeRecordVue>
 
     <!-- 命令下发弹出框-太阳能 -->
-    <commandTaiYangNengVue
-      v-if="command_dialogFormVisible_taiyangneng"
-      :command_dialogFormVisible="command_dialogFormVisible_taiyangneng"
-      :commandType="commandType"
-      :data="multipleSelection[0]"
-      @close="closeCommandDialog"
-    ></commandTaiYangNengVue>
+    <commandTaiYangNengVue v-if="command_dialogFormVisible_taiyangneng"
+      :command_dialogFormVisible="command_dialogFormVisible_taiyangneng" :commandType="commandType"
+      :data="multipleSelection[0]" @close="closeCommandDialog"></commandTaiYangNengVue>
 
     <!-- 命令下发弹出框-信驰 -->
-    <commandXinchiVue
-      v-if="command_dialogFormVisible_xinchi"
-      :command_dialogFormVisible="command_dialogFormVisible_xinchi"
-      :commandType="commandType"
-      :data="multipleSelection[0]"
-      @close="closeCommandDialog"
-    ></commandXinchiVue>
+    <commandXinchiVue v-if="command_dialogFormVisible_xinchi"
+      :command_dialogFormVisible="command_dialogFormVisible_xinchi" :commandType="commandType"
+      :data="multipleSelection[0]" @close="closeCommandDialog"></commandXinchiVue>
 
     <!-- 命令下发弹出框-旧信驰 -->
-    <commandOldXinchi
-      v-if="command_dialogFormVisible_old_xinchi"
-      :command_dialogFormVisible="command_dialogFormVisible_old_xinchi"
-      :commandType="commandType"
-      :data="multipleSelection[0]"
-      @close="closeCommandDialog"
-    ></commandOldXinchi>
+    <commandOldXinchi v-if="command_dialogFormVisible_old_xinchi"
+      :command_dialogFormVisible="command_dialogFormVisible_old_xinchi" :commandType="commandType"
+      :data="multipleSelection[0]" @close="closeCommandDialog"></commandOldXinchi>
 
     <!-- 命令下发弹出框-集万讯 -->
-    <commandJiWanXun
-      v-if="command_dialogFormVisible_jiwanxun"
-      :command_dialogFormVisible="command_dialogFormVisible_jiwanxun"
-      :commandType="commandType"
-      :data="multipleSelection[0]"
-      @close="closeCommandDialog"
-    ></commandJiWanXun>
+    <commandJiWanXun v-if="command_dialogFormVisible_jiwanxun"
+      :command_dialogFormVisible="command_dialogFormVisible_jiwanxun" :commandType="commandType"
+      :data="multipleSelection[0]" @close="closeCommandDialog"></commandJiWanXun>
 
     <!-- 命令下发弹出框-圣鑫 -->
-    <commandShengXin
-      v-if="command_dialogFormVisible_shengxin"
-      :command_dialogFormVisible="command_dialogFormVisible_shengxin"
-      :commandType="commandType"
-      :data="multipleSelection[0]"
-      @close="closeCommandDialog"
-    ></commandShengXin>
+    <commandShengXin v-if="command_dialogFormVisible_shengxin"
+      :command_dialogFormVisible="command_dialogFormVisible_shengxin" :commandType="commandType"
+      :data="multipleSelection[0]" @close="closeCommandDialog"></commandShengXin>
 
     <!-- 命令下发弹出框-卓正 -->
-    <commandZhuoZheng
-      v-if="command_dialogFormVisible_zhuozheng"
-      :command_dialogFormVisible="command_dialogFormVisible_zhuozheng"
-      :commandType="commandType"
-      :data="multipleSelection[0]"
-      @close="closeCommandDialog"
-    ></commandZhuoZheng>
+    <commandZhuoZheng v-if="command_dialogFormVisible_zhuozheng"
+      :command_dialogFormVisible="command_dialogFormVisible_zhuozheng" :commandType="commandType"
+      :data="multipleSelection[0]" @close="closeCommandDialog"></commandZhuoZheng>
 
     <!-- 命令下发弹出框-千宝通 -->
-    <commandQianBaoTong
-      v-if="command_dialogFormVisible_qianbaotong"
-      :command_dialogFormVisible="command_dialogFormVisible_qianbaotong"
-      :commandType="commandType"
-      :data="multipleSelection[0]"
-      @close="closeCommandDialog"
-    ></commandQianBaoTong>
+    <commandQianBaoTong v-if="command_dialogFormVisible_qianbaotong"
+      :command_dialogFormVisible="command_dialogFormVisible_qianbaotong" :commandType="commandType"
+      :data="multipleSelection[0]" @close="closeCommandDialog"></commandQianBaoTong>
+
+    <!-- 批量修改用户水价 加一个弹出框-->
+    <!-- 弹出框 -->
+    <el-dialog title="批量修改用户水价" v-model="priceDialogVisible" :modal="false"
+ :close-on-click-modal="false"
+    width="400px">
+      <div>
+        <el-form label-width="100px">
+          <el-form-item label="水价类型">
+            <el-select v-model="selectedPriceId" placeholder="请选择水价类型" style="width: 100%">
+              <el-option v-for="item in price_list" :key="item.id" :label="item.label" :value="item.id" />
+            </el-select>
+          </el-form-item>
+        </el-form>
+      </div>
+
+      <template #footer>
+        <el-button @click="priceDialogVisible = false">取消</el-button>
+        <el-button type="primary" @click="confirm_edit_price">确定</el-button>
+      </template>
+
+    </el-dialog>
+
+
   </div>
 </template>
 
 <script>
+import { queryPriceMg } from "@/api/price/price";
+import { multiEditUserBindMeterInfo } from "@/api/userMeterBind/userMeterBind"
 import commandTaiYangNengVue from "@/components/userManage/command_taiyangneng.vue";
 import commandXinchiVue from "@/components/userManage/command_xinchi.vue";
 import commandQianBaoTong from "@/components/userManage/command_qianbaotong.vue";
@@ -358,13 +374,16 @@ export default {
         companyId: null, // 所属水厂ID
         order: 0,
       },
+      price_list: [],
+      priceDialogVisible: false,
+      selectedPriceId: null,
+
       companyId: JSON.parse(sessionStorage.getItem("userData")).companyId, // 公司ID
       staffPermissionIds: JSON.parse(sessionStorage.getItem("userData")).staffPermissionIds,
       token: JSON.parse(sessionStorage.getItem("userData")).token, // 用户token
       currentPage: 1,
       pageSize: 50,
       total: null,
-
       shuibiao_list: [
         {
           id: 1,
@@ -445,6 +464,157 @@ export default {
     this.getCompanyList();
   },
   methods: {
+    multi_edit_meter_price() {
+      console.log(this.multipleSelection.length)
+      if (!this.multipleSelection || this.multipleSelection.length === 0) {
+        return ElMessage.warning("请先选择用户！");
+      }
+
+      // 有选择数据 → 加载水价 → 打开弹窗
+      this.getPriceList();
+      this.priceDialogVisible = true;
+    },
+     // 获取水价列表
+    getPriceList() {
+      let params = {
+        pageNo: 1,
+        pageSize: 1000,
+        companyId: this.companyId
+      };
+
+      queryPriceMg(params)
+        .then((res) => {
+          this.price_list = res.data.records.map((item) => ({
+            id: item.priceId,
+            label: item.priceName
+          }));
+        })
+        .catch(() => {
+          ElMessage.error("获取价格类型失败");
+        });
+    },
+     // 点击弹框中的确定按钮
+    confirm_edit_price() {
+      if (!this.selectedPriceId) {
+        return ElMessage.warning("请选择水价类型！");
+      }
+
+      // 提取 userId 数组
+      const imeis = this.multipleSelection.map(item => item.imei);
+
+      const params = {
+        priceId: this.selectedPriceId,
+        imeiList: imeis
+      };
+
+      multiEditUserBindMeterInfo(params)
+        .then((res) => {
+          ElMessage.success("批量修改成功");
+          this.priceDialogVisible = false;
+          this.search();
+          this.selectedPriceId = ''
+        })
+        .catch(() => {
+          ElMessage.error("批量修改失败");
+          this.selectedPriceId = ''
+        });
+
+    },
+    triggerCommonMeterImport() {
+      this.$refs.commonMeterInput.value = "";
+      this.$refs.commonMeterInput.click();
+    },
+    common_meter_template_click() {
+      //普通水表用水量导入模板
+      let url = "/userManage/userCharge/importCommonMeterDataTemplate";
+      // 调用后端接口
+      axios({
+        url: url, // 后端接口地址
+        method: "GET",
+        responseType: "blob", // 指定响应类型为二进制流
+        headers: {
+          Authorization: this.token,
+        },
+      })
+        .then((response) => {
+          if (response.status !== 200) {
+            throw new Error("导出失败: " + response.statusText);
+          }
+
+          // 获取 Blob 对象
+          const blob = new Blob([response.data], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+
+          // if (blob.size === 0) {
+          //   ElMessage.warning("内容为空，无法下载");
+          //   return;
+          // }
+
+          // 创建一个链接元素
+          const link = document.createElement("a");
+          link.href = window.URL.createObjectURL(blob); // 创建 Blob URL
+          link.download = "普表用水量导入.xlsx"; // 设置下载文件名
+          document.body.appendChild(link);
+          link.click(); // 触发下载
+          document.body.removeChild(link); // 移除链接元素
+          window.URL.revokeObjectURL(link.href); // 释放 Blob URL
+        })
+        .catch((error) => {
+          console.error("导出失败:", error);
+          ElMessage.error("导出失败: " + error.message);
+        });
+    },
+    async common_meter_click() {
+      const fileInput = this.$refs.commonMeterInput;
+      const file = fileInput.files[0];
+
+      if (!file) {
+        ElMessage.warning("请选择要上传的文件");
+        return;
+      }
+
+      // 文件类型验证
+      const allowedTypes = ["application/vnd.ms-excel", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"];
+      if (!allowedTypes.includes(file.type)) {
+        ElMessage.warning("仅支持上传 .xls 或 .xlsx 文件");
+        return;
+      }
+
+      const formData = new FormData();
+      const companyId = this.companyId;
+      formData.append("file", file);
+      formData.append("companyId", companyId);
+      try {
+        const response = await service.post("/userManage/userCharge/importCommonMeterData", formData, { responseType: "blob" });
+        console.log(response);
+        // 获取 Blob 对象
+        const blob = new Blob([response.data], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+
+        if (blob.size === 0) {
+          ElMessage.success("导入成功");
+          fileInput.value = ""; // 清空文件输入框
+          this.reflush();
+          return;
+        }
+
+        ElMessage.warning("用户用水量导入成功，详细查看下载列表");
+
+        // 创建一个链接元素
+        const link = document.createElement("a");
+        link.href = window.URL.createObjectURL(blob); // 创建 Blob URL
+        link.download = "普表用水量导入详情列表.xlsx"; // 设置下载文件名
+        document.body.appendChild(link);
+        link.click(); // 触发下载
+        document.body.removeChild(link); // 移除链接元素
+        window.URL.revokeObjectURL(link.href); // 释放 Blob URL
+        fileInput.value = ""; // 清空文件输入框
+        this.reflush();
+      } catch (error) {
+        const errorMessage = error.response?.data?.message || error.message || "未知错误";
+        ElMessage.error("导入失败: " + errorMessage);
+        console.error("上传失败:", error);
+      }
+
+    },
     filterNode(value, data) {
       if (!value) return true;
       return data.label.includes(value);
@@ -1114,7 +1284,7 @@ export default {
   padding: 0px 20px;
 }
 
-.user-container > * {
+.user-container>* {
   padding: 0px 10px;
   border: 1px solid #e9e9e9;
   border-radius: 5px;
@@ -1134,14 +1304,15 @@ export default {
 .search-input {
   display: flex;
   justify-content: flex-start;
-  justify-content: center; /* 确保子元素在父容器中垂直居中 */
+  justify-content: center;
+  /* 确保子元素在父容器中垂直居中 */
   flex-direction: column;
   width: 14%;
   height: 100%;
   margin-right: 20px;
 }
 
-.search-input > span {
+.search-input>span {
   font-size: 14px;
   margin-bottom: 5px;
 }
@@ -1151,7 +1322,7 @@ export default {
   width: 100%;
 }
 
-.time-input > * {
+.time-input>* {
   width: 50%;
   margin-right: 20px;
 }
@@ -1165,7 +1336,7 @@ export default {
   right: 20px;
 }
 
-.buttons > * {
+.buttons>* {
   width: 120px;
   margin-right: 30px;
 }
@@ -1184,6 +1355,7 @@ export default {
 .sercah-btn {
   background-color: #45ba7e;
 }
+
 .clear-btn {
   background-color: #fff;
   border: 2px solid #f2f2f2;
@@ -1204,14 +1376,16 @@ export default {
   display: flex;
   align-items: center;
   width: 100%;
-  height: 40px;
+  height: 80px;
   /* margin-top: 20px; */
   margin-bottom: 20px;
   position: absolute;
   top: 20px;
+  flex-wrap: wrap;
+  /* 允许换行 */
 }
 
-.command-box > * {
+.command-box>* {
   margin-right: 15px;
 }
 
@@ -1226,8 +1400,10 @@ export default {
 .export-out-btn {
   display: flex;
   align-items: center;
-  width: 80px; /* 设置按钮的宽度 */
-  height: 32px; /* 设置按钮的高度 */
+  width: 80px;
+  /* 设置按钮的宽度 */
+  height: 32px;
+  /* 设置按钮的高度 */
   color: white;
   border-radius: 5px;
   cursor: pointer;
@@ -1241,8 +1417,10 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 35px; /* 设置按钮的宽度 */
-  height: 32px; /* 设置按钮的高度 */
+  width: 35px;
+  /* 设置按钮的宽度 */
+  height: 32px;
+  /* 设置按钮的高度 */
   color: white;
   border-radius: 5px;
   cursor: pointer;
@@ -1254,7 +1432,7 @@ export default {
 
 .user-list {
   width: 100%;
-  height: calc(100% - 150px);
+  height: calc(100% - 190px);
   display: flex;
   margin-top: 15px;
 }
@@ -1271,18 +1449,18 @@ export default {
   margin-right: 20px;
 }
 
-.quyu-box > * {
+.quyu-box>* {
   width: 100%;
   margin-bottom: 5px;
 }
 
-.quyu-box > .el-tree {
+.quyu-box>.el-tree {
   height: 100%;
   width: 100%;
   align-items: center;
 }
 
-.quyu-box > .el-input ::placeholder {
+.quyu-box>.el-input ::placeholder {
   text-align: center;
 }
 
@@ -1382,7 +1560,7 @@ export default {
 <style lang="scss" scoped>
 :deep(.el-tree) {
   .is-current {
-    > .el-tree-node__content {
+    >.el-tree-node__content {
       background-color: var(--el-tree-node-hover-bg-color);
       color: white;
     }
@@ -1394,11 +1572,13 @@ export default {
   background-repeat: no-repeat;
   background-size: contain;
 }
+
 .asc-icon:hover {
   background-image: url("@/assets/yonghu/icon24.png");
   background-repeat: no-repeat;
   background-size: contain;
 }
+
 .asc-icon.active {
   background-image: url("@/assets/yonghu/icon24.png");
   background-repeat: no-repeat;
@@ -1410,14 +1590,17 @@ export default {
   background-repeat: no-repeat;
   background-size: contain;
 }
+
 .desc-icon:hover {
   background-image: url("@/assets/yonghu/icon22.png");
   background-repeat: no-repeat;
   background-size: contain;
 }
+
 .desc-icon.active {
   background-image: url("@/assets/yonghu/icon22.png");
   background-repeat: no-repeat;
   background-size: contain;
 }
+
 </style>

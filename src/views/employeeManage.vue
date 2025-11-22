@@ -42,15 +42,23 @@
     </div>
     <div class="yuangong-info">
       <div class="command-box">
-        <div class="add-btn" style="width: 110px; margin-left: 10px" @click="add_dialogFormVisible = true" v-if="staffPermissionIds.includes(30)">
+        <div class="add-btn" style="width: 110px; margin-left: 10px" @click="add_dialogFormVisible = true"
+          v-if="staffPermissionIds.includes(30)">
           <img src="@/assets/yuangong/icon6.png" alt="" style="margin-left: 8px" />
           <span style="font-size: 16px; margin-left: 10px; color: #5a5a5a">新增水厂</span>
         </div>
-        <div class="add-btn" style="width: 110px; margin-left: 10px" @click="addRegion_dialogFormVisible = true" v-if="staffPermissionIds.includes(31)">
+        <div class="add-btn" style="width: 110px; margin-left: 10px" @click="addRegion_dialogFormVisible = true"
+          v-if="staffPermissionIds.includes(31)">
           <img src="@/assets/yuangong/icon6.png" alt="" style="margin-left: 8px" />
           <span style="font-size: 16px; margin-left: 10px; color: #5a5a5a">新增区域</span>
         </div>
-        <div class="add-btn" style="width: 110px; margin-left: 10px" @click="deleteRegion_dialogFormVisible = true" v-if="staffPermissionIds.includes(32)">
+        <div class="add-btn" style="width: 110px; margin-left: 10px" @click="edit_company_block = true"
+          v-if="staffPermissionIds.includes(40) && companyId == 1">
+          <img src="@/assets/yuangong/icon6.png" alt="" style="margin-left: 8px" />
+          <span style="font-size: 16px; margin-left: 10px; color: #5a5a5a">水厂管理</span>
+        </div>
+        <div class="add-btn" style="width: 110px; margin-left: 10px" @click="deleteRegion_dialogFormVisible = true"
+          v-if="staffPermissionIds.includes(32)">
           <img src="@/assets/yuangong/icon4.png" alt="" style="margin-left: 8px" />
           <span style="font-size: 16px; margin-left: 10px; color: #5a5a5a">删除区域</span>
         </div>
@@ -76,16 +84,10 @@
         </div>
       </div>
       <div class="yuangong-table">
-        <el-table
-          ref="multipleTableRef"
-          :data="employeeData"
-          row-key="staffId"
-          style="width: auto; height: 100%; table-layout: fixed; overflow-x: auto; overflow-y: auto"
-          border
-          :header-cell-style="{ background: '#46B97E', color: '#FFFFFF' }"
-          @selection-change="handleSelectionChange"
-          id="yuangong-table"
-        >
+        <el-table ref="multipleTableRef" :data="employeeData" row-key="staffId"
+          style="width: auto; height: 100%; table-layout: fixed; overflow-x: auto; overflow-y: auto" border
+          :header-cell-style="{ background: '#46B97E', color: '#FFFFFF' }" @selection-change="handleSelectionChange"
+          id="yuangong-table">
           <el-table-column type="selection" :selectable="selectable" :width="selectionWidth" align="center" />
           <el-table-column label="序号" :width="indexWidth" align="center" fixed="left" #default="scope">
             {{ scope.$index + 1 + (params.pageNo - 1) * params.pageSize }}
@@ -103,7 +105,8 @@
       </div>
       <div class="page-box">
         <div class="demo-pagination-block">
-          <el-pagination v-model:current-page="params.pageNo" v-model:page-size="params.pageSize" :page-sizes="[5, 10, 15]" layout="total,  prev, pager, next, jumper" :total="total" />
+          <el-pagination v-model:current-page="params.pageNo" v-model:page-size="params.pageSize"
+            :page-sizes="[5, 10, 15]" layout="total,  prev, pager, next, jumper" :total="total" />
         </div>
       </div>
     </div>
@@ -127,11 +130,15 @@
         </div>
         <div class="btn">
           <div class="confirm-btn" @click="add_confirm">
-            <el-icon style="margin-left: 15%"><Check /></el-icon>
+            <el-icon style="margin-left: 15%">
+              <Check />
+            </el-icon>
             <span style="font-size: 16px; margin-left: 15%">确认</span>
           </div>
           <div class="cancel-btn" @click="add_dialogFormVisible = false">
-            <el-icon style="margin-left: 15%; color: #45ba7e"><Close /></el-icon>
+            <el-icon style="margin-left: 15%; color: #45ba7e">
+              <Close />
+            </el-icon>
             <span style="font-size: 16px; margin-left: 15%; color: #5a5a5a">取消</span>
           </div>
         </div>
@@ -163,11 +170,15 @@
         </div>
         <div class="btn">
           <div class="confirm-btn" @click="addRegion_confirm">
-            <el-icon style="margin-left: 15%"><Check /></el-icon>
+            <el-icon style="margin-left: 15%">
+              <Check />
+            </el-icon>
             <span style="font-size: 16px; margin-left: 15%">确认</span>
           </div>
           <div class="cancel-btn" @click="addRegion_dialogFormVisible = false">
-            <el-icon style="margin-left: 15%; color: #45ba7e"><Close /></el-icon>
+            <el-icon style="margin-left: 15%; color: #45ba7e">
+              <Close />
+            </el-icon>
             <span style="font-size: 16px; margin-left: 15%; color: #5a5a5a">取消</span>
           </div>
         </div>
@@ -194,9 +205,11 @@
           </div>
           <div class="add-input">
             <span>区域名称</span>
-            <el-select v-model="deleteRegion.regionIds" multiple clearable collapse-tags placeholder="请选择区域" popper-class="custom-header" :max-collapse-tags="1">
+            <el-select v-model="deleteRegion.regionIds" multiple clearable collapse-tags placeholder="请选择区域"
+              popper-class="custom-header" :max-collapse-tags="1">
               <template #header>
-                <el-checkbox class="user-checkbox" v-model="checkAll" :indeterminate="indeterminate" @change="handleCheckAll"> 全选 </el-checkbox>
+                <el-checkbox class="user-checkbox" v-model="checkAll" :indeterminate="indeterminate"
+                  @change="handleCheckAll"> 全选 </el-checkbox>
               </template>
               <el-option v-for="item in regionList" :key="item.id" :label="item.label" :value="item.id" />
             </el-select>
@@ -204,11 +217,15 @@
         </div>
         <div class="btn">
           <div class="confirm-btn" @click="deleteRegion_confirm">
-            <el-icon style="margin-left: 15%"><Check /></el-icon>
+            <el-icon style="margin-left: 15%">
+              <Check />
+            </el-icon>
             <span style="font-size: 16px; margin-left: 15%">确认</span>
           </div>
           <div class="cancel-btn" @click="cancelDeleteRegion">
-            <el-icon style="margin-left: 15%; color: #45ba7e"><Close /></el-icon>
+            <el-icon style="margin-left: 15%; color: #45ba7e">
+              <Close />
+            </el-icon>
             <span style="font-size: 16px; margin-left: 15%; color: #5a5a5a">取消</span>
           </div>
         </div>
@@ -227,16 +244,22 @@
           </div>
         </div>
         <div class="delete-content">
-          <el-icon style="margin-right: 10px; margin-top: 35px; font-size: 40px; color: #f33125" align-self="center"><WarningFilled /></el-icon>
+          <el-icon style="margin-right: 10px; margin-top: 35px; font-size: 40px; color: #f33125" align-self="center">
+            <WarningFilled />
+          </el-icon>
           <span style="margin-top: 5px">删除后不可恢复，确认删除数据吗？</span>
         </div>
         <div class="btn">
           <div class="confirm-btn" @click="deleteConfirm">
-            <el-icon style="margin-left: 15%"><Check /></el-icon>
+            <el-icon style="margin-left: 15%">
+              <Check />
+            </el-icon>
             <span style="font-size: 16px; margin-left: 15%">确认</span>
           </div>
           <div class="cancel-btn" @click="delete_dialogFormVisible = false">
-            <el-icon style="margin-left: 15%; color: #45ba7e"><Close /></el-icon>
+            <el-icon style="margin-left: 15%; color: #45ba7e">
+              <Close />
+            </el-icon>
             <span style="font-size: 16px; margin-left: 15%; color: #5a5a5a">取消</span>
           </div>
         </div>
@@ -296,15 +319,49 @@
         </div>
         <div class="btn">
           <div class="confirm-btn" @click="editConfirm">
-            <el-icon style="margin-left: 15%"><Check /></el-icon>
+            <el-icon style="margin-left: 15%">
+              <Check />
+            </el-icon>
             <span style="font-size: 16px; margin-left: 15%">确认</span>
           </div>
           <div class="cancel-btn" @click="edit_dialogFormVisible = false">
-            <el-icon style="margin-left: 15%; color: #45ba7e"><Close /></el-icon>
+            <el-icon style="margin-left: 15%; color: #45ba7e">
+              <Close />
+            </el-icon>
             <span style="font-size: 16px; margin-left: 15%; color: #5a5a5a">取消</span>
           </div>
         </div>
       </div>
+    </div>
+
+    <!-- 编辑水厂停用功能 -->
+    <div class="edit-dialog" v-if="edit_company_block">
+      <div class="add-dialog-content">
+        <div class="title">
+          <div style="margin-left: 10px; display: flex; align-items: center">
+            <img src="@/assets/fapiao/icon8.png" alt="" style="margin-right: 10px" />
+            <span style="font-size: 18px">水厂管理</span>
+          </div>
+          <div style="margin-right: 10px; cursor: pointer" @click="edit_company_block = false">
+            <img src="@/assets/close.png" alt="" />
+          </div>
+        </div>
+        <el-table :data="companyList" style="width: 100%">
+          <el-table-column prop="name" label="水厂名称"  align="center" />
+
+
+          <el-table-column label="操作">
+            <template #default="scope">
+              <el-button :type="scope.row.isBlock === '正常' ? 'danger' : 'primary'" size="large"
+                @click="editCompanyStatus(scope.row.id)">
+                {{ scope.row.isBlock === '正常' ? '停用' : '启用' }}
+              </el-button>
+            </template>
+          </el-table-column>
+        </el-table>
+
+      </div>
+
     </div>
   </div>
 </template>
@@ -313,6 +370,7 @@
 import service from "@/api/request";
 import { ElMessage } from "element-plus";
 import axios from "axios";
+import { editCompanyStatus } from "@/api/otherapi/other.js";
 export default {
   data() {
     return {
@@ -393,6 +451,7 @@ export default {
       edit_dialogFormVisible: false,
       addRegion_dialogFormVisible: false,
       deleteRegion_dialogFormVisible: false,
+      edit_company_block: false,
 
       //表格勾选行
       selection: [],
@@ -460,6 +519,11 @@ export default {
     },
   },
   mounted() {
+    // editCompanyStatus(10).then(res => {
+    //   console.log("状态修改成功:", res);
+    // }).catch(err => {
+    //   console.error("修改失败", err);
+    // });
     // 获取父容器元素
     this.parentContainer = document.querySelector(".yuangong-table");
     // 初始化列宽
@@ -483,6 +547,16 @@ export default {
     }
   },
   methods: {
+    editCompanyStatus(companyId) {
+      editCompanyStatus(companyId).then(res => {
+        ElMessage.success("操作成功");
+        this.getCompanyList();
+      }).catch(err => {
+        // console.error("修改失败", err);
+        ElMessage.error(res.msg);
+      });
+
+    },
     selectable() {
       return true; // 目前允许所有行选择，你可以加上你的业务逻辑
     },
@@ -579,6 +653,7 @@ export default {
               return {
                 id: item.companyId,
                 name: item.companyName,
+                isBlock:item.isBlock
               };
             });
           } else {
@@ -1039,14 +1114,15 @@ export default {
 
 .search-input {
   display: flex;
-  justify-content: center; /* 确保子元素在父容器中垂直居中 */
+  justify-content: center;
+  /* 确保子元素在父容器中垂直居中 */
   flex-direction: column;
   width: 25%;
   height: 100%;
   margin-right: 20px;
 }
 
-.search-input > span {
+.search-input>span {
   font-size: 14px;
   margin-bottom: 5px;
 }
@@ -1055,7 +1131,7 @@ export default {
   display: flex;
 }
 
-.time-input > span {
+.time-input>span {
   font-size: 14px;
   margin-bottom: 5px;
   align-self: center;
@@ -1071,7 +1147,7 @@ export default {
   margin-left: 100px;
 }
 
-.buttons > * {
+.buttons>* {
   width: 120px;
 }
 
@@ -1090,6 +1166,7 @@ export default {
   background-color: #45ba7e;
   margin-right: 50px;
 }
+
 .clear-btn {
   background-color: #fff;
   border: 2px solid #f2f2f2;
@@ -1118,7 +1195,7 @@ export default {
   margin-bottom: 10px;
 }
 
-.command-box > * {
+.command-box>* {
   margin-right: 20px;
 }
 
@@ -1129,8 +1206,10 @@ export default {
 .export-out-btn {
   display: flex;
   align-items: center;
-  width: 80px; /* 设置按钮的宽度 */
-  height: 32px; /* 设置按钮的高度 */
+  width: 80px;
+  /* 设置按钮的宽度 */
+  height: 32px;
+  /* 设置按钮的高度 */
   color: white;
   border-radius: 5px;
   cursor: pointer;
@@ -1144,8 +1223,10 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 35px; /* 设置按钮的宽度 */
-  height: 32px; /* 设置按钮的高度 */
+  width: 35px;
+  /* 设置按钮的宽度 */
+  height: 32px;
+  /* 设置按钮的高度 */
   color: white;
   border-radius: 5px;
   cursor: pointer;
@@ -1205,6 +1286,7 @@ export default {
 .add-dialog-content {
   width: 35%;
 }
+
 .delete-dialog-content {
   width: 35%;
   height: 300px;
@@ -1261,19 +1343,20 @@ export default {
 
 .edit-input {
   display: flex;
-  justify-content: center; /* 确保子元素在父容器中垂直居中 */
+  justify-content: center;
+  /* 确保子元素在父容器中垂直居中 */
   flex-direction: column;
   width: 31%;
   height: 80px;
   margin-right: 3.5%;
 }
 
-.edit-input > span {
+.edit-input>span {
   font-size: 16px;
   margin-bottom: 5px;
 }
 
-.edit-input > .el-input {
+.edit-input>.el-input {
   height: 35px;
   width: 100%;
 }
@@ -1293,19 +1376,20 @@ export default {
 
 .add-input {
   display: flex;
-  justify-content: center; /* 确保子元素在父容器中垂直居中 */
+  justify-content: center;
+  /* 确保子元素在父容器中垂直居中 */
   flex-direction: column;
   width: 45%;
   height: 100%;
 }
 
-.add-input > span {
+.add-input>span {
   font-size: 15px;
   margin-bottom: 5px;
   color: #575556;
 }
 
-.add-input > .el-input {
+.add-input>.el-input {
   height: 35px;
   width: 100%;
 }
