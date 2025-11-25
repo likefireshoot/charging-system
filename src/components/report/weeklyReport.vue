@@ -17,23 +17,13 @@
         <div class="search-input" style="margin-left: 20px; width: 50%">
           <span>时间</span>
           <div class="time-input">
-            <el-date-picker
-              v-model="params.startTime"
-              type="date"
-              placeholder="选择日期"
-              style="flex-grow: 0; width: 150px; flex-basis: auto; margin-right: 5px; height: 35px"
-              format="YYYY-MM-DD"
-              value-format="YYYY-MM-DD"
-            />
+            <el-date-picker v-model="params.startTime" type="date" placeholder="选择日期"
+              style="flex-grow: 0; width: 150px; flex-basis: auto; margin-right: 5px; height: 35px" format="YYYY-MM-DD"
+              value-format="YYYY-MM-DD" />
             <span>至</span>
-            <el-date-picker
-              v-model="params.endTime"
-              type="date"
-              placeholder="选择日期"
-              style="flex-grow: 0; width: 150px; flex-basis: auto; height: 35px"
-              format="YYYY-MM-DD"
-              value-format="YYYY-MM-DD"
-            />
+            <el-date-picker v-model="params.endTime" type="date" placeholder="选择日期"
+              style="flex-grow: 0; width: 150px; flex-basis: auto; height: 35px" format="YYYY-MM-DD"
+              value-format="YYYY-MM-DD" />
           </div>
         </div>
       </div>
@@ -54,7 +44,8 @@
           <div class="detail-info">
             <span>本周交易总额</span>
             <div class="message">
-              <span style="font-size: 24px; margin-bottom: 20px; font-family: 'Microsoft YaHei'; font-weight: bold">{{ trade_data.totalMoney }}</span>
+              <span style="font-size: 24px; margin-bottom: 20px; font-family: 'Microsoft YaHei'; font-weight: bold">{{
+                trade_data.totalMoney }}</span>
               <span style="margin-bottom: 20px">元</span>
             </div>
             <span>交易笔数</span>
@@ -69,7 +60,8 @@
           <div class="cashdetail-info">
             <span>本周现金交易总金额</span>
             <div class="message">
-              <span style="font-size: 24px; margin-bottom: 20px; font-family: 'Microsoft YaHei'; font-weight: bold">{{ trade_data.cashMoney }}</span>
+              <span style="font-size: 24px; margin-bottom: 20px; font-family: 'Microsoft YaHei'; font-weight: bold">{{
+                trade_data.cashMoney }}</span>
               <span style="margin-bottom: 20px">元</span>
             </div>
             <span>交易笔数</span>
@@ -84,7 +76,8 @@
           <div class="weichatdetail-info">
             <span>本周微信支付交易总金额</span>
             <div class="message">
-              <span style="font-size: 24px; margin-bottom: 20px; font-family: 'Microsoft YaHei'; font-weight: bold">{{ trade_data.weChatMoney }}</span>
+              <span style="font-size: 24px; margin-bottom: 20px; font-family: 'Microsoft YaHei'; font-weight: bold">{{
+                trade_data.weChatMoney }}</span>
               <span style="margin-bottom: 20px; font-family: 'Microsoft YaHei'">元</span>
             </div>
             <span>交易笔数</span>
@@ -99,7 +92,8 @@
           <div class="alipaydetail-info">
             <span>本周支付宝支付交易总金额</span>
             <div class="message">
-              <span style="font-size: 24px; margin-bottom: 20px; font-family: 'Microsoft YaHei'; font-weight: bold">{{ trade_data.alipayMoney }}</span>
+              <span style="font-size: 24px; margin-bottom: 20px; font-family: 'Microsoft YaHei'; font-weight: bold">{{
+                trade_data.alipayMoney }}</span>
               <span style="margin-bottom: 20px">元</span>
             </div>
             <span>交易笔数</span>
@@ -114,7 +108,12 @@
       <div class="baobiao-chart">
         <div class="week-report">
           <div class="week-report-title">
-            <span style="font-size: 16px; margin-top: 10px; margin-bottom: 5px">收费周报表统计（{{ params.startTime }}至{{ params.endTime }}）</span>
+            <span style="font-size: 16px; margin-top: 10px; margin-bottom: 5px">收费周报表统计（{{ params.startTime }}至{{
+              params.endTime }}）
+            <a href="javascript:;" style="font-size: 14px; margin-left: 0px;color: #000;"
+                @click="exportYearChartPNG(weekchart, '图表数据')">(导出)</a>    
+            
+            </span>
             <div class="flex-container">
               <div style="width: 4px; height: 4px; background-color: #46b87d; margin-right: 5px"></div>
               <div style="width: 4px; height: 4px; background-color: #90d5b2; margin-right: 5px"></div>
@@ -126,7 +125,11 @@
         </div>
         <div class="week-huanbi">
           <div class="week-huanbi-title">
-            <span style="font-size: 16px; margin-top: 10px; margin-bottom: 5px">收费周报表统计环比（{{ params.startTime }}至{{ params.endTime }}）</span>
+            <span style="font-size: 16px; margin-top: 10px; margin-bottom: 5px">收费周报表统计环比（{{ params.startTime }}至{{
+              params.endTime }}）
+             <a href="javascript:;" style="font-size: 14px; margin-left: 0px;color: #000;"
+                @click="exportYearChartPNG(weekhuanbichart, '图表数据')">(导出)</a>  
+            </span>
             <div class="flex-container">
               <div style="width: 4px; height: 4px; background-color: #46b87d; margin-right: 5px"></div>
               <div style="width: 4px; height: 4px; background-color: #90d5b2; margin-right: 5px"></div>
@@ -138,7 +141,13 @@
         </div>
         <div class="week-tongbi">
           <div class="week-tongbi-title">
-            <span style="font-size: 16px; margin-top: 10px; margin-bottom: 5px">收费周报表统计同比（{{ params.startTime }}至{{ params.endTime }}）</span>
+            <span style="font-size: 16px; margin-top: 10px; margin-bottom: 5px">收费周报表统计同比（{{ params.startTime }}至{{
+              params.endTime }}）
+
+              <a href="javascript:;" style="font-size: 14px; margin-left: 0px;color: #000;"
+                @click="exportYearChartPNG(weektongbichart, '图表数据')">(导出)</a>
+
+            </span>
             <div class="flex-container">
               <div style="width: 4px; height: 4px; background-color: #46b87d; margin-right: 5px"></div>
               <div style="width: 4px; height: 4px; background-color: #90d5b2; margin-right: 5px"></div>
@@ -158,7 +167,7 @@ import * as echarts from "echarts";
 import { markRaw } from "vue";
 import service from "@/api/request";
 import { ElMessage } from "element-plus";
-
+import { exportYearChartPNG } from "@/api/otherapi/other.js";
 export default {
   data() {
     const now = new Date();
@@ -237,6 +246,13 @@ export default {
             },
           },
         ],
+        // ⭐⭐⭐⭐ 关键：启用静态 label ⭐⭐⭐⭐
+        label: {
+          show: true,
+          position: "top",
+          color: "#333",
+          fontSize: 12,
+        }
       },
       weekchartResizeObserver: null,
       weekhuanbichart: null,
@@ -406,6 +422,7 @@ export default {
     },
   },
   methods: {
+    exportYearChartPNG,
     debounce(func, delay) {
       let timer = null;
       return function () {
@@ -665,7 +682,7 @@ export default {
   padding: 0px 20px;
 }
 
-.baobiao-container > * {
+.baobiao-container>* {
   width: 99.3%;
 }
 
@@ -691,14 +708,15 @@ export default {
 .search-input {
   display: flex;
   justify-content: flex-start;
-  justify-content: center; /* 确保子元素在父容器中垂直居中 */
+  justify-content: center;
+  /* 确保子元素在父容器中垂直居中 */
   flex-direction: column;
   width: 25%;
   height: 100%;
   margin-right: 20px;
 }
 
-.search-input > span {
+.search-input>span {
   font-size: 14px;
   margin-bottom: 5px;
 }
@@ -707,7 +725,7 @@ export default {
   display: flex;
 }
 
-.time-input > span {
+.time-input>span {
   font-size: 14px;
   margin-bottom: 5px;
   display: flex;
@@ -725,7 +743,7 @@ export default {
   align-items: center;
 }
 
-.buttons > * {
+.buttons>* {
   width: 120px;
 }
 
@@ -744,6 +762,7 @@ export default {
   background-color: #45ba7e;
   margin-right: 30px;
 }
+
 .clear-btn {
   background-color: #fff;
   border: 2px solid #f2f2f2;
@@ -796,25 +815,25 @@ export default {
   margin-left: 20px;
 }
 
-.detail-info > span {
+.detail-info>span {
   font-size: 16px;
   color: #fff;
 }
 
-.cashdetail-info > span,
-.weichatdetail-info > span,
-.alipaydetail-info > span {
+.cashdetail-info>span,
+.weichatdetail-info>span,
+.alipaydetail-info>span {
   font-size: 16px;
   color: #000;
 }
 
-.detail-info > .message > span {
+.detail-info>.message>span {
   color: #fff;
 }
 
-.cashdetail-info > .message > span,
-.weichatdetail-info > .message > span,
-.alipaydetail-info > .message > span {
+.cashdetail-info>.message>span,
+.weichatdetail-info>.message>span,
+.alipaydetail-info>.message>span {
   color: #000;
 }
 

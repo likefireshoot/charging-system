@@ -2,6 +2,13 @@
   <div class="baobiao-container">
     <div class="search-box">
       <div class="search-content">
+        <div class="search-input" style="margin-left: 10px; margin-left: 10px">
+          <span>选择报表</span>
+          <el-select v-model="currentReportTye">
+            <el-option v-for="item in selectReportTypeList" :key="item.key" :label="item.label" :value="item.key">
+            </el-option>
+          </el-select>
+        </div>
         <div class="search-input" style="margin-left: 10px; margin-left: 10px" v-if="companyId === 1">
           <span>所属水厂</span>
           <el-select v-model="params.company" placeholder="请选择所属水厂">
@@ -34,7 +41,12 @@
       <div class="baobiao-chart">
         <div class="year-report">
           <div class="year-report-title">
-            <span style="font-size: 16px; margin-top: 10px; margin-bottom: 5px">用水年报表统计（{{ params.year }}年）</span>
+            <span style="font-size: 16px; margin-top: 10px; margin-bottom: 5px">{{currentName}}年报表统计（{{ params.year }}年）
+              
+               <a href="javascript:;" style="font-size: 14px; margin-left: 0px;color: #000;" @click="exportYearChartPNG(yearchart,'图表数据')">(导出)</a>
+
+
+            </span>
             <div class="flex-container">
               <div style="width: 4px; height: 4px; background-color: #46b87d; margin-right: 5px"></div>
               <div style="width: 4px; height: 4px; background-color: #90d5b2; margin-right: 5px"></div>
@@ -46,7 +58,12 @@
         </div>
         <div class="year-huanbi">
           <div class="year-huanbi-title">
-            <span style="font-size: 16px; margin-top: 10px; margin-bottom: 5px">用水年报表统计环比及同比（{{ params.year }}年）</span>
+            <span style="font-size: 16px; margin-top: 10px; margin-bottom: 5px">{{currentName}}年报表统计环比及同比（{{ params.year }}年）
+              
+               <a href="javascript:;" style="font-size: 14px; margin-left: 0px;color: #000;" @click="exportYearChartPNG(yearhuanbichart,'图表数据')">(导出)</a>
+
+
+            </span>
             <div class="flex-container">
               <div style="width: 4px; height: 4px; background-color: #46b87d; margin-right: 5px"></div>
               <div style="width: 4px; height: 4px; background-color: #90d5b2; margin-right: 5px"></div>
@@ -66,7 +83,7 @@ import * as echarts from "echarts";
 import { markRaw } from "vue";
 import service from "@/api/request";
 import { ElMessage } from "element-plus";
-
+import {exportYearChartPNG} from "@/api/otherapi/other.js";
 export default {
   data() {
     return {
@@ -132,6 +149,13 @@ export default {
             },
           },
         ],
+           // ⭐⭐⭐⭐ 关键：启用静态 label ⭐⭐⭐⭐
+        label: {
+          show: true,
+          position: "top",
+          color: "#333",
+          fontSize: 12,
+        }
       },
       yearchartResizeObserver: null,
       yearhuanbichart: null,
@@ -197,6 +221,19 @@ export default {
         ],
       },
       yearhuanbichartResizeObserver: null,
+      selectReportTypeList: [
+        {
+          "label": "用水记录报表",
+          "key": 1
+        },
+        {
+          "label": "扣费记录报表",
+          "key": 2
+        }
+      ],
+      currentReportTye: 1,
+      currentName: "用水",
+      currentUnit: "吨"
     };
   },
   watch: {
@@ -211,6 +248,7 @@ export default {
     this.getTradeData();
   },
   methods: {
+    exportYearChartPNG,
     debounce(func, delay) {
       let timer = null;
       return function () {
@@ -327,8 +365,14 @@ export default {
         recordTime: year,
         companyId: params.companyId,
       };
+      let path = "/waterYearReport";
+      if (this.currentReportTye == 1) {
+        path = "/waterYearReport";
+      } else if (this.currentReportTye == 2) {
+        path = "/chargeYearReport";
+      }
       service
-        .post("/waterYearReport", queryParams)
+        .post(path, queryParams)
         .then((response) => {
           if (response.code === 200) {
             //获取横坐标
@@ -365,6 +409,8 @@ export default {
             this.beforeUnmount();
             this.yearChart();
             this.yearHuanbiChart();
+
+            this.renewType()
           } else {
             ElMessage.error(response.msg);
           }
@@ -378,6 +424,15 @@ export default {
       this.params.year = "";
       this.params.company = null;
     },
+      renewType() {
+      if (this.currentReportTye == 1) {//跟新标签
+        this.currentName = "用水"
+        this.currentUnit = "吨"
+      } else if (this.currentReportTye == 2) {
+        this.currentName = "扣费"
+        this.currentUnit = "元"
+      }
+    }
   },
 };
 </script>

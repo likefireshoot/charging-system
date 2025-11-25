@@ -95,7 +95,10 @@
       </div>
       <div class="week-report">
         <div class="week-report-title">
-          <span style="font-size: 16px; margin-top: 10px; margin-bottom: 5px">收费日报表统计（{{ params.record_time }}）</span>
+          <span style="font-size: 16px; margin-top: 10px; margin-bottom: 5px">收费日报表统计（{{ params.record_time }}）
+              <a href="javascript:;" style="font-size: 14px; margin-left: 0px;color: #000;" @click="exportYearChartPNG(weekchart,'收费日报表统计')">(导出)</a>
+
+          </span>
           <div class="flex-container">
             <div style="width: 4px; height: 4px; background-color: #46b87d; margin-right: 5px"></div>
             <div style="width: 4px; height: 4px; background-color: #90d5b2; margin-right: 5px"></div>
@@ -114,7 +117,7 @@ import * as echarts from "echarts";
 import { markRaw } from "vue";
 import service from "@/api/request";
 import { ElMessage } from "element-plus";
-
+import {exportYearChartPNG} from "@/api/otherapi/other.js";
 export default {
   data() {
     const now = new Date();
@@ -185,6 +188,13 @@ export default {
             },
           },
         ],
+        // ⭐⭐⭐⭐ 关键：启用静态 label ⭐⭐⭐⭐
+        label: {
+          show: true,
+          position: "top",
+          color: "#333",
+          fontSize: 12,
+        }
       },
       weekchartResizeObserver: null,
     };
@@ -201,6 +211,7 @@ export default {
     this.getTradeData();
   },
   methods: {
+    exportYearChartPNG,
     debounce(func, delay) {
       let timer = null;
       return function () {

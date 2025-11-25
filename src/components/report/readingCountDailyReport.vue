@@ -2,6 +2,13 @@
   <div class="baobiao-container">
     <div class="search-box">
       <div class="search-content">
+        <div class="search-input" style="margin-left: 10px; margin-left: 10px">
+          <span>选择报表</span>
+          <el-select v-model="currentReportTye">
+            <el-option v-for="item in selectReportTypeList" :key="item.key" :label="item.label" :value="item.key">
+            </el-option>
+          </el-select>
+        </div>
         <div class="search-input" style="margin-left: 10px; margin-left: 10px" v-if="companyId === 1">
           <span>所属水厂</span>
           <el-select v-model="params.companyId" placeholder="请选择所属水厂">
@@ -16,7 +23,8 @@
         </div>
         <div class="search-input" style="margin-left: 20px">
           <span>时间</span>
-          <el-date-picker v-model="params.recordTime" type="date" placeholder="选择日期" style="flex-grow: 0; width: 100%; height: 35px" format="YYYY-MM-DD" value-format="YYYY-MM-DD" />
+          <el-date-picker v-model="params.recordTime" type="date" placeholder="选择日期"
+            style="flex-grow: 0; width: 100%; height: 35px" format="YYYY-MM-DD" value-format="YYYY-MM-DD" />
         </div>
       </div>
       <div class="buttons">
@@ -33,7 +41,15 @@
     <div class="baobiao-info">
       <div class="week-report">
         <div class="week-report-title">
-          <span style="font-size: 16px; margin-top: 10px; margin-bottom: 5px">用水日报表统计（{{ params.recordTime }}）</span>
+          <span style="font-size: 16px; margin-top: 10px; margin-bottom: 5px">{{ currentName }}日报表统计（{{
+            params.recordTime
+          }}）
+
+            <a href="javascript:;" style="font-size: 14px; margin-left: 0px;color: #000;"
+              @click="exportYearChartPNG(weekchart, currentName + '日报表统计')">(导出)</a>
+
+
+          </span>
           <div class="flex-container">
             <div style="width: 4px; height: 4px; background-color: #46b87d; margin-right: 5px"></div>
             <div style="width: 4px; height: 4px; background-color: #90d5b2; margin-right: 5px"></div>
@@ -52,7 +68,7 @@ import * as echarts from "echarts";
 import { markRaw } from "vue";
 import service from "@/api/request";
 import { ElMessage } from "element-plus";
-
+import { exportYearChartPNG } from "@/api/otherapi/other.js";
 export default {
   data() {
     const now = new Date();
@@ -93,9 +109,9 @@ export default {
         },
         tooltip: {
           trigger: "item",
-          formatter: function (params) {
-            return params.name + ": " + params.value + "吨";
-          },
+          formatter: (params) => {
+            return params.name + ": " + params.value + this.currentUnit;
+          }
         },
         series: [
           {
@@ -122,15 +138,44 @@ export default {
             },
           },
         ],
+        // ⭐⭐⭐⭐ 关键：启用静态 label ⭐⭐⭐⭐
+        label: {
+          show: true,
+          position: "top",
+          color: "#333",
+          fontSize: 12,
+        }
       },
       weekchartResizeObserver: null,
+      selectReportTypeList: [
+        {
+          "label": "用水记录报表",
+          "key": 1
+        },
+        {
+          "label": "扣费记录报表",
+          "key": 2
+        }
+      ],
+      currentReportTye: 1,
+      currentName: "用水",
+      currentUnit: "吨"
+
     };
   },
   watch: {
     "params.companyId"() {
       this.params.regionName = "";
       this.getRegionData();
-    },
+    }
+    // ,
+    // currentReportTye(newvalue, oldvalue) {
+    //   if (newvalue == 1) {
+    //     this.currentName = "用水"
+    //   } else if (newvalue == 2) {
+    //     this.currentName = "扣费"
+    //   }
+    // }
   },
   mounted() {
     this.getCompanyList();
@@ -138,6 +183,7 @@ export default {
     this.getWeekTradeData();
   },
   methods: {
+    exportYearChartPNG,
     debounce(func, delay) {
       let timer = null;
       return function () {
@@ -233,8 +279,14 @@ export default {
         recordTime: this.params.recordTime,
         companyId: params.companyId,
       };
+      let path = "/waterDayReport";
+      if (this.currentReportTye == 1) {
+        path = "/waterDayReport";
+      } else if (this.currentReportTye == 2) {
+        path = "/chargeDayReport";
+      }
       service
-        .post("/waterDayReport", queryParams)
+        .post(path, queryParams)
         .then((response) => {
           if (response.code === 200) {
             // 提取 reportTimeStart 数据
@@ -252,6 +304,9 @@ export default {
             // 更新图表
             this.beforeUnmount();
             this.weekChart();
+            //更新展示标签
+            this.renewType();
+
           }
         })
         .catch((error) => {
@@ -263,6 +318,15 @@ export default {
       this.params.recordTime = "";
       this.params.companyId = null;
     },
+    renewType() {
+      if (this.currentReportTye == 1) {//跟新标签
+        this.currentName = "用水"
+        this.currentUnit = "吨"
+      } else if (this.currentReportTye == 2) {
+        this.currentName = "扣费"
+        this.currentUnit = "元"
+      }
+    }
   },
 };
 </script>
@@ -299,7 +363,7 @@ export default {
   padding: 0px 20px;
 }
 
-.baobiao-container > * {
+.baobiao-container>* {
   width: 99.3%;
 }
 
@@ -325,14 +389,15 @@ export default {
 .search-input {
   display: flex;
   justify-content: flex-start;
-  justify-content: center; /* 确保子元素在父容器中垂直居中 */
+  justify-content: center;
+  /* 确保子元素在父容器中垂直居中 */
   flex-direction: column;
   width: 25%;
   height: 100%;
   margin-right: 20px;
 }
 
-.search-input > span {
+.search-input>span {
   font-size: 14px;
   margin-bottom: 5px;
 }
@@ -344,7 +409,7 @@ export default {
   align-items: center;
 }
 
-.buttons > * {
+.buttons>* {
   width: 120px;
 }
 
@@ -363,6 +428,7 @@ export default {
   background-color: #45ba7e;
   margin-right: 30px;
 }
+
 .clear-btn {
   background-color: #fff;
   border: 2px solid #f2f2f2;
@@ -415,25 +481,25 @@ export default {
   margin-left: 20px;
 }
 
-.detail-info > span {
+.detail-info>span {
   font-size: 16px;
   color: #fff;
 }
 
-.cashdetail-info > span,
-.weichatdetail-info > span,
-.alipaydetail-info > span {
+.cashdetail-info>span,
+.weichatdetail-info>span,
+.alipaydetail-info>span {
   font-size: 16px;
   color: #000;
 }
 
-.detail-info > .message > span {
+.detail-info>.message>span {
   color: #fff;
 }
 
-.cashdetail-info > .message > span,
-.weichatdetail-info > .message > span,
-.alipaydetail-info > .message > span {
+.cashdetail-info>.message>span,
+.weichatdetail-info>.message>span,
+.alipaydetail-info>.message>span {
   color: #000;
 }
 

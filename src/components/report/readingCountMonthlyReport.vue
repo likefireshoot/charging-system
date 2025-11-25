@@ -2,6 +2,13 @@
   <div class="baobiao-container">
     <div class="search-box">
       <div class="search-content">
+        <div class="search-input" style="margin-left: 10px; margin-left: 10px">
+          <span>选择报表</span>
+          <el-select v-model="currentReportTye">
+            <el-option v-for="item in selectReportTypeList" :key="item.key" :label="item.label" :value="item.key">
+            </el-option>
+          </el-select>
+        </div>
         <div class="search-input" style="margin-left: 10px; margin-left: 10px" v-if="companyId === 1">
           <span>所属水厂</span>
           <el-select v-model="params.company" placeholder="请选择所属水厂">
@@ -34,7 +41,13 @@
       <div class="baobiao-chart">
         <div class="month-report">
           <div class="month-report-title">
-            <span style="font-size: 16px; margin-top: 10px; margin-bottom: 5px">用水月报表统计（{{ params.month }}）</span>
+            <span style="font-size: 16px; margin-top: 10px; margin-bottom: 5px">{{currentName}}月报表统计（{{ params.month }}）
+
+              
+               <a href="javascript:;" style="font-size: 14px; margin-left: 0px;color: #000;" @click="exportYearChartPNG(monthchart,+currentName+'月报表统计')">(导出)</a>
+
+
+            </span>
             <div class="flex-container">
               <div style="width: 4px; height: 4px; background-color: #46b87d; margin-right: 5px"></div>
               <div style="width: 4px; height: 4px; background-color: #90d5b2; margin-right: 5px"></div>
@@ -46,7 +59,13 @@
         </div>
         <div class="month-huanbi">
           <div class="month-huanbi-title">
-            <span style="font-size: 16px; margin-top: 10px; margin-bottom: 5px">用水月报表统计环比（{{ params.month }}）</span>
+            <span style="font-size: 16px; margin-top: 10px; margin-bottom: 5px">{{currentName}}月报表统计环比（{{ params.month }}）
+
+              
+               <a href="javascript:;" style="font-size: 14px; margin-left: 0px;color: #000;" @click="exportYearChartPNG(monthhuanbichart,currentName+'月报表统计')">(导出)</a>
+
+
+            </span>
             <div class="flex-container">
               <div style="width: 4px; height: 4px; background-color: #46b87d; margin-right: 5px"></div>
               <div style="width: 4px; height: 4px; background-color: #90d5b2; margin-right: 5px"></div>
@@ -58,7 +77,13 @@
         </div>
         <div class="month-tongbi">
           <div class="month-tongbi-title">
-            <span style="font-size: 16px; margin-top: 10px; margin-bottom: 5px">用水月报表统计同比（{{ params.month }}）</span>
+            <span style="font-size: 16px; margin-top: 10px; margin-bottom: 5px">{{currentName}}月报表统计同比（{{ params.month }}）
+
+              
+               <a href="javascript:;" style="font-size: 14px; margin-left: 0px;color: #000;" @click="exportYearChartPNG(monthtongbichart,currentName+'月报表统计同比')">(导出)</a>
+
+
+            </span>
             <div class="flex-container">
               <div style="width: 4px; height: 4px; background-color: #46b87d; margin-right: 5px"></div>
               <div style="width: 4px; height: 4px; background-color: #90d5b2; margin-right: 5px"></div>
@@ -78,7 +103,7 @@ import * as echarts from "echarts";
 import { markRaw } from "vue";
 import service from "@/api/request";
 import { ElMessage } from "element-plus";
-
+import {exportYearChartPNG} from "@/api/otherapi/other.js";
 export default {
   data() {
     const now = new Date();
@@ -148,6 +173,13 @@ export default {
             },
           },
         ],
+           // ⭐⭐⭐⭐ 关键：启用静态 label ⭐⭐⭐⭐
+        label: {
+          show: true,
+          position: "top",
+          color: "#333",
+          fontSize: 12,
+        }
       },
       monthchartResizeObserver: null,
       monthhuanbichart: null,
@@ -316,6 +348,19 @@ export default {
         ],
       },
       monthtongbichartResizeObserver: null,
+      selectReportTypeList: [
+        {
+          "label": "用水记录报表",
+          "key": 1
+        },
+        {
+          "label": "扣费记录报表",
+          "key": 2
+        }
+      ],
+      currentReportTye: 1,
+      currentName: "用水",
+      currentUnit: "吨"
     };
   },
   watch: {
@@ -323,6 +368,7 @@ export default {
       this.params.region = "";
       this.getRegionData();
     },
+
   },
   mounted() {
     this.getCompanyList();
@@ -330,6 +376,7 @@ export default {
     this.getTradeData();
   },
   methods: {
+    exportYearChartPNG,
     debounce(func, delay) {
       let timer = null;
       return function () {
@@ -468,7 +515,13 @@ export default {
         recordTime: monthResult,
         companyId: params.companyId,
       };
-      service.post("/waterMonthReport", queryParams).then((response) => {
+      let path = "/waterMonthReport";
+      if (this.currentReportTye == 1) {
+        path = "/waterMonthReport";
+      } else if (this.currentReportTye == 2) {
+        path = "/chargeMonthReport";
+      }
+      service.post(path, queryParams).then((response) => {
         if (response.code === 200) {
           //获取横坐标
           const reportTimeStarts = response.data.wdrList.map((item) => {
@@ -543,6 +596,8 @@ export default {
           this.monthChart();
           this.monthHuanbiChart();
           this.monthTongbiChart();
+
+          this.renewType();
         }
       });
     },
@@ -551,6 +606,15 @@ export default {
       this.params.month = "";
       this.params.company = null;
     },
+    renewType() {
+      if (this.currentReportTye == 1) {//跟新标签
+        this.currentName = "用水"
+        this.currentUnit = "吨"
+      } else if (this.currentReportTye == 2) {
+        this.currentName = "扣费"
+        this.currentUnit = "元"
+      }
+    }
   },
 };
 </script>
