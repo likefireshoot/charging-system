@@ -285,7 +285,7 @@
 
     <!-- 批量修改用户水价 加一个弹出框-->
     <!-- 弹出框 -->
-    <el-dialog title="批量修改用户水价" v-model="priceDialogVisible" :modal="false"
+    <el-dialog title="批量修改用户水价" v-model="priceDialogVisible" :modal="true"
  :close-on-click-modal="false"
     width="400px">
       <div>
@@ -1284,12 +1284,21 @@ export default {
   padding: 0px 20px;
 }
 
-.user-container>* {
+.serach-box,.user-info {
   padding: 0px 10px;
   border: 1px solid #e9e9e9;
   border-radius: 5px;
   width: 99.3%;
   background-color: #fff;
+}
+/* 自定义el-dialog的遮罩层背景色 */
+.el-overlay {
+  background: rgba(0, 0, 0, 0.5) !important;  /* 半透明黑色 */
+}
+
+/* 确保el-dialog弹出框本身不被覆盖 */
+.el-dialog__wrapper {
+  background: rgba(255, 255, 255, 0.9) !important;  /* 半透明白色背景 */
 }
 
 .serach-box {
