@@ -2,13 +2,13 @@
   <div class="baobiao-container">
     <div class="search-box">
       <div class="search-content">
-        <div class="search-input" style="margin-left: 10px; margin-left: 10px">
+        <!-- <div class="search-input" style="margin-left: 10px; margin-left: 10px">
           <span>选择报表</span>
           <el-select v-model="currentReportTye">
             <el-option v-for="item in selectReportTypeList" :key="item.key" :label="item.label" :value="item.key">
             </el-option>
           </el-select>
-        </div>
+        </div> -->
         <div class="search-input" style="margin-left: 10px; margin-left: 10px" v-if="companyId === 1">
           <span>所属水厂</span>
           <el-select v-model="params.companyId" placeholder="请选择所属水厂">

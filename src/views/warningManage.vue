@@ -311,8 +311,6 @@ export default {
     },
   },
   mounted() {
-    
-      
     this.$nextTick(() => {
       this.treeRef = this.$refs.treeRef;
     });
@@ -331,9 +329,10 @@ export default {
     }
     if(this.$route.query.warningType!=""){
           this.params.warningType = this.$route.query.warningType
-           this.$store.commit("setNavIndex", 6);
-          // console.log("--------------------------------------------------")
-          // console.log(this.params)
+          this.$store.commit("setNavIndex", 6);
+    }
+    if (this.params.warningType === "" || this.params.warningType === undefined){
+      this.params.warningType = "欠费用户" //默认选项
     }
     this.getCompanyList();
     this.getRegionData();
@@ -543,6 +542,7 @@ export default {
       } else {
         params.companyId = this.companyId; // 所属水厂ID
       }
+      params.warningType = "欠费用户"
       service
         .post("/warning/queryWarning", params)
         .then((response) => {
@@ -566,7 +566,7 @@ export default {
     clear() {
       this.params.company = null;
       this.params.companyId = null;
-      this.params.warningType = "";
+      this.params.warningType = "欠费用户";
       this.params.userName = "";
       this.params.imei = "";
       this.params.meterCode = "";
