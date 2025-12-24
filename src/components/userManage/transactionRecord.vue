@@ -11,15 +11,9 @@
         </div>
       </div>
 
-      <transactionRecordVue v-if="isShow"
-         :data="data"
-        @changeTye="changeTye"></transactionRecordVue>
+      <transactionRecordVue v-if="isShow" :data="data" @changeTye="changeTye"></transactionRecordVue>
 
-        <chargeRecordItemVue v-else
-         :data="data"
-        @changeTye="changeTye"
-        ></chargeRecordItemVue>
-
+      <chargeRecordItemVue v-else :data="data" @changeTye="changeTye"></chargeRecordItemVue>
     </div>
   </div>
 </template>
@@ -33,7 +27,7 @@ import transactionRecordVue from "./transactionRecord/transactionRecord.vue";
 export default {
   components: {
     chargeRecordItemVue,
-    transactionRecordVue
+    transactionRecordVue,
   },
   props: {
     transaction_dialogFormVisible: {
@@ -48,23 +42,22 @@ export default {
   data() {
     return {
       title: "历史交易记录",
-      isShow:true//两个的显示与否
+      isShow: true, //两个的显示与否
     };
   },
-  mounted() {
-  },
+  mounted() {},
   methods: {
     handleTransactionRecordClose() {
       this.$emit("close");
     },
-    changeTye(){
-      this.isShow = !this.isShow // title在改变
-      if(this.isShow){
+    changeTye() {
+      this.isShow = !this.isShow; // title在改变
+      if (this.isShow) {
         this.title = "历史交易记录";
-      }else{
-        this.title = "历史扣费记录"
+      } else {
+        this.title = "历史扣费记录";
       }
-    }
+    },
   },
 };
 </script>
@@ -121,13 +114,13 @@ export default {
   justify-content: flex-end;
   justify-content: center;
   /* 确保子元素在父容器中垂直居中 */
-  flex-direction: row;
+  flex-direction: column;
   width: 12%;
   height: 100%;
   margin-right: 20px;
 }
 
-.search-input>span {
+.search-input > span {
   font-size: 14px;
   margin-bottom: 5px;
 }
@@ -137,12 +130,12 @@ export default {
   width: 100%;
 }
 
-.time-input>* {
+.time-input > * {
   width: 50%;
   margin-right: 20px;
 }
 
-.transaction-record-content>.serach-box {
+.transaction-record-content > .serach-box {
   background-color: #fff;
   border-radius: 5px;
   width: 96%;
@@ -152,7 +145,7 @@ export default {
   padding: 0 10px;
 }
 
-.transaction-record-content>.transaction-list {
+.transaction-record-content > .transaction-list {
   width: 96%;
   /* height: 100%; */
   background-color: #fff;
