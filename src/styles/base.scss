@@ -9,6 +9,7 @@
 
 html {
   height: 100%;
+  overflow: hidden;
   body {
     margin: 0 auto;
     font-size: 16px;
@@ -17,7 +18,7 @@ html {
     height: 100%;
     background: #fff;
     user-select: none;
-    zoom: 0.7;
+    overflow: hidden;
   }
 }
 
@@ -25,7 +26,10 @@ a {
   cursor: pointer;
 }
 #app {
-  height: 100%;
+  height: calc(100% / 0.7); /* 补偿缩放，使缩放后正好是 100% */
+  width: calc(100% / 0.7); /* 补偿缩放，使缩放后正好是 100% */
+  transform: scale(0.7);
+  transform-origin: top left;
 }
 
 img {
