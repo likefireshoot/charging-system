@@ -1,12 +1,13 @@
 <template>
   <div class="transaction-record-content">
     <div class="serach-box">
-      <div class="search-input" style="width: 10%; margin-right: 10px; margin-top: 55px">
+      <div class="search-input" style="width: 10%; margin-right: 10px">
+        <span>类型</span>
         <el-select v-model="title" placeholder="请选择" style="width: 100%">
           <el-option v-for="item in transactionOrChargeRecordList" :key="item.value" :label="item.label" :value="item.value"> </el-option>
         </el-select>
       </div>
-      <div class="search-input" style="width: 30%; margin-right: 10px; margin-top: 55px">
+      <div class="search-input" style="width: 30%; margin-right: 10px">
         <span>时间</span>
         <div class="time-input">
           <el-select v-model="transactionData.timeType" placeholder="请选择" style="width: 100px; margin-right: 10px">
