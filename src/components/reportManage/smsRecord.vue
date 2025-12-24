@@ -90,24 +90,24 @@
           @selection-change="handleSelectionChange"
           id="log-table"
         >
-          <el-table-column type="selection" :selectable="selectable" min-width="55" align="center" fixed="left" />
+          <el-table-column type="selection" :selectable="selectable" min-width="40" align="center" fixed="left" />
           <!-- <el-table-column label="序号" width="120" align="center" fixed="left" #default="scope">
             {{ scope.$index + 1 + (params.pageNo - 1) * params.pageSize }}
           </el-table-column> -->
-          <el-table-column property="userId" label="用户号" min-width="100" align="center" fixed="left" />
-          <el-table-column property="userName" label="用户名称" min-width="160" align="center" />
-          <el-table-column property="userPhone" label="联系电话" min-width="160" align="center" />
-          <el-table-column property="meterCode" label="表号" min-width="180" align="center" />
+          <el-table-column property="userId" label="用户号" min-width="50" align="center" fixed="left" />
+          <el-table-column property="userName" label="用户名称" min-width="70" align="center" />
+          <el-table-column property="userPhone" label="联系电话" min-width="70" align="center" />
+          <el-table-column property="meterCode" label="表号" min-width="100" align="center" />
           <!-- <el-table-column property="imei" label="IMEI号" width="240" align="center" /> -->
-          <el-table-column property="balance" label="当前余额/元" min-width="160" align="center" />
-          <el-table-column property="monthlyWaterCosts" label="本月用水量/吨" min-width="160" align="center" />
-          <el-table-column property="monthlyMoneyCosts" label="本月消费金额/元" min-width="160" align="center" />
-          <el-table-column property="arrears" label="欠费金额/元" min-width="160" align="center" />
-          <el-table-column property="minimumBalanceThreshold" label="余额不足触发值/元" min-width="160" align="center" />
-          <el-table-column property="createTime" label="短信发送时间" min-width="200" align="center" />
-          <el-table-column property="regionName" label="所属区域" min-width="180" align="center" />
-          <el-table-column property="companyName" label="所属水厂" min-width="180" align="center" />
-          <el-table-column property="userAddr" label="用户住址" min-width="200" align="center" />
+          <el-table-column property="balance" label="当前余额/元" min-width="70" align="center" />
+          <el-table-column property="monthlyWaterCosts" label="本月用水量/吨" min-width="70" align="center" />
+          <el-table-column property="monthlyMoneyCosts" label="本月消费金额/元" min-width="70" align="center" />
+          <el-table-column property="arrears" label="欠费金额/元" min-width="70" align="center" />
+          <el-table-column property="minimumBalanceThreshold" label="余额不足触发值/元" min-width="70" align="center" />
+          <el-table-column property="createTime" label="短信发送时间" min-width="120" align="center" />
+          <el-table-column property="regionName" label="所属区域" min-width="80" align="center" />
+          <el-table-column property="companyName" label="所属水厂" min-width="70" align="center" />
+          <el-table-column property="userAddr" label="用户住址" min-width="100" align="center" />
           <!-- <el-table-column property="sendContent" label="短信内容" width="180" align="center" /> -->
         </el-table>
       </div>

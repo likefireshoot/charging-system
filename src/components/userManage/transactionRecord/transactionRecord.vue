@@ -1,102 +1,103 @@
 <template>
-   <div class="transaction-record-content">
-        <div class="serach-box">
-         <div class="search-input" style="width:15% ;margin-right: 10px;margin-top: 55px;">
-         <el-select v-model="title" placeholder="请选择" style="width: 100%;">
-              <el-option v-for="item in transactionOrChargeRecordList" :key="item.value" :label="item.label" :value="item.value">
-              </el-option>
-            </el-select>
-         </div>
-          <div class="search-input" style="width:40% ;margin-right: 10px;margin-top: 55px;">          
-            <span>时间</span>
-            <div class="time-input">
-              <el-select v-model="transactionData.timeType" placeholder="请选择" style="width: 100px; margin-right: 10px">
-                <el-option label="年" value="year" selected style="color: #46b97e"></el-option>
-                <el-option label="月" value="month" selected style="color: #46b97e"></el-option>
-                <el-option label="日" value="day" selected style="color: #46b97e"></el-option>
-              </el-select>
-              <div v-if="transactionData.timeType === 'year'" style="margin-right: 0px; flex-grow: 1">
-                <div style="display: flex; align-items: center">
-                  <el-date-picker v-model="transactionData.createTime" type="year" placeholder="选择年份"
-                    style="flex-grow: 1; width: 100%; height: 35px" value-format="YYYY" />
-                </div>
-              </div>
-              <div v-if="transactionData.timeType === 'month'" style="margin-right: 0px; flex-grow: 1">
-                <div style="display: flex; align-items: center">
-                  <el-date-picker v-model="transactionData.createTime" type="month" placeholder="选择月份"
-                    style="flex-grow: 1; width: 100%; height: 35px" value-format="YYYY-MM" />
-                </div>
-              </div>
-              <div v-if="!transactionData.timeType || transactionData.timeType === 'day'"
-                style="margin-right: 0px; flex-grow: 1">
-                <div style="display: flex; align-items: center">
-                  <el-date-picker v-model="transactionData.createTime" type="date" placeholder="选择日期"
-                    style="flex-grow: 1; width: 100%; height: 35px" format="YYYY-MM-DD" value-format="YYYY-MM-DD" />
-                </div>
-              </div>
+  <div class="transaction-record-content">
+    <div class="serach-box">
+      <div class="search-input" style="width: 10%; margin-right: 10px; margin-top: 55px">
+        <el-select v-model="title" placeholder="请选择" style="width: 100%">
+          <el-option v-for="item in transactionOrChargeRecordList" :key="item.value" :label="item.label" :value="item.value"> </el-option>
+        </el-select>
+      </div>
+      <div class="search-input" style="width: 30%; margin-right: 10px; margin-top: 55px">
+        <span>时间</span>
+        <div class="time-input">
+          <el-select v-model="transactionData.timeType" placeholder="请选择" style="width: 100px; margin-right: 10px">
+            <el-option label="年" value="year" selected style="color: #46b97e"></el-option>
+            <el-option label="月" value="month" selected style="color: #46b97e"></el-option>
+            <el-option label="日" value="day" selected style="color: #46b97e"></el-option>
+          </el-select>
+          <div v-if="transactionData.timeType === 'year'" style="margin-right: 0px; flex-grow: 1">
+            <div style="display: flex; align-items: center">
+              <el-date-picker v-model="transactionData.createTime" type="year" placeholder="选择年份" style="flex-grow: 1; width: 100%; height: 35px" value-format="YYYY" />
             </div>
           </div>
-          <div class="buttons" style="margin-left: 10%; margin-right: 10px">
-            <div class="sercah-btn" @click="search">
-              <img src="@/assets/yonghu/icon16.png" alt="" style="margin-left: 8px" />
-              <span style="font-size: 16px; margin-left: 15%">搜索</span>
+          <div v-if="transactionData.timeType === 'month'" style="margin-right: 0px; flex-grow: 1">
+            <div style="display: flex; align-items: center">
+              <el-date-picker v-model="transactionData.createTime" type="month" placeholder="选择月份" style="flex-grow: 1; width: 100%; height: 35px" value-format="YYYY-MM" />
             </div>
-            <div class="clear-btn" @click="clear">
-              <img src="@/assets/yonghu/icon4.png" alt="" style="margin-left: 8px" />
-              <span style="font-size: 16px; margin-left: 15%; color: #5a5a5a">清空</span>
+          </div>
+          <div v-if="!transactionData.timeType || transactionData.timeType === 'day'" style="margin-right: 0px; flex-grow: 1">
+            <div style="display: flex; align-items: center">
+              <el-date-picker v-model="transactionData.createTime" type="date" placeholder="选择日期" style="flex-grow: 1; width: 100%; height: 35px" format="YYYY-MM-DD" value-format="YYYY-MM-DD" />
             </div>
           </div>
         </div>
-        <div class="transaction-list">
-          <div class="command-buttons">
-            <div class="export-out-btn" style="margin-right: 10px; width: 100px" @click="receipt">
-              <img src="@/assets/yonghu/icon26.png" alt="" style="margin-left: 7px" />
-              <span style="font-size: 16px; margin-left: 10px; color: #5a5a5a">开收据</span>
-            </div>
-            <!-- <div class="export-in-btn" style="margin-right: 10px" @click="triggerFileInput">
+      </div>
+      <div class="buttons" style="margin-left: 10%; margin-right: 10px">
+        <div class="sercah-btn" @click="search">
+          <img src="@/assets/yonghu/icon16.png" alt="" style="margin-left: 8px" />
+          <span style="font-size: 16px; margin-left: 15%">搜索</span>
+        </div>
+        <div class="clear-btn" @click="clear">
+          <img src="@/assets/yonghu/icon4.png" alt="" style="margin-left: 8px" />
+          <span style="font-size: 16px; margin-left: 15%; color: #5a5a5a">清空</span>
+        </div>
+      </div>
+    </div>
+    <div class="transaction-list">
+      <div class="command-buttons">
+        <div class="export-out-btn" style="margin-right: 10px; width: 100px" @click="receipt">
+          <img src="@/assets/yonghu/icon26.png" alt="" style="margin-left: 7px" />
+          <span style="font-size: 16px; margin-left: 10px; color: #5a5a5a">开收据</span>
+        </div>
+        <!-- <div class="export-in-btn" style="margin-right: 10px" @click="triggerFileInput">
               <img src="@/assets/yonghu/icon1.png" alt="" style="margin-left: 7px" />
               <span style="font-size: 16px; margin-left: 10px; color: #5a5a5a">导入</span>
               <input ref="fileInput" type="file" accept=".xls,.xlsx" style="display: none" @change="exportIn" />
             </div> -->
-            <div class="export-out-btn" style="margin-right: 10px" @click="exportExcel">
-              <img src="@/assets/yonghu/icon2.png" alt="" style="margin-left: 7px" />
-              <span style="font-size: 16px; margin-left: 10px; color: #5a5a5a">导出</span>
-            </div>
-            <div class="reflush" style="margin-right: 10px" @click="reflush">
-              <img src="@/assets/yonghu/icon15.png" alt="" />
-            </div>
-          </div>
-          <div class="transaction-table">
-            <el-table ref="multipleTableRef" :data="transactionTableData" row-key="theId"
-              style="width: auto; height: 100%; table-layout: fixed; overflow-x: auto; overflow-y: auto"
-              :max-height="tableMaxHeight" border :header-cell-style="{ background: '#46B97E', color: '#FFFFFF' }"
-              @selection-change="handleSelectionChange" id="transaction-record-table">
-              <el-table-column type="selection" :selectable="selectable" min-width="55" align="center" fixed="left" />
-              <!-- <el-table-column property="theId" label="序号" width="100" align="center" fixed="left" /> -->
-              <el-table-column property="userId" label="用户号" min-width="100" align="center" fixed="left" />
-              <el-table-column property="userName" label="用户名称" min-width="160" align="center" />
-              <el-table-column property="regionName" label="所属区域" min-width="200" align="center" />
-              <!-- <el-table-column property="companyName" label="所属水厂" width="240" align="center" /> -->
-              <el-table-column property="userPhone" label="联系电话" min-width="200" align="center" />
-              <el-table-column property="meterCode" label="表号" min-width="200" align="center" />
-              <!-- <el-table-column property="imei" label="IMEI号" width="240" align="center" /> -->
-              <el-table-column property="meterType" label="水表类型" min-width="160" align="center" />
-              <el-table-column property="payerPhone" label="缴费人手机号" min-width="160" align="center" />
-              <el-table-column property="rechargeType" label="交易方式" min-width="160" align="center" />
-              <el-table-column property="rechargeAmount" label="交易金额" min-width="160" align="center" />
-              <el-table-column property="oldBalance" label="充值前余额/元" min-width="160" align="center" />
-              <el-table-column property="newBalance" label="充值后余额/元" min-width="160" align="center" />
-              <el-table-column property="createTime" label="交易时间" min-width="240" align="center" />
-            </el-table>
-          </div>
+        <div class="export-out-btn" style="margin-right: 10px" @click="exportExcel">
+          <img src="@/assets/yonghu/icon2.png" alt="" style="margin-left: 7px" />
+          <span style="font-size: 16px; margin-left: 10px; color: #5a5a5a">导出</span>
         </div>
-        <div class="page-box">
-          <div class="demo-pagination-block">
-            <el-pagination v-model:current-page="currentPage" v-model:page-size="pageSize" :page-sizes="[5, 10, 15]"
-              layout="total,  prev, pager, next, jumper" :total="total" />
-          </div>
+        <div class="reflush" style="margin-right: 10px" @click="reflush">
+          <img src="@/assets/yonghu/icon15.png" alt="" />
         </div>
+      </div>
+      <div class="transaction-table">
+        <el-table
+          ref="multipleTableRef"
+          :data="transactionTableData"
+          row-key="theId"
+          style="width: auto; height: 100%; table-layout: fixed; overflow-x: auto; overflow-y: auto"
+          :max-height="tableMaxHeight"
+          border
+          :header-cell-style="{ background: '#46B97E', color: '#FFFFFF' }"
+          @selection-change="handleSelectionChange"
+          id="transaction-record-table"
+        >
+          <el-table-column type="selection" :selectable="selectable" min-width="40" align="center" fixed="left" />
+          <!-- <el-table-column property="theId" label="序号" width="100" align="center" fixed="left" /> -->
+          <el-table-column property="userId" label="用户号" min-width="50" align="center" fixed="left" />
+          <el-table-column property="userName" label="用户名称" min-width="70" align="center" />
+          <el-table-column property="regionName" label="所属区域" min-width="80" align="center" />
+          <!-- <el-table-column property="companyName" label="所属水厂" width="240" align="center" /> -->
+          <el-table-column property="userPhone" label="联系电话" min-width="70" align="center" />
+          <el-table-column property="meterCode" label="表号" min-width="100" align="center" />
+          <!-- <el-table-column property="imei" label="IMEI号" width="240" align="center" /> -->
+          <el-table-column property="meterType" label="水表类型" min-width="70" align="center" />
+          <el-table-column property="payerPhone" label="缴费人手机号" min-width="70" align="center" />
+          <el-table-column property="rechargeType" label="交易方式" min-width="70" align="center" />
+          <el-table-column property="rechargeAmount" label="交易金额" min-width="70" align="center" />
+          <el-table-column property="oldBalance" label="充值前余额/元" min-width="70" align="center" />
+          <el-table-column property="newBalance" label="充值后余额/元" min-width="70" align="center" />
+          <el-table-column property="createTime" label="交易时间" min-width="120" align="center" />
+        </el-table>
+      </div>
     </div>
+    <div class="page-box">
+      <div class="demo-pagination-block">
+        <el-pagination v-model:current-page="currentPage" v-model:page-size="pageSize" :page-sizes="[5, 10, 15]" layout="total,  prev, pager, next, jumper" :total="total" />
+      </div>
+    </div>
+  </div>
 </template>
 
 <script>
@@ -127,13 +128,16 @@ export default {
       pageSize: 30,
       total: null,
       title: "历史交易记录",
-      transactionOrChargeRecordList: [{
-          value: '历史交易记录',
-          label: '历史交易记录'
-        }, {
-          value: '历史扣费记录',
-          label: '历史扣费记录'
-        }]
+      transactionOrChargeRecordList: [
+        {
+          value: "历史交易记录",
+          label: "历史交易记录",
+        },
+        {
+          value: "历史扣费记录",
+          label: "历史扣费记录",
+        },
+      ],
     };
   },
   computed: {
@@ -145,9 +149,9 @@ export default {
     currentPage() {
       this.getTransactionRecordData();
     },
-    title(newVal,oldVal){
-        this.$emit("changeTye")
-    }
+    title(newVal, oldVal) {
+      this.$emit("changeTye");
+    },
   },
   mounted() {
     this.assignmentData();
@@ -549,7 +553,7 @@ export default {
   margin-right: 20px;
 }
 
-.search-input>span {
+.search-input > span {
   font-size: 14px;
   margin-bottom: 5px;
 }
@@ -559,12 +563,12 @@ export default {
   width: 100%;
 }
 
-.time-input>* {
+.time-input > * {
   width: 50%;
   margin-right: 20px;
 }
 
-.transaction-record-content>.serach-box {
+.transaction-record-content > .serach-box {
   background-color: #fff;
   border-radius: 5px;
   width: 96%;
@@ -574,7 +578,7 @@ export default {
   padding: 0 10px;
 }
 
-.transaction-record-content>.transaction-list {
+.transaction-record-content > .transaction-list {
   width: 96%;
   /* height: 100%; */
   background-color: #fff;

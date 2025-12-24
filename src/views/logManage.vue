@@ -163,7 +163,7 @@ export default {
         worker_name: 6,
         operate_type: 9,
         operate_time: 12,
-        user_name: 8,
+        user_name: 6,
         biao_hao: 12,
         imei: 12,
         operate_content: 18,

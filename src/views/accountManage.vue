@@ -86,22 +86,22 @@
             @selection-change="handleSelectionChange"
             id="yonghu-table"
           >
-            <el-table-column type="selection" :selectable="selectable" min-width="55" align="center" fixed="left" />
+            <el-table-column type="selection" :selectable="selectable" min-width="40" align="center" fixed="left" />
             <!-- <el-table-column property="theId" label="序号" width="100" align="center" fixed="left" /> -->
-            <el-table-column property="userId" label="用户号" min-width="100" align="center" fixed="left" />
-            <el-table-column property="userName" label="用户名称" min-width="160" align="center"> </el-table-column>
-            <el-table-column property="userPhone" label="联系电话" min-width="180" align="center" />
-            <el-table-column property="meterCode" label="表号" min-width="180" align="center" />
-            <el-table-column property="meterType" label="水表类型" min-width="160" align="center" />
-            <el-table-column property="priceName" label="价格类型" min-width="180" align="center" />
-            <el-table-column property="smsConfigName" label="短信配置" min-width="180" align="center"></el-table-column>
-            <el-table-column property="userAddr" label="用户地址" min-width="200" align="center" />
-            <el-table-column property="companyName" label="所属水厂" min-width="200" align="center" />
-            <el-table-column property="regionName" label="所属区域" min-width="200" align="center" />
-            <el-table-column property="approver1" label="开户审批人1" min-width="180" align="center" />
-            <el-table-column property="approver2" label="开户审批人2" min-width="180" align="center" />
-            <el-table-column property="approver3" label="开户审批人3" min-width="180" align="center" />
-            <el-table-column property="createTime" label="开户时间" min-width="200" align="center"> </el-table-column>
+            <el-table-column property="userId" label="用户号" min-width="50" align="center" fixed="left" />
+            <el-table-column property="userName" label="用户名称" min-width="70" align="center"> </el-table-column>
+            <el-table-column property="userPhone" label="联系电话" min-width="100" align="center" />
+            <el-table-column property="meterCode" label="表号" min-width="100" align="center" />
+            <el-table-column property="meterType" label="水表类型" min-width="70" align="center" />
+            <el-table-column property="priceName" label="价格类型" min-width="90" align="center" />
+            <el-table-column property="smsConfigName" label="短信配置" min-width="90" align="center"></el-table-column>
+            <el-table-column property="userAddr" label="用户地址" min-width="100" align="center" />
+            <el-table-column property="companyName" label="所属水厂" min-width="70" align="center" />
+            <el-table-column property="regionName" label="所属区域" min-width="80" align="center" />
+            <el-table-column property="approver1" label="开户审批人1" min-width="70" align="center" />
+            <el-table-column property="approver2" label="开户审批人2" min-width="70" align="center" />
+            <el-table-column property="approver3" label="开户审批人3" min-width="70" align="center" />
+            <el-table-column property="createTime" label="开户时间" min-width="100" align="center"> </el-table-column>
           </el-table>
         </div>
       </div>

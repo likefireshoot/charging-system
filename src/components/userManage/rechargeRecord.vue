@@ -36,7 +36,7 @@
             <span>表号</span>
             <el-input v-model="rechargeRecordeData.meterCode" placeholder="请输入..." />
           </div>
-          <div class="search-input" style="width: 30%; margin-right: 10px">
+          <div class="search-input" style="width: 25%; margin-right: 10px">
             <span>时间</span>
             <div class="time-input">
               <el-select v-model="rechargeRecordeData.timeType" placeholder="请选择" style="width: 100px; margin-right: 10px">
@@ -68,7 +68,7 @@
               </div>
             </div>
           </div>
-          <div class="buttons" style="margin-left: 10%; margin-right: 10px">
+          <div class="buttons" style="margin-left: 5%; margin-right: 10px">
             <div class="sercah-btn" @click="search">
               <img src="@/assets/yonghu/icon16.png" alt="" style="margin-left: 8px" />
               <span style="font-size: 16px; margin-left: 15%">搜索</span>
@@ -119,23 +119,23 @@
               id="recharge-record-table"
               class="table"
             >
-              <el-table-column type="selection" :selectable="selectable" min-width="55" align="center" fixed="left" />
+              <el-table-column type="selection" :selectable="selectable" min-width="40" align="center" fixed="left" />
               <!-- <el-table-column property="theId" label="序号" width="100" align="center" fixed="left" /> -->
-              <el-table-column property="userId" label="用户号" min-width="100" align="center" fixed="left" />
-              <el-table-column property="userName" label="用户名称" min-width="160" align="center" />
-              <el-table-column property="userAddr" label="用户地址" min-width="200" align="center" />
-              <el-table-column property="regionName" label="所属区域" min-width="200" align="center" />
+              <el-table-column property="userId" label="用户号" min-width="50" align="center" fixed="left" />
+              <el-table-column property="userName" label="用户名称" min-width="70" align="center" />
+              <el-table-column property="userAddr" label="用户地址" min-width="100" align="center" />
+              <el-table-column property="regionName" label="所属区域" min-width="100" align="center" />
               <!-- <el-table-column property="companyName" label="所属水厂" width="240" align="center" /> -->
-              <el-table-column property="userPhone" label="联系电话" min-width="200" align="center" />
-              <el-table-column property="meterCode" label="表号" min-width="200" align="center" />
+              <el-table-column property="userPhone" label="联系电话" min-width="100" align="center" />
+              <el-table-column property="meterCode" label="表号" min-width="100" align="center" />
               <!-- <el-table-column property="imei" label="IMEI号" width="240" align="center" /> -->
-              <el-table-column property="meterType" label="水表类型" min-width="160" align="center" />
-              <el-table-column property="payerPhone" label="缴费人手机号" min-width="160" align="center" />
-              <el-table-column property="rechargeType" label="交易方式" min-width="160" align="center" />
-              <el-table-column property="rechargeAmount" label="充值金额/元" min-width="160" align="center" />
-              <el-table-column property="oldBalance" label="充值前余额/元" min-width="160" align="center" />
-              <el-table-column property="newBalance" label="充值后余额/元" min-width="160" align="center" />
-              <el-table-column property="createTime" label="充值时间" min-width="200" align="center" />
+              <el-table-column property="meterType" label="水表类型" min-width="100" align="center" />
+              <el-table-column property="payerPhone" label="缴费人手机号" min-width="100" align="center" />
+              <el-table-column property="rechargeType" label="交易方式" min-width="100" align="center" />
+              <el-table-column property="rechargeAmount" label="充值金额/元" min-width="100" align="center" />
+              <el-table-column property="oldBalance" label="充值前余额/元" min-width="100" align="center" />
+              <el-table-column property="newBalance" label="充值后余额/元" min-width="100" align="center" />
+              <el-table-column property="createTime" label="充值时间" min-width="100" align="center" />
             </el-table>
           </div>
         </div>

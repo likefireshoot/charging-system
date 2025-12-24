@@ -114,38 +114,33 @@
               @selection-change="handleSelectionChange"
               id="change-record-table"
             >
-              <el-table-column type="selection" :selectable="selectable" min-width="55" align="center" fixed="left" />
+              <el-table-column type="selection" :selectable="selectable" min-width="40" align="center" fixed="left" />
               <!-- <el-table-column property="theId" label="序号" width="100" align="center" fixed="left" /> -->
-              <el-table-column property="userId" label="用户号" min-width="100" align="center" fixed="left" />
-              <el-table-column property="userName" label="用户名称" min-width="160" align="center" />
-              <el-table-column property="userAddr" label="用户地址" min-width="200" align="center" />
-              <el-table-column property="regionName" label="所属区域" min-width="200" align="center" />
+              <el-table-column property="userId" label="用户号" min-width="50" align="center" fixed="left" />
+              <el-table-column property="userName" label="用户名称" min-width="70" align="center" />
+              <el-table-column property="userAddr" label="用户地址" min-width="100" align="center" />
+              <el-table-column property="regionName" label="所属区域" min-width="80" align="center" />
               <!-- <el-table-column property="companyName" label="所属水厂" width="240" align="center" /> -->
-              <el-table-column property="userPhone" label="联系电话" min-width="180" align="center" />
-              <el-table-column property="oldMeterCode" label="旧表号" min-width="200" align="center" />
+              <el-table-column property="userPhone" label="联系电话" min-width="100" align="center" />
+              <el-table-column property="oldMeterCode" label="旧表号" min-width="100" align="center" />
               <!-- <el-table-column property="oldImei" label="旧IMEI号" width="240" align="center" /> -->
-              <el-table-column property="oldMeterType" label="旧表类型" min-width="200" align="center" />
+              <el-table-column property="oldMeterType" label="旧表类型" min-width="70" align="center" />
               <!-- <el-table-column property="bef_replace_meter_type" label="旧表价格类型" width="120" align="center" /> -->
-              <el-table-column property="newMeterCode" label="新表号" min-width="200" align="center" />
+              <el-table-column property="newMeterCode" label="新表号" min-width="100" align="center" />
               <!-- <el-table-column property="newImei" label="新IMEI号" width="240" align="center" /> -->
-              <el-table-column property="newMeterType" label="新表类型" min-width="200" align="center" />
+              <el-table-column property="newMeterType" label="新表类型" min-width="70" align="center" />
               <!-- <el-table-column property="af_replace_meter_price_type" label="新表价格类型" width="120" align="center" /> -->
-              <el-table-column property="createTime" label="换表日期" min-width="250" align="center" />
-              <el-table-column property="createTime" label="换表日期" min-width="250" align="center" />
+              <el-table-column property="createTime" label="换表日期" min-width="100" align="center" />
+              <el-table-column property="createTime" label="换表日期" min-width="100" align="center" />
 
               <el-table-column label="操作" width="150" align="center">
-                  <template #default="{ row }">
-                    <!-- 撤回按钮 -->
-                    <el-button
-                      size="small"
-                      :type="row.isWithdraw === 1 ? 'info' : 'success'"
-                      :disabled="row.isWithdraw === 1"
-                      @click="withdraw(row.meterChangeRecordId)"
-                    >
-                      {{ row.isWithdraw === 1 ? '已撤回' : '撤回' }}
-                    </el-button>
-                  </template>
-                </el-table-column>
+                <template #default="{ row }">
+                  <!-- 撤回按钮 -->
+                  <el-button size="small" :type="row.isWithdraw === 1 ? 'info' : 'success'" :disabled="row.isWithdraw === 1" @click="withdraw(row.meterChangeRecordId)">
+                    {{ row.isWithdraw === 1 ? "已撤回" : "撤回" }}
+                  </el-button>
+                </template>
+              </el-table-column>
             </el-table>
           </div>
         </div>
@@ -221,9 +216,9 @@ export default {
     this.getRegionData();
   },
   methods: {
-    withdraw(meterChangeRecordId){
-      console.log(meterChangeRecordId)
-      let url = `/userManage/meterRead/withdrawChangeMeter/`+meterChangeRecordId; // 所属水厂ID
+    withdraw(meterChangeRecordId) {
+      console.log(meterChangeRecordId);
+      let url = `/userManage/meterRead/withdrawChangeMeter/` + meterChangeRecordId; // 所属水厂ID
       service
         .get(url)
         .then((res) => {
@@ -672,8 +667,8 @@ export default {
 
 .search-input {
   display: flex;
-  justify-content: flex-start;
   justify-content: center; /* 确保子元素在父容器中垂直居中 */
+  /* align-items: center;  */
   flex-direction: column;
   width: 12%;
   height: 100%;
@@ -683,6 +678,8 @@ export default {
 .search-input > span {
   font-size: 14px;
   margin-bottom: 5px;
+  white-space: nowrap;
+  /* text-align: center; */
 }
 
 .time-input {
