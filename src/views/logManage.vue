@@ -164,9 +164,9 @@ export default {
         operate_type: 9,
         operate_time: 12,
         user_name: 6,
-        biao_hao: 12,
+        biao_hao: 10,
         imei: 12,
-        operate_content: 18,
+        operate_content: 22,
         company: 9,
       };
     },
