@@ -42,7 +42,7 @@
             <span>交易笔数</span>
             <div class="message">
               <span style="font-size: 24px; margin-bottom: 20px">{{ trade_data.totalNumber }}</span>
-              <span style="margin-bottom: 20px; font-family: 'Microsoft YaHei'">比</span>
+              <span style="margin-bottom: 20px; font-family: 'Microsoft YaHei'">笔</span>
             </div>
           </div>
           <img src="@/assets/baobiao/icon1.png" alt="" style="width: 60px; height: 60px; margin-right: 60px" />
@@ -57,7 +57,7 @@
             <span>交易笔数</span>
             <div class="message">
               <span style="font-size: 24px; margin-bottom: 20px">{{ trade_data.cashNumber }}</span>
-              <span style="margin-bottom: 20px; font-family: 'Microsoft YaHei'">比</span>
+              <span style="margin-bottom: 20px; font-family: 'Microsoft YaHei'">笔</span>
             </div>
           </div>
           <img src="@/assets/baobiao/icon2.png" alt="" style="width: 60px; height: 60px; margin-right: 60px" />
@@ -72,7 +72,7 @@
             <span>交易笔数</span>
             <div class="message">
               <span style="font-size: 24px; margin-bottom: 20px">{{ trade_data.weChatNumber }}</span>
-              <span style="margin-bottom: 20px">比</span>
+              <span style="margin-bottom: 20px">笔</span>
             </div>
           </div>
           <img src="@/assets/baobiao/icon4.png" alt="" style="width: 60px; height: 60px; margin-right: 60px" />
@@ -87,7 +87,7 @@
             <span>交易笔数</span>
             <div class="message">
               <span style="font-size: 24px; margin-bottom: 20px">{{ trade_data.alipayNumber }}</span>
-              <span style="margin-bottom: 20px; font-family: 'Microsoft YaHei'">比</span>
+              <span style="margin-bottom: 20px; font-family: 'Microsoft YaHei'">笔</span>
             </div>
           </div>
           <img src="@/assets/baobiao/icon3.png" alt="" style="width: 60px; height: 60px; margin-right: 60px" />
