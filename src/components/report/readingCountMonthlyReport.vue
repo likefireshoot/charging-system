@@ -41,12 +41,10 @@
       <div class="baobiao-chart">
         <div class="month-report">
           <div class="month-report-title">
-            <span style="font-size: 16px; margin-top: 10px; margin-bottom: 5px">{{currentName}}月报表统计（{{ params.month }}）
+            <span style="font-size: 16px; margin-top: 10px; margin-bottom: 5px"
+              >{{ currentName }}月报表统计（{{ params.month }}）
 
-              
-               <a href="javascript:;" style="font-size: 14px; margin-left: 0px;color: #000;" @click="exportYearChartPNG(monthchart,+currentName+'月报表统计')">(导出)</a>
-
-
+              <a href="javascript:;" style="font-size: 14px; margin-left: 0px; color: #000" @click="exportYearChartPNG(monthchart, +currentName + '月报表统计')">(导出)</a>
             </span>
             <div class="flex-container">
               <div style="width: 4px; height: 4px; background-color: #46b87d; margin-right: 5px"></div>
@@ -59,12 +57,10 @@
         </div>
         <div class="month-huanbi">
           <div class="month-huanbi-title">
-            <span style="font-size: 16px; margin-top: 10px; margin-bottom: 5px">{{currentName}}月报表统计环比（{{ params.month }}）
+            <span style="font-size: 16px; margin-top: 10px; margin-bottom: 5px"
+              >{{ currentName }}月报表统计环比（{{ params.month }}）
 
-              
-               <a href="javascript:;" style="font-size: 14px; margin-left: 0px;color: #000;" @click="exportYearChartPNG(monthhuanbichart,currentName+'月报表统计')">(导出)</a>
-
-
+              <a href="javascript:;" style="font-size: 14px; margin-left: 0px; color: #000" @click="exportYearChartPNG(monthhuanbichart, currentName + '月报表统计')">(导出)</a>
             </span>
             <div class="flex-container">
               <div style="width: 4px; height: 4px; background-color: #46b87d; margin-right: 5px"></div>
@@ -77,12 +73,10 @@
         </div>
         <div class="month-tongbi">
           <div class="month-tongbi-title">
-            <span style="font-size: 16px; margin-top: 10px; margin-bottom: 5px">{{currentName}}月报表统计同比（{{ params.month }}）
+            <span style="font-size: 16px; margin-top: 10px; margin-bottom: 5px"
+              >{{ currentName }}月报表统计同比（{{ params.month }}）
 
-              
-               <a href="javascript:;" style="font-size: 14px; margin-left: 0px;color: #000;" @click="exportYearChartPNG(monthtongbichart,currentName+'月报表统计同比')">(导出)</a>
-
-
+              <a href="javascript:;" style="font-size: 14px; margin-left: 0px; color: #000" @click="exportYearChartPNG(monthtongbichart, currentName + '月报表统计同比')">(导出)</a>
             </span>
             <div class="flex-container">
               <div style="width: 4px; height: 4px; background-color: #46b87d; margin-right: 5px"></div>
@@ -103,7 +97,7 @@ import * as echarts from "echarts";
 import { markRaw } from "vue";
 import service from "@/api/request";
 import { ElMessage } from "element-plus";
-import {exportYearChartPNG} from "@/api/otherapi/other.js";
+import { exportYearChartPNG } from "@/api/otherapi/other.js";
 export default {
   data() {
     const now = new Date();
@@ -173,13 +167,13 @@ export default {
             },
           },
         ],
-           // ⭐⭐⭐⭐ 关键：启用静态 label ⭐⭐⭐⭐
+        // ⭐⭐⭐⭐ 关键：启用静态 label ⭐⭐⭐⭐
         label: {
           show: true,
           position: "top",
           color: "#333",
           fontSize: 12,
-        }
+        },
       },
       monthchartResizeObserver: null,
       monthhuanbichart: null,
@@ -350,17 +344,17 @@ export default {
       monthtongbichartResizeObserver: null,
       selectReportTypeList: [
         {
-          "label": "用水记录报表",
-          "key": 1
+          label: "用水记录报表",
+          key: 1,
         },
         {
-          "label": "扣费记录报表",
-          "key": 2
-        }
+          label: "扣费记录报表",
+          key: 2,
+        },
       ],
       currentReportTye: 1,
       currentName: "用水",
-      currentUnit: "吨"
+      currentUnit: "吨",
     };
   },
   watch: {
@@ -368,7 +362,6 @@ export default {
       this.params.region = "";
       this.getRegionData();
     },
-
   },
   mounted() {
     this.getCompanyList();
@@ -389,46 +382,97 @@ export default {
       };
     },
     monthChart() {
-      this.monthchart = markRaw(echarts.init(document.getElementById("month")));
-      this.monthchart.setOption(this.monthchart_option);
+      // 使用 nextTick 确保 DOM 已经渲染完成，容器有正确的尺寸
+      this.$nextTick(() => {
+        const chartDom = document.getElementById("month");
+        if (!chartDom) return;
 
-      // 创建 ResizeObserver 实例来监听 monthshouyi div 大小变化
-      this.monthchartResizeObserver = new ResizeObserver(
-        this.debounce(() => {
-          this.monthchart.resize(); // 当大小变化时，调用 resize 来调整图表的尺寸
-        }, 200)
-      ); // 200 毫秒的防抖延时
+        // 如果图表已存在，先销毁
+        if (this.monthchart) {
+          this.monthchart.dispose();
+        }
 
-      // 开始监听 monthshouyi div 的大小变化
-      this.monthchartResizeObserver.observe(document.getElementById("month"));
+        this.monthchart = markRaw(echarts.init(chartDom));
+        this.monthchart.setOption(this.monthchart_option);
+
+        // 创建 ResizeObserver 实例来监听图表容器大小变化
+        if (this.monthchartResizeObserver) {
+          this.monthchartResizeObserver.disconnect();
+        }
+
+        this.monthchartResizeObserver = new ResizeObserver(
+          this.debounce(() => {
+            if (this.monthchart && !this.monthchart.isDisposed()) {
+              this.monthchart.resize(); // 当大小变化时，调用 resize 来调整图表的尺寸
+            }
+          }, 200)
+        ); // 200 毫秒的防抖延时
+
+        // 开始监听图表容器的大小变化
+        this.monthchartResizeObserver.observe(chartDom);
+      });
     },
     monthHuanbiChart() {
-      this.monthhuanbichart = markRaw(echarts.init(document.getElementById("month-huanbi")));
-      this.monthhuanbichart.setOption(this.monthhuanbichart_option);
+      // 使用 nextTick 确保 DOM 已经渲染完成，容器有正确的尺寸
+      this.$nextTick(() => {
+        const chartDom = document.getElementById("month-huanbi");
+        if (!chartDom) return;
 
-      // 创建 ResizeObserver 实例来监听 monthshouyi div 大小变化
-      this.monthhuanbichartResizeObserver = new ResizeObserver(
-        this.debounce(() => {
-          this.monthhuanbichart.resize(); // 当大小变化时，调用 resize 来调整图表的尺寸
-        }, 200)
-      ); // 200 毫秒的防抖延时
+        // 如果图表已存在，先销毁
+        if (this.monthhuanbichart) {
+          this.monthhuanbichart.dispose();
+        }
 
-      // 开始监听 monthshouyi div 的大小变化
-      this.monthhuanbichartResizeObserver.observe(document.getElementById("month-huanbi"));
+        this.monthhuanbichart = markRaw(echarts.init(chartDom));
+        this.monthhuanbichart.setOption(this.monthhuanbichart_option);
+
+        // 创建 ResizeObserver 实例来监听图表容器大小变化
+        if (this.monthhuanbichartResizeObserver) {
+          this.monthhuanbichartResizeObserver.disconnect();
+        }
+
+        this.monthhuanbichartResizeObserver = new ResizeObserver(
+          this.debounce(() => {
+            if (this.monthhuanbichart && !this.monthhuanbichart.isDisposed()) {
+              this.monthhuanbichart.resize(); // 当大小变化时，调用 resize 来调整图表的尺寸
+            }
+          }, 200)
+        ); // 200 毫秒的防抖延时
+
+        // 开始监听图表容器的大小变化
+        this.monthhuanbichartResizeObserver.observe(chartDom);
+      });
     },
     monthTongbiChart() {
-      this.monthtongbichart = markRaw(echarts.init(document.getElementById("month-tongbi")));
-      this.monthtongbichart.setOption(this.monthtongbichart_option);
+      // 使用 nextTick 确保 DOM 已经渲染完成，容器有正确的尺寸
+      this.$nextTick(() => {
+        const chartDom = document.getElementById("month-tongbi");
+        if (!chartDom) return;
 
-      // 创建 ResizeObserver 实例来监听 monthshouyi div 大小变化
-      this.monthtongbichartResizeObserver = new ResizeObserver(
-        this.debounce(() => {
-          this.monthtongbichart.resize(); // 当大小变化时，调用 resize 来调整图表的尺寸
-        }, 200)
-      ); // 200 毫秒的防抖延时
+        // 如果图表已存在，先销毁
+        if (this.monthtongbichart) {
+          this.monthtongbichart.dispose();
+        }
 
-      // 开始监听 monthshouyi div 的大小变化
-      this.monthtongbichartResizeObserver.observe(document.getElementById("month-tongbi"));
+        this.monthtongbichart = markRaw(echarts.init(chartDom));
+        this.monthtongbichart.setOption(this.monthtongbichart_option);
+
+        // 创建 ResizeObserver 实例来监听图表容器大小变化
+        if (this.monthtongbichartResizeObserver) {
+          this.monthtongbichartResizeObserver.disconnect();
+        }
+
+        this.monthtongbichartResizeObserver = new ResizeObserver(
+          this.debounce(() => {
+            if (this.monthtongbichart && !this.monthtongbichart.isDisposed()) {
+              this.monthtongbichart.resize(); // 当大小变化时，调用 resize 来调整图表的尺寸
+            }
+          }, 200)
+        ); // 200 毫秒的防抖延时
+
+        // 开始监听图表容器的大小变化
+        this.monthtongbichartResizeObserver.observe(chartDom);
+      });
     },
     beforeUnmount() {
       if (this.monthchartResizeObserver) {
@@ -607,14 +651,15 @@ export default {
       this.params.company = null;
     },
     renewType() {
-      if (this.currentReportTye == 1) {//跟新标签
-        this.currentName = "用水"
-        this.currentUnit = "吨"
+      if (this.currentReportTye == 1) {
+        //跟新标签
+        this.currentName = "用水";
+        this.currentUnit = "吨";
       } else if (this.currentReportTye == 2) {
-        this.currentName = "扣费"
-        this.currentUnit = "元"
+        this.currentName = "扣费";
+        this.currentUnit = "元";
       }
-    }
+    },
   },
 };
 </script>
@@ -649,10 +694,13 @@ export default {
   width: 100%;
   height: 98%;
   padding: 0px 20px;
+  box-sizing: border-box;
+  overflow: hidden; /* 防止内容溢出 */
 }
 
 .baobiao-container > * {
   width: 99.3%;
+  box-sizing: border-box;
 }
 
 .search-box {
@@ -795,7 +843,9 @@ export default {
   justify-content: space-between;
   flex-direction: column;
   height: 100%;
-  flex-grow: 1;
+  flex: 1; /* 使用 flex: 1 替代 flex-grow: 1 */
+  min-width: 0; /* 允许 flex 子元素正确收缩 */
+  box-sizing: border-box;
 }
 
 .month-report,
@@ -808,6 +858,8 @@ export default {
   display: flex;
   flex-direction: column;
   padding: 0 10px;
+  box-sizing: border-box;
+  min-width: 0; /* 允许 flex 子元素正确收缩 */
 }
 
 .month-report-title,
@@ -817,6 +869,8 @@ export default {
   height: 100%;
   display: flex;
   flex-direction: column;
+  min-width: 0; /* 允许 flex 子元素正确收缩 */
+  box-sizing: border-box;
 }
 
 .flex-container {
@@ -831,7 +885,10 @@ export default {
 .month-tongbi-chart {
   height: 100%;
   width: 100%;
+  min-width: 0; /* 关键：允许 flex 子元素正确收缩，防止宽度计算问题 */
   margin-bottom: 10px;
-  overflow-x: auto;
+  box-sizing: border-box;
+  overflow: hidden; /* 改为 hidden，避免 overflow-x: auto 导致的宽度计算问题 */
+  position: relative; /* 确保容器定位正确 */
 }
 </style>
