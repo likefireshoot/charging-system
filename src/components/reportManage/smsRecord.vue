@@ -457,7 +457,7 @@ export default {
   flex-direction: column;
   align-content: center;
   justify-content: center;
-  width: 94%;
+  width: 100%;
   height: 98%;
   padding: 0px 20px;
 }
@@ -516,6 +516,7 @@ export default {
   height: 100%;
   align-items: center;
   margin-left: 100px;
+  margin-right: 30px;
 }
 
 .buttons > * {

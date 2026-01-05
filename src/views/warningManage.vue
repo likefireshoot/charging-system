@@ -781,6 +781,7 @@ export default {
   align-items: center;
   position: absolute;
   right: 20px;
+  margin-right: 30px;
 }
 
 .buttons > * {

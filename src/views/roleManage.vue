@@ -752,6 +752,7 @@ export default {
   height: 100%;
   align-items: center;
   margin-left: 100px;
+  margin-right: 30px;
 }
 
 .buttons > * {
