@@ -89,7 +89,7 @@ export default {
   data() {
     return {
       addData: {
-        companyId: null, // 新增水厂字段
+        companyId: JSON.parse(sessionStorage.getItem("userData")).companyId, // 新增水厂字段
         //regionName: "",
         userId: "",
         userName: "",
