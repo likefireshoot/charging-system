@@ -851,14 +851,17 @@ export default {
           ElMessage.error(error);
         });
     },
-    clear() {
+    clear(isSearch) {
       this.params.priceName = null;
       this.params.priceId = null;
       this.params.company = null;
       this.params.companyId = null;
+      if (typeof isSearch != 'number' || isNaN(isSearch)) {//如果不是数字就搜索
+        this.getPriceData();
+      }
     },
     reflush() {
-      this.clear();
+      this.clear(1);
       this.params.pageNo = 1;
       this.params.pageSize = 50;
       let params = { priceId: null, priceName: null, pageNo: 1, pageSize: 50 };

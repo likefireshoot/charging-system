@@ -47,7 +47,8 @@
           <img src="@/assets/yonghu/icon13.png" alt="" style="margin-left: 8px" />
           <span style="font-size: 16px; margin-left: 8px; color: #5a5a5a">新增</span>
         </div> -->
-        <div class="delete-btn" style="margin-left: 5px" @click="delete_btn_click" v-if="staffPermissionIds.includes(6)">
+        <div class="delete-btn" style="margin-left: 5px" @click="delete_btn_click"
+          v-if="staffPermissionIds.includes(6)">
           <img src="@/assets/yonghu/icon4.png" alt="" style="margin-left: 8px" />
           <span style="font-size: 16px; margin-left: 8px; color: #5a5a5a">删除</span>
         </div>
@@ -55,31 +56,38 @@
           <img src="@/assets/yonghu/icon5.png" alt="" style="margin-left: 8px" />
           <span style="font-size: 16px; margin-left: 8px; color: #5a5a5a">命令下发</span>
         </div>
-        <div class="command-btn" style="margin-left: 5px; width: 110px" @click="valveOpen_dialogFormVisible = true" v-if="staffPermissionIds.includes(7)">
+        <div class="command-btn" style="margin-left: 5px; width: 110px" @click="valveOpen_dialogFormVisible = true"
+          v-if="staffPermissionIds.includes(7)">
           <img src="@/assets/yonghu/icon18.png" alt="" style="margin-left: 8px; margin-top: 3px" />
           <span style="font-size: 16px; margin-left: 8px; color: #5a5a5a">开阀控制</span>
         </div>
-        <div class="command-btn" style="margin-left: 5px; width: 110px" @click="valve_dialogFormVisible = true" v-if="staffPermissionIds.includes(8)">
+        <div class="command-btn" style="margin-left: 5px; width: 110px" @click="valve_dialogFormVisible = true"
+          v-if="staffPermissionIds.includes(8)">
           <img src="@/assets/yonghu/icon17.png" alt="" style="margin-left: 8px; margin-top: 3px" />
           <span style="font-size: 16px; margin-left: 8px; color: #5a5a5a">关阀控制</span>
         </div>
-        <div class="recharge-btn" style="margin-left: 5px; width: 110px" @click="change_balance_btn_click" v-if="staffPermissionIds.includes(9)">
+        <div class="recharge-btn" style="margin-left: 5px; width: 110px" @click="change_balance_btn_click"
+          v-if="staffPermissionIds.includes(9)">
           <img src="@/assets/yonghu/icon20.png" alt="" style="margin-left: 8px" />
           <span style="font-size: 16px; margin-left: 8px; color: #5a5a5a">余额调整</span>
         </div>
-        <div class="recharge-btn" style="margin-left: 5px" @click="recharge_btn_click" v-if="staffPermissionIds.includes(10)">
+        <div class="recharge-btn" style="margin-left: 5px" @click="recharge_btn_click"
+          v-if="staffPermissionIds.includes(10)">
           <img src="@/assets/yonghu/icon6.png" alt="" style="margin-left: 8px" />
           <span style="font-size: 16px; margin-left: 8px; color: #5a5a5a">充值</span>
         </div>
-        <div class="recharge-record-btn" style="margin-left: 5px; width: 110px" @click="recharge_record_btn_click" v-if="staffPermissionIds.includes(11)">
+        <div class="recharge-record-btn" style="margin-left: 5px; width: 110px" @click="recharge_record_btn_click"
+          v-if="staffPermissionIds.includes(11)">
           <img src="@/assets/yonghu/icon7.png" alt="" style="margin-left: 8px" />
           <span style="font-size: 16px; margin-left: 8px; color: #5a5a5a">充值记录</span>
         </div>
-        <div class="water-meter-btn" style="margin-left: 5px" @click="change_btn_click" v-if="staffPermissionIds.includes(13)">
+        <div class="water-meter-btn" style="margin-left: 5px" @click="change_btn_click"
+          v-if="staffPermissionIds.includes(13)">
           <img src="@/assets/yonghu/icon8.png" alt="" style="margin-left: 8px" />
           <span style="font-size: 16px; margin-left: 8px; color: #5a5a5a">换表</span>
         </div>
-        <div class="water-meter-record-btn" style="margin-left: 5px; width: 110px" @click="change_record_btn_click" v-if="staffPermissionIds.includes(14)">
+        <div class="water-meter-record-btn" style="margin-left: 5px; width: 110px" @click="change_record_btn_click"
+          v-if="staffPermissionIds.includes(14)">
           <img src="@/assets/yonghu/icon9.png" alt="" style="margin-left: 8px" />
           <span style="font-size: 16px; margin-left: 8px; color: #5a5a5a">换表记录</span>
         </div>
@@ -103,7 +111,8 @@
         <div class="export-in-btn" style="margin-left: 5px; width: 150px" @click="triggerCommonMeterImport">
           <img src="@/assets/yonghu/icon1.png" alt="" style="margin-left: 7px" />
           <span style="font-size: 16px; margin-left: 5px; color: #5a5a5a">普表用水量导入</span>
-          <input ref="commonMeterInput" type="file" accept=".xls,.xlsx" style="display: none" @change="common_meter_click" />
+          <input ref="commonMeterInput" type="file" accept=".xls,.xlsx" style="display: none"
+            @change="common_meter_click" />
         </div>
         <div class="export-in-btn" style="margin-left: 5px; width: 150px" @click="multi_edit_meter_price">
           <img src="@/assets/jiage/icon3.png" alt="" style="margin-left: 7px" />
@@ -117,19 +126,14 @@
       <div class="user-list">
         <div class="quyu-box">
           <el-input v-model="filterText" placeholder="请输入关键字检索" style="height: 32px; margin-bottom: 10px" />
-          <el-tree ref="treeRef" node-key="id" :data="quyu_data" :props="defaultProps" default-expand-all :filter-node-method="filterNode" @node-click="handleNodeClick" />
+          <el-tree ref="treeRef" node-key="id" :data="quyu_data" :props="defaultProps" default-expand-all
+            :filter-node-method="filterNode" @node-click="handleNodeClick" />
         </div>
         <div class="user-table">
-          <el-table
-            ref="multipleTableRef"
-            :data="yonghuData"
-            row-key="imei"
-            style="width: auto; height: 100%; table-layout: fixed; overflow-x: auto; overflow-y: auto"
-            border
-            :header-cell-style="{ background: '#46B97E', color: '#FFFFFF' }"
-            @selection-change="handleSelectionChange"
-            id="yonghu-table"
-          >
+          <el-table ref="multipleTableRef" :data="yonghuData" row-key="imei"
+            style="width: auto; height: 100%; table-layout: fixed; overflow-x: auto; overflow-y: auto" border
+            :header-cell-style="{ background: '#46B97E', color: '#FFFFFF' }" @selection-change="handleSelectionChange"
+            id="yonghu-table">
             <el-table-column type="selection" :selectable="selectable" min-width="40" align="center" fixed="left" />
             <!-- <el-table-column label="序号" width="160" align="center" fixed="left" #default="scope">
               {{ scope.$index + 1 + (currentPage - 1) * pageSize }}
@@ -137,15 +141,17 @@
             <el-table-column property="userId" label="用户号" min-width="50" align="center" fixed="left" />
             <el-table-column label="用户名称" min-width="70" align="center">
               <template #default="scope">
-                <span @click="handleUserInfo(scope.row)" style="color: #46b97e; display: block; width: 100%; text-align: center">{{ scope.row.userName }}</span>
+                <span @click="handleUserInfo(scope.row)"
+                  style="color: #46b97e; display: block; width: 100%; text-align: center">{{ scope.row.userName
+                  }}</span>
               </template>
             </el-table-column>
             <el-table-column property="meterCode" label="表号" min-width="100" align="center" />
             <el-table-column label="余额/元" min-width="70" align="center">
               <template #default="scope">
-                <span @click="handleYue(scope.row)" style="color: #46b97e; display: block; width: 100%; text-align: center">{{ scope.row.balance }}</span>
-              </template></el-table-column
-            >
+                <span @click="handleYue(scope.row)"
+                  style="color: #46b97e; display: block; width: 100%; text-align: center">{{ scope.row.balance }}</span>
+              </template></el-table-column>
             <el-table-column property="newReading" label="水表读数/吨" min-width="70" align="center" />
             <el-table-column property="valveStatus" label="阀门状态" min-width="70" align="center" />
             <el-table-column property="battery" label="电池电量" min-width="70" align="center" />
@@ -154,13 +160,17 @@
                 <div style="display: flex; align-items: center; justify-content: center">
                   <span>抄表时间</span>
                   <div style="display: flex; flex-direction: column; margin-left: 10px; border: none">
-                    <div :class="['asc-icon', { active: sortOrder === 'asc' }]" style="cursor: pointer; width: 12px; height: 12px; border: none" @click="ascClick" />
-                    <div :class="['desc-icon', { active: sortOrder === 'desc' }]" style="cursor: pointer; width: 12px; height: 12px; border: none" @click="descClick" />
+                    <div :class="['asc-icon', { active: sortOrder === 'asc' }]"
+                      style="cursor: pointer; width: 12px; height: 12px; border: none" @click="ascClick" />
+                    <div :class="['desc-icon', { active: sortOrder === 'desc' }]"
+                      style="cursor: pointer; width: 12px; height: 12px; border: none" @click="descClick" />
                   </div>
                 </div>
               </template>
               <template #default="scope">
-                <span @click="handleChaoBiaoTime(scope.row)" style="color: #46b97e; display: block; width: 100%; text-align: center">{{ scope.row.updateTime }}</span>
+                <span @click="handleChaoBiaoTime(scope.row)"
+                  style="color: #46b97e; display: block; width: 100%; text-align: center">{{ scope.row.updateTime
+                  }}</span>
               </template>
             </el-table-column>
             <!-- <el-table-column property="imei" label="IMEI号" width="280" align="center" /> -->
@@ -180,132 +190,98 @@
       </div>
       <div class="page-box">
         <div class="demo-pagination-block">
-          <el-pagination v-model:current-page="currentPage" v-model:page-size="pageSize" :page-sizes="[5, 10, 15]" layout="total, prev, pager, next, jumper" :total="total" />
+          <el-pagination v-model:current-page="currentPage" v-model:page-size="pageSize" :page-sizes="[5, 10, 15]"
+            layout="total, prev, pager, next, jumper" :total="total" />
         </div>
       </div>
     </div>
 
     <!-- 点击用户名称弹出框 -->
-    <userInfoVue
-      v-if="user_info_dialogFormVisible"
-      :user_info_dialogFormVisible="user_info_dialogFormVisible"
-      :quyu_data="quyu_data"
-      :data="multipleSelection[0]"
-      @close="closeUserInfoDialog"
-    ></userInfoVue>
+    <userInfoVue v-if="user_info_dialogFormVisible" :user_info_dialogFormVisible="user_info_dialogFormVisible"
+      :quyu_data="quyu_data" :data="multipleSelection[0]" @close="closeUserInfoDialog"></userInfoVue>
 
     <!-- 抄表记录弹出框 -->
-    <chabiaoRecord v-if="chaobiao_dialogFormVisible" :chaobiao_dialogFormVisible="chaobiao_dialogFormVisible" :data="multipleSelection[0]" @close="chaobiao_dialogFormVisible = false"></chabiaoRecord>
+    <chabiaoRecord v-if="chaobiao_dialogFormVisible" :chaobiao_dialogFormVisible="chaobiao_dialogFormVisible"
+      :data="multipleSelection[0]" @close="chaobiao_dialogFormVisible = false"></chabiaoRecord>
 
     <!-- 交易记录弹出框 -->
-    <transactionRecord v-if="transaction_dialogFormVisible" :transaction_dialogFormVisible="transaction_dialogFormVisible" :data="multipleSelection[0]" @close="closeTransaction"></transactionRecord>
+    <transactionRecord v-if="transaction_dialogFormVisible"
+      :transaction_dialogFormVisible="transaction_dialogFormVisible" :data="multipleSelection[0]"
+      @close="closeTransaction"></transactionRecord>
 
     <!-- 新增按钮弹出框 -->
-    <addVue v-if="add_dialogFormVisible" :add_dialogFormVisible="add_dialogFormVisible" :quyu_data="quyu_data" @close="closeAddDialog"></addVue>
+    <addVue v-if="add_dialogFormVisible" :add_dialogFormVisible="add_dialogFormVisible" :quyu_data="quyu_data"
+      @close="closeAddDialog"></addVue>
 
     <!-- 删除按钮弹出框 -->
-    <deleteVue v-if="delete_dialogFormVisible" :delete_dialogFormVisible="delete_dialogFormVisible" :data="multipleSelection" @close="closeDeleteDialog"></deleteVue>
+    <deleteVue v-if="delete_dialogFormVisible" :delete_dialogFormVisible="delete_dialogFormVisible"
+      :data="multipleSelection" @close="closeDeleteDialog"></deleteVue>
 
     <!-- 开阀控制弹出框 -->
-    <valueOpenVue v-if="valveOpen_dialogFormVisible" :valveOpen_dialogFormVisible="valveOpen_dialogFormVisible" :quyu_data="quyu_data" @close="closeValveOpenDialog"></valueOpenVue>
+    <valueOpenVue v-if="valveOpen_dialogFormVisible" :valveOpen_dialogFormVisible="valveOpen_dialogFormVisible"
+      :quyu_data="quyu_data" @close="closeValveOpenDialog"></valueOpenVue>
 
     <!-- 关阀控制弹出框 -->
-    <valveVue v-if="valve_dialogFormVisible" :valve_dialogFormVisible="valve_dialogFormVisible" :quyu_data="quyu_data" @close="closeValveDialog"></valveVue>
+    <valveVue v-if="valve_dialogFormVisible" :valve_dialogFormVisible="valve_dialogFormVisible" :quyu_data="quyu_data"
+      @close="closeValveDialog"></valveVue>
 
     <!-- 换表弹出框 -->
-    <changeVue v-if="change_dialogFormVisible" :change_dialogFormVisible="change_dialogFormVisible" :data="multipleSelection[0]" @close="closeChangeDialog"></changeVue>
+    <changeVue v-if="change_dialogFormVisible" :change_dialogFormVisible="change_dialogFormVisible"
+      :data="multipleSelection[0]" @close="closeChangeDialog"></changeVue>
 
     <!-- 换表记录弹出框 -->
-    <changeRecord
-      v-if="change_record_dialogFormVisible"
-      :change_record_dialogFormVisible="change_record_dialogFormVisible"
-      :quyu_data="quyu_data"
-      :data="multipleSelection[0]"
-      @close="closeChangeRecordDialog"
-    ></changeRecord>
+    <changeRecord v-if="change_record_dialogFormVisible"
+      :change_record_dialogFormVisible="change_record_dialogFormVisible" :quyu_data="quyu_data"
+      :data="multipleSelection[0]" @close="closeChangeRecordDialog"></changeRecord>
 
     <!-- 余额调整弹出框 -->
-    <changeBalanceVue
-      v-if="changeBalance_dialogFormVisible"
-      :changeBalance_dialogFormVisible="changeBalance_dialogFormVisible"
-      :data="multipleSelection[0]"
-      @close="closeChangeBalanceDialog"
-    ></changeBalanceVue>
+    <changeBalanceVue v-if="changeBalance_dialogFormVisible"
+      :changeBalance_dialogFormVisible="changeBalance_dialogFormVisible" :data="multipleSelection[0]"
+      @close="closeChangeBalanceDialog"></changeBalanceVue>
 
     <!-- 充值弹出框 -->
-    <rechargeVue v-if="recharge_dialogFormVisible" :recharge_dialogFormVisible="recharge_dialogFormVisible" :data="multipleSelection[0]" @close="closeRechargeDialog"></rechargeVue>
+    <rechargeVue v-if="recharge_dialogFormVisible" :recharge_dialogFormVisible="recharge_dialogFormVisible"
+      :data="multipleSelection[0]" @close="closeRechargeDialog"></rechargeVue>
 
     <!-- 充值记录弹出框 -->
-    <rechargeRecordVue
-      v-if="recharge_record_dialogFormVisible"
-      :recharge_record_dialogFormVisible="recharge_record_dialogFormVisible"
-      :quyu_data="quyu_data"
-      :data="multipleSelection[0]"
-      @close="closeRechargeRecordDialog"
-    ></rechargeRecordVue>
+    <rechargeRecordVue v-if="recharge_record_dialogFormVisible"
+      :recharge_record_dialogFormVisible="recharge_record_dialogFormVisible" :quyu_data="quyu_data"
+      :data="multipleSelection[0]" @close="closeRechargeRecordDialog"></rechargeRecordVue>
 
     <!-- 命令下发弹出框-太阳能 -->
-    <commandTaiYangNengVue
-      v-if="command_dialogFormVisible_taiyangneng"
-      :command_dialogFormVisible="command_dialogFormVisible_taiyangneng"
-      :commandType="commandType"
-      :data="multipleSelection[0]"
-      @close="closeCommandDialog"
-    ></commandTaiYangNengVue>
+    <commandTaiYangNengVue v-if="command_dialogFormVisible_taiyangneng"
+      :command_dialogFormVisible="command_dialogFormVisible_taiyangneng" :commandType="commandType"
+      :data="multipleSelection[0]" @close="closeCommandDialog"></commandTaiYangNengVue>
 
     <!-- 命令下发弹出框-信驰 -->
-    <commandXinchiVue
-      v-if="command_dialogFormVisible_xinchi"
-      :command_dialogFormVisible="command_dialogFormVisible_xinchi"
-      :commandType="commandType"
-      :data="multipleSelection[0]"
-      @close="closeCommandDialog"
-    ></commandXinchiVue>
+    <commandXinchiVue v-if="command_dialogFormVisible_xinchi"
+      :command_dialogFormVisible="command_dialogFormVisible_xinchi" :commandType="commandType"
+      :data="multipleSelection[0]" @close="closeCommandDialog"></commandXinchiVue>
 
     <!-- 命令下发弹出框-旧信驰 -->
-    <commandOldXinchi
-      v-if="command_dialogFormVisible_old_xinchi"
-      :command_dialogFormVisible="command_dialogFormVisible_old_xinchi"
-      :commandType="commandType"
-      :data="multipleSelection[0]"
-      @close="closeCommandDialog"
-    ></commandOldXinchi>
+    <commandOldXinchi v-if="command_dialogFormVisible_old_xinchi"
+      :command_dialogFormVisible="command_dialogFormVisible_old_xinchi" :commandType="commandType"
+      :data="multipleSelection[0]" @close="closeCommandDialog"></commandOldXinchi>
 
     <!-- 命令下发弹出框-集万讯 -->
-    <commandJiWanXun
-      v-if="command_dialogFormVisible_jiwanxun"
-      :command_dialogFormVisible="command_dialogFormVisible_jiwanxun"
-      :commandType="commandType"
-      :data="multipleSelection[0]"
-      @close="closeCommandDialog"
-    ></commandJiWanXun>
+    <commandJiWanXun v-if="command_dialogFormVisible_jiwanxun"
+      :command_dialogFormVisible="command_dialogFormVisible_jiwanxun" :commandType="commandType"
+      :data="multipleSelection[0]" @close="closeCommandDialog"></commandJiWanXun>
 
     <!-- 命令下发弹出框-圣鑫 -->
-    <commandShengXin
-      v-if="command_dialogFormVisible_shengxin"
-      :command_dialogFormVisible="command_dialogFormVisible_shengxin"
-      :commandType="commandType"
-      :data="multipleSelection[0]"
-      @close="closeCommandDialog"
-    ></commandShengXin>
+    <commandShengXin v-if="command_dialogFormVisible_shengxin"
+      :command_dialogFormVisible="command_dialogFormVisible_shengxin" :commandType="commandType"
+      :data="multipleSelection[0]" @close="closeCommandDialog"></commandShengXin>
 
     <!-- 命令下发弹出框-卓正 -->
-    <commandZhuoZheng
-      v-if="command_dialogFormVisible_zhuozheng"
-      :command_dialogFormVisible="command_dialogFormVisible_zhuozheng"
-      :commandType="commandType"
-      :data="multipleSelection[0]"
-      @close="closeCommandDialog"
-    ></commandZhuoZheng>
+    <commandZhuoZheng v-if="command_dialogFormVisible_zhuozheng"
+      :command_dialogFormVisible="command_dialogFormVisible_zhuozheng" :commandType="commandType"
+      :data="multipleSelection[0]" @close="closeCommandDialog"></commandZhuoZheng>
 
     <!-- 命令下发弹出框-千宝通 -->
-    <commandQianBaoTong
-      v-if="command_dialogFormVisible_qianbaotong"
-      :command_dialogFormVisible="command_dialogFormVisible_qianbaotong"
-      :commandType="commandType"
-      :data="multipleSelection[0]"
-      @close="closeCommandDialog"
-    ></commandQianBaoTong>
+    <commandQianBaoTong v-if="command_dialogFormVisible_qianbaotong"
+      :command_dialogFormVisible="command_dialogFormVisible_qianbaotong" :commandType="commandType"
+      :data="multipleSelection[0]" @close="closeCommandDialog"></commandQianBaoTong>
 
     <!-- 批量修改用户水价 加一个弹出框-->
     <!-- 弹出框 -->
@@ -918,7 +894,7 @@ export default {
         });
     },
     reflush() {
-      this.clear();
+      this.clear(1);//不搜
       this.filterText = "";
       this.$refs.treeRef.setCurrentKey(null);
       this.quyu_selected = null;
@@ -982,7 +958,8 @@ export default {
           ElMessage.error("获取区域数据失败");
         });
     },
-    clear() {
+    clear(isSearch) {
+      console.log(isSearch)
       this.param = {
         userName: "",
         userId: "",
@@ -998,6 +975,12 @@ export default {
         order: 0,
       };
       this.sortOrder = null; // 清除排序状态
+      if (typeof isSearch != 'number' || isNaN(isSearch)) {//如果不是数字就搜索
+        this.search();
+        this.currentPage = 1;//清楚页数信息
+      }
+
+
     },
     // 过滤掉值为空的参数
     filterNonEmptyParams(params) {
@@ -1309,14 +1292,17 @@ export default {
   width: 99.3%;
   background-color: #fff;
 }
+
 /* 自定义el-dialog的遮罩层背景色 */
 .el-overlay {
-  background: rgba(0, 0, 0, 0.5) !important; /* 半透明黑色 */
+  background: rgba(0, 0, 0, 0.5) !important;
+  /* 半透明黑色 */
 }
 
 /* 确保el-dialog弹出框本身不被覆盖 */
 .el-dialog__wrapper {
-  background: rgba(255, 255, 255, 0.9) !important; /* 半透明白色背景 */
+  background: rgba(255, 255, 255, 0.9) !important;
+  /* 半透明白色背景 */
 }
 
 .serach-box {
@@ -1339,7 +1325,7 @@ export default {
   margin-right: 20px;
 }
 
-.search-input > span {
+.search-input>span {
   font-size: 14px;
   margin-bottom: 5px;
 }
@@ -1349,7 +1335,7 @@ export default {
   width: 100%;
 }
 
-.time-input > * {
+.time-input>* {
   width: 50%;
   margin-right: 20px;
 }
@@ -1363,7 +1349,7 @@ export default {
   right: 20px;
 }
 
-.buttons > * {
+.buttons>* {
   width: 120px;
   margin-right: 30px;
 }
@@ -1412,7 +1398,7 @@ export default {
   /* 允许换行 */
 }
 
-.command-box > * {
+.command-box>* {
   margin-right: 15px;
 }
 
@@ -1476,18 +1462,18 @@ export default {
   margin-right: 20px;
 }
 
-.quyu-box > * {
+.quyu-box>* {
   width: 100%;
   margin-bottom: 5px;
 }
 
-.quyu-box > .el-tree {
+.quyu-box>.el-tree {
   height: 100%;
   width: 100%;
   align-items: center;
 }
 
-.quyu-box > .el-input ::placeholder {
+.quyu-box>.el-input ::placeholder {
   text-align: center;
 }
 
@@ -1587,7 +1573,7 @@ export default {
 <style lang="scss" scoped>
 :deep(.el-tree) {
   .is-current {
-    > .el-tree-node__content {
+    >.el-tree-node__content {
       background-color: var(--el-tree-node-hover-bg-color);
       color: white;
     }

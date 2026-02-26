@@ -36,7 +36,7 @@
           <span style="font-size: 16px; margin-top: 10px; margin-bottom: 5px"
             >近7天缴费总额
 
-            <a href="javascript:;" style="font-size: 14px; margin-left: 0px; color: #000" @click="exportYearChartPNG(weekchart, '图表数据')">(导出)</a>
+            <a href="javascript:;" style="font-size: 14px; margin-left: 0px; color: #000" @click="exportYearChartPNG(weekchart, '近7天缴费总额')">(导出)</a>
           </span>
           <div class="flex-container">
             <div style="width: 4px; height: 4px; background-color: #46b87d; margin-right: 5px"></div>
@@ -101,7 +101,7 @@
             >本月缴费情况
 
             <!-- <a href="javascript:;" style="font-size: 14px; margin-left: 20px;color: #1a73e8;" @click="exportYearChartPNG(monthchart,'图表数据')">导出PNG</a> -->
-            <a href="javascript:;" style="font-size: 14px; margin-left: 0px; color: #000" @click="exportYearChartPNG(monthchart, '图表数据')">(导出)</a>
+            <a href="javascript:;" style="font-size: 14px; margin-left: 0px; color: #000" @click="exportYearChartPNG(monthchart, '本月缴费情况')">(导出)</a>
           </span>
           <div class="flex-container">
             <div style="width: 4px; height: 4px; background-color: #46b87d; margin-right: 5px"></div>
@@ -115,7 +115,7 @@
           <span style="font-size: 16px; margin-top: 10px; margin-bottom: 5px"
             >本年度结算总额情况
             <!-- <a href="javascript:;" style="font-size: 14px; margin-left: 20px;color: #1a73e8;" @click="exportYearChartPNG(yearchart,'图表数据')">导出PNG</a> -->
-            <a href="javascript:;" style="font-size: 14px; margin-left: 0px; color: #000" @click="exportYearChartPNG(yearchart, '图表数据')">(导出)</a>
+            <a href="javascript:;" style="font-size: 14px; margin-left: 0px; color: #000" @click="exportYearChartPNG(yearchart, '本年度结算总额情况')">(导出)</a>
           </span>
 
           <div class="flex-container">

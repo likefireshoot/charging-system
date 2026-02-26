@@ -354,7 +354,7 @@ export default {
         });
     },
     reflush() {
-      this.clear();
+      this.clear(1);
       this.filterText = "";
       this.$refs.treeRef.setCurrentKey(null);
       this.quyu_selected = null;
@@ -423,7 +423,7 @@ export default {
           ElMessage.error("获取区域数据失败");
         });
     },
-    clear() {
+    clear(isSearch) {
       this.param = {
         userName: "",
         userId: "",
@@ -432,6 +432,11 @@ export default {
         companyId: null, // 所属水厂ID
         regionId: null, // 区域ID
       };
+      if (typeof isSearch != 'number' || isNaN(isSearch)) {//如果不是数字就搜索
+        this.search();
+        this.currentPage = 1;//清楚页数信息
+      }
+      
     },
     // 过滤掉值为空的参数
     filterNonEmptyParams(params) {
