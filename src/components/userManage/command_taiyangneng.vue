@@ -41,142 +41,278 @@
                 </div>
               </div>
               <div v-else>
-                <div class="set-content-container" v-if="node.label == '设置心跳上报间隔'">
+                <!-- 新增：设置心跳上报间隔 - 表单校验包裹 -->
+                <el-form 
+                  :model="params_set_tai" 
+                  :rules="heartIntervalRules" 
+                  ref="heartIntervalForm" 
+                  class="set-content-container"
+                  v-if="node.label == '设置心跳上报间隔'"
+                >
                   <div class="set-input">
                     <span>心跳上报间隔(秒)</span>
-                    <el-input v-model="params_set_tai.heartInterval"></el-input>
+                    <el-form-item prop="heartInterval" style="margin: 0;">
+                      <el-input v-model="params_set_tai.heartInterval"></el-input>
+                    </el-form-item>
                   </div>
-                </div>
-                <div class="set-content-container" v-if="node.label === '设置网络参数'">
+                </el-form>
+
+                <!-- 新增：设置网络参数 - 表单校验包裹 -->
+                <el-form 
+                  :model="params_set_tai.wangluo" 
+                  :rules="wangluoRules" 
+                  ref="wangluoForm" 
+                  class="set-content-container"
+                  v-if="node.label === '设置网络参数'"
+                >
                   <div class="set-input">
                     <span>IP地址</span>
-                    <el-input v-model="params_set_tai.wangluo.ip"></el-input>
+                    <el-form-item prop="ip" style="margin: 0;">
+                      <el-input v-model="params_set_tai.wangluo.ip"></el-input>
+                    </el-form-item>
                   </div>
                   <div class="set-input">
                     <span>端口号</span>
-                    <el-input v-model="params_set_tai.wangluo.port"></el-input>
+                    <el-form-item prop="port" style="margin: 0;">
+                      <el-input v-model="params_set_tai.wangluo.port"></el-input>
+                    </el-form-item>
                   </div>
-                </div>
-                <div class="set-content-container" v-if="node.label === '设置抄表配置'">
+                </el-form>
+
+                <!-- 新增：设置抄表配置 - 表单校验包裹 -->
+                <el-form 
+                  :model="params_set_tai.chaobiaoPeizhi" 
+                  :rules="chaobiaoPeizhiRules" 
+                  ref="chaobiaoPeizhiForm" 
+                  class="set-content-container"
+                  v-if="node.label === '设置抄表配置'"
+                >
                   <div class="set-input">
                     <span>上传方式</span>
-                    <el-select v-model="params_set_tai.chaobiaoPeizhi.way">
-                      <el-option label="历史上传" value="0"></el-option>
-                      <el-option label="实时上传" value="1"></el-option>
-                    </el-select>
+                    <el-form-item prop="way" style="margin: 0;">
+                      <el-select v-model="params_set_tai.chaobiaoPeizhi.way">
+                        <el-option label="历史上传" value="0"></el-option>
+                        <el-option label="实时上传" value="1"></el-option>
+                      </el-select>
+                    </el-form-item>
                   </div>
                   <div class="set-input" style="width: 100%; flex-direction: row; justify-content: flex-start">
                     <div style="width: 24%; display: flex; flex-direction: column; margin-right: 15px">
                       <span style="font-size: 14px; color: #747374; margin-bottom: 5px">抄表间隔(小时)</span>
-                      <el-input style="height: 35px; width: 100%" v-model="params_set_tai.chaobiaoPeizhi.chaobiaoHour"></el-input>
+                      <el-form-item prop="chaobiaoHour" style="margin: 0;">
+                        <el-input style="height: 35px; width: 100%" v-model="params_set_tai.chaobiaoPeizhi.chaobiaoHour"></el-input>
+                      </el-form-item>
                     </div>
                     <div style="width: 24%; display: flex; flex-direction: column; margin-right: 15px">
                       <span style="font-size: 14px; color: #747374; margin-bottom: 5px">抄表间隔(分钟)</span>
-                      <el-input style="height: 35px; width: 100%" v-model="params_set_tai.chaobiaoPeizhi.chaobiaoMinute"></el-input>
+                      <el-form-item prop="chaobiaoMinute" style="margin: 0;">
+                        <el-input style="height: 35px; width: 100%" v-model="params_set_tai.chaobiaoPeizhi.chaobiaoMinute"></el-input>
+                      </el-form-item>
                     </div>
                     <div style="width: 24%; display: flex; flex-direction: column; margin-right: 15px">
                       <span style="font-size: 14px; color: #747374; margin-bottom: 5px">上传间隔(天)</span>
-                      <el-input style="height: 35px; width: 100%" v-model="params_set_tai.chaobiaoPeizhi.uploadDate"></el-input>
+                      <el-form-item prop="uploadDate" style="margin: 0;">
+                        <el-input style="height: 35px; width: 100%" v-model="params_set_tai.chaobiaoPeizhi.uploadDate"></el-input>
+                      </el-form-item>
                     </div>
                     <div style="width: 24%; display: flex; flex-direction: column; margin-right: 15px">
                       <span style="font-size: 14px; color: #747374; margin-bottom: 5px">上传间隔(小时)</span>
-                      <el-input style="height: 35px; width: 100%" v-model="params_set_tai.chaobiaoPeizhi.uploadHour"></el-input>
+                      <el-form-item prop="uploadHour" style="margin: 0;">
+                        <el-input style="height: 35px; width: 100%" v-model="params_set_tai.chaobiaoPeizhi.uploadHour"></el-input>
+                      </el-form-item>
                     </div>
                   </div>
-                </div>
-                <div class="set-content-container" v-if="node.label === '设置阀门维护配置'">
+                </el-form>
+
+                <!-- 新增：设置阀门维护配置 - 表单校验包裹 -->
+                <el-form 
+                  :model="params_set_tai.famenWeihu" 
+                  :rules="famenWeihuRules" 
+                  ref="famenWeihuForm" 
+                  class="set-content-container"
+                  v-if="node.label === '设置阀门维护配置'"
+                >
                   <div class="set-input">
                     <span>月洗阀次数</span>
-                    <el-select v-model="params_set_tai.famenWeihu.count">
-                      <el-option label="1次" value="1"></el-option>
-                      <el-option label="2次" value="2"></el-option>
-                      <el-option label="3次" value="3"></el-option>
-                      <el-option label="4次" value="4"></el-option>
-                    </el-select>
+                    <el-form-item prop="count" style="margin: 0;">
+                      <el-select v-model="params_set_tai.famenWeihu.count">
+                        <el-option label="1次" value="1"></el-option>
+                        <el-option label="2次" value="2"></el-option>
+                        <el-option label="3次" value="3"></el-option>
+                        <el-option label="4次" value="4"></el-option>
+                      </el-select>
+                    </el-form-item>
                   </div>
                   <div style="width: 100%" class="set-input" v-if="params_set_tai.famenWeihu.count >= 1">
                     <span>第一次洗阀时间</span>
                     <div style="width: 100%; display: flex; justify-content: space-between">
-                      <el-input style="margin-right: 15px" v-model="params_set_tai.famenWeihu.first.day" placeholder="日"></el-input>
-                      <el-input style="margin-right: 15px" v-model="params_set_tai.famenWeihu.first.hour" placeholder="时"></el-input>
-                      <el-input style="margin-right: 15px" v-model="params_set_tai.famenWeihu.first.minute" placeholder="分"></el-input>
+                      <el-form-item prop="first.day" style="margin: 0; margin-right: 15px;">
+                        <el-input v-model="params_set_tai.famenWeihu.first.day" placeholder="日"></el-input>
+                      </el-form-item>
+                      <el-form-item prop="first.hour" style="margin: 0; margin-right: 15px;">
+                        <el-input v-model="params_set_tai.famenWeihu.first.hour" placeholder="时"></el-input>
+                      </el-form-item>
+                      <el-form-item prop="first.minute" style="margin: 0;">
+                        <el-input v-model="params_set_tai.famenWeihu.first.minute" placeholder="分"></el-input>
+                      </el-form-item>
                     </div>
                   </div>
                   <div style="width: 100%" class="set-input" v-if="params_set_tai.famenWeihu.count >= 2">
                     <span>第二次洗阀时间</span>
                     <div style="width: 100%; display: flex; justify-content: space-between">
-                      <el-input style="margin-right: 15px" v-model="params_set_tai.famenWeihu.second.day" placeholder="日"></el-input>
-                      <el-input style="margin-right: 15px" v-model="params_set_tai.famenWeihu.second.hour" placeholder="时"></el-input>
-                      <el-input style="margin-right: 15px" v-model="params_set_tai.famenWeihu.second.minute" placeholder="分"></el-input>
+                      <el-form-item prop="second.day" style="margin: 0; margin-right: 15px;">
+                        <el-input v-model="params_set_tai.famenWeihu.second.day" placeholder="日"></el-input>
+                      </el-form-item>
+                      <el-form-item prop="second.hour" style="margin: 0; margin-right: 15px;">
+                        <el-input v-model="params_set_tai.famenWeihu.second.hour" placeholder="时"></el-input>
+                      </el-form-item>
+                      <el-form-item prop="second.minute" style="margin: 0;">
+                        <el-input v-model="params_set_tai.famenWeihu.second.minute" placeholder="分"></el-input>
+                      </el-form-item>
                     </div>
                   </div>
                   <div style="width: 100%" class="set-input" v-if="params_set_tai.famenWeihu.count >= 3">
                     <span>第三次洗阀时间</span>
                     <div style="width: 100%; display: flex; justify-content: space-between">
-                      <el-input style="margin-right: 15px" v-model="params_set_tai.famenWeihu.third.day" placeholder="日"></el-input>
-                      <el-input style="margin-right: 15px" v-model="params_set_tai.famenWeihu.third.hour" placeholder="时"></el-input>
-                      <el-input style="margin-right: 15px" v-model="params_set_tai.famenWeihu.third.minute" placeholder="分"></el-input>
+                      <el-form-item prop="third.day" style="margin: 0; margin-right: 15px;">
+                        <el-input v-model="params_set_tai.famenWeihu.third.day" placeholder="日"></el-input>
+                      </el-form-item>
+                      <el-form-item prop="third.hour" style="margin: 0; margin-right: 15px;">
+                        <el-input v-model="params_set_tai.famenWeihu.third.hour" placeholder="时"></el-input>
+                      </el-form-item>
+                      <el-form-item prop="third.minute" style="margin: 0;">
+                        <el-input v-model="params_set_tai.famenWeihu.third.minute" placeholder="分"></el-input>
+                      </el-form-item>
                     </div>
                   </div>
                   <div style="width: 100%" class="set-input" v-if="params_set_tai.famenWeihu.count >= 4">
                     <span>第四次洗阀时间</span>
                     <div style="width: 100%; display: flex; justify-content: space-between">
-                      <el-input style="margin-right: 15px" v-model="params_set_tai.famenWeihu.fourth.day" placeholder="日"></el-input>
-                      <el-input style="margin-right: 15px" v-model="params_set_tai.famenWeihu.fourth.hour" placeholder="时"></el-input>
-                      <el-input style="margin-right: 15px" v-model="params_set_tai.famenWeihu.fourth.minute" placeholder="分"></el-input>
+                      <el-form-item prop="fourth.day" style="margin: 0; margin-right: 15px;">
+                        <el-input v-model="params_set_tai.famenWeihu.fourth.day" placeholder="日"></el-input>
+                      </el-form-item>
+                      <el-form-item prop="fourth.hour" style="margin: 0; margin-right: 15px;">
+                        <el-input v-model="params_set_tai.famenWeihu.fourth.hour" placeholder="时"></el-input>
+                      </el-form-item>
+                      <el-form-item prop="fourth.minute" style="margin: 0;">
+                        <el-input v-model="params_set_tai.famenWeihu.fourth.minute" placeholder="分"></el-input>
+                      </el-form-item>
                     </div>
                   </div>
-                </div>
-                <div class="set-content-container" v-if="node.label === '设置水表配置'">
+                </el-form>
+
+                <!-- 新增：设置水表配置 - 表单校验包裹 -->
+                <el-form 
+                  :model="params_set_tai" 
+                  :rules="beilvRules" 
+                  ref="beilvForm" 
+                  class="set-content-container"
+                  v-if="node.label === '设置水表配置'"
+                >
                   <div class="set-input">
                     <span>倍率</span>
-                    <el-select v-model="params_set_tai.beilv">
-                      <el-option label="0.1" value="0.1"></el-option>
-                      <el-option label="1" value="1"></el-option>
-                      <el-option label="10" value="10"></el-option>
-                      <el-option label="100" value="100"></el-option>
-                      <el-option label="1000" value="1000"></el-option>
-                    </el-select>
+                    <el-form-item prop="beilv" style="margin: 0;">
+                      <el-select v-model="params_set_tai.beilv">
+                        <el-option label="0.1" value="0.1"></el-option>
+                        <el-option label="1" value="1"></el-option>
+                        <el-option label="10" value="10"></el-option>
+                        <el-option label="100" value="100"></el-option>
+                        <el-option label="1000" value="1000"></el-option>
+                      </el-select>
+                    </el-form-item>
                   </div>
-                </div>
-                <div class="set-content-container" v-if="node.label === '设置读数'">
+                </el-form>
+
+                <!-- 新增：设置读数 - 表单校验包裹 -->
+                <el-form 
+                  :model="params_set_tai" 
+                  :rules="countRules" 
+                  ref="countForm" 
+                  class="set-content-container"
+                  v-if="node.label === '设置读数'"
+                >
                   <div class="set-input">
                     <span>读数</span>
-                    <el-input v-model="params_set_tai.count"></el-input>
+                    <el-form-item prop="count" style="margin: 0;">
+                      <el-input v-model="params_set_tai.count"></el-input>
+                    </el-form-item>
                   </div>
-                </div>
-                <div class="set-content-container" v-if="node.label === '阀门控制'">
+                </el-form>
+
+                <!-- 新增：阀门控制 - 表单校验包裹 -->
+                <el-form 
+                  :model="params_set_tai" 
+                  :rules="famenstateRules" 
+                  ref="famenstateForm" 
+                  class="set-content-container"
+                  v-if="node.label === '阀门控制'"
+                >
                   <div class="set-input">
                     <span>阀门状态</span>
-                    <el-select v-model="params_set_tai.famenstate">
-                      <el-option label="开阀" value="1"></el-option>
-                      <el-option label="关阀" value="0"></el-option>
-                    </el-select>
+                    <el-form-item prop="famenstate" style="margin: 0;">
+                      <el-select v-model="params_set_tai.famenstate">
+                        <el-option label="开阀" value="1"></el-option>
+                        <el-option label="关阀" value="0"></el-option>
+                      </el-select>
+                    </el-form-item>
                   </div>
-                </div>
-                <div class="set-content-container" v-if="node.label === '校时'">
+                </el-form>
+
+                <!-- 新增：校时 - 表单校验包裹 -->
+                <el-form 
+                  :model="params_set_tai.jiaoshi" 
+                  :rules="jiaoshiRules" 
+                  ref="jiaoshiForm" 
+                  class="set-content-container"
+                  v-if="node.label === '校时'"
+                >
                   <div class="set-input" style="width: 100%">
                     <span>校准的时间</span>
                     <div style="width: 100%; display: flex; justify-content: space-between">
-                      <el-input style="margin-right: 10px" v-model="params_set_tai.jiaoshi.year" placeholder="年"></el-input>
-                      <el-input style="margin-right: 10px" v-model="params_set_tai.jiaoshi.month" placeholder="月"></el-input>
-                      <el-input style="margin-right: 10px" v-model="params_set_tai.jiaoshi.day" placeholder="日"></el-input>
-                      <el-input style="margin-right: 10px" v-model="params_set_tai.jiaoshi.hour" placeholder="时"></el-input>
-                      <el-input style="margin-right: 10px" v-model="params_set_tai.jiaoshi.minute" placeholder="分"></el-input>
-                      <el-input style="margin-right: 10px" v-model="params_set_tai.jiaoshi.second" placeholder="秒"></el-input>
+                      <el-form-item prop="year" style="margin: 0; margin-right: 10px;">
+                        <el-input v-model="params_set_tai.jiaoshi.year" placeholder="年"></el-input>
+                      </el-form-item>
+                      <el-form-item prop="month" style="margin: 0; margin-right: 10px;">
+                        <el-input v-model="params_set_tai.jiaoshi.month" placeholder="月"></el-input>
+                      </el-form-item>
+                      <el-form-item prop="day" style="margin: 0; margin-right: 10px;">
+                        <el-input v-model="params_set_tai.jiaoshi.day" placeholder="日"></el-input>
+                      </el-form-item>
+                      <el-form-item prop="hour" style="margin: 0; margin-right: 10px;">
+                        <el-input v-model="params_set_tai.jiaoshi.hour" placeholder="时"></el-input>
+                      </el-form-item>
+                      <el-form-item prop="minute" style="margin: 0; margin-right: 10px;">
+                        <el-input v-model="params_set_tai.jiaoshi.minute" placeholder="分"></el-input>
+                      </el-form-item>
+                      <el-form-item prop="second" style="margin: 0;">
+                        <el-input v-model="params_set_tai.jiaoshi.second" placeholder="秒"></el-input>
+                      </el-form-item>
                     </div>
                   </div>
-                </div>
-                <div class="set-content-container" v-if="node.label === '设置关阀圈数'">
+                </el-form>
+
+                <!-- 新增：设置关阀圈数 - 表单校验包裹 -->
+                <el-form 
+                  :model="params_set_tai.guanfa" 
+                  :rules="guanfaRules" 
+                  ref="guanfaForm" 
+                  class="set-content-container"
+                  v-if="node.label === '设置关阀圈数'"
+                >
                   <div class="set-input">
                     <span>关阀圈数</span>
-                    <el-input v-model="params_set_tai.guanfa.count"></el-input>
+                    <el-form-item prop="count" style="margin: 0;">
+                      <el-input v-model="params_set_tai.guanfa.count"></el-input>
+                    </el-form-item>
                   </div>
                   <div class="set-input">
                     <span>系列号</span>
-                    <el-input v-model="params_set_tai.guanfa.xiliehao"></el-input>
+                    <el-form-item prop="xiliehao" style="margin: 0;">
+                      <el-input v-model="params_set_tai.guanfa.xiliehao"></el-input>
+                    </el-form-item>
                   </div>
-                </div>
+                </el-form>
+
                 <div class="set-content-container" v-if="node.label === '设备还原'">
                   <div class="set-input" style="width: 100%; height: 175px; justify-content: center; align-items: center">
                     <img src="@/assets/yonghu/0.png" alt="" style="width: auto; height: 75%" />
@@ -403,9 +539,152 @@ export default {
     },
   },
   data() {
+    // ========== 新增：校验函数 ==========
+    // 心跳上报间隔校验
+    const validateHeartInterval = (rule, value, callback) => {
+      if (value === null || value === undefined || value === "") {
+        callback(new Error("心跳上报间隔不能为空"));
+      } else if (!/^\d+$/.test(value) || Number(value) <= 0) {
+        callback(new Error("心跳上报间隔必须为正整数"));
+      } else {
+        callback();
+      }
+    };
+
+    // 网络参数-IP校验
+    const validateIp = (rule, value, callback) => {
+      if (value === "") {
+        callback(new Error("IP地址不能为空"));
+      } else if (!/^((25[0-5]|2[0-4]\d|[01]?\d\d?)\.){3}(25[0-5]|2[0-4]\d|[01]?\d\d?)$/.test(value)) {
+        callback(new Error("请输入合法的IP地址"));
+      } else {
+        callback();
+      }
+    };
+
+    // 网络参数-端口校验
+    const validatePort = (rule, value, callback) => {
+      if (value === "") {
+        callback(new Error("端口号不能为空"));
+      } else if (!/^\d+$/.test(value) || Number(value) < 1 || Number(value) > 65535) {
+        callback(new Error("端口号必须为1-65535的整数"));
+      } else {
+        callback();
+      }
+    };
+
+    // 抄表配置校验
+    const validateChaobiaoPeizhi = (rule, value, callback) => {
+      if (value === "" || value === undefined || value === null) {
+        callback(new Error(rule.field === 'way' ? "上传方式不能为空" : "该字段不能为空"));
+      } else if (['chaobiaoHour', 'chaobiaoMinute', 'uploadDate', 'uploadHour'].includes(rule.field) && (!/^\d+$/.test(value) || Number(value) < 0)) {
+        callback(new Error("该字段必须为非负整数"));
+      } else {
+        callback();
+      }
+    };
+
+    // 阀门维护配置校验
+    const validateFamenWeihu = (rule, value, callback) => {
+      // 次数校验
+      if (rule.field === 'count' && (value === "" || value === undefined)) {
+        callback(new Error("月洗阀次数不能为空"));
+      }
+      // 时间字段校验
+      else if (['first.day', 'first.hour', 'first.minute', 'second.day', 'second.hour', 'second.minute', 'third.day', 'third.hour', 'third.minute', 'fourth.day', 'fourth.hour', 'fourth.minute'].includes(rule.field)) {
+        const count = this.params_set_tai.famenWeihu.count;
+        const fieldMap = {
+          'first.day': { min:1, max:31, msg:"日必须为1-31的整数" },
+          'first.hour': { min:0, max:23, msg:"时必须为0-23的整数" },
+          'first.minute': { min:0, max:59, msg:"分必须为0-59的整数" },
+          'second.day': { min:1, max:31, msg:"日必须为1-31的整数" },
+          'second.hour': { min:0, max:23, msg:"时必须为0-23的整数" },
+          'second.minute': { min:0, max:59, msg:"分必须为0-59的整数" },
+          'third.day': { min:1, max:31, msg:"日必须为1-31的整数" },
+          'third.hour': { min:0, max:23, msg:"时必须为0-23的整数" },
+          'third.minute': { min:0, max:59, msg:"分必须为0-59的整数" },
+          'fourth.day': { min:1, max:31, msg:"日必须为1-31的整数" },
+          'fourth.hour': { min:0, max:23, msg:"时必须为0-23的整数" },
+          'fourth.minute': { min:0, max:59, msg:"分必须为0-59的整数" },
+        };
+        // 根据次数判断是否需要校验当前字段
+        const level = rule.field.split('.')[0];
+        const levelMap = { first:1, second:2, third:3, fourth:4 };
+        if (count >= levelMap[level] && (value === "" || value === undefined)) {
+          callback(new Error(`${level === 'first' ? '第一' : level === 'second' ? '第二' : level === 'third' ? '第三' : '第四'}次洗阀${rule.field.split('.')[1]}不能为空`));
+        } else if (count >= levelMap[level] && (!/^\d+$/.test(value) || Number(value) < fieldMap[rule.field].min || Number(value) > fieldMap[rule.field].max)) {
+          callback(new Error(fieldMap[rule.field].msg));
+        } else {
+          callback();
+        }
+      } else {
+        callback();
+      }
+    };
+
+    // 倍率校验
+    const validateBeilv = (rule, value, callback) => {
+      if (value === "") {
+        callback(new Error("倍率不能为空"));
+      } else {
+        callback();
+      }
+    };
+
+    // 读数校验
+    const validateCount = (rule, value, callback) => {
+      if (value === null || value === undefined || value === "") {
+        callback(new Error("读数不能为空"));
+      } else if (isNaN(value) || Number(value) <= 0) {
+        callback(new Error("读数必须为正数"));
+      } else {
+        callback();
+      }
+    };
+
+    // 阀门状态校验
+    const validateFamenstate = (rule, value, callback) => {
+      if (!value && value !== 0) {
+        callback(new Error("请选择阀门状态"));
+      } else {
+        callback();
+      }
+    };
+
+    // 校时参数校验
+    const validateJiaoshi = (rule, value, callback) => {
+      if (value === "") {
+        callback(new Error(`${rule.field === 'year' ? '年' : rule.field === 'month' ? '月' : rule.field === 'day' ? '日' : rule.field === 'hour' ? '时' : rule.field === 'minute' ? '分' : '秒'}不能为空`));
+      } else {
+        const rangeMap = {
+          year: { min:2000, max:2100, msg:"年必须为2000-2100的整数" },
+          month: { min:1, max:12, msg:"月必须为1-12的整数" },
+          day: { min:1, max:31, msg:"日必须为1-31的整数" },
+          hour: { min:0, max:23, msg:"时必须为0-23的整数" },
+          minute: { min:0, max:59, msg:"分必须为0-59的整数" },
+          second: { min:0, max:59, msg:"秒必须为0-59的整数" },
+        };
+        if (!/^\d+$/.test(value) || Number(value) < rangeMap[rule.field].min || Number(value) > rangeMap[rule.field].max) {
+          callback(new Error(rangeMap[rule.field].msg));
+        } else {
+          callback();
+        }
+      }
+    };
+
+    // 关阀圈数校验
+    const validateGuanfa = (rule, value, callback) => {
+      if (value === "") {
+        callback(new Error(rule.field === 'count' ? "关阀圈数不能为空" : "系列号不能为空"));
+      } else if (rule.field === 'count' && (!/^\d+$/.test(value) || Number(value) <= 0)) {
+        callback(new Error("关阀圈数必须为正整数"));
+      } else {
+        callback();
+      }
+    };
+
     return {
       commandFilterText: "",
-      //当前所选择到的子节点的信息
       node: {
         label: "",
         id: "",
@@ -421,110 +700,48 @@ export default {
           value: 1,
           label: "下发控制命令",
           children: [
-            // {
-            //   id: 3,
-            //   value: 3,
-            //   label: "设置心跳上报间隔",
-            // },
-            // {
-            //   id: 4,
-            //   value: 4,
-            //   label: "设置网络参数",
-            // },
-            // {
-            //   id: 5,
-            //   value: 5,
-            //   label: "设置抄表配置",
-            // },
-            // {
-            //   id: 6,
-            //   value: 6,
-            //   label: "设置阀门维护配置",
-            // },
-            // {
-            //   id: 7,
-            //   value: 7,
-            //   label: "设置水表配置",
-            // },
-            // {
-            //   id: 8,
-            //   value: 8,
-            //   label: "设置读数",
-            // },
+            {
+              id: 5,
+              value: 5,
+              label: "设置抄表配置",
+            },
+            {
+              id: 6,
+              value: 6,
+              label: "设置阀门维护配置",
+            },
+            {
+              id: 7,
+              value: 7,
+              label: "设置水表配置",
+            },
+            {
+              id: 8,
+              value: 8,
+              label: "设置读数",
+            },
             {
               id: 9,
               value: 9,
               label: "阀门控制",
             },
-            // {
-            //   id: 10,
-            //   value: 10,
-            //   label: "校时",
-            // },
-            // {
-            //   id: 11,
-            //   value: 11,
-            //   label: "设置关阀圈数",
-            // },
-            // {
-            //   id: 12,
-            //   value: 12,
-            //   label: "设备还原",
-            // },
+            {
+              id: 10,
+              value: 10,
+              label: "校时",
+            },
+            {
+              id: 11,
+              value: 11,
+              label: "设置关阀圈数",
+            },
+            {
+              id: 12,
+              value: 12,
+              label: "设备还原",
+            },
           ],
         },
-        //{
-        //   id: 2,
-        //   value: 2,
-        //   label: "下发获取命令",
-        //   children: [
-        //     {
-        //       id: 13,
-        //       value: 13,
-        //       label: "获取心跳上报间隔",
-        //     },
-        //     {
-        //       id: 14,
-        //       value: 14,
-        //       label: "获取网络参数",
-        //     },
-        //     {
-        //       id: 15,
-        //       value: 15,
-        //       label: "获取心跳数据",
-        //     },
-        //     {
-        //       id: 16,
-        //       value: 16,
-        //       label: "获取抄表配置",
-        //     },
-        //     {
-        //       id: 17,
-        //       value: 17,
-        //       label: "获取抄表数据",
-        //     },
-        //     {
-        //       id: 18,
-        //       value: 18,
-        //       label: "获取阀门状态",
-        //     },
-        //     {
-        //       id: 19,
-        //       value: 19,
-        //       label: "获取本地时间",
-        //     },
-        //     {
-        //       id: 20,
-        //       value: 20,
-        //       label: "获取阀门维护配置",
-        //     },
-        //     {
-        //       id: 21,
-        //       value: 21,
-        //       label: "获取设备状态",
-        //     },
-        //   ],
-        // },
       ],
       params_set_tai: {
         heartInterval: null,
@@ -650,6 +867,57 @@ export default {
         },
         reboot: "",
       },
+      // ========== 新增：校验规则 ==========
+      heartIntervalRules: {
+        heartInterval: [{ validator: validateHeartInterval, trigger: 'blur' }]
+      },
+      wangluoRules: {
+        ip: [{ validator: validateIp, trigger: 'blur' }],
+        port: [{ validator: validatePort, trigger: 'blur' }]
+      },
+      chaobiaoPeizhiRules: {
+        way: [{ validator: validateChaobiaoPeizhi, trigger: 'change' }],
+        chaobiaoHour: [{ validator: validateChaobiaoPeizhi, trigger: 'blur' }],
+        chaobiaoMinute: [{ validator: validateChaobiaoPeizhi, trigger: 'blur' }],
+        uploadDate: [{ validator: validateChaobiaoPeizhi, trigger: 'blur' }],
+        uploadHour: [{ validator: validateChaobiaoPeizhi, trigger: 'blur' }]
+      },
+      famenWeihuRules: {
+        count: [{ validator: validateFamenWeihu, trigger: 'change' }],
+        'first.day': [{ validator: validateFamenWeihu, trigger: 'blur' }],
+        'first.hour': [{ validator: validateFamenWeihu, trigger: 'blur' }],
+        'first.minute': [{ validator: validateFamenWeihu, trigger: 'blur' }],
+        'second.day': [{ validator: validateFamenWeihu, trigger: 'blur' }],
+        'second.hour': [{ validator: validateFamenWeihu, trigger: 'blur' }],
+        'second.minute': [{ validator: validateFamenWeihu, trigger: 'blur' }],
+        'third.day': [{ validator: validateFamenWeihu, trigger: 'blur' }],
+        'third.hour': [{ validator: validateFamenWeihu, trigger: 'blur' }],
+        'third.minute': [{ validator: validateFamenWeihu, trigger: 'blur' }],
+        'fourth.day': [{ validator: validateFamenWeihu, trigger: 'blur' }],
+        'fourth.hour': [{ validator: validateFamenWeihu, trigger: 'blur' }],
+        'fourth.minute': [{ validator: validateFamenWeihu, trigger: 'blur' }]
+      },
+      beilvRules: {
+        beilv: [{ validator: validateBeilv, trigger: 'change' }]
+      },
+      countRules: {
+        count: [{ validator: validateCount, trigger: 'blur' }]
+      },
+      famenstateRules: {
+        famenstate: [{ validator: validateFamenstate, trigger: 'change' }]
+      },
+      jiaoshiRules: {
+        year: [{ validator: validateJiaoshi, trigger: 'blur' }],
+        month: [{ validator: validateJiaoshi, trigger: 'blur' }],
+        day: [{ validator: validateJiaoshi, trigger: 'blur' }],
+        hour: [{ validator: validateJiaoshi, trigger: 'blur' }],
+        minute: [{ validator: validateJiaoshi, trigger: 'blur' }],
+        second: [{ validator: validateJiaoshi, trigger: 'blur' }]
+      },
+      guanfaRules: {
+        count: [{ validator: validateGuanfa, trigger: 'blur' }],
+        xiliehao: [{ validator: validateGuanfa, trigger: 'blur' }]
+      }
     };
   },
 
@@ -682,272 +950,297 @@ export default {
       this.node.label = "";
       this.$emit("close");
     },
-    /**
-     * 将年、月、日、时、分、秒转换为 YYYY-MM-DD HH:MM:SS 格式的字符串
-     */
     formatDateTime(year, month, day, hour, minute, second) {
-      // 补零函数，确保个位数前有0
       const padZero = (num) => num.toString().padStart(2, "0");
-      // 构建并返回格式化的日期时间字符串
       return `${year}-${padZero(month)}-${padZero(day)} ${padZero(hour)}:${padZero(minute)}:${padZero(second)}`;
     },
     commit_taiyangneng() {
+      // ========== 新增：表单校验逻辑 - 设置心跳上报间隔 ==========
       if (this.node.label === "设置心跳上报间隔") {
-        const imei = this.data.imei;
-        const formData = new FormData();
-        const intervalValue = parseInt(this.params_set_tai.heartInterval, 10);
-        console.log("intervalValue:", intervalValue);
-        formData.append("imei", imei);
-        formData.append("interval", intervalValue);
-        service
-          .post("/solarEnergy/waterMeterSetBeatInterval80H", formData)
-          .then((response) => {
-            if (response.code === 200) {
-              ElMessage.success("设置心跳上报间隔成功");
-            } else {
-              ElMessage.error(response.msg);
-            }
-          })
-          .catch((error) => {
-            ElMessage.error(error);
-          });
-      } else if (this.node.label === "设置网络参数") {
-        ElMessage.error("暂未开通");
-      } else if (this.node.label === "设置抄表配置") {
-        const imei = this.data.imei;
-        const uploadForm = this.params_set_tai.chaobiaoPeizhi.way;
-        const readHour = this.params_set_tai.chaobiaoPeizhi.chaobiaoHour;
-        const readMinute = this.params_set_tai.chaobiaoPeizhi.chaobiaoMinute;
-        const uploadDay = this.params_set_tai.chaobiaoPeizhi.uploadDate;
-        const uploadHour = this.params_set_tai.chaobiaoPeizhi.uploadHour;
-        if (uploadForm === "") {
-          ElMessage.error("请设置上传方式");
+        if (!this.$refs.heartIntervalForm) {
+          ElMessage.error('表单未加载完成，请稍后重试');
           return;
         }
-        if (readHour === null || readMinute === null) {
-          ElMessage.error("请设置抄表时间");
+        this.$refs.heartIntervalForm.validate((valid) => {
+          if (!valid) return;
+          // 原有业务逻辑（未改动）
+          const imei = this.data.imei;
+          const formData = new FormData();
+          const intervalValue = parseInt(this.params_set_tai.heartInterval, 10);
+          console.log("intervalValue:", intervalValue);
+          formData.append("imei", imei);
+          formData.append("interval", intervalValue);
+          service
+            .post("/solarEnergy/waterMeterSetBeatInterval80H", formData)
+            .then((response) => {
+              if (response.code === 200) {
+                ElMessage.success("设置心跳上报间隔成功");
+              } else {
+                ElMessage.error(response.msg);
+              }
+            })
+            .catch((error) => {
+              ElMessage.error(error);
+            });
+        });
+      } 
+      // ========== 新增：表单校验逻辑 - 设置网络参数 ==========
+      else if (this.node.label === "设置网络参数") {
+        if (!this.$refs.wangluoForm) {
+          ElMessage.error('表单未加载完成，请稍后重试');
           return;
         }
-        if (uploadDay === null || uploadHour === null) {
-          ElMessage.error("请设置上传时间");
+        this.$refs.wangluoForm.validate((valid) => {
+          if (!valid) return;
+          // 原有业务逻辑（未改动）
+          ElMessage.error("暂未开通");
+        });
+      } 
+      // ========== 新增：表单校验逻辑 - 设置抄表配置 ==========
+      else if (this.node.label === "设置抄表配置") {
+        if (!this.$refs.chaobiaoPeizhiForm) {
+          ElMessage.error('表单未加载完成，请稍后重试');
           return;
         }
-        service
-          .get(`/command/solarEnergy/solarEnergySetReadConfig?imei=${imei}&uploadForm=${uploadForm}&readHour=${readHour}&readMinute=${readMinute}&uploadDay=${uploadDay}&uploadHour=${uploadHour}`)
-          .then((response) => {
-            if (response.code === 200) {
-              ElMessage.success("设置抄表配置成功");
-            } else {
-              ElMessage.error(response.msg);
-            }
-          })
-          .catch((error) => {
-            ElMessage.error(error);
-          });
-      } else if (this.node.label === "设置阀门维护配置") {
-        const imei = this.data.imei;
-        const washingFrequency = this.params_set_tai.famenWeihu.count;
-        if (washingFrequency === "") {
-          ElMessage.error("请设置阀门维护次数");
+        this.$refs.chaobiaoPeizhiForm.validate((valid) => {
+          if (!valid) return;
+          // 原有业务逻辑（未改动）
+          const imei = this.data.imei;
+          const uploadForm = this.params_set_tai.chaobiaoPeizhi.way;
+          const readHour = this.params_set_tai.chaobiaoPeizhi.chaobiaoHour;
+          const readMinute = this.params_set_tai.chaobiaoPeizhi.chaobiaoMinute;
+          const uploadDay = this.params_set_tai.chaobiaoPeizhi.uploadDate;
+          const uploadHour = this.params_set_tai.chaobiaoPeizhi.uploadHour;
+          service
+            .get(`/command/solarEnergy/solarEnergySetReadConfig?imei=${imei}&uploadForm=${uploadForm}&readHour=${readHour}&readMinute=${readMinute}&uploadDay=${uploadDay}&uploadHour=${uploadHour}`)
+            .then((response) => {
+              if (response.code === 200) {
+                ElMessage.success("设置抄表配置成功");
+              } else {
+                ElMessage.error(response.msg);
+              }
+            })
+            .catch((error) => {
+              ElMessage.error(error);
+            });
+        });
+      } 
+      // ========== 新增：表单校验逻辑 - 设置阀门维护配置 ==========
+      else if (this.node.label === "设置阀门维护配置") {
+        if (!this.$refs.famenWeihuForm) {
+          ElMessage.error('表单未加载完成，请稍后重试');
           return;
         }
-        // 构建请求参数对象
-        const requestData = {
-          imei: imei,
-          washingFrequency: washingFrequency,
-        };
-        // 根据维护次数添加对应的时间设置
-        if (washingFrequency >= 1) {
-          requestData.firstWashingTime = {
-            day: this.params_set_tai.famenWeihu.first.day,
-            hour: this.params_set_tai.famenWeihu.first.hour,
-            minute: this.params_set_tai.famenWeihu.first.minute,
+        this.$refs.famenWeihuForm.validate((valid) => {
+          if (!valid) return;
+          // 原有业务逻辑（未改动）
+          const imei = this.data.imei;
+          const washingFrequency = this.params_set_tai.famenWeihu.count;
+          const requestData = {
+            imei: imei,
+            washingFrequency: washingFrequency,
           };
-          requestData.secondWashingTime = {
-            day: 0,
-            hour: 0,
-            minute: 0,
-          };
-          requestData.thirdWashingTime = {
-            day: 0,
-            hour: 0,
-            minute: 0,
-          };
-          requestData.fourthWashingTime = {
-            day: 0,
-            hour: 0,
-            minute: 0,
-          };
-        }
-        if (washingFrequency >= 2) {
-          requestData.secondWashingTime = {
-            day: this.params_set_tai.famenWeihu.second.day,
-            hour: this.params_set_tai.famenWeihu.second.hour,
-            minute: this.params_set_tai.famenWeihu.second.minute,
-          };
-          requestData.thirdWashingTime = {
-            day: 0,
-            hour: 0,
-            minute: 0,
-          };
-          requestData.fourthWashingTime = {
-            day: 0,
-            hour: 0,
-            minute: 0,
-          };
-        }
-        if (washingFrequency >= 3) {
-          requestData.thirdWashingTime = {
-            day: this.params_set_tai.famenWeihu.third.day,
-            hour: this.params_set_tai.famenWeihu.third.hour,
-            minute: this.params_set_tai.famenWeihu.third.minute,
-          };
-          requestData.fourthWashingTime = {
-            day: 0,
-            hour: 0,
-            minute: 0,
-          };
-        }
-        if (washingFrequency >= 4) {
-          requestData.fourthWashingTime = {
-            day: this.params_set_tai.famenWeihu.fourth.day,
-            hour: this.params_set_tai.famenWeihu.fourth.hour,
-            minute: this.params_set_tai.famenWeihu.fourth.minute,
-          };
-        }
-        if (requestData.washingFrequency == null) {
-          ElMessage.error("请设置阀门维护次数");
+          if (washingFrequency >= 1) {
+            requestData.firstWashingTime = {
+              day: this.params_set_tai.famenWeihu.first.day,
+              hour: this.params_set_tai.famenWeihu.first.hour,
+              minute: this.params_set_tai.famenWeihu.first.minute,
+            };
+            requestData.secondWashingTime = {
+              day: 0,
+              hour: 0,
+              minute: 0,
+            };
+            requestData.thirdWashingTime = {
+              day: 0,
+              hour: 0,
+              minute: 0,
+            };
+            requestData.fourthWashingTime = {
+              day: 0,
+              hour: 0,
+              minute: 0,
+            };
+          }
+          if (washingFrequency >= 2) {
+            requestData.secondWashingTime = {
+              day: this.params_set_tai.famenWeihu.second.day,
+              hour: this.params_set_tai.famenWeihu.second.hour,
+              minute: this.params_set_tai.famenWeihu.second.minute,
+            };
+            requestData.thirdWashingTime = {
+              day: 0,
+              hour: 0,
+              minute: 0,
+            };
+            requestData.fourthWashingTime = {
+              day: 0,
+              hour: 0,
+              minute: 0,
+            };
+          }
+          if (washingFrequency >= 3) {
+            requestData.thirdWashingTime = {
+              day: this.params_set_tai.famenWeihu.third.day,
+              hour: this.params_set_tai.famenWeihu.third.hour,
+              minute: this.params_set_tai.famenWeihu.third.minute,
+            };
+            requestData.fourthWashingTime = {
+              day: 0,
+              hour: 0,
+              minute: 0,
+            };
+          }
+          if (washingFrequency >= 4) {
+            requestData.fourthWashingTime = {
+              day: this.params_set_tai.famenWeihu.fourth.day,
+              hour: this.params_set_tai.famenWeihu.fourth.hour,
+              minute: this.params_set_tai.famenWeihu.fourth.minute,
+            };
+          }
+          service
+            .post("/command/solarEnergy/solarEnergySetMaintenance", requestData)
+            .then((response) => {
+              if (response.code === 200) {
+                ElMessage.success("设置阀门维护配置成功");
+              } else {
+                ElMessage.error(response.msg);
+              }
+            })
+            .catch((error) => {
+              ElMessage.error(error);
+            });
+        });
+      } 
+      // ========== 新增：表单校验逻辑 - 设置水表配置 ==========
+      else if (this.node.label === "设置水表配置") {
+        if (!this.$refs.beilvForm) {
+          ElMessage.error('表单未加载完成，请稍后重试');
           return;
         }
-        if (requestData.firstWashingTime.day === "" || requestData.firstWashingTime.hour === "" || requestData.firstWashingTime.minute === "") {
-          ElMessage.error("请设置第一次阀门维护时间");
+        this.$refs.beilvForm.validate((valid) => {
+          if (!valid) return;
+          // 原有业务逻辑（未改动）
+          const imei = this.data.imei;
+          const multiplier = this.params_set_tai.beilv;
+          service
+            .get(`/command/solarEnergy/solarEnergySetMultiplier?imei=${imei}&multiplier=${multiplier}`)
+            .then((response) => {
+              if (response.code === 200) {
+                ElMessage.success("设置水表配置成功");
+              } else {
+                ElMessage.error(response.msg);
+              }
+            })
+            .catch((error) => {
+              ElMessage.error(error);
+            });
+        });
+      } 
+      // ========== 新增：表单校验逻辑 - 设置读数 ==========
+      else if (this.node.label === "设置读数") {
+        if (!this.$refs.countForm) {
+          ElMessage.error('表单未加载完成，请稍后重试');
           return;
         }
-        if (requestData.secondWashingTime.day === "" || requestData.secondWashingTime.hour === "" || requestData.secondWashingTime.minute === "") {
-          ElMessage.error("请设置第二次阀门维护时间");
+        this.$refs.countForm.validate((valid) => {
+          if (!valid) return;
+          // 原有业务逻辑（未改动）
+          const imei = this.data.imei;
+          const read_count = this.params_set_tai.count;
+          service
+            .get(`/command/solarEnergy/solarEnergySetReadCount?imei=${imei}&count=${read_count}`)
+            .then((response) => {
+              if (response.code === 200) {
+                ElMessage.success("设置读数成功");
+              } else {
+                ElMessage.error(response.msg);
+              }
+            })
+            .catch((error) => {
+              ElMessage.error(error);
+            });
+        });
+      } 
+      // ========== 新增：表单校验逻辑 - 阀门控制 ==========
+      else if (this.node.label === "阀门控制") {
+        if (!this.$refs.famenstateForm) {
+          ElMessage.error('表单未加载完成，请稍后重试');
           return;
         }
-        if (requestData.thirdWashingTime.day === "" || requestData.thirdWashingTime.hour === "" || requestData.thirdWashingTime.minute === "") {
-          ElMessage.error("请设置第三次阀门维护时间");
+        this.$refs.famenstateForm.validate((valid) => {
+          if (!valid) return;
+          // 原有业务逻辑（未改动）
+          const imei = this.data.imei;
+          const status = this.params_set_tai.famenstate;
+          service
+            .get(`/command/solarEnergy/solarEnergyValveCommand?imei=${imei}&status=${status}`)
+            .then((response) => {
+              if (response.code === 200) {
+                ElMessage.success("设置阀门状态成功");
+              } else {
+                ElMessage.error(response.msg);
+              }
+            })
+            .catch((error) => {
+              ElMessage.error(error);
+            });
+        });
+      } 
+      // ========== 新增：表单校验逻辑 - 校时 ==========
+      else if (this.node.label === "校时") {
+        if (!this.$refs.jiaoshiForm) {
+          ElMessage.error('表单未加载完成，请稍后重试');
           return;
         }
-        if (requestData.fourthWashingTime.day === "" || requestData.fourthWashingTime.hour === "" || requestData.fourthWashingTime.minute === "") {
-          ElMessage.error("请设置第四次阀门维护时间");
+        this.$refs.jiaoshiForm.validate((valid) => {
+          if (!valid) return;
+          // 原有业务逻辑（未改动）
+          const imei = this.data.imei;
+          const { year, month, day, hour, minute, second } = this.params_set_tai.jiaoshi;
+          const time = this.formatDateTime(year, month, day, hour, minute, second);
+          service
+            .get(`/command/solarEnergy/solarEnergySetCalibrationTime?imei=${imei}&time=${time}`)
+            .then((response) => {
+              if (response.code === 200) {
+                ElMessage.success("设置校时成功");
+              } else {
+                ElMessage.error(response.msg);
+              }
+            })
+            .catch((error) => {
+              ElMessage.error(error);
+            });
+        });
+      } 
+      // ========== 新增：表单校验逻辑 - 设置关阀圈数 ==========
+      else if (this.node.label === "设置关阀圈数") {
+        if (!this.$refs.guanfaForm) {
+          ElMessage.error('表单未加载完成，请稍后重试');
           return;
         }
-        service
-          .post("/command/solarEnergy/solarEnergySetMaintenance", requestData)
-          .then((response) => {
-            if (response.code === 200) {
-              ElMessage.success("设置阀门维护配置成功");
-            } else {
-              ElMessage.error(response.msg);
-            }
-          })
-          .catch((error) => {
-            ElMessage.error(error);
-          });
-      } else if (this.node.label === "设置水表配置") {
-        const imei = this.data.imei;
-        const multiplier = this.params_set_tai.beilv;
-        if (multiplier === "") {
-          ElMessage.error("请设置水表倍数");
-          return;
-        }
-        service
-          .get(`/command/solarEnergy/solarEnergySetMultiplier?imei=${imei}&multiplier=${multiplier}`)
-          .then((response) => {
-            if (response.code === 200) {
-              ElMessage.success("设置水表配置成功");
-            } else {
-              ElMessage.error(response.msg);
-            }
-          })
-          .catch((error) => {
-            ElMessage.error(error);
-          });
-      } else if (this.node.label === "设置读数") {
-        const imei = this.data.imei;
-        const read_count = this.params_set_tai.count;
-        if (read_count === null) {
-          ElMessage.error("请设置读数");
-          return;
-        }
-        service
-          .get(`/command/solarEnergy/solarEnergySetReadCount?imei=${imei}&count=${read_count}`)
-          .then((response) => {
-            if (response.code === 200) {
-              ElMessage.success("设置读数成功");
-            } else {
-              ElMessage.error(response.msg);
-            }
-          })
-          .catch((error) => {
-            ElMessage.error(error);
-          });
-      } else if (this.node.label === "阀门控制") {
-        const imei = this.data.imei;
-        if (this.params_set_tai.famenstate === "") {
-          ElMessage.error("请设置阀门状态");
-          return;
-        }
-        const status = this.params_set_tai.famenstate;
-
-        service
-          .get(`/command/solarEnergy/solarEnergyValveCommand?imei=${imei}&status=${status}`)
-          .then((response) => {
-            if (response.code === 200) {
-              ElMessage.success("设置阀门状态成功");
-            } else {
-              ElMessage.error(response.msg);
-            }
-          })
-          .catch((error) => {
-            ElMessage.error(error);
-          });
-      } else if (this.node.label === "校时") {
-        const imei = this.data.imei;
-        // 从params_set_tai.jiaoshi对象中获取各时间参数
-        const { year, month, day, hour, minute, second } = this.params_set_tai.jiaoshi;
-        if (year === "" || month === "" || day === "" || hour === "" || minute === "" || second === "") {
-          ElMessage.error("所有的参数均不能为空！");
-          return;
-        }
-        // 调用格式化函数
-        const time = this.formatDateTime(year, month, day, hour, minute, second);
-        service
-          .get(`/command/solarEnergy/solarEnergySetCalibrationTime?imei=${imei}&time=${time}`)
-          .then((response) => {
-            if (response.code === 200) {
-              ElMessage.success("设置校时成功");
-            } else {
-              ElMessage.error(response.msg);
-            }
-          })
-          .catch((error) => {
-            ElMessage.error(error);
-          });
-      } else if (this.node.label === "设置关阀圈数") {
-        const imei = this.data.imei;
-        const count = this.params_set_tai.guanfa.count;
-        const order_number = this.params_set_tai.guanfa.xiliehao;
-        if (count === "" || order_number === "") {
-          ElMessage.error("所有的参数均不能为空！");
-          return;
-        }
-        service
-          .get(`/command/solarEnergy/solarEnergySetCloseCycle?imei=${imei}&closeCircle=${count}&serialNumber=${order_number}`)
-          .then((response) => {
-            if (response.code === 200) {
-              ElMessage.success("设置关阀圈数成功");
-            } else {
-              ElMessage.error(response.msg);
-            }
-          })
-          .catch((error) => {
-            ElMessage.error(error);
-          });
-      } else if (this.node.label === "设备还原") {
+        this.$refs.guanfaForm.validate((valid) => {
+          if (!valid) return;
+          // 原有业务逻辑（未改动）
+          const imei = this.data.imei;
+          const count = this.params_set_tai.guanfa.count;
+          const order_number = this.params_set_tai.guanfa.xiliehao;
+          service
+            .get(`/command/solarEnergy/solarEnergySetCloseCycle?imei=${imei}&closeCircle=${count}&serialNumber=${order_number}`)
+            .then((response) => {
+              if (response.code === 200) {
+                ElMessage.success("设置关阀圈数成功");
+              } else {
+                ElMessage.error(response.msg);
+              }
+            })
+            .catch((error) => {
+              ElMessage.error(error);
+            });
+        });
+      } 
+      // 设备还原（无参数，无需校验）
+      else if (this.node.label === "设备还原") {
         const imei = this.data.imei;
         service
           .get(`/command/solarEnergy/solarEnergyReSetDevice?imei=${imei}`)
@@ -961,7 +1254,9 @@ export default {
           .catch((error) => {
             ElMessage.error(error);
           });
-      } else if (this.node.label === "获取心跳上报间隔") {
+      } 
+      // 以下为获取类命令（暂未开通，无需校验）
+      else if (this.node.label === "获取心跳上报间隔") {
         const imei = this.data.imei;
         const formData1 = new FormData();
         const formData2 = new FormData();
@@ -984,14 +1279,11 @@ export default {
           if (response.code === 200) {
             ElMessage.success("获取心跳上报间隔成功");
             this.params_get_tai.heartInterval = response.data[0].intervalSecs;
-            //this.params_get_tai.heartInterval = 1;
             console.log(this.params_get_tai.heartInterval);
           } else {
             ElMessage.error(response.msg);
           }
-        }); // .catch((error) => {
-        //   ElMessage.error(error);
-        // });
+        });
       } else if (this.node.label === "获取网络参数") {
         ElMessage.error("暂未开通");
       } else if (this.node.label === "获取心跳数据") {
@@ -1023,9 +1315,6 @@ export default {
             ElMessage.error(response.msg);
           }
         });
-        // .catch((error) => {
-        //   ElMessage.error(error);
-        // });
       } else if (this.node.label === "获取抄表配置") {
         ElMessage.error("暂未开通");
       } else if (this.node.label === "获取抄表数据") {
@@ -1043,10 +1332,9 @@ export default {
           } else {
             ElMessage.error(response.msg);
           }
+        }).catch((error) => {
+          ElMessage.error(error);
         });
-        // .catch((error) => {
-        //   ElMessage.error(error);
-        // });
         service.post("/solarEnergy/waterMeterGetOpenClose0EH", formData2).then((response) => {
           if (response.code === 200) {
             ElMessage.success("获取阀门状态成功");
@@ -1054,10 +1342,9 @@ export default {
           } else {
             ElMessage.error(response.msg);
           }
+        }).catch((error) => {
+          ElMessage.error(error);
         });
-        // .catch((error) => {
-        //   ElMessage.error(error);
-        // });
       } else if (this.node.label === "获取本地时间") {
         ElMessage.error("暂未开通");
       } else if (this.node.label === "获取阀门维护配置") {

@@ -13,16 +13,11 @@
       </div>
       <div class="command-content">
         <div class="command-select">
-          <el-input v-model="commandFilterText" placeholder="请输入命令名称..." style="height: 40px; margin-bottom: 10px; margin-top: 10px"></el-input>
-          <el-tree
-            ref="commandTreeRef"
-            style="width: 230px; height: 460px; overflow-y: auto"
-            :data="command_jiwanxun_data"
-            :props="commandProps"
-            default-expand-all
-            :filter-node-method="command_filterNode"
-            @node-click="handleNodeClick"
-          ></el-tree>
+          <el-input v-model="commandFilterText" placeholder="请输入命令名称..."
+            style="height: 40px; margin-bottom: 10px; margin-top: 10px"></el-input>
+          <el-tree ref="commandTreeRef" style="width: 230px; height: 460px; overflow-y: auto"
+            :data="command_jiwanxun_data" :props="commandProps" default-expand-all
+            :filter-node-method="command_filterNode" @node-click="handleNodeClick"></el-tree>
         </div>
         <div class="command-params">
           <div class="set-params">
@@ -41,7 +36,7 @@
                 </div>
               </div>
               <div v-else>
-                <div class="set-content-container" v-if="node.label === '阀门控制'">
+                <!-- <div class="set-content-container" v-if="node.label === '阀门控制'">
                   <div class="set-input">
                     <span>阀门状态</span>
                     <el-select v-model="params_set_tai.famenstate">
@@ -49,7 +44,19 @@
                       <el-option label="关阀" value="0"></el-option>
                     </el-select>
                   </div>
-                </div>
+                </div> -->
+                <el-form :model="params_set_tai" :rules="valveControlRules" ref="valveControlForm"
+                  class="set-content-container" v-if="node.label === '阀门控制'">
+                  <div class="set-input">
+                    <span>阀门状态</span>
+                    <el-form-item prop="famenstate" style="margin: 0;">
+                      <el-select v-model="params_set_tai.famenstate">
+                        <el-option label="开阀" value="1"></el-option>
+                        <el-option label="关阀" value="0"></el-option>
+                      </el-select>
+                    </el-form-item>
+                  </div>
+                </el-form>
               </div>
             </div>
           </div>
@@ -72,11 +79,15 @@
           </div>
           <div class="btns">
             <div class="confirm-btn" @click="commit_jiwanxun">
-              <el-icon style="margin-left: 15%"><Check /></el-icon>
+              <el-icon style="margin-left: 15%">
+                <Check />
+              </el-icon>
               <span style="font-size: 16px; margin-left: 15%">确认</span>
             </div>
             <div class="cancel-btn" @click="closeCommandDialog">
-              <el-icon style="margin-left: 15%; color: #45ba7e"><Close /></el-icon>
+              <el-icon style="margin-left: 15%; color: #45ba7e">
+                <Close />
+              </el-icon>
               <span style="font-size: 16px; margin-left: 15%; color: #5a5a5a">取消</span>
             </div>
           </div>
@@ -106,6 +117,13 @@ export default {
     },
   },
   data() {
+    const validateFamenstate = (rule, value, callback) => {
+      if (!value && value !== 0) { // 0是关阀有效值，需特殊处理
+        callback(new Error('请选择阀门状态'));
+      } else {
+        callback();
+      }
+    };
     return {
       commandFilterText: "",
       //当前所选择到的子节点的信息
@@ -134,6 +152,9 @@ export default {
       ],
       params_set_tai: {
         famenstate: "",
+      },
+      valveControlRules: {
+        famenstate: [{ validator: validateFamenstate, trigger: 'change' }]
       },
     };
   },
@@ -169,22 +190,32 @@ export default {
     },
     commit_jiwanxun() {
       if (this.node.label === "阀门控制") {
-        console.log(this.data);
-        const meterCode = this.data.meterCode;
-        const status = this.params_set_tai.famenstate;
-        service
-          .get(`/command/jiWanXun/jiWanXunValveCommand?meterCode=${meterCode}&status=${status}`)
-          .then((res) => {
-            if (res.code === 200) {
-              ElMessage.success("阀门控制成功");
-            } else {
-              ElMessage.error(res.code);
-            }
-          })
-          .catch((err) => {
-            ElMessage.error(err.msg);
-            console.log(err);
-          });
+
+        if (!this.$refs.valveControlForm) {
+          ElMessage.error('表单未加载完成，请稍后重试');
+          return;
+        }
+        this.$refs.valveControlForm.validate((valid) => {
+          if (valid) {
+            console.log(this.data);
+            const meterCode = this.data.meterCode;
+            const status = this.params_set_tai.famenstate;
+            service
+              .get(`/command/jiWanXun/jiWanXunValveCommand?meterCode=${meterCode}&status=${status}`)
+              .then((res) => {
+                if (res.code === 200) {
+                  ElMessage.success("阀门控制成功");
+                } else {
+                  ElMessage.error(res.code);
+                }
+              })
+              .catch((err) => {
+                ElMessage.error(err.msg);
+                console.log(err);
+              });
+          }
+        });
+
       }
     },
   },
@@ -273,20 +304,21 @@ export default {
 
 .set-input {
   display: flex;
-  justify-content: center; /* 确保子元素在父容器中垂直居中 */
+  justify-content: center;
+  /* 确保子元素在父容器中垂直居中 */
   flex-direction: column;
   width: 31.5%;
   height: 75px;
   margin-right: 10px;
 }
 
-.set-input > span {
+.set-input>span {
   font-size: 14px;
   color: #747374;
   margin-bottom: 5px;
 }
 
-.set-input > .el-input {
+.set-input>.el-input {
   height: 35px;
   width: 100%;
 }
@@ -345,7 +377,7 @@ export default {
 <style lang="scss" scoped>
 :deep(.el-tree) {
   .is-current {
-    > .el-tree-node__content {
+    >.el-tree-node__content {
       background-color: var(--el-tree-node-hover-bg-color);
       color: white;
     }

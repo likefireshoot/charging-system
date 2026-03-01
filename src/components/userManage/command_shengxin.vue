@@ -41,21 +41,40 @@
                 </div>
               </div>
               <div v-else>
-                <div class="set-content-container" v-if="node.label === '阀门控制'">
+                <!-- 新增：阀门控制 - 表单校验包裹 -->
+                <el-form 
+                  :model="params_set_tai" 
+                  :rules="valveRules" 
+                  ref="valveForm" 
+                  class="set-content-container"
+                  v-if="node.label === '阀门控制'"
+                >
                   <div class="set-input">
                     <span>阀门状态</span>
-                    <el-select v-model="params_set_tai.famenstate">
-                      <el-option label="开阀" value="1"></el-option>
-                      <el-option label="关阀" value="0"></el-option>
-                    </el-select>
+                    <el-form-item prop="famenstate" style="margin: 0;">
+                      <el-select v-model="params_set_tai.famenstate">
+                        <el-option label="开阀" value="1"></el-option>
+                        <el-option label="关阀" value="0"></el-option>
+                      </el-select>
+                    </el-form-item>
                   </div>
-                </div>
-                <div class="set-content-container" v-if="node.label === '写累计流量'">
+                </el-form>
+
+                <!-- 新增：写累计流量 - 表单校验包裹 -->
+                <el-form 
+                  :model="params_set_tai" 
+                  :rules="trafficRules" 
+                  ref="trafficForm" 
+                  class="set-content-container"
+                  v-if="node.label === '写累计流量'"
+                >
                   <div class="set-input">
                     <span>累计流量</span>
-                    <el-input v-model="params_set_tai.cumulativeTraffic"></el-input>
+                    <el-form-item prop="cumulativeTraffic" style="margin: 0;">
+                      <el-input v-model="params_set_tai.cumulativeTraffic"></el-input>
+                    </el-form-item>
                   </div>
-                </div>
+                </el-form>
               </div>
             </div>
           </div>
@@ -112,6 +131,27 @@ export default {
     },
   },
   data() {
+    // ========== 新增：校验函数 ==========
+    // 阀门状态校验
+    const validateValve = (rule, value, callback) => {
+      if (!value && value !== 0) { // 0是关阀有效值，需特殊判断
+        callback(new Error("请选择阀门状态"));
+      } else {
+        callback();
+      }
+    };
+
+    // 累计流量校验
+    const validateTraffic = (rule, value, callback) => {
+      if (value === "" || value === undefined || value === null) {
+        callback(new Error("累计流量不能为空"));
+      } else if (isNaN(value) || Number(value) < 0) {
+        callback(new Error("累计流量必须为非负数值"));
+      } else {
+        callback();
+      }
+    };
+
     return {
       commandFilterText: "",
       //当前所选择到的子节点的信息
@@ -135,11 +175,11 @@ export default {
               value: 2,
               label: "阀门控制",
             },
-            // {
-            //   id: 3,
-            //   value: 3,
-            //   label: "写累计流量",
-            // },
+            {
+              id: 3,
+              value: 3,
+              label: "写累计流量",
+            },
             // {
             //   id: 5,
             //   value: 5,
@@ -150,11 +190,19 @@ export default {
       ],
       params_set_tai: {
         famenstate: "",
+        cumulativeTraffic: "", // 新增：补充累计流量绑定字段（原有代码使用但未定义）
         writeNum: {
           integer: 0,
           float: 0,
         },
       },
+      // ========== 新增：校验规则 ==========
+      valveRules: {
+        famenstate: [{ validator: validateValve, trigger: 'change' }]
+      },
+      trafficRules: {
+        cumulativeTraffic: [{ validator: validateTraffic, trigger: 'blur' }]
+      }
     };
   },
 
@@ -189,39 +237,57 @@ export default {
     },
     commit_shengxin() {
       if (this.node.label === "阀门控制") {
-        console.log(this.data);
-        const meterCode = this.data.meterCode;
-        const status = this.params_set_tai.famenstate;
-        service
-          .get(`/command/shengXin/shengXinValveCommand?meterCode=${meterCode}&status=${status}`)
-          .then((res) => {
-            if (res.code === 200) {
-              ElMessage.success("阀门控制成功");
-            } else {
-              ElMessage.error(res.code);
-            }
-          })
-          .catch((err) => {
-            ElMessage.error(err.msg);
-            console.log(err);
-          });
+        // ========== 新增：阀门控制表单校验 ==========
+        if (!this.$refs.valveForm) {
+          ElMessage.error('表单未加载完成，请稍后重试');
+          return;
+        }
+        this.$refs.valveForm.validate((valid) => {
+          if (!valid) return;
+          // 原有业务逻辑（未改动）
+          console.log(this.data);
+          const meterCode = this.data.meterCode;
+          const status = this.params_set_tai.famenstate;
+          service
+            .get(`/command/shengXin/shengXinValveCommand?meterCode=${meterCode}&status=${status}`)
+            .then((res) => {
+              if (res.code === 200) {
+                ElMessage.success("阀门控制成功");
+              } else {
+                ElMessage.error(res.code);
+              }
+            })
+            .catch((err) => {
+              ElMessage.error(err.msg);
+              console.log(err);
+            });
+        });
       } else if (this.node.label === "写累计流量") {
-        console.log(this.data);
-        const meterCode = this.data.meterCode;
-        const cumulativeTraffic = this.params_set_tai.cumulativeTraffic;
-        service
-          .get(`/command/shengXin/sendShengXinCumulativeTrafficCommand?meterCode=${meterCode}&cumulativeTraffic=${cumulativeTraffic}`)
-          .then((res) => {
-            if (res.code === 200) {
-              ElMessage.success("写累计流量成功");
-            } else {
-              ElMessage.error(res.code);
-            }
-          })
-          .catch((err) => {
-            ElMessage.error(err.msg);
-            console.log(err);
-          });
+        // ========== 新增：写累计流量表单校验 ==========
+        if (!this.$refs.trafficForm) {
+          ElMessage.error('表单未加载完成，请稍后重试');
+          return;
+        }
+        this.$refs.trafficForm.validate((valid) => {
+          if (!valid) return;
+          // 原有业务逻辑（未改动）
+          console.log(this.data);
+          const meterCode = this.data.meterCode;
+          const cumulativeTraffic = this.params_set_tai.cumulativeTraffic;
+          service
+            .get(`/command/shengXin/sendShengXinCumulativeTrafficCommand?meterCode=${meterCode}&cumulativeTraffic=${cumulativeTraffic}`)
+            .then((res) => {
+              if (res.code === 200) {
+                ElMessage.success("写累计流量成功");
+              } else {
+                ElMessage.error(res.code);
+              }
+            })
+            .catch((err) => {
+              ElMessage.error(err.msg);
+              console.log(err);
+            });
+        });
       } else {
         ElMessage.warning("请选择命令");
       }

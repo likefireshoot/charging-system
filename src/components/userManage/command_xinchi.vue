@@ -13,16 +13,11 @@
       </div>
       <div class="command-content">
         <div class="command-select">
-          <el-input v-model="commandFilterText" placeholder="请输入命令名称..." style="height: 40px; margin-bottom: 10px; margin-top: 10px"></el-input>
-          <el-tree
-            ref="commandTreeRef"
-            style="width: 210px; height: 460px; overflow-y: auto"
-            :data="command_xinchi_data"
-            :props="commandProps"
-            default-expand-all
-            :filter-node-method="command_filterNode"
-            @node-click="handleNodeClick"
-          ></el-tree>
+          <el-input v-model="commandFilterText" placeholder="请输入命令名称..."
+            style="height: 40px; margin-bottom: 10px; margin-top: 10px"></el-input>
+          <el-tree ref="commandTreeRef" style="width: 210px; height: 460px; overflow-y: auto"
+            :data="command_xinchi_data" :props="commandProps" default-expand-all
+            :filter-node-method="command_filterNode" @node-click="handleNodeClick"></el-tree>
         </div>
         <div class="command-params">
           <div class="set-params">
@@ -64,7 +59,7 @@
                     <el-input v-model="params_set_tai.wangluo.port"></el-input>
                   </div>
                 </div> -->
-                <div class="set-content-container" v-if="node.label === '设置周期上报参数'">
+                <!-- <div class="set-content-container" v-if="node.label === '设置周期上报参数'">
                   <div class="set-input">
                     <span>周期频率</span>
                     <el-select v-model="params_set_tai.zhouqishangbao.way">
@@ -85,12 +80,18 @@
                   <div class="set-input" style="width: 100%">
                     <span>开始时间</span>
                     <div style="width: 100%; display: flex; justify-content: space-between">
-                      <el-input style="margin-right: 10px" v-model="params_set_tai.zhouqishangbao.year" placeholder="年"></el-input>
-                      <el-input style="margin-right: 10px" v-model="params_set_tai.zhouqishangbao.month" placeholder="月"></el-input>
-                      <el-input style="margin-right: 10px" v-model="params_set_tai.zhouqishangbao.day" placeholder="日"></el-input>
-                      <el-input style="margin-right: 10px" v-model="params_set_tai.zhouqishangbao.hour" placeholder="时"></el-input>
-                      <el-input style="margin-right: 10px" v-model="params_set_tai.zhouqishangbao.minute" placeholder="分"></el-input>
-                      <el-input style="margin-right: 10px" v-model="params_set_tai.zhouqishangbao.second" placeholder="秒"></el-input>
+                      <el-input style="margin-right: 10px" v-model="params_set_tai.zhouqishangbao.year"
+                        placeholder="年"></el-input>
+                      <el-input style="margin-right: 10px" v-model="params_set_tai.zhouqishangbao.month"
+                        placeholder="月"></el-input>
+                      <el-input style="margin-right: 10px" v-model="params_set_tai.zhouqishangbao.day"
+                        placeholder="日"></el-input>
+                      <el-input style="margin-right: 10px" v-model="params_set_tai.zhouqishangbao.hour"
+                        placeholder="时"></el-input>
+                      <el-input style="margin-right: 10px" v-model="params_set_tai.zhouqishangbao.minute"
+                        placeholder="分"></el-input>
+                      <el-input style="margin-right: 10px" v-model="params_set_tai.zhouqishangbao.second"
+                        placeholder="秒"></el-input>
                     </div>
                   </div>
                 </div>
@@ -103,6 +104,87 @@
                     </el-select>
                   </div>
                 </div>
+                <div class="set-content-container" v-if="node.label === '设置读数'">
+                  <div class="set-input">
+                    <span>读数</span>
+                    <el-input v-model="params_set_tai.count" type="number"></el-input>
+                  </div>
+                </div> -->
+
+                <el-form :model="params_set_tai.zhouqishangbao" :rules="cycleReportRules" ref="cycleReportForm"
+                  class="set-content-container" v-if="node.label === '设置周期上报参数'">
+                  <div class="set-input">
+                    <span>周期频率</span>
+                    <el-form-item prop="way" style="margin: 0;">
+                      <el-select v-model="params_set_tai.zhouqishangbao.way">
+                        <el-option label="每小时" value="5"></el-option>
+                        <el-option label="每天" value="6"></el-option>
+                        <el-option label="每周" value="7"></el-option>
+                        <el-option label="每月" value="8"></el-option>
+                      </el-select>
+                    </el-form-item>
+                  </div>
+                  <div class="set-input">
+                    <span>星期</span>
+                    <el-form-item prop="week" style="margin: 0;">
+                      <el-input v-model="params_set_tai.zhouqishangbao.week" placeholder="有效值为0~7"></el-input>
+                    </el-form-item>
+                  </div>
+                  <div class="set-input">
+                    <span>周期间隔</span>
+                    <el-form-item prop="interval" style="margin: 0;">
+                      <el-input v-model="params_set_tai.zhouqishangbao.interval"></el-input>
+                    </el-form-item>
+                  </div>
+                  <div class="set-input" style="width: 100%">
+                    <span>开始时间</span>
+                    <div style="width: 100%; display: flex; justify-content: space-between">
+                      <el-form-item prop="year" style="margin: 0; flex: 1; margin-right: 10px;">
+                        <el-input v-model="params_set_tai.zhouqishangbao.year" placeholder="年"></el-input>
+                      </el-form-item>
+                      <el-form-item prop="month" style="margin: 0; flex: 1; margin-right: 10px;">
+                        <el-input v-model="params_set_tai.zhouqishangbao.month" placeholder="月"></el-input>
+                      </el-form-item>
+                      <el-form-item prop="day" style="margin: 0; flex: 1; margin-right: 10px;">
+                        <el-input v-model="params_set_tai.zhouqishangbao.day" placeholder="日"></el-input>
+                      </el-form-item>
+                      <el-form-item prop="hour" style="margin: 0; flex: 1; margin-right: 10px;">
+                        <el-input v-model="params_set_tai.zhouqishangbao.hour" placeholder="时"></el-input>
+                      </el-form-item>
+                      <el-form-item prop="minute" style="margin: 0; flex: 1; margin-right: 10px;">
+                        <el-input v-model="params_set_tai.zhouqishangbao.minute" placeholder="分"></el-input>
+                      </el-form-item>
+                      <el-form-item prop="second" style="margin: 0; flex: 1; margin-right: 10px;">
+                        <el-input v-model="params_set_tai.zhouqishangbao.second" placeholder="秒"></el-input>
+                      </el-form-item>
+                    </div>
+                  </div>
+                </el-form>
+
+                <!-- 阀门控制：新增el-form包裹，绑定model和rules -->
+                <el-form :model="params_set_tai" :rules="valveControlRules" ref="valveControlForm"
+                  class="set-content-container" v-if="node.label === '阀门控制'">
+                  <div class="set-input">
+                    <span>阀门状态</span>
+                    <el-form-item prop="famenstate" style="margin: 0;">
+                      <el-select v-model="params_set_tai.famenstate">
+                        <el-option label="开阀" value="1"></el-option>
+                        <el-option label="关阀" value="0"></el-option>
+                      </el-select>
+                    </el-form-item>
+                  </div>
+                </el-form>
+
+                <!-- 设置读数：新增el-form包裹，绑定model和rules -->
+                <el-form :model="params_set_tai" :rules="readCountRules" ref="readCountForm"
+                  class="set-content-container" v-if="node.label === '设置读数'">
+                  <div class="set-input">
+                    <span>读数</span>
+                    <el-form-item prop="count" style="margin: 0;">
+                      <el-input v-model="params_set_tai.count" type="number"></el-input>
+                    </el-form-item>
+                  </div>
+                </el-form>
                 <!-- <div class="set-content-container" v-if="node.label === '设置失联检测参数'">
                   <div class="set-input">
                     <span>失联天数</span>
@@ -320,11 +402,15 @@
           </div>
           <div class="btns">
             <div class="confirm-btn" @click="commit_xinchi">
-              <el-icon style="margin-left: 15%"><Check /></el-icon>
+              <el-icon style="margin-left: 15%">
+                <Check />
+              </el-icon>
               <span style="font-size: 16px; margin-left: 15%">确认</span>
             </div>
             <div class="cancel-btn" @click="closeCommandDialog">
-              <el-icon style="margin-left: 15%; color: #45ba7e"><Close /></el-icon>
+              <el-icon style="margin-left: 15%; color: #45ba7e">
+                <Close />
+              </el-icon>
               <span style="font-size: 16px; margin-left: 15%; color: #5a5a5a">取消</span>
             </div>
           </div>
@@ -354,6 +440,105 @@ export default {
     },
   },
   data() {
+    const validateWay = (rule, value, callback) => {
+      if (!value) {
+        callback(new Error('周期频率不能为空'));
+      } else {
+        callback();
+      }
+    };
+    const validateWeek = (rule, value, callback) => {
+      if (value === '' || value === undefined || value === null) {
+        callback(new Error('星期不能为空'));
+      } else if (!/^\d+$/.test(value) || Number(value) < 0 || Number(value) > 7) {
+        callback(new Error('星期有效值为0~7的整数'));
+      } else {
+        callback();
+      }
+    };
+    const validateInterval = (rule, value, callback) => {
+      if (value === '' || value === undefined || value === null) {
+        callback(new Error('周期间隔不能为空'));
+      } else if (!/^\d+$/.test(value) || Number(value) <= 0) {
+        callback(new Error('周期间隔必须为正整数'));
+      } else {
+        callback();
+      }
+    };
+    const validateYear = (rule, value, callback) => {
+      if (value === '' || value === undefined || value === null) {
+        callback(new Error('年份不能为空'));
+      } else if (!/^\d+$/.test(value) || Number(value) < 1970 || Number(value) > 2099) {
+        callback(new Error('年份必须为1970~2099的整数'));
+      } else {
+        callback();
+      }
+    };
+    const validateMonth = (rule, value, callback) => {
+      if (value === '' || value === undefined || value === null) {
+        callback(new Error('月份不能为空'));
+      } else if (!/^\d+$/.test(value) || Number(value) < 1 || Number(value) > 12) {
+        callback(new Error('月份必须为1~12的整数'));
+      } else {
+        callback();
+      }
+    };
+    const validateDay = (rule, value, callback) => {
+      if (value === '' || value === undefined || value === null) {
+        callback(new Error('日期不能为空'));
+      } else if (!/^\d+$/.test(value) || Number(value) < 1 || Number(value) > 31) {
+        callback(new Error('日期必须为1~31的整数'));
+      } else {
+        callback();
+      }
+    };
+    const validateHour = (rule, value, callback) => {
+      if (value === '' || value === undefined || value === null) {
+        callback(new Error('小时不能为空'));
+      } else if (!/^\d+$/.test(value) || Number(value) < 0 || Number(value) > 23) {
+        callback(new Error('小时必须为0~23的整数'));
+      } else {
+        callback();
+      }
+    };
+    const validateMinute = (rule, value, callback) => {
+      if (value === '' || value === undefined || value === null) {
+        callback(new Error('分钟不能为空'));
+      } else if (!/^\d+$/.test(value) || Number(value) < 0 || Number(value) > 59) {
+        callback(new Error('分钟必须为0~59的整数'));
+      } else {
+        callback();
+      }
+    };
+    const validateSecond = (rule, value, callback) => {
+      if (value === '' || value === undefined || value === null) {
+        callback(new Error('秒数不能为空'));
+      } else if (!/^\d+$/.test(value) || Number(value) < 0 || Number(value) > 59) {
+        callback(new Error('秒数必须为0~59的整数'));
+      } else {
+        callback();
+      }
+    };
+
+    // ========== 新增：阀门控制校验函数 ==========
+    const validateFamenstate = (rule, value, callback) => {
+      if (!value && value !== 0) { // 0是关阀有效值，需特殊处理
+        callback(new Error('请选择阀门状态'));
+      } else {
+        callback();
+      }
+    };
+
+    // ========== 新增：设置读数校验函数 ==========
+    const validateCount = (rule, value, callback) => {
+      if (value === '' || value === undefined || value === null) {
+        callback(new Error('读数不能为空'));
+      } else if (isNaN(value) || value <= 0) {
+        callback(new Error('读数必须为正整数'));
+      } else {
+        callback();
+      }
+    };
     return {
       commandFilterText: "",
       //当前所选择到的子节点的信息
@@ -382,16 +567,23 @@ export default {
             //   value: 4,
             //   label: "设置网络参数",
             // },
-            // {
-            //   id: 5,
-            //   value: 5,
-            //   label: "设置周期上报参数",
-            // },
+            {
+              id: 5,
+              value: 5,
+              label: "设置周期上报参数",
+            },
             {
               id: 6,
               value: 6,
               label: "阀门控制",
             },
+            {
+
+              id: 7,
+              value: 7,
+              label: "设置读数",
+
+            }
             // {
             //   id: 7,
             //   value: 7,
@@ -477,6 +669,7 @@ export default {
           ip: "",
           port: "",
         },
+        count: '',
         chaobiaoPeizhi: {
           way: "",
           chaobiaoHour: null,
@@ -508,7 +701,25 @@ export default {
           minute: "",
           second: "",
         },
+
       },
+      cycleReportRules: {
+        way: [{ validator: validateWay, trigger: 'change' }],
+        week: [{ validator: validateWeek, trigger: 'blur' }],
+        interval: [{ validator: validateInterval, trigger: 'blur' }],
+        year: [{ validator: validateYear, trigger: 'blur' }],
+        month: [{ validator: validateMonth, trigger: 'blur' }],
+        day: [{ validator: validateDay, trigger: 'blur' }],
+        hour: [{ validator: validateHour, trigger: 'blur' }],
+        minute: [{ validator: validateMinute, trigger: 'blur' }],
+        second: [{ validator: validateSecond, trigger: 'blur' }]
+      },
+      valveControlRules: {
+        famenstate: [{ validator: validateFamenstate, trigger: 'change' }]
+      },
+      readCountRules: {
+        count: [{ validator: validateCount, trigger: 'blur' }]
+      }
       // params_get_tai: {
       //   biaodushu: {
       //     count: "",
@@ -626,45 +837,85 @@ export default {
     },
     commit_xinchi() {
       if (this.node.label === "设置周期上报参数") {
-        const imei = this.data.imei;
-        const status = this.params_set_tai.zhouqishangbao.way;
-        const weeks = this.params_set_tai.zhouqishangbao.week;
-        const cycleIntervals = this.params_set_tai.zhouqishangbao.interval;
-        const { year, month, day, hour, minute, second } = this.params_set_tai.zhouqishangbao;
-        if (status === "" || weeks == null || cycleIntervals == null || year === "" || month === "" || day === "" || hour === "" || minute === "" || second === "") {
-          ElMessage.error("所有的参数均不能为空！");
+        if (!this.$refs.cycleReportForm) {
+          ElMessage.error('表单未加载完成，请稍后重试');
           return;
         }
-        // 调用格式化函数
-        const time = this.formatDateTime(year, month, day, hour, minute, second);
-        service
-          .get(`/command/xinChi/xinChiSetCycleParametersCommand?imei=${imei}&status=${status}&weeks=${weeks}&cycleIntervals=${cycleIntervals}&time=${time}`)
-          .then((res) => {
-            if (res.code === 200) {
-              ElMessage.success("周期上报参数设置成功！");
-              // this.closeCommandDialog();
-            } else {
-              ElMessage.error(res.msg);
-            }
-          })
-          .catch((error) => {
-            ElMessage.error(error.message || "设置周期上报参数失败!");
-          });
+        this.$refs.cycleReportForm.validate((valid) => {
+          if (valid) {
+            const imei = this.data.imei;
+            const status = this.params_set_tai.zhouqishangbao.way;
+            const weeks = this.params_set_tai.zhouqishangbao.week;
+            const cycleIntervals = this.params_set_tai.zhouqishangbao.interval;
+            const { year, month, day, hour, minute, second } = this.params_set_tai.zhouqishangbao;
+            // 调用格式化函数
+            const time = this.formatDateTime(year, month, day, hour, minute, second);
+            service
+              .get(`/command/xinChi/xinChiSetCycleParametersCommand?imei=${imei}&status=${status}&weeks=${weeks}&cycleIntervals=${cycleIntervals}&time=${time}`)
+              .then((res) => {
+                if (res.code === 200) {
+                  ElMessage.success("周期上报参数设置成功！");
+                  // this.closeCommandDialog();
+                } else {
+                  ElMessage.error(res.msg);
+                }
+              })
+              .catch((error) => {
+                ElMessage.error(error.message || "设置周期上报参数失败!");
+              });
+          }
+        });
+
       } else if (this.node.label === "阀门控制") {
-        const imei = this.data.imei;
-        const status = this.params_set_tai.famenstate;
-        service
-          .get(`/command/xinChi/xinChiValveCommand?imei=${imei}&status=${status}`)
-          .then((res) => {
-            if (res.code === 200) {
-              ElMessage.success("阀门设置成功");
-            } else {
-              ElMessage.error(res.msg);
-            }
-          })
-          .catch((error) => {
-            ElMessage.error(error.msg);
-          });
+        if (!this.$refs.valveControlForm) {
+          ElMessage.error('表单未加载完成，请稍后重试');
+          return;
+        }
+        this.$refs.valveControlForm.validate((valid) => {
+          if (valid) {
+            const imei = this.data.imei;
+            const status = this.params_set_tai.famenstate;
+            service
+              .get(`/command/xinChi/xinChiValveCommand?imei=${imei}&status=${status}`)
+              .then((res) => {
+                if (res.code === 200) {
+                  ElMessage.success("阀门设置成功");
+                } else {
+                  ElMessage.error(res.msg);
+                }
+              })
+              .catch((error) => {
+                ElMessage.error(error.msg);
+              });
+          }
+        });
+
+      } else if (this.node.label === "设置读数") {
+
+        if (!this.$refs.readCountForm) {
+          ElMessage.error('表单未加载完成，请稍后重试');
+          return;
+        }
+        this.$refs.readCountForm.validate((valid) => {
+          if (valid) {
+            console.log("设置读数")
+            const imei = this.data.imei;
+            const count = this.params_set_tai.count;
+            service
+              .get(`/command/xinChi/xinChiSetReadCount?imei=${imei}&readCount=${count}`)
+              .then((res) => {
+                if (res.code === 200) {
+                  ElMessage.success("表读数设置成功");
+                } else {
+                  ElMessage.error(res.msg);
+                }
+              })
+              .catch((error) => {
+                ElMessage.error(error.msg);
+              });
+          }
+        });
+
       }
     },
   },
@@ -756,20 +1007,21 @@ export default {
 
 .set-input {
   display: flex;
-  justify-content: center; /* 确保子元素在父容器中垂直居中 */
+  justify-content: center;
+  /* 确保子元素在父容器中垂直居中 */
   flex-direction: column;
   width: 31.5%;
   height: 75px;
   margin-right: 10px;
 }
 
-.set-input > span {
+.set-input>span {
   font-size: 14px;
   color: #747374;
   margin-bottom: 5px;
 }
 
-.set-input > .el-input {
+.set-input>.el-input {
   height: 35px;
   width: 100%;
 }
@@ -828,7 +1080,7 @@ export default {
 <style lang="scss" scoped>
 :deep(.el-tree) {
   .is-current {
-    > .el-tree-node__content {
+    >.el-tree-node__content {
       background-color: var(--el-tree-node-hover-bg-color);
       color: white;
     }
