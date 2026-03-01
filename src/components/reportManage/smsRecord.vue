@@ -302,7 +302,7 @@ export default {
       this.getSmsRecordData();
     },
 
-    clear() {
+    clear(isSearch) {
       this.params.regionName = "";
       this.params.userId = "";
       this.params.userName = "";
@@ -312,10 +312,14 @@ export default {
       this.params.endTime = null;
       this.params.companyId = null;
       this.params.company = null; // 清空所属水厂
+      if (typeof isSearch != 'number' || isNaN(isSearch)) {
+        this.params.pageNo = 1;
+        this.getSmsRecordData();
+      }
     },
 
     reflush() {
-      this.clear();
+      this.clear(1);
       this.params.pageNo = 1; // 重置页码
       this.params.pageSize = 50; // 重置每页条数
       let params = {

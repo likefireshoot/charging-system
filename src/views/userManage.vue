@@ -52,7 +52,7 @@
           <img src="@/assets/yonghu/icon4.png" alt="" style="margin-left: 8px" />
           <span style="font-size: 16px; margin-left: 8px; color: #5a5a5a">删除</span>
         </div>
-        <div class="command-btn" style="margin-left: 10px; width: 110px" @click="handleCommand">
+        <div class="command-btn" style="margin-left: 10px; width: 110px" :class="{ 'btn-single-only-disabled': multipleSelection.length !== 1 }" @click="multipleSelection.length === 1 && handleCommand()">
           <img src="@/assets/yonghu/icon5.png" alt="" style="margin-left: 8px" />
           <span style="font-size: 16px; margin-left: 8px; color: #5a5a5a">命令下发</span>
         </div>
@@ -66,12 +66,12 @@
           <img src="@/assets/yonghu/icon17.png" alt="" style="margin-left: 8px; margin-top: 3px" />
           <span style="font-size: 16px; margin-left: 8px; color: #5a5a5a">关阀控制</span>
         </div>
-        <div class="recharge-btn" style="margin-left: 5px; width: 110px" @click="change_balance_btn_click"
+        <div class="recharge-btn" style="margin-left: 5px; width: 110px" :class="{ 'btn-single-only-disabled': multipleSelection.length !== 1 }" @click="multipleSelection.length === 1 && change_balance_btn_click()"
           v-if="staffPermissionIds.includes(9)">
           <img src="@/assets/yonghu/icon20.png" alt="" style="margin-left: 8px" />
           <span style="font-size: 16px; margin-left: 8px; color: #5a5a5a">余额调整</span>
         </div>
-        <div class="recharge-btn" style="margin-left: 5px" @click="recharge_btn_click"
+        <div class="recharge-btn" style="margin-left: 5px" :class="{ 'btn-single-only-disabled': multipleSelection.length !== 1 }" @click="multipleSelection.length === 1 && recharge_btn_click()"
           v-if="staffPermissionIds.includes(10)">
           <img src="@/assets/yonghu/icon6.png" alt="" style="margin-left: 8px" />
           <span style="font-size: 16px; margin-left: 8px; color: #5a5a5a">充值</span>
@@ -81,7 +81,7 @@
           <img src="@/assets/yonghu/icon7.png" alt="" style="margin-left: 8px" />
           <span style="font-size: 16px; margin-left: 8px; color: #5a5a5a">充值记录</span>
         </div>
-        <div class="water-meter-btn" style="margin-left: 5px" @click="change_btn_click"
+        <div class="water-meter-btn" style="margin-left: 5px" :class="{ 'btn-single-only-disabled': multipleSelection.length !== 1 }" @click="multipleSelection.length === 1 && change_btn_click()"
           v-if="staffPermissionIds.includes(13)">
           <img src="@/assets/yonghu/icon8.png" alt="" style="margin-left: 8px" />
           <span style="font-size: 16px; margin-left: 8px; color: #5a5a5a">换表</span>
@@ -283,24 +283,38 @@
       :command_dialogFormVisible="command_dialogFormVisible_qianbaotong" :commandType="commandType"
       :data="multipleSelection[0]" @close="closeCommandDialog"></commandQianBaoTong>
 
-    <!-- 批量修改用户水价 加一个弹出框-->
-    <!-- 弹出框 -->
-    <el-dialog title="批量修改用户水价" v-model="priceDialogVisible" :modal="true" :close-on-click-modal="false" width="400px">
-      <div>
-        <el-form label-width="100px">
-          <el-form-item label="水价类型">
+    <!-- 批量修改用户水价 弹出框（样式与其他页面统一）-->
+    <div class="add-dialog" v-if="priceDialogVisible">
+      <div class="add-dialog-content">
+        <div class="title">
+          <div style="margin-left: 10px; display: flex; align-items: center">
+            <img src="@/assets/jiage/icon3.png" alt="" style="margin-right: 10px" />
+            <span style="font-size: 18px">批量修改用户水价</span>
+          </div>
+          <div style="margin-right: 10px; cursor: pointer" @click="priceDialogVisible = false">
+            <img src="@/assets/close.png" alt="" />
+          </div>
+        </div>
+        <div class="add-content">
+          <div class="add-input" style="width: 100%">
+            <span>水价类型</span>
             <el-select v-model="selectedPriceId" placeholder="请选择水价类型" style="width: 100%">
               <el-option v-for="item in price_list" :key="item.id" :label="item.label" :value="item.id" />
             </el-select>
-          </el-form-item>
-        </el-form>
+          </div>
+        </div>
+        <div class="btn">
+          <div class="confirm-btn" @click="confirm_edit_price">
+            <el-icon style="margin-left: 15%"><Check /></el-icon>
+            <span style="font-size: 16px; margin-left: 15%">确认</span>
+          </div>
+          <div class="cancel-btn" @click="priceDialogVisible = false">
+            <el-icon style="margin-left: 15%; color: #45ba7e"><Close /></el-icon>
+            <span style="font-size: 16px; margin-left: 15%; color: #5a5a5a">取消</span>
+          </div>
+        </div>
       </div>
-
-      <template #footer>
-        <el-button @click="priceDialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="confirm_edit_price">确定</el-button>
-      </template>
-    </el-dialog>
+    </div>
   </div>
 </template>
 
@@ -329,10 +343,13 @@ import changeBalanceVue from "@/components/userManage/changeBalance.vue";
 
 import service from "@/api/request";
 import { ElMessage } from "element-plus";
+import { Check, Close } from "@element-plus/icons-vue";
 import axios from "axios";
 
 export default {
   components: {
+    Check,
+    Close,
     rechargeVue,
     rechargeRecordVue,
     changeVue,
@@ -959,7 +976,6 @@ export default {
         });
     },
     clear(isSearch) {
-      console.log(isSearch)
       this.param = {
         userName: "",
         userId: "",
@@ -975,12 +991,15 @@ export default {
         order: 0,
       };
       this.sortOrder = null; // 清除排序状态
-      if (typeof isSearch != 'number' || isNaN(isSearch)) {//如果不是数字就搜索
+      if (typeof isSearch != 'number' || isNaN(isSearch)) {
+        this.filterText = "";
+        if (this.$refs.treeRef) {
+          this.$refs.treeRef.setCurrentKey(null);
+        }
+        this.quyu_selected = null;
+        this.currentPage = 1;
         this.search();
-        this.currentPage = 1;//清楚页数信息
       }
-
-
     },
     // 过滤掉值为空的参数
     filterNonEmptyParams(params) {
@@ -1548,6 +1567,56 @@ export default {
 .cancel-btn {
   background-color: #fff;
   margin-right: 5%;
+}
+
+.btn-single-only-disabled {
+  opacity: 0.5;
+  cursor: not-allowed !important;
+  pointer-events: none;
+}
+
+.add-dialog-content {
+  width: 400px;
+  border: 1px solid #fafafa;
+  background-color: #fafafa;
+  border-radius: 5px;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-bottom: 20px;
+}
+
+.add-dialog-content .add-content {
+  border: 1px solid #fff;
+  background-color: #fff;
+  border-radius: 5px;
+  width: 90%;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  margin-top: 20px;
+  padding: 15px 3%;
+  flex-wrap: wrap;
+}
+
+.add-dialog-content .add-input {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.add-dialog-content .add-input > span {
+  font-size: 15px;
+  margin-bottom: 5px;
+  color: #575556;
+}
+
+.add-dialog-content .add-input .el-select {
+  width: 100%;
 }
 
 .delete-dialog,

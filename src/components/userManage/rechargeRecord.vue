@@ -80,12 +80,12 @@
           </div>
         </div>
         <div class="recharge-record-list">
-          <div class="command-buttons">
-            <div class="export-out-btn" style="margin-right: 10px; width: 100px" @click="receipt">
+            <div class="command-buttons">
+            <div class="export-out-btn" style="margin-right: 10px; width: 100px" :class="{ 'btn-single-only-disabled': multipleSelection.length !== 1 }" @click="multipleSelection.length === 1 && receipt()">
               <img src="@/assets/yonghu/icon26.png" alt="" style="margin-left: 7px" />
               <span style="font-size: 16px; margin-left: 10px; color: #5a5a5a">开收据</span>
             </div>
-            <div class="export-out-btn" style="margin-right: 10px; width: 115px" @click="reset">
+            <div class="export-out-btn" style="margin-right: 10px; width: 115px" :class="{ 'btn-single-only-disabled': multipleSelection.length !== 1 }" @click="multipleSelection.length === 1 && reset()">
               <img src="@/assets/yonghu/icon27.png" alt="" style="margin-left: 7px" />
               <span style="font-size: 16px; margin-left: 10px; color: #5a5a5a">撤销充值</span>
             </div>
@@ -306,7 +306,7 @@ export default {
         });
     },
     reflush() {
-      this.clear();
+      this.clear(1);
       let param = {
         companyId: "",
       };
@@ -345,7 +345,7 @@ export default {
           console.log(error);
         });
     },
-    clear() {
+    clear(isSearch) {
       this.rechargeRecordeData.region = "";
       this.rechargeRecordeData.timeType = null;
       this.rechargeRecordeData.beginTime = "";
@@ -354,6 +354,10 @@ export default {
       this.rechargeRecordeData.imei = "";
       this.rechargeRecordeData.companyId = null;
       this.rechargeRecordeData.userId = "";
+      if (typeof isSearch != 'number' || isNaN(isSearch)) {
+        this.currentPage = 1;
+        this.search();
+      }
     },
     // 过滤掉值为空的参数
     filterNonEmptyParams(params) {
@@ -822,6 +826,13 @@ export default {
   font-size: 14px;
   background-color: #fff;
   border: 2px solid #f2f2f2;
+}
+
+/* 仅支持单选的操作在多选或未选时置灰不可点 */
+.btn-single-only-disabled {
+  opacity: 0.5;
+  cursor: not-allowed !important;
+  pointer-events: none;
 }
 
 .page-box {

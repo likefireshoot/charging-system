@@ -326,7 +326,7 @@ export default {
         });
     },
     reflush() {
-      this.clear();
+      this.clear(1);
       let url = "";
       if (this.companyId === 1) {
         if (this.changeRecordeData.companyId) {
@@ -360,7 +360,7 @@ export default {
           ElMessage.error(err);
         });
     },
-    clear() {
+    clear(isSearch) {
       this.changeRecordeData = {
         region: "",
         userId: "",
@@ -373,6 +373,37 @@ export default {
         imei: "",
         companyId: null, // 清空水厂选择
       };
+      if (typeof isSearch != 'number' || isNaN(isSearch)) {
+        this.currentPage = 1;
+        let url = "";
+        if (this.companyId === 1) {
+          url = `/userManage/meterRead/showChangeMeterRecords/1`;
+        } else {
+          url = `/userManage/meterRead/showChangeMeterRecords/1?companyId=${this.companyId}`;
+        }
+        service
+          .get(url)
+          .then((res) => {
+            if (res.code === 200) {
+              res.data.meterChangeRecord.map((v, i) => {
+                v.theId = this.pageSize * (res.data.currentPages - 1) + i + 1;
+              });
+              this.changeRecordTableData = res.data.meterChangeRecord;
+              if (this.changeRecordTableData.length > 0) {
+                this.changeRecordTableData.forEach((item) => {
+                  item.createTime = item.createTime.replace("T", " ");
+                });
+              }
+              this.total = res.data.totalElements;
+              this.currentPage = 1;
+            } else {
+              ElMessage.error(res.msg);
+            }
+          })
+          .catch((err) => {
+            ElMessage.error(err);
+          });
+      }
     },
     // 过滤掉值为空的参数
     filterNonEmptyParams(params) {

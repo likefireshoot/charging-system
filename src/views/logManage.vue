@@ -332,16 +332,20 @@ export default {
     search() {
       this.getLogsData();
     },
-    clear() {
+    clear(isSearch) {
       this.params.operationId = null;
       this.params.userName = null;
       this.params.meterCode = null;
       this.params.staffName = null;
       this.params.company = null; // 清空所属水厂
       this.params.userId = null; // 清空用户号
+      if (typeof isSearch != 'number' || isNaN(isSearch)) {
+        this.params.pageNo = 1;
+        this.getLogsData();
+      }
     },
     reflush() {
-      this.clear();
+      this.clear(1);
       let params = {
         pageNo: 1,
         pageSize: 50,

@@ -217,7 +217,7 @@ export default {
       }
     },
     reflush() {
-      this.clear();
+      this.clear(1);
       service
         .get(`/userManage/userCharge/showMeterChargeRecords/1?meterCode=${this.data.meterCode}`)
         .then((response) => {
@@ -239,9 +239,32 @@ export default {
           ElMessage.error(error);
         });
     },
-    clear() {
+    clear(isSearch) {
       this.transactionData.timeType = "";
       this.transactionData.createTime = "";
+      if (typeof isSearch != 'number' || isNaN(isSearch)) {
+        this.currentPage = 1;
+        service
+          .get(`/userManage/userCharge/showMeterChargeRecords/1?meterCode=${this.data.meterCode}`)
+          .then((response) => {
+            if (response.code === 200) {
+              response.data.userSingleRechargeRecordData.map((v, i) => {
+                v.theId = this.pageSize * (response.data.currentPages - 1) + i + 1;
+              });
+              this.transactionTableData = response.data.userSingleRechargeRecordData;
+              this.transactionTableData.forEach((item) => {
+                item.createTime = item.createTime.replace("T", " ");
+              });
+              this.total = response.data.totalElements;
+              this.currentPage = 1;
+            } else {
+              ElMessage.error(response.msg);
+            }
+          })
+          .catch((error) => {
+            ElMessage.error(error);
+          });
+      }
     },
     // 过滤掉值为空的参数，并格式化时间类型参数
     filterNonEmptyParams(params) {

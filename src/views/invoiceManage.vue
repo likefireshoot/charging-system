@@ -50,7 +50,7 @@
     </div>
     <div class="fapiao-info">
       <div class="command-box">
-        <div class="add-btn" style="margin-left: 10px" @click="handleInvoice">
+        <div class="add-btn" style="margin-left: 10px" :class="{ 'btn-single-only-disabled': !multipleSelection || multipleSelection.length !== 1 }" @click="multipleSelection && multipleSelection.length === 1 && handleInvoice()">
           <img src="@/assets/fapiao/icon1.png" alt="" style="margin-left: 7px" />
           <span style="font-size: 16px; margin-left: 15%; color: #5a5a5a">开票</span>
         </div>
@@ -290,7 +290,7 @@ export default {
         pageSize: 50,
       },
       fapiaoData: [],
-      multipleSelection: null,
+      multipleSelection: [],
 
       total: null,
 
@@ -439,10 +439,10 @@ export default {
       return true; // 目前允许所有行选择，你可以加上你的业务逻辑
     },
     handleSelectionChange(val) {
-      this.multipleSelection = val[0];
+      this.multipleSelection = val;
     },
     handleInvoice() {
-      if (this.multipleSelection != null && this.multipleSelection.status != "已开票") {
+      if (this.multipleSelection && this.multipleSelection.length === 1 && this.multipleSelection[0].status != "已开票") {
         this.invoiceDialogVisible = true;
         this.buyer_info_fields.forEach((item) => {
           item.value = "";
@@ -453,6 +453,10 @@ export default {
         this.invoice_content_fields.forEach((item) => {
           item.value = "";
         });
+      } else if (!this.multipleSelection || this.multipleSelection.length === 0) {
+        ElMessage.error("请选择未开票的数据");
+      } else if (this.multipleSelection.length > 1) {
+        ElMessage.error("开票仅支持单选，请只选择一条记录");
       } else {
         ElMessage.error("请选择未开票的数据");
       }
@@ -613,6 +617,8 @@ export default {
       this.params.deviceNumber = "";
       this.params.startDate = "";
       this.params.endDate = "";
+      this.params.pageNo = 1;
+      this.getInvoiceData();
     },
     submitClear() {
       this.invoiceDialogVisible = false;
@@ -642,7 +648,7 @@ export default {
           value: [],
         },
       };
-      params.invoiceId = this.multipleSelection.invoicId;
+      params.invoiceId = this.multipleSelection[0].invoicId;
       let buyer_info_fields = this.buyer_info_fields.filter((field) => field.value !== "");
       let gongsi_info_fields = this.gongsi_info_fields.filter((field) => field.value !== "");
       let invoice_content_fields = this.invoice_content_fields.filter((field) => field.value !== "");
@@ -1273,5 +1279,11 @@ export default {
 .cancel-btn {
   background-color: #fff;
   margin-right: 5%;
+}
+
+.btn-single-only-disabled {
+  opacity: 0.5;
+  cursor: not-allowed !important;
+  pointer-events: none;
 }
 </style>

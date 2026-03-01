@@ -45,7 +45,7 @@
     </div>
     <div class="transaction-list">
       <div class="command-buttons">
-        <div class="export-out-btn" style="margin-right: 10px; width: 100px" @click="receipt">
+        <div class="export-out-btn" style="margin-right: 10px; width: 100px" :class="{ 'btn-single-only-disabled': multipleSelection.length !== 1 }" @click="multipleSelection.length === 1 && receipt()">
           <img src="@/assets/yonghu/icon26.png" alt="" style="margin-left: 7px" />
           <span style="font-size: 16px; margin-left: 10px; color: #5a5a5a">开收据</span>
         </div>
@@ -220,7 +220,7 @@ export default {
       }
     },
     reflush() {
-      this.clear();
+      this.clear(1);
       service
         .get(`/userManage/userCharge/showSingleRechargeMeterRecords/1?meterCode=${this.data.meterCode}`)
         .then((response) => {
@@ -242,9 +242,32 @@ export default {
           ElMessage.error(error);
         });
     },
-    clear() {
+    clear(isSearch) {
       this.transactionData.timeType = "";
       this.transactionData.createTime = "";
+      if (typeof isSearch != 'number' || isNaN(isSearch)) {
+        this.currentPage = 1;
+        service
+          .get(`/userManage/userCharge/showSingleRechargeMeterRecords/1?meterCode=${this.data.meterCode}`)
+          .then((response) => {
+            if (response.code === 200) {
+              response.data.userSingleRechargeRecordData.map((v, i) => {
+                v.theId = this.pageSize * (response.data.currentPages - 1) + i + 1;
+              });
+              this.transactionTableData = response.data.userSingleRechargeRecordData;
+              this.transactionTableData.forEach((item) => {
+                item.createTime = item.createTime.replace("T", " ");
+              });
+              this.total = response.data.totalElements;
+              this.currentPage = 1;
+            } else {
+              ElMessage.error(response.msg);
+            }
+          })
+          .catch((error) => {
+            ElMessage.error(error);
+          });
+      }
     },
     // 过滤掉值为空的参数，并格式化时间类型参数
     filterNonEmptyParams(params) {
@@ -633,6 +656,12 @@ export default {
   font-size: 14px;
   background-color: #fff;
   border: 2px solid #f2f2f2;
+}
+
+.btn-single-only-disabled {
+  opacity: 0.5;
+  cursor: not-allowed !important;
+  pointer-events: none;
 }
 
 .transaction-table {

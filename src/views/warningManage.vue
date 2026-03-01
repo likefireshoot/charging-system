@@ -530,7 +530,7 @@ export default {
       return filteredParams;
     },
     reflush() {
-      this.clear();
+      this.clear(1);
       this.filterText = "";
       this.$refs.treeRef.setCurrentKey(null);
       this.region = "";
@@ -563,7 +563,7 @@ export default {
           ElMessage.error(error);
         });
     },
-    clear() {
+    clear(isSearch) {
       this.params.company = null;
       this.params.companyId = null;
       this.params.warningType = "欠费用户";
@@ -572,6 +572,15 @@ export default {
       this.params.meterCode = "";
       this.params.regionName = "";
       this.params.userId = "";
+      if (typeof isSearch != 'number' || isNaN(isSearch)) {
+        this.filterText = "";
+        if (this.$refs.treeRef) {
+          this.$refs.treeRef.setCurrentKey(null);
+        }
+        this.region = "";
+        this.params.pageNo = 1;
+        this.getWaringData();
+      }
     },
     exportExcel() {
       let url = "";

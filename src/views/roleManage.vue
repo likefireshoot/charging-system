@@ -32,7 +32,7 @@
           <img src="@/assets/yuangong/icon4.png" alt="" style="margin-left: 8px" />
           <span style="font-size: 16px; margin-left: 10px; color: #5a5a5a">删除</span>
         </div>
-        <div class="edit-btn" style="margin-left: 10px" @click="edit_click" v-if="staffPermissionIds.includes(38)">
+        <div class="edit-btn" style="margin-left: 10px" :class="{ 'btn-single-only-disabled': multipleSelection.length !== 1 }" @click="multipleSelection.length === 1 && edit_click()" v-if="staffPermissionIds.includes(38)">
           <img src="@/assets/yuangong/icon3.png" alt="" style="margin-left: 8px" />
           <span style="font-size: 16px; margin-left: 10px; color: #5a5a5a">编辑</span>
         </div>
@@ -445,12 +445,16 @@ export default {
     search() {
       this.getRoleData();
     },
-    clear() {
+    clear(isSearch) {
       this.params.roleId = null;
       this.params.roleName = null;
+      if (typeof isSearch != 'number' || isNaN(isSearch)) {
+        this.params.pageNo = 1;
+        this.getRoleData();
+      }
     },
     reflush() {
-      this.clear();
+      this.clear(1);
       let params = {
         pageNo: 1,
         pageSize: 50,
@@ -1038,5 +1042,11 @@ export default {
 .cancel-btn {
   background-color: #fff;
   margin-right: 5%;
+}
+
+.btn-single-only-disabled {
+  opacity: 0.5;
+  cursor: not-allowed !important;
+  pointer-events: none;
 }
 </style>

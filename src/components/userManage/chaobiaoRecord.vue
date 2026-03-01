@@ -236,7 +236,7 @@ export default {
       }
     },
     reflush() {
-      this.clear();
+      this.clear(1);
       service
         .get(`/userManage/meterRead/showReadMeterRecords/1?meterCode=${this.data.meterCode}&imei=${this.data.imei}&companyId=${this.data.companyId}`)
         .then((response) => {
@@ -260,9 +260,34 @@ export default {
           ElMessage.error(error);
         });
     },
-    clear() {
+    clear(isSearch) {
       this.chaobiaoData.time.type = "";
       this.chaobiaoData.time.accurateTime = "";
+      if (typeof isSearch != 'number' || isNaN(isSearch)) {
+        this.currentPage = 1;
+        service
+          .get(`/userManage/meterRead/showReadMeterRecords/1?meterCode=${this.data.meterCode}&imei=${this.data.imei}&companyId=${this.data.companyId}`)
+          .then((response) => {
+            if (response.code === 200) {
+              response.data.userInfoData.map((v, i) => {
+                v.theId = this.pageSize * (response.data.currentPages - 1) + i + 1;
+              });
+              this.chaobiaoTableData = response.data.userInfoData;
+              if (this.chaobiaoTableData.length > 0) {
+                this.chaobiaoTableData.forEach((item) => {
+                  item.createTime = item.createTime.replace("T", " ");
+                });
+              }
+              this.total = response.data.totalElements;
+              this.currentPage = 1;
+            } else {
+              ElMessage.error(response.msg);
+            }
+          })
+          .catch((error) => {
+            ElMessage.error(error);
+          });
+      }
     },
     // 过滤掉值为空的参数
     filterNonEmptyParams(params) {

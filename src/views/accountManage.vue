@@ -432,11 +432,16 @@ export default {
         companyId: null, // 所属水厂ID
         regionId: null, // 区域ID
       };
-      if (typeof isSearch != 'number' || isNaN(isSearch)) {//如果不是数字就搜索
+      // 用户点击清空时，重置区域选择和树，并自动请求数据
+      if (typeof isSearch != 'number' || isNaN(isSearch)) {
+        this.filterText = "";
+        if (this.$refs.treeRef) {
+          this.$refs.treeRef.setCurrentKey(null);
+        }
+        this.quyu_selected = null;
+        this.currentPage = 1;
         this.search();
-        this.currentPage = 1;//清楚页数信息
       }
-      
     },
     // 过滤掉值为空的参数
     filterNonEmptyParams(params) {
