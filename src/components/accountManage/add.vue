@@ -19,7 +19,7 @@
           <span>用户住址</span>
           <el-input v-model="addData.userAddr" class="input-item" />
         </div>
-        <div class="edit-input" style="margin-right: 1%">
+        <div class="edit-input" style="margin-right: 1%" v-if="companyId == 1">
           <span>所属水厂</span>
           <el-select v-model="addData.companyId" class="input-item">
             <el-option v-for="item in companyList" :key="item.id" :label="item.name" :value="item.id" :disabled="companyId !== 1"> </el-option>

@@ -33,6 +33,7 @@
             <el-radio value="150" class="recharge-green">150元</el-radio>
             <el-radio value="200" class="recharge-green">200元</el-radio>
             <el-radio value="500" class="recharge-green">500元</el-radio>
+            <el-radio value="" class="recharge-green">取消</el-radio>
           </el-radio-group>
         </div>
         <div class="recharge-input" style="margin-right: 1%">

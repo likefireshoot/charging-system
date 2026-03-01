@@ -56,16 +56,10 @@
         </div>
       </div>
       <div class="jiage-table">
-        <el-table
-          ref="multipleTableRef"
-          :data="priceData"
-          row-key="priceId"
-          style="width: auto; height: 100%; table-layout: fixed; overflow-x: auto; overflow-y: auto"
-          border
-          :header-cell-style="{ background: '#46B97E', color: '#FFFFFF' }"
-          @selection-change="handleSelectionChange"
-          id="jiage-table"
-        >
+        <el-table ref="multipleTableRef" :data="priceData" row-key="priceId"
+          style="width: auto; height: 100%; table-layout: fixed; overflow-x: auto; overflow-y: auto" border
+          :header-cell-style="{ background: '#46B97E', color: '#FFFFFF' }" @selection-change="handleSelectionChange"
+          id="jiage-table">
           <el-table-column type="selection" :selectable="selectable" :width="selectionWidth" align="center" />
           <el-table-column label="序号" :width="idWidth" align="center" #default="scope">
             {{ scope.$index + 1 + (params.pageNo - 1) * params.pageSize }}
@@ -78,9 +72,10 @@
           <el-table-column property="additionPrice" label="附加费/元" :width="fujiPriceWidth" align="center" />
           <el-table-column label="操作" :width="operationWidth" align="center">
             <template #default="scope">
-              <span style="display: block; width: 100%; text-align: center; cursor: pointer" @click="viewDetail(scope.row)">
-                <img src="@/assets/jiage/icon7.png" alt="" style="margin-right: 15px; width: 20px; height: auto; cursor: pointer" />查看</span
-              >
+              <span style="display: block; width: 100%; text-align: center; cursor: pointer"
+                @click="viewDetail(scope.row)">
+                <img src="@/assets/jiage/icon7.png" alt=""
+                  style="margin-right: 15px; width: 20px; height: auto; cursor: pointer" />查看</span>
             </template>
           </el-table-column>
           <el-table-column property="companyName" label="所属水厂" :width="companyWidth" align="center" />
@@ -88,7 +83,8 @@
       </div>
       <div class="page-box">
         <div class="demo-pagination-block">
-          <el-pagination v-model:current-page="params.pageNo" v-model:page-size="params.pageSize" :page-sizes="[5, 10, 15]" layout="total,  prev, pager, next, jumper" :total="total" />
+          <el-pagination v-model:current-page="params.pageNo" v-model:page-size="params.pageSize"
+            :page-sizes="[5, 10, 15]" layout="total,  prev, pager, next, jumper" :total="total" />
         </div>
       </div>
     </div>
@@ -137,7 +133,7 @@
               <div class="jieti-item" style="width: 60%">
                 <span>水量范围</span>
                 <div class="jieti-range">
-                  <el-input v-model="addData.amountFirstStart" />
+                  <el-input v-model="addData.amountFirstStart" :disabled="true" />
                   <span style="font-size: 16px; margin-bottom: 5px; align-self: center; margin: 0 5px">至</span>
                   <el-input v-model="addData.amountFirstEnd" />
                 </div>
@@ -154,7 +150,8 @@
               <div class="jieti-item" style="width: 60%">
                 <span>水量范围</span>
                 <div class="jieti-range">
-                  <el-input v-model="addData.amountSecondStart" :disabled="addData.stepNumber === '1'" />
+                  <!-- :disabled="addData.stepNumber === '1'" -->
+                  <el-input v-model="addData.amountSecondStart" :disabled="true" />
                   <span style="font-size: 16px; margin-bottom: 5px; align-self: center; margin: 0 5px">至</span>
                   <el-input v-model="addData.amountSecondEnd" :disabled="addData.stepNumber === '1'" />
                 </div>
@@ -171,25 +168,32 @@
               <div class="jieti-item" style="width: 60%">
                 <span>水量范围</span>
                 <div class="jieti-range">
-                  <el-input v-model="addData.amountThirdStart" :disabled="addData.stepNumber === '1' || addData.stepNumber === '2'" />
+                  <!-- :disabled="addData.stepNumber === '1' || addData.stepNumber === '2'" -->
+                  <el-input v-model="addData.amountThirdStart" :disabled="true" />
                   <span style="font-size: 16px; margin-bottom: 5px; align-self: center; margin: 0 5px">至</span>
-                  <el-input v-model="addData.amountThirdEnd" :disabled="addData.stepNumber === '1' || addData.stepNumber === '2'" />
+                  <el-input v-model="addData.amountThirdEnd"
+                    :disabled="addData.stepNumber === '1' || addData.stepNumber === '2'" />
                 </div>
               </div>
               <div class="jieti-item" style="width: 35%">
                 <span>价格（元/吨）</span>
-                <el-input v-model="addData.priceThird" :disabled="addData.stepNumber === '1' || addData.stepNumber === '2'" />
+                <el-input v-model="addData.priceThird"
+                  :disabled="addData.stepNumber === '1' || addData.stepNumber === '2'" />
               </div>
             </div>
           </div>
         </div>
         <div class="btn">
           <div class="confirm-btn" @click="addPrice">
-            <el-icon style="margin-left: 15%"><Check /></el-icon>
+            <el-icon style="margin-left: 15%">
+              <Check />
+            </el-icon>
             <span style="font-size: 16px; margin-left: 15%">确认</span>
           </div>
           <div class="cancel-btn" @click="add_cancel">
-            <el-icon style="margin-left: 15%; color: #45ba7e"><Close /></el-icon>
+            <el-icon style="margin-left: 15%; color: #45ba7e">
+              <Close />
+            </el-icon>
             <span style="font-size: 16px; margin-left: 15%; color: #5a5a5a">取消</span>
           </div>
         </div>
@@ -280,25 +284,32 @@
               <div class="jieti-item" style="width: 60%">
                 <span>水量范围</span>
                 <div class="jieti-range">
-                  <el-input v-model="editData.amountThirdStart" :disabled="editData.stepNumber === '1' || editData.stepNumber === '2'" />
+                  <el-input v-model="editData.amountThirdStart"
+                    :disabled="editData.stepNumber === '1' || editData.stepNumber === '2'" />
                   <span style="font-size: 16px; margin-bottom: 5px; align-self: center; margin: 0 5px">至</span>
-                  <el-input v-model="editData.amountThirdEnd" :disabled="editData.stepNumber === '1' || editData.stepNumber === '2'" />
+                  <el-input v-model="editData.amountThirdEnd"
+                    :disabled="editData.stepNumber === '1' || editData.stepNumber === '2'" />
                 </div>
               </div>
               <div class="jieti-item" style="width: 35%">
                 <span>价格（元/吨）</span>
-                <el-input v-model="editData.priceThird" :disabled="editData.stepNumber === '1' || editData.stepNumber === '2'" />
+                <el-input v-model="editData.priceThird"
+                  :disabled="editData.stepNumber === '1' || editData.stepNumber === '2'" />
               </div>
             </div>
           </div>
         </div>
         <div class="btn">
           <div class="confirm-btn" @click="editPrice">
-            <el-icon style="margin-left: 15%"><Check /></el-icon>
+            <el-icon style="margin-left: 15%">
+              <Check />
+            </el-icon>
             <span style="font-size: 16px; margin-left: 15%">确认</span>
           </div>
           <div class="cancel-btn" @click="edit_dialogFormVisible = false">
-            <el-icon style="margin-left: 15%; color: #45ba7e"><Close /></el-icon>
+            <el-icon style="margin-left: 15%; color: #45ba7e">
+              <Close />
+            </el-icon>
             <span style="font-size: 16px; margin-left: 15%; color: #5a5a5a">取消</span>
           </div>
         </div>
@@ -317,16 +328,22 @@
           </div>
         </div>
         <div class="delete-content">
-          <el-icon style="margin-right: 10px; margin-top: 35px; font-size: 40px; color: #f33125" align-self="center"><WarningFilled /></el-icon>
+          <el-icon style="margin-right: 10px; margin-top: 35px; font-size: 40px; color: #f33125" align-self="center">
+            <WarningFilled />
+          </el-icon>
           <span style="margin-top: 5px">删除后不可恢复，确认删除数据吗？</span>
         </div>
         <div class="btn">
           <div class="confirm-btn" @click="deletePrice">
-            <el-icon style="margin-left: 15%"><Check /></el-icon>
+            <el-icon style="margin-left: 15%">
+              <Check />
+            </el-icon>
             <span style="font-size: 16px; margin-left: 15%">确认</span>
           </div>
           <div class="cancel-btn" @click="delete_dialogFormVisible = false">
-            <el-icon style="margin-left: 15%; color: #45ba7e"><Close /></el-icon>
+            <el-icon style="margin-left: 15%; color: #45ba7e">
+              <Close />
+            </el-icon>
             <span style="font-size: 16px; margin-left: 15%; color: #5a5a5a">取消</span>
           </div>
         </div>
@@ -970,148 +987,563 @@ export default {
           ElMessage.error("导出失败: " + error.message);
         });
     },
+    // validateAddData() {
+    //   const { priceName, amountZeroEnd, priceZero, stepNumber, additionPrice, amountFirstStart, amountFirstEnd, amountSecondStart, amountSecondEnd, amountThirdStart, amountThirdEnd } = this.addData;
+
+
+    //   // 非空校验
+    //   if (!priceName) {
+    //     this.$message.error("价格名称不能为空");
+    //     return false;
+    //   }
+    //   if (!amountZeroEnd) {
+    //     this.$message.error("保底数值不能为空");
+    //     return false;
+    //   }
+    //   if(amountZeroEnd<0){
+    //     this.$message.error("保底数值不能小于零");
+    //     return false;
+    //   }
+    //   if (priceZero === null || priceZero === "" || isNaN(parseFloat(priceZero))) {
+    //     this.$message.error("保底价格不能为空");
+    //     return false;
+    //   }
+    //   if (!stepNumber) {
+    //     this.$message.error("阶梯数不能为空");
+    //     return false;
+    //   }
+    //   if (additionPrice === null || additionPrice === "" || isNaN(parseFloat(additionPrice))) {
+    //     this.$message.error("附加费用不能为空");
+    //     return false;
+    //   }
+
+    //   // 检查第一阶梯开始值是否不超过保底数值
+    //   const zeroEndValue = parseFloat(this.addData.amountZeroEnd);
+    //   const firstStartValue = parseFloat(this.addData.amountFirstStart);
+    //   console.log(zeroEndValue, firstStartValue);
+    //   console.log(typeof zeroEndValue, typeof firstStartValue);
+    //   if (firstStartValue < zeroEndValue) {
+    //     this.$message.error("第一阶梯开始值小于保底数值");
+    //     return false;
+    //   }
+
+    //   // 检查每一阶梯开始值是否小于结束值
+    //   if (parseFloat(amountFirstStart) >= parseFloat(amountFirstEnd)) {
+    //     this.$message.error("第一阶梯开始值必须小于结束值");
+    //     return false;
+    //   }
+
+    //   if (parseFloat(stepNumber) > 1) {
+    //     const firstEnd = parseFloat(amountFirstEnd);
+    //     this.addData.amountSecondStart = (firstEnd + 0.01).toFixed(2);
+
+    //     if (firstEnd >= parseFloat(this.addData.amountSecondStart)) {
+    //       this.$message.error("第一阶梯结束值必须小于第二阶梯开始值");
+    //       return false;
+    //     }
+
+    //     if (parseFloat(this.addData.amountSecondStart) >= parseFloat(amountSecondEnd)) {
+    //       this.$message.error("第二阶梯开始值必须小于结束值");
+    //       return false;
+    //     }
+    //   }
+
+    //   if (parseFloat(stepNumber) > 2) {
+    //     const secondEnd = parseFloat(amountSecondEnd);
+    //     this.addData.amountThirdStart = (secondEnd + 0.01).toFixed(2);
+
+    //     if (secondEnd >= parseFloat(this.addData.amountThirdStart)) {
+    //       this.$message.error("第二阶梯结束值必须小于第三阶梯开始值");
+    //       return false;
+    //     }
+
+    //     if (parseFloat(this.addData.amountThirdStart) >= parseFloat(amountThirdEnd)) {
+    //       this.$message.error("第三阶梯开始值必须小于结束值");
+    //       return false;
+    //     }
+    //   }
+
+    //   return true;
+    // },
+    // validateEditData() {
+    //   const { priceName, amountZeroEnd, priceZero, stepNumber, additionPrice, amountFirstStart, amountFirstEnd, amountSecondStart, amountSecondEnd, amountThirdStart, amountThirdEnd } = this.editData;
+    //   // 非空校验
+    //   if (!priceName) {
+    //     this.$message.error("价格名称不能为空");
+    //     return false;
+    //   }
+    //   if (amountZeroEnd === null || amountZeroEnd === "" || isNaN(parseFloat(amountZeroEnd))) {
+    //     this.$message.error("保底数值不能为空");
+    //     return false;
+    //   }
+    //   if (priceZero === null || priceZero === "" || isNaN(parseFloat(priceZero))) {
+    //     this.$message.error("保底价格不能为空");
+    //     return false;
+    //   }
+    //   if (!stepNumber) {
+    //     this.$message.error("阶梯数不能为空");
+    //     return false;
+    //   }
+    //   if (additionPrice === null || additionPrice === "" || isNaN(parseFloat(additionPrice))) {
+    //     this.$message.error("附加费用不能为空");
+    //     return false;
+    //   }
+
+    //   // 检查第一阶梯开始值是否不超过保底数值
+    //   const zeroEndValue = parseFloat(this.editData.amountZeroEnd);
+    //   const firstStartValue = parseFloat(this.editData.amountFirstStart);
+    //   if (firstStartValue < zeroEndValue) {
+    //     this.$message.error("第一阶梯开始值小于保底数值");
+    //     return false;
+    //   }
+
+    //   // 检查每一阶梯开始值是否小于结束值
+    //   if (parseFloat(amountFirstStart) >= parseFloat(amountFirstEnd)) {
+    //     this.$message.error("第一阶梯开始值必须小于结束值");
+    //     return false;
+    //   }
+
+    //   if (parseFloat(stepNumber) > 1) {
+    //     const firstEnd = parseFloat(amountFirstEnd);
+    //     this.editData.amountSecondStart = (firstEnd + 0.01).toFixed(2);
+
+    //     if (firstEnd >= parseFloat(this.editData.amountSecondStart)) {
+    //       this.$message.error("第一阶梯结束值必须小于第二阶梯开始值");
+    //       return false;
+    //     }
+
+    //     if (parseFloat(this.editData.amountSecondStart) >= parseFloat(amountSecondEnd)) {
+    //       this.$message.error("第二阶梯开始值必须小于结束值");
+    //       return false;
+    //     }
+    //   }
+
+    //   if (parseFloat(stepNumber) > 2) {
+    //     const secondEnd = parseFloat(amountSecondEnd);
+    //     this.editData.amountThirdStart = (secondEnd + 0.01).toFixed(2);
+
+    //     if (secondEnd >= parseFloat(this.editData.amountThirdStart)) {
+    //       this.$message.error("第二阶梯结束值必须小于第三阶梯开始值");
+    //       return false;
+    //     }
+
+    //     if (parseFloat(this.editData.amountThirdStart) >= parseFloat(amountThirdEnd)) {
+    //       this.$message.error("第三阶梯开始值必须小于结束值");
+    //       return false;
+    //     }
+    //   }
+
+    //   return true;
+    // },
+    // ========== 1. 新增价格配置 - 增强参数校验 ==========
     validateAddData() {
-      const { priceName, amountZeroEnd, priceZero, stepNumber, additionPrice, amountFirstStart, amountFirstEnd, amountSecondStart, amountSecondEnd, amountThirdStart, amountThirdEnd } = this.addData;
-      // 非空校验
+      // 先统一去除所有字符串参数的首尾空格
+      Object.keys(this.addData).forEach((key) => {
+        if (typeof this.addData[key] === "string") {
+          this.addData[key] = this.addData[key].trim();
+        }
+      });
+
+      const {
+        priceName, amountZeroEnd, priceZero, stepNumber, additionPrice,
+        amountFirstStart, amountFirstEnd, priceFirst,
+        amountSecondStart, amountSecondEnd, priceSecond,
+        amountThirdStart, amountThirdEnd, priceThird
+      } = this.addData;
+
+      // ========== 基础非空+格式校验 ==========
+      // 价格名称：非空 + 长度限制（2-50字）
       if (!priceName) {
-        this.$message.error("价格名称不能为空");
+        ElMessage.error("价格名称不能为空");
         return false;
       }
-      if (!amountZeroEnd) {
-        this.$message.error("保底数值不能为空");
-        return false;
-      }
-      if (priceZero === null || priceZero === "" || isNaN(parseFloat(priceZero))) {
-        this.$message.error("保底价格不能为空");
-        return false;
-      }
-      if (!stepNumber) {
-        this.$message.error("阶梯数不能为空");
-        return false;
-      }
-      if (additionPrice === null || additionPrice === "" || isNaN(parseFloat(additionPrice))) {
-        this.$message.error("附加费用不能为空");
+      if (priceName.length < 2 || priceName.length > 50) {
+        ElMessage.error("价格名称长度需在2-50字之间");
         return false;
       }
 
-      // 检查第一阶梯开始值是否不超过保底数值
-      const zeroEndValue = parseFloat(this.addData.amountZeroEnd);
-      const firstStartValue = parseFloat(this.addData.amountFirstStart);
-      console.log(zeroEndValue, firstStartValue);
-      console.log(typeof zeroEndValue, typeof firstStartValue);
-      if (firstStartValue < zeroEndValue) {
-        this.$message.error("第一阶梯开始值小于保底数值");
-        return false;
-      }
-
-      // 检查每一阶梯开始值是否小于结束值
-      if (parseFloat(amountFirstStart) >= parseFloat(amountFirstEnd)) {
-        this.$message.error("第一阶梯开始值必须小于结束值");
-        return false;
-      }
-
-      if (parseFloat(stepNumber) > 1) {
-        const firstEnd = parseFloat(amountFirstEnd);
-        this.addData.amountSecondStart = (firstEnd + 0.01).toFixed(2);
-
-        if (firstEnd >= parseFloat(this.addData.amountSecondStart)) {
-          this.$message.error("第一阶梯结束值必须小于第二阶梯开始值");
-          return false;
-        }
-
-        if (parseFloat(this.addData.amountSecondStart) >= parseFloat(amountSecondEnd)) {
-          this.$message.error("第二阶梯开始值必须小于结束值");
-          return false;
-        }
-      }
-
-      if (parseFloat(stepNumber) > 2) {
-        const secondEnd = parseFloat(amountSecondEnd);
-        this.addData.amountThirdStart = (secondEnd + 0.01).toFixed(2);
-
-        if (secondEnd >= parseFloat(this.addData.amountThirdStart)) {
-          this.$message.error("第二阶梯结束值必须小于第三阶梯开始值");
-          return false;
-        }
-
-        if (parseFloat(this.addData.amountThirdStart) >= parseFloat(amountThirdEnd)) {
-          this.$message.error("第三阶梯开始值必须小于结束值");
-          return false;
-        }
-      }
-
-      return true;
-    },
-    validateEditData() {
-      const { priceName, amountZeroEnd, priceZero, stepNumber, additionPrice, amountFirstStart, amountFirstEnd, amountSecondStart, amountSecondEnd, amountThirdStart, amountThirdEnd } = this.editData;
-      // 非空校验
-      if (!priceName) {
-        this.$message.error("价格名称不能为空");
-        return false;
-      }
+      // 保底数值：非空 + 非负 + 数字 + 最多2位小数
       if (amountZeroEnd === null || amountZeroEnd === "" || isNaN(parseFloat(amountZeroEnd))) {
-        this.$message.error("保底数值不能为空");
+        ElMessage.error("保底数值不能为空且必须为有效数字");
         return false;
       }
+      const amountZeroEndVal = parseFloat(amountZeroEnd);
+      if (amountZeroEndVal < 0) {
+        ElMessage.error("保底数值不能小于零");
+        return false;
+      }
+      if (amountZeroEndVal.toString().split(".")[1]?.length > 2) {
+        ElMessage.error("保底数值最多保留2位小数");
+        return false;
+      }
+
+      // 保底价格：非空 + 非负 + 数字 + 最多2位小数
       if (priceZero === null || priceZero === "" || isNaN(parseFloat(priceZero))) {
-        this.$message.error("保底价格不能为空");
+        ElMessage.error("保底价格不能为空且必须为有效数字");
         return false;
       }
-      if (!stepNumber) {
-        this.$message.error("阶梯数不能为空");
+      const priceZeroVal = parseFloat(priceZero);
+      if (priceZeroVal < 0) {
+        ElMessage.error("保底价格不能小于零");
         return false;
       }
+      if (priceZeroVal.toString().split(".")[1]?.length > 2) {
+        ElMessage.error("保底价格最多保留2位小数");
+        return false;
+      }
+
+      // 阶梯数：非空 + 只能是1/2/3
+      if (!stepNumber || !["1", "2", "3"].includes(stepNumber)) {
+        ElMessage.error("阶梯数不能为空且只能选择1、2、3");
+        return false;
+      }
+      const stepNumberVal = parseInt(stepNumber);
+
+      // 附加费：非空 + 非负 + 数字 + 最多2位小数
       if (additionPrice === null || additionPrice === "" || isNaN(parseFloat(additionPrice))) {
-        this.$message.error("附加费用不能为空");
+        ElMessage.error("附加费用不能为空且必须为有效数字");
+        return false;
+      }
+      const additionPriceVal = parseFloat(additionPrice);
+      if (additionPriceVal < 0) {
+        ElMessage.error("附加费用不能小于零");
+        return false;
+      }
+      if (additionPriceVal.toString().split(".")[1]?.length > 2) {
+        ElMessage.error("附加费用最多保留2位小数");
         return false;
       }
 
-      // 检查第一阶梯开始值是否不超过保底数值
-      const zeroEndValue = parseFloat(this.editData.amountZeroEnd);
-      const firstStartValue = parseFloat(this.editData.amountFirstStart);
-      if (firstStartValue < zeroEndValue) {
-        this.$message.error("第一阶梯开始值小于保底数值");
+      // ========== 第一阶梯校验（必选） ==========
+      // 第一阶梯开始值：非空 + 数字 + ≥保底数值
+      if (amountFirstStart === null || amountFirstStart === "" || isNaN(parseFloat(amountFirstStart))) {
+        ElMessage.error("第一阶梯开始值不能为空且必须为有效数字");
+        return false;
+      }
+      const amountFirstStartVal = parseFloat(amountFirstStart);
+      if (amountFirstStartVal < amountZeroEndVal) {
+        ElMessage.error("第一阶梯开始值不能小于保底数值");
         return false;
       }
 
-      // 检查每一阶梯开始值是否小于结束值
-      if (parseFloat(amountFirstStart) >= parseFloat(amountFirstEnd)) {
-        this.$message.error("第一阶梯开始值必须小于结束值");
+      // 第一阶梯结束值：非空 + 数字 + >开始值 + 最多2位小数
+      if (amountFirstEnd === null || amountFirstEnd === "" || isNaN(parseFloat(amountFirstEnd))) {
+        ElMessage.error("第一阶梯结束值不能为空且必须为有效数字");
+        return false;
+      }
+      const amountFirstEndVal = parseFloat(amountFirstEnd);
+      if (amountFirstEndVal <= amountFirstStartVal) {
+        ElMessage.error("第一阶梯开始值必须小于结束值");
+        return false;
+      }
+      if (amountFirstEndVal.toString().split(".")[1]?.length > 2) {
+        ElMessage.error("第一阶梯结束值最多保留2位小数");
         return false;
       }
 
-      if (parseFloat(stepNumber) > 1) {
-        const firstEnd = parseFloat(amountFirstEnd);
-        this.editData.amountSecondStart = (firstEnd + 0.01).toFixed(2);
+      // 第一阶梯价格：非空 + 非负 + 数字 + 最多2位小数
+      if (priceFirst === null || priceFirst === "" || isNaN(parseFloat(priceFirst))) {
+        ElMessage.error("第一阶梯价格不能为空且必须为有效数字");
+        return false;
+      }
+      const priceFirstVal = parseFloat(priceFirst);
+      if (priceFirstVal < 0) {
+        ElMessage.error("第一阶梯价格不能小于零");
+        return false;
+      }
+      if (priceFirstVal.toString().split(".")[1]?.length > 2) {
+        ElMessage.error("第一阶梯价格最多保留2位小数");
+        return false;
+      }
 
-        if (firstEnd >= parseFloat(this.editData.amountSecondStart)) {
-          this.$message.error("第一阶梯结束值必须小于第二阶梯开始值");
+      // ========== 第二阶梯校验（阶梯数≥2时必选） ==========
+      if (stepNumberVal > 1) {
+        // 第二阶梯开始值：非空 + 数字 + >第一阶梯结束值
+        if (amountSecondStart === null || amountSecondStart === "" || isNaN(parseFloat(amountSecondStart))) {
+          ElMessage.error("第二阶梯开始值不能为空且必须为有效数字");
+          return false;
+        }
+        const amountSecondStartVal = parseFloat(amountSecondStart);
+        if (amountSecondStartVal <= amountFirstEndVal) {
+          ElMessage.error("第二阶梯开始值必须大于第一阶梯结束值");
           return false;
         }
 
-        if (parseFloat(this.editData.amountSecondStart) >= parseFloat(amountSecondEnd)) {
-          this.$message.error("第二阶梯开始值必须小于结束值");
+        // 第二阶梯结束值：非空 + 数字 + >开始值 + 最多2位小数
+        if (amountSecondEnd === null || amountSecondEnd === "" || isNaN(parseFloat(amountSecondEnd))) {
+          ElMessage.error("第二阶梯结束值不能为空且必须为有效数字");
+          return false;
+        }
+        const amountSecondEndVal = parseFloat(amountSecondEnd);
+        if (amountSecondEndVal <= amountSecondStartVal) {
+          ElMessage.error("第二阶梯开始值必须小于结束值");
+          return false;
+        }
+        if (amountSecondEndVal.toString().split(".")[1]?.length > 2) {
+          ElMessage.error("第二阶梯结束值最多保留2位小数");
+          return false;
+        }
+
+        // 第二阶梯价格：非空 + 非负 + 数字 + 最多2位小数
+        if (priceSecond === null || priceSecond === "" || isNaN(parseFloat(priceSecond))) {
+          ElMessage.error("第二阶梯价格不能为空且必须为有效数字");
+          return false;
+        }
+        const priceSecondVal = parseFloat(priceSecond);
+        if (priceSecondVal < 0) {
+          ElMessage.error("第二阶梯价格不能小于零");
+          return false;
+        }
+        if (priceSecondVal.toString().split(".")[1]?.length > 2) {
+          ElMessage.error("第二阶梯价格最多保留2位小数");
           return false;
         }
       }
 
-      if (parseFloat(stepNumber) > 2) {
-        const secondEnd = parseFloat(amountSecondEnd);
-        this.editData.amountThirdStart = (secondEnd + 0.01).toFixed(2);
-
-        if (secondEnd >= parseFloat(this.editData.amountThirdStart)) {
-          this.$message.error("第二阶梯结束值必须小于第三阶梯开始值");
+      // ========== 第三阶梯校验（阶梯数≥3时必选） ==========
+      if (stepNumberVal > 2) {
+        // 第三阶梯开始值：非空 + 数字 + >第二阶梯结束值
+        if (amountThirdStart === null || amountThirdStart === "" || isNaN(parseFloat(amountThirdStart))) {
+          ElMessage.error("第三阶梯开始值不能为空且必须为有效数字");
+          return false;
+        }
+        const amountThirdStartVal = parseFloat(amountThirdStart);
+        if (amountThirdStartVal <= parseFloat(amountSecondEnd)) {
+          ElMessage.error("第三阶梯开始值必须大于第二阶梯结束值");
           return false;
         }
 
-        if (parseFloat(this.editData.amountThirdStart) >= parseFloat(amountThirdEnd)) {
-          this.$message.error("第三阶梯开始值必须小于结束值");
+        // 第三阶梯结束值：非空 + 数字 + >开始值 + 最多2位小数
+        if (amountThirdEnd === null || amountThirdEnd === "" || isNaN(parseFloat(amountThirdEnd))) {
+          ElMessage.error("第三阶梯结束值不能为空且必须为有效数字");
+          return false;
+        }
+        const amountThirdEndVal = parseFloat(amountThirdEnd);
+        if (amountThirdEndVal <= amountThirdStartVal) {
+          ElMessage.error("第三阶梯开始值必须小于结束值");
+          return false;
+        }
+        if (amountThirdEndVal.toString().split(".")[1]?.length > 2) {
+          ElMessage.error("第三阶梯结束值最多保留2位小数");
+          return false;
+        }
+
+        // 第三阶梯价格：非空 + 非负 + 数字 + 最多2位小数
+        if (priceThird === null || priceThird === "" || isNaN(parseFloat(priceThird))) {
+          ElMessage.error("第三阶梯价格不能为空且必须为有效数字");
+          return false;
+        }
+        const priceThirdVal = parseFloat(priceThird);
+        if (priceThirdVal < 0) {
+          ElMessage.error("第三阶梯价格不能小于零");
+          return false;
+        }
+        if (priceThirdVal.toString().split(".")[1]?.length > 2) {
+          ElMessage.error("第三阶梯价格最多保留2位小数");
           return false;
         }
       }
 
       return true;
     },
+
+    // ========== 2. 编辑价格配置 - 增强参数校验 ==========
+    validateEditData() {
+      // 先统一去除所有字符串参数的首尾空格
+      Object.keys(this.editData).forEach((key) => {
+        if (typeof this.editData[key] === "string") {
+          this.editData[key] = this.editData[key].trim();
+        }
+      });
+
+      const {
+        priceName, amountZeroEnd, priceZero, stepNumber, additionPrice,
+        amountFirstStart, amountFirstEnd, priceFirst,
+        amountSecondStart, amountSecondEnd, priceSecond,
+        amountThirdStart, amountThirdEnd, priceThird
+      } = this.editData;
+
+      // ========== 基础非空+格式校验（同新增逻辑） ==========
+      if (!priceName) {
+        ElMessage.error("价格名称不能为空");
+        return false;
+      }
+      if (priceName.length < 2 || priceName.length > 50) {
+        ElMessage.error("价格名称长度需在2-50字之间");
+        return false;
+      }
+
+      if (amountZeroEnd === null || amountZeroEnd === "" || isNaN(parseFloat(amountZeroEnd))) {
+        ElMessage.error("保底数值不能为空且必须为有效数字");
+        return false;
+      }
+      const amountZeroEndVal = parseFloat(amountZeroEnd);
+      if (amountZeroEndVal < 0) {
+        ElMessage.error("保底数值不能小于零");
+        return false;
+      }
+      if (amountZeroEndVal.toString().split(".")[1]?.length > 2) {
+        ElMessage.error("保底数值最多保留2位小数");
+        return false;
+      }
+
+      if (priceZero === null || priceZero === "" || isNaN(parseFloat(priceZero))) {
+        ElMessage.error("保底价格不能为空且必须为有效数字");
+        return false;
+      }
+      const priceZeroVal = parseFloat(priceZero);
+      if (priceZeroVal < 0) {
+        ElMessage.error("保底价格不能小于零");
+        return false;
+      }
+      if (priceZeroVal.toString().split(".")[1]?.length > 2) {
+        ElMessage.error("保底价格最多保留2位小数");
+        return false;
+      }
+
+      if (!stepNumber || !["1", "2", "3"].includes(stepNumber)) {
+        ElMessage.error("阶梯数不能为空且只能选择1、2、3");
+        return false;
+      }
+      const stepNumberVal = parseInt(stepNumber);
+
+      if (additionPrice === null || additionPrice === "" || isNaN(parseFloat(additionPrice))) {
+        ElMessage.error("附加费用不能为空且必须为有效数字");
+        return false;
+      }
+      const additionPriceVal = parseFloat(additionPrice);
+      if (additionPriceVal < 0) {
+        ElMessage.error("附加费用不能小于零");
+        return false;
+      }
+      if (additionPriceVal.toString().split(".")[1]?.length > 2) {
+        ElMessage.error("附加费用最多保留2位小数");
+        return false;
+      }
+
+      // ========== 第一阶梯校验（必选） ==========
+      if (amountFirstStart === null || amountFirstStart === "" || isNaN(parseFloat(amountFirstStart))) {
+        ElMessage.error("第一阶梯开始值不能为空且必须为有效数字");
+        return false;
+      }
+      const amountFirstStartVal = parseFloat(amountFirstStart);
+      if (amountFirstStartVal < amountZeroEndVal) {
+        ElMessage.error("第一阶梯开始值不能小于保底数值");
+        return false;
+      }
+
+      if (amountFirstEnd === null || amountFirstEnd === "" || isNaN(parseFloat(amountFirstEnd))) {
+        ElMessage.error("第一阶梯结束值不能为空且必须为有效数字");
+        return false;
+      }
+      const amountFirstEndVal = parseFloat(amountFirstEnd);
+      if (amountFirstEndVal <= amountFirstStartVal) {
+        ElMessage.error("第一阶梯开始值必须小于结束值");
+        return false;
+      }
+      if (amountFirstEndVal.toString().split(".")[1]?.length > 2) {
+        ElMessage.error("第一阶梯结束值最多保留2位小数");
+        return false;
+      }
+
+      if (priceFirst === null || priceFirst === "" || isNaN(parseFloat(priceFirst))) {
+        ElMessage.error("第一阶梯价格不能为空且必须为有效数字");
+        return false;
+      }
+      const priceFirstVal = parseFloat(priceFirst);
+      if (priceFirstVal < 0) {
+        ElMessage.error("第一阶梯价格不能小于零");
+        return false;
+      }
+      if (priceFirstVal.toString().split(".")[1]?.length > 2) {
+        ElMessage.error("第一阶梯价格最多保留2位小数");
+        return false;
+      }
+
+      // ========== 第二阶梯校验（阶梯数≥2时必选） ==========
+      if (stepNumberVal > 1) {
+        if (amountSecondStart === null || amountSecondStart === "" || isNaN(parseFloat(amountSecondStart))) {
+          ElMessage.error("第二阶梯开始值不能为空且必须为有效数字");
+          return false;
+        }
+        const amountSecondStartVal = parseFloat(amountSecondStart);
+        if (amountSecondStartVal <= amountFirstEndVal) {
+          ElMessage.error("第二阶梯开始值必须大于第一阶梯结束值");
+          return false;
+        }
+
+        if (amountSecondEnd === null || amountSecondEnd === "" || isNaN(parseFloat(amountSecondEnd))) {
+          ElMessage.error("第二阶梯结束值不能为空且必须为有效数字");
+          return false;
+        }
+        const amountSecondEndVal = parseFloat(amountSecondEnd);
+        if (amountSecondEndVal <= amountSecondStartVal) {
+          ElMessage.error("第二阶梯开始值必须小于结束值");
+          return false;
+        }
+        if (amountSecondEndVal.toString().split(".")[1]?.length > 2) {
+          ElMessage.error("第二阶梯结束值最多保留2位小数");
+          return false;
+        }
+
+        if (priceSecond === null || priceSecond === "" || isNaN(parseFloat(priceSecond))) {
+          ElMessage.error("第二阶梯价格不能为空且必须为有效数字");
+          return false;
+        }
+        const priceSecondVal = parseFloat(priceSecond);
+        if (priceSecondVal < 0) {
+          ElMessage.error("第二阶梯价格不能小于零");
+          return false;
+        }
+        if (priceSecondVal.toString().split(".")[1]?.length > 2) {
+          ElMessage.error("第二阶梯价格最多保留2位小数");
+          return false;
+        }
+      }
+
+      // ========== 第三阶梯校验（阶梯数≥3时必选） ==========
+      if (stepNumberVal > 2) {
+        if (amountThirdStart === null || amountThirdStart === "" || isNaN(parseFloat(amountThirdStart))) {
+          ElMessage.error("第三阶梯开始值不能为空且必须为有效数字");
+          return false;
+        }
+        const amountThirdStartVal = parseFloat(amountThirdStart);
+        if (amountThirdStartVal <= parseFloat(amountSecondEnd)) {
+          ElMessage.error("第三阶梯开始值必须大于第二阶梯结束值");
+          return false;
+        }
+
+        if (amountThirdEnd === null || amountThirdEnd === "" || isNaN(parseFloat(amountThirdEnd))) {
+          ElMessage.error("第三阶梯结束值不能为空且必须为有效数字");
+          return false;
+        }
+        const amountThirdEndVal = parseFloat(amountThirdEnd);
+        if (amountThirdEndVal <= amountThirdStartVal) {
+          ElMessage.error("第三阶梯开始值必须小于结束值");
+          return false;
+        }
+        if (amountThirdEndVal.toString().split(".")[1]?.length > 2) {
+          ElMessage.error("第三阶梯结束值最多保留2位小数");
+          return false;
+        }
+
+        if (priceThird === null || priceThird === "" || isNaN(parseFloat(priceThird))) {
+          ElMessage.error("第三阶梯价格不能为空且必须为有效数字");
+          return false;
+        }
+        const priceThirdVal = parseFloat(priceThird);
+        if (priceThirdVal < 0) {
+          ElMessage.error("第三阶梯价格不能小于零");
+          return false;
+        }
+        if (priceThirdVal.toString().split(".")[1]?.length > 2) {
+          ElMessage.error("第三阶梯价格最多保留2位小数");
+          return false;
+        }
+      }
+
+      return true;
+    }
   },
 };
 </script>
@@ -1204,14 +1636,15 @@ export default {
 
 .search-input {
   display: flex;
-  justify-content: center; /* 确保子元素在父容器中垂直居中 */
+  justify-content: center;
+  /* 确保子元素在父容器中垂直居中 */
   flex-direction: column;
   width: 30%;
   height: 100%;
   margin-right: 20px;
 }
 
-.search-input > span {
+.search-input>span {
   font-size: 14px;
   margin-bottom: 5px;
 }
@@ -1220,7 +1653,7 @@ export default {
   display: flex;
 }
 
-.time-input > span {
+.time-input>span {
   font-size: 14px;
   margin-bottom: 5px;
   align-self: center;
@@ -1236,7 +1669,7 @@ export default {
   margin-right: 30px;
 }
 
-.buttons > * {
+.buttons>* {
   width: 120px;
 }
 
@@ -1255,6 +1688,7 @@ export default {
   background-color: #45ba7e;
   margin-right: 30px;
 }
+
 .clear-btn {
   background-color: #fff;
   border: 2px solid #f2f2f2;
@@ -1283,7 +1717,7 @@ export default {
   margin-bottom: 15px;
 }
 
-.command-box > * {
+.command-box>* {
   margin-right: 20px;
 }
 
@@ -1294,8 +1728,10 @@ export default {
 .export-out-btn {
   display: flex;
   align-items: center;
-  width: 80px; /* 设置按钮的宽度 */
-  height: 32px; /* 设置按钮的高度 */
+  width: 80px;
+  /* 设置按钮的宽度 */
+  height: 32px;
+  /* 设置按钮的高度 */
   color: white;
   border-radius: 5px;
   cursor: pointer;
@@ -1309,8 +1745,10 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 35px; /* 设置按钮的宽度 */
-  height: 32px; /* 设置按钮的高度 */
+  width: 35px;
+  /* 设置按钮的宽度 */
+  height: 32px;
+  /* 设置按钮的高度 */
   color: white;
   border-radius: 5px;
   cursor: pointer;
@@ -1357,9 +1795,12 @@ export default {
   background-color: #fafafa;
   border-radius: 5px;
   position: absolute;
-  left: 50%; /* 水平方向初始定位 */
-  top: 50%; /* 垂直方向初始定位 */
-  transform: translate(-50%, -50%); /* 同时处理水平和垂直偏移 */
+  left: 50%;
+  /* 水平方向初始定位 */
+  top: 50%;
+  /* 垂直方向初始定位 */
+  transform: translate(-50%, -50%);
+  /* 同时处理水平和垂直偏移 */
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1372,7 +1813,8 @@ export default {
 }
 
 .test-dialog-content {
-  width: 70%; /* 覆盖之前的 35% 宽度 */
+  width: 70%;
+  /* 覆盖之前的 35% 宽度 */
 }
 
 .title {
@@ -1426,18 +1868,19 @@ export default {
 
 .test-input {
   display: flex;
-  justify-content: center; /* 确保子元素在父容器中垂直居中 */
+  justify-content: center;
+  /* 确保子元素在父容器中垂直居中 */
   flex-direction: column;
   width: 32.4%;
   height: 80px;
 }
 
-.test-input > span {
+.test-input>span {
   font-size: 16px;
   margin-bottom: 5px;
 }
 
-.test-input > .el-input {
+.test-input>.el-input {
   height: 35px;
   width: 100%;
 }
@@ -1458,7 +1901,7 @@ export default {
   flex-direction: column;
 }
 
-.jieti-item > span {
+.jieti-item>span {
   font-size: 16px;
   margin-bottom: 5px;
 }

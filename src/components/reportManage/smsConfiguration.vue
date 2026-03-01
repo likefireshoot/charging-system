@@ -256,7 +256,7 @@
           </div>
           <div class="test-input">
             <span>区域</span>
-            <el-select v-model="waterOutageData.region" placeholder="请选择所属水厂">
+            <el-select v-model="waterOutageData.region" placeholder="请选择所属区域">
               <el-option v-for="item in quyu_data" :key="item.id" :label="item.label" :value="item.id"></el-option>
             </el-select>
           </div>
@@ -435,7 +435,8 @@ export default {
     },
     "waterOutageData.region": {
       handler() {
-        if (this.flag === 1) {
+        if (this.flag === 1 && this.waterOutageData.region) {
+
           this.getUserByRegionId();
         }
       },
@@ -694,6 +695,11 @@ export default {
       } else {
         this.addData.companyId = this.companyId; // 设置所属水厂ID
       }
+      Object.keys(this.addData).forEach((key) => {
+        if (typeof this.addData[key] === "string") {
+          this.addData[key] = this.addData[key].trim();
+        }
+      });
       const validations = [
         { condition: this.addData.smsConfigName === null || this.addData.smsConfigName === "", message: "短信配置名称不能为空！" },
         { condition: this.addData.smsSendType === null || this.addData.smsSendType === "", message: "发送方式不能为空！" },
@@ -724,6 +730,14 @@ export default {
         {
           condition: this.addData.companyId === null || this.addData.companyId === "",
           message: "所属水厂不能为空！",
+        },
+        {
+          condition: this.addData.minimumBalanceThreshold && parseFloat(this.addData.minimumBalanceThreshold).toString().split(".")[1]?.length > 2,
+          message: "余额不足发送预警值最多保留2位小数！",
+        },
+        {
+          condition: this.addData.balanceWarningDays && (parseInt(this.addData.balanceWarningDays) > 365),
+          message: "余额不足短信提醒天数不能超过365天！",
         },
       ];
 
@@ -789,6 +803,11 @@ export default {
     },
 
     editConfirm() {
+      Object.keys(this.editData).forEach((key) => {
+        if (typeof this.editData[key] === "string") {
+          this.editData[key] = this.editData[key].trim();
+        }
+      });
       const validations = [
         { condition: this.editData.smsConfigName === null || this.editData.smsConfigName === "", message: "短信配置名称不能为空！" },
         { condition: this.editData.smsSendType === null || this.editData.smsSendType === "", message: "发送方式不能为空！" },
@@ -819,6 +838,14 @@ export default {
         {
           condition: this.editData.companyName === null || this.editData.companyName === "",
           message: "所属水厂不能为空！",
+        },
+        {
+          condition: this.editData.minimumBalanceThreshold && parseFloat(this.editData.minimumBalanceThreshold).toString().split(".")[1]?.length > 2,
+          message: "余额不足发送预警值最多保留2位小数！",
+        },
+        {
+          condition: this.editData.balanceWarningDays && (parseInt(this.editData.balanceWarningDays) > 365),
+          message: "余额不足短信提醒天数不能超过365天！",
         },
       ];
 
@@ -911,6 +938,15 @@ export default {
 
     addOutageConfirm() {
       console.log(this.waterOutageData);
+      if(this.companyId!=1){
+        this.waterOutageData.companyId = this.companyId;//设置companyId
+      }
+      // ========== 新增：先统一去除所有字符串参数的首尾空格 ==========
+      Object.keys(this.waterOutageData).forEach((key) => {
+        if (typeof this.waterOutageData[key] === "string") {
+          this.waterOutageData[key] = this.waterOutageData[key].trim();
+        }
+      });
       let validations = [
         {
           condition: this.waterOutageData.companyId === null || this.waterOutageData.companyId === "",
@@ -932,6 +968,11 @@ export default {
           condition: this.waterOutageData.time === null || this.waterOutageData.time.length !== 2,
           message: "停水起止时间不能为空！",
         },
+        // ========== 新增校验：停水原因长度限制（如10-500字） ==========
+        {
+          condition: this.waterOutageData.reason && (this.waterOutageData.reason.length < 10 || this.waterOutageData.reason.length > 500),
+          message: "停水原因长度需在10-500字之间！",
+        }
       ];
       for (const validation of validations) {
         if (validation.condition) {
