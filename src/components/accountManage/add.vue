@@ -16,6 +16,10 @@
           <el-input v-model="addData.userName" class="input-item" />
         </div>
         <div class="edit-input" style="margin-right: 1%">
+          <span>用户号（选填）</span>
+          <el-input v-model="addData.userId" class="input-item" placeholder="选填" />
+        </div>
+        <div class="edit-input" style="margin-right: 1%">
           <span>用户住址</span>
           <el-input v-model="addData.userAddr" class="input-item" />
         </div>
@@ -69,6 +73,7 @@ export default {
     return {
       addData: {
         userName: "",
+          userId: "",
         userAddr: "",
         regionName: "",
         companyId: null, // 新增水厂字段
@@ -154,7 +159,7 @@ export default {
           this.addData[key] = this.addData[key].trim();
         }
       });
-      
+
       formData = this.addData;
       if (this.companyId !== 1) {
         formData.companyId = this.companyId;
@@ -163,6 +168,7 @@ export default {
       // 定义字段名映射，将属性名映射为友好的显示名称
       const fieldNameMap = {
         userName: "用户名称",
+        userId: "用户号",
         userAddr: "用户住址",
         regionName: "所属区域",
         userPhone: "联系电话",
@@ -170,11 +176,20 @@ export default {
         createTime: "开户时间",
       };
 
+      // 可选字段列表（允许为空）
+      const optionalFields = ["userId"];
+
       // 递归遍历对象属性
       function traverseObject(obj, parentKey = "") {
         for (const key in obj) {
           if (obj.hasOwnProperty(key)) {
             const fullKey = parentKey ? `${parentKey}.${key}` : key;
+
+            // 如果是可选字段，则跳过必填校验
+            if (!parentKey && optionalFields.includes(key)) {
+              continue;
+            }
+
             const value = obj[key];
 
             if (typeof value === "object" && value !== null) {
