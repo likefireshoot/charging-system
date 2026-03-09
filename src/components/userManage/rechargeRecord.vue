@@ -36,36 +36,31 @@
             <span>表号</span>
             <el-input v-model="rechargeRecordeData.meterCode" placeholder="请输入..." />
           </div>
+          <div class="search-input" style="width: 15%; margin-right: 10px">
+            <span>收费人</span>
+            <el-input v-model="rechargeRecordeData.rechargeUser" placeholder="请输入..." />
+          </div>
+          <div class="search-input" style="width: 18%; margin-right: 10px">
+            <span>收费类型</span>
+            <el-select v-model="rechargeRecordeData.rechargeType" placeholder="请选择收费类型">
+              <el-option label="现金" value="现金"></el-option>
+              <el-option label="微信支付" value="微信支付"></el-option>
+              <el-option label="支付宝支付" value="支付宝支付"></el-option>
+            </el-select>
+          </div>
           <div class="search-input" style="width: 25%; margin-right: 10px">
             <span>时间</span>
             <div class="time-input">
-              <el-select v-model="rechargeRecordeData.timeType" placeholder="请选择" style="width: 100px; margin-right: 10px">
-                <el-option label="年" value="year" selected style="color: #46b97e"></el-option>
-                <el-option label="月" value="month" selected style="color: #46b97e"></el-option>
-                <el-option label="日" value="day" selected style="color: #46b97e"></el-option>
-              </el-select>
-              <div v-if="rechargeRecordeData.timeType === 'year'" style="margin-right: 0px; flex-grow: 1">
-                <div style="display: flex; align-items: center">
-                  <el-date-picker v-model="rechargeRecordeData.beginTime" type="year" placeholder="选择年份" style="flex-grow: 1; width: 100%; height: 35px" value-format="YYYY" />
-                </div>
-              </div>
-              <div v-if="rechargeRecordeData.timeType === 'month'" style="margin-right: 0px; flex-grow: 1">
-                <div style="display: flex; align-items: center">
-                  <el-date-picker v-model="rechargeRecordeData.beginTime" type="month" placeholder="选择月份" style="flex-grow: 1; width: 100%; height: 35px" value-format="YYYY-MM" />
-                </div>
-              </div>
-              <div v-if="!rechargeRecordeData.timeType || rechargeRecordeData.timeType === 'day'" style="margin-right: 0px; flex-grow: 1">
-                <div style="display: flex; align-items: center">
-                  <el-date-picker
-                    v-model="rechargeRecordeData.beginTime"
-                    type="date"
-                    placeholder="选择日期"
-                    style="flex-grow: 1; width: 100%; height: 35px"
-                    format="YYYY-MM-DD"
-                    value-format="YYYY-MM-DD"
-                  />
-                </div>
-              </div>
+              <el-date-picker
+                v-model="rechargeRecordeData.dateRange"
+                type="daterange"
+                range-separator="至"
+                start-placeholder="开始日期"
+                end-placeholder="结束日期"
+                style="flex-grow: 1; width: 100%; height: 35px"
+                format="YYYY-MM-DD"
+                value-format="YYYY-MM-DD"
+              />
             </div>
           </div>
           <div class="buttons" style="margin-left: 5%; margin-right: 10px">
@@ -129,8 +124,9 @@
               <el-table-column property="userPhone" label="联系电话" min-width="100" align="center" />
               <el-table-column property="meterCode" label="表号" min-width="100" align="center" />
               <!-- <el-table-column property="imei" label="IMEI号" width="240" align="center" /> -->
-              <el-table-column property="meterType" label="水表类型" min-width="100" align="center" />
+              <!-- <el-table-column property="meterType" label="水表类型" min-width="100" align="center" /> -->
               <el-table-column property="payerPhone" label="缴费人手机号" min-width="100" align="center" />
+              <el-table-column property="rechargeUser" label="收费人" min-width="80" align="center" />
               <el-table-column property="rechargeType" label="交易方式" min-width="100" align="center" />
               <el-table-column property="rechargeAmount" label="充值金额/元" min-width="100" align="center" />
               <el-table-column property="oldBalance" label="充值前余额/元" min-width="100" align="center" />
@@ -169,13 +165,16 @@ export default {
     return {
       rechargeRecordeData: {
         region: "",
-        beginTime: "",
-        timeType: null,
+        startDate: "",
+        endDate: "",
+        dateRange: [],
         userName: "",
         meterCode: "",
         imei: "",
         companyId: null,
         userId: "",
+        rechargeUser: "",
+        rechargeType: "",
       },
       companyId: JSON.parse(sessionStorage.getItem("userData")).companyId, // 公司ID
       rechargeRecordTableData: [],
@@ -347,13 +346,16 @@ export default {
     },
     clear(isSearch) {
       this.rechargeRecordeData.region = "";
-      this.rechargeRecordeData.timeType = null;
-      this.rechargeRecordeData.beginTime = "";
+      this.rechargeRecordeData.startDate = "";
+      this.rechargeRecordeData.endDate = "";
+      this.rechargeRecordeData.dateRange = [];
       this.rechargeRecordeData.userName = "";
       this.rechargeRecordeData.meterCode = "";
       this.rechargeRecordeData.imei = "";
       this.rechargeRecordeData.companyId = null;
       this.rechargeRecordeData.userId = "";
+      this.rechargeRecordeData.rechargeUser = "";
+      this.rechargeRecordeData.rechargeType = "";
       if (typeof isSearch != 'number' || isNaN(isSearch)) {
         this.currentPage = 1;
         this.search();
@@ -367,44 +369,21 @@ export default {
         if (params.hasOwnProperty(key)) {
           const value = params[key];
 
+          // 时间范围：拆分为后端需要的 startDate / endDate
+          if (key === "dateRange" && Array.isArray(value) && value.length === 2) {
+            if (value[0]) {
+              filteredParams.startDate = value[0];
+            }
+            if (value[1]) {
+              filteredParams.endDate = value[1];
+            }
+            continue;
+          }
+
           // 跳过无效值
           if (value === "" || value === null || value === undefined) {
             continue;
           }
-
-          // 关键：如果是createTime，且已经通过timeType处理过，则跳过
-          if (key === "beginTime" && filteredParams.hasOwnProperty("beginTime")) {
-            continue;
-          }
-
-          // 处理时间类型参数
-          if (key === "timeType" && params["beginTime"]) {
-            let formattedTime = "";
-            let timeTypeValue = null;
-
-            switch (value) {
-              case "year":
-                formattedTime = `${params["beginTime"]}-01-01 00:00:00`;
-                timeTypeValue = 1;
-                break;
-              case "month":
-                formattedTime = `${params["beginTime"]}-01 00:00:00`;
-                timeTypeValue = 2;
-                break;
-              case "day":
-                formattedTime = `${params["beginTime"]} 00:00:00`;
-                timeTypeValue = 3;
-                break;
-              default:
-                continue;
-            }
-
-            filteredParams["timeType"] = timeTypeValue;
-            filteredParams["beginTime"] = formattedTime;
-            continue;
-          }
-
-          // 其他参数直接添加
           filteredParams[key] = value;
         }
       }
@@ -701,8 +680,7 @@ export default {
   justify-content: flex-start;
   justify-content: center; /* 确保子元素在父容器中垂直居中 */
   flex-direction: column;
-  width: 12%;
-  height: 100%;
+  width: 14%;
   margin-right: 20px;
 }
 

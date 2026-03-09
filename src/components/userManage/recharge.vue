@@ -181,7 +181,14 @@ export default {
         return;
       }
 
-      let dataParams = { meterCode: formData.meterCode, rechargeType: formData.rechargeType, rechargeAmount: null, region: formData.region };
+      const rechargeUser = JSON.parse(sessionStorage.getItem("userData"))?.staffName || "";
+      let dataParams = {
+        meterCode: formData.meterCode,
+        rechargeType: formData.rechargeType,
+        rechargeAmount: null,
+        region: formData.region,
+        rechargeUser: rechargeUser,
+      };
       if (formData.quickmoney) {
         dataParams.rechargeAmount = formData.quickmoney;
       } else if (formData.money) {
