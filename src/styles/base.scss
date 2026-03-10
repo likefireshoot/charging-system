@@ -12,7 +12,7 @@ html {
   overflow: hidden;
   body {
     margin: 0 auto;
-    font-size: 16px;
+    font-size: 20px;
     font-family: PingFangSC-Regular, PingFang SC, Microsoft YaHei, Helvetica Neue, Source Han Sans SC, Noto Sans CJK SC, WenQuanYi Micro Hei, sans-serif;
     min-height: 100%;
     height: 100%;
@@ -20,6 +20,13 @@ html {
     user-select: none;
     overflow: hidden;
   }
+}
+
+:root {
+  // --el-color-primary: #46b97e !important;
+  // --el-input-height: 35px !important;
+  // --el-component-size: 35px !important;
+  --el-font-size-base: 20px !important;
 }
 
 a {
