@@ -3,7 +3,7 @@
     <div class="serach-box">
       <div class="search-input" v-if="companyId === 1">
         <span>所属水厂</span>
-        <el-select v-model="param.company" placeholder="请选择所属水厂">
+        <el-select class="big-font-el-select" v-model="param.company" placeholder="请选择所属水厂">
           <el-option v-for="item in companyList" :key="item.id" :label="item.name" :value="item.id"></el-option>
         </el-select>
       </div>
@@ -21,12 +21,12 @@
       </div>
       <div class="buttons">
         <div class="sercah-btn" @click="search">
-          <img src="@/assets/yonghu/icon16.png" alt="" style="margin-left: 12px" />
-          <span style="font-size: 16px; margin-left: 15%">搜索</span>
+          <img src="@/assets/yonghu/icon16.png" alt="" style="margin-left: 10px" />
+          <span style="font-size: 20px; margin-left: 15%">搜索</span>
         </div>
         <div class="clear-btn" @click="clear">
-          <img src="@/assets/yonghu/icon4.png" alt="" style="margin-left: 12px" />
-          <span style="font-size: 16px; margin-left: 15%; color: #5a5a5a">清空</span>
+          <img src="@/assets/yonghu/icon4.png" alt="" style="margin-left: 10px" />
+          <span style="font-size: 20px; margin-left: 15%; color: #5a5a5a">清空</span>
         </div>
       </div>
     </div>
@@ -34,37 +34,37 @@
       <div class="command-box">
         <div class="add-btn" style="margin-left: 5px" @click="add_dialogFormVisible = true" v-if="staffPermissionIds.includes(2)">
           <img src="@/assets/yonghu/icon13.png" alt="" style="margin-left: 8px" />
-          <span style="font-size: 16px; margin-left: 8px; color: #5a5a5a">开户</span>
+          <span style="font-size: 20px; margin-left: 8px; color: #5a5a5a">开户</span>
         </div>
-        <div class="export-out-btn" style="margin-left: 5px; width: 110px" @click="deviceBinding_dialogFormVisible = true" v-if="staffPermissionIds.includes(3)">
+        <div class="export-out-btn" style="margin-left: 5px;width:130px" @click="deviceBinding_dialogFormVisible = true" v-if="staffPermissionIds.includes(3)">
           <img src="@/assets/yonghu/icon21.png" alt="" style="margin-left: 7px" />
-          <span style="font-size: 16px; margin-left: 10px; color: #5a5a5a">设备绑定</span>
+          <span style="font-size: 20px; margin-left: 10px; color: #5a5a5a">设备绑定</span>
         </div>
         <div class="delete-btn" style="margin-left: 5px" @click="delete_btn_click" v-if="staffPermissionIds.includes(4)">
           <img src="@/assets/yonghu/icon4.png" alt="" style="margin-left: 8px" />
-          <span style="font-size: 16px; margin-left: 8px; color: #5a5a5a">删除</span>
+          <span style="font-size: 20px; margin-left: 8px; color: #5a5a5a">删除</span>
         </div>
-        <div class="export-out-btn" style="margin-left: 5px; width: 145px" @click="download" v-if="staffPermissionIds.includes(5)">
+        <div class="export-out-btn" style="margin-left: 5px; width: 165px" @click="download" v-if="staffPermissionIds.includes(5)">
           <img src="@/assets/yonghu/icon1.png" alt="" style="margin-left: 7px" />
-          <span style="font-size: 16px; margin-left: 10px; color: #5a5a5a">用户导入模板</span>
+          <span style="font-size: 20px; margin-left: 10px; color: #5a5a5a">用户导入模板</span>
         </div>
-        <div class="export-in-btn" style="margin-left: 5px; width: 110px" @click="triggerUserImport" v-if="staffPermissionIds.includes(5)">
+        <div class="export-in-btn" style="margin-left: 5px; width: 130px" @click="triggerUserImport" v-if="staffPermissionIds.includes(5)">
           <img src="@/assets/yonghu/icon1.png" alt="" style="margin-left: 7px" />
-          <span style="font-size: 16px; margin-left: 5px; color: #5a5a5a">用户导入</span>
+          <span style="font-size: 20px; margin-left: 5px; color: #5a5a5a">用户导入</span>
           <input ref="userFileInput" type="file" accept=".xls,.xlsx" style="display: none" @change="exportIn" />
         </div>
-        <div class="export-out-btn" style="margin-left: 5px; width: 145px" @click="bindingDownload" v-if="staffPermissionIds.includes(5)">
+        <div class="export-out-btn" style="margin-left: 5px; width: 165px" @click="bindingDownload" v-if="staffPermissionIds.includes(5)">
           <img src="@/assets/yonghu/icon1.png" alt="" style="margin-left: 7px" />
-          <span style="font-size: 16px; margin-left: 10px; color: #5a5a5a">绑定导入模板</span>
+          <span style="font-size: 20px; margin-left: 10px; color: #5a5a5a">绑定导入模板</span>
         </div>
-        <div class="export-in-btn" style="margin-left: 5px; width: 110px" @click="triggerBindImport" v-if="staffPermissionIds.includes(5)">
+        <div class="export-in-btn" style="margin-left: 5px; width: 130px" @click="triggerBindImport" v-if="staffPermissionIds.includes(5)">
           <img src="@/assets/yonghu/icon1.png" alt="" style="margin-left: 7px" />
-          <span style="font-size: 16px; margin-left: 5px; color: #5a5a5a">绑定导入</span>
+          <span style="font-size: 20px; margin-left: 5px; color: #5a5a5a">绑定导入</span>
           <input ref="bindFileInput" type="file" accept=".xls,.xlsx" style="display: none" @change="bindingExportIn" />
         </div>
         <div class="export-out-btn" style="margin-left: 5px" @click="exportExcel">
           <img src="@/assets/yonghu/icon2.png" alt="" style="margin-left: 7px" />
-          <span style="font-size: 16px; margin-left: 10px; color: #5a5a5a">导出</span>
+          <span style="font-size: 20px; margin-left: 10px; color: #5a5a5a">导出</span>
         </div>
         <div class="reflush" style="margin-left: 5px" @click="reflush">
           <img src="@/assets/yonghu/icon15.png" alt="" />
@@ -824,6 +824,24 @@ export default {
   --el-color-primary: #46b97e;
 }
 
+/* 修改分页整体字号（包括“共 x 条”） */
+:deep(.el-pagination) {
+  font-size: 16px;
+}
+
+/* 修改页码数字按钮的大小 */
+:deep(.el-pagination .el-pager li) {
+  font-size: 16px;
+  min-width: 35px; /* 数字变大后，按钮也要相应加宽 */
+  height: 35px;
+  line-height: 35px;
+}
+
+/* 如果有下拉选择每页条数，修改其内部文字 */
+:deep(.el-pagination .el-select .el-input) {
+  font-size: 16px;
+}
+
 :deep(.el-tree) {
   --el-fill-color-light: #46b97e;
   --el-fill-color-blank: #e8f3ed;
@@ -881,7 +899,7 @@ export default {
 }
 
 .search-input > span {
-  font-size: 14px;
+  font-size: 18px;
   margin-bottom: 5px;
 }
 
@@ -965,13 +983,13 @@ export default {
 .export-out-btn {
   display: flex;
   align-items: center;
-  width: 80px; /* 设置按钮的宽度 */
-  height: 32px; /* 设置按钮的高度 */
+  width: 90px; /* 设置按钮的宽度 */
+  height: 35px; /* 设置按钮的高度 */
   color: white;
   border-radius: 5px;
   cursor: pointer;
   transition: all 0.3s;
-  font-size: 14px;
+  font-size: 20px;
   background-color: #fff;
   border: 2px solid #f2f2f2;
 }
@@ -986,7 +1004,7 @@ export default {
   border-radius: 5px;
   cursor: pointer;
   transition: all 0.3s;
-  font-size: 14px;
+  font-size: 20px;
   background-color: #fff;
   border: 2px solid #f2f2f2;
 }

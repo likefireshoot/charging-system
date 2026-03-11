@@ -4,7 +4,7 @@
       <div class="title">
         <div style="margin-left: 10px; display: flex; align-items: center">
           <img src="@/assets/yonghu/icon9.png" alt="" style="margin-right: 8px" />
-          <span style="font-size: 18px">换表记录</span>
+          <span style="font-size: 20px">换表记录</span>
         </div>
         <div style="margin-right: 10px; cursor: pointer" @click="handleChangeRecordClose">
           <img src="@/assets/close.png" alt="" />
@@ -75,28 +75,28 @@
           <div class="buttons" style="margin-left: 10%; margin-right: 10px">
             <div class="sercah-btn" @click="search">
               <img src="@/assets/yonghu/icon16.png" alt="" style="margin-left: 8px" />
-              <span style="font-size: 16px; margin-left: 15%">搜索</span>
+              <span style="font-size: 20px; margin-left: 7%">搜索</span>
             </div>
             <div class="clear-btn" @click="clear">
               <img src="@/assets/yonghu/icon4.png" alt="" style="margin-left: 8px" />
-              <span style="font-size: 16px; margin-left: 15%; color: #5a5a5a">清空</span>
+              <span style="font-size: 20px; margin-left: 7%; color: #5a5a5a">清空</span>
             </div>
           </div>
         </div>
         <div class="change-record-list">
           <div class="command-buttons">
-            <div class="export-out-btn" style="margin-right: 10px; width: 110px" @click="download" v-if="staffPermissionIds.includes(15)">
+            <div class="export-out-btn" style="margin-right: 10px; width: 130px" @click="download" v-if="staffPermissionIds.includes(15)">
               <img src="@/assets/yonghu/icon1.png" alt="" style="margin-left: 7px" />
-              <span style="font-size: 16px; margin-left: 10px; color: #5a5a5a">模板下载</span>
+              <span style="font-size: 20px; margin-left: 10px; color: #5a5a5a">模板下载</span>
             </div>
             <div class="export-in-btn" style="margin-right: 10px" @click="triggerFileInput" v-if="staffPermissionIds.includes(15)">
               <img src="@/assets/yonghu/icon1.png" alt="" style="margin-left: 7px" />
-              <span style="font-size: 16px; margin-left: 10px; color: #5a5a5a">导入</span>
+              <span style="font-size: 20px; margin-left: 10px; color: #5a5a5a">导入</span>
               <input ref="fileInput" type="file" accept=".xls,.xlsx" style="display: none" @change="exportIn" />
             </div>
             <div class="export-out-btn" style="margin-right: 10px" @click="exportExcel">
               <img src="@/assets/yonghu/icon2.png" alt="" style="margin-left: 7px" />
-              <span style="font-size: 16px; margin-left: 10px; color: #5a5a5a">导出</span>
+              <span style="font-size: 20px; margin-left: 10px; color: #5a5a5a">导出</span>
             </div>
             <div class="reflush" style="margin-left: 10px" @click="reflush">
               <img src="@/assets/yonghu/icon15.png" alt="" />
@@ -136,7 +136,7 @@
               <el-table-column label="操作" width="150" align="center">
                 <template #default="{ row }">
                   <!-- 撤回按钮 -->
-                  <el-button size="small" :type="row.isWithdraw === 1 ? 'info' : 'success'" :disabled="row.isWithdraw === 1" @click="withdraw(row.meterChangeRecordId)">
+                  <el-button size="large" :type="row.isWithdraw === 1 ? 'info' : 'success'" :disabled="row.isWithdraw === 1" @click="withdraw(row.meterChangeRecordId)">
                     {{ row.isWithdraw === 1 ? "已撤回" : "撤回" }}
                   </el-button>
                 </template>
@@ -649,7 +649,7 @@ export default {
 };
 </script>
 
-<style>
+<style scoped>
 .change-record-dialog {
   position: fixed;
   top: 0;
@@ -707,7 +707,7 @@ export default {
 }
 
 .search-input > span {
-  font-size: 14px;
+  font-size: 20px;
   margin-bottom: 5px;
   white-space: nowrap;
   /* text-align: center; */
@@ -758,13 +758,13 @@ export default {
 .export-out-btn {
   display: flex;
   align-items: center;
-  width: 80px; /* 设置按钮的宽度 */
+  width: 85px; /* 设置按钮的宽度 */
   height: 32px; /* 设置按钮的高度 */
   color: white;
   border-radius: 5px;
   cursor: pointer;
   transition: all 0.3s;
-  font-size: 14px;
+  font-size: 20px;
   background-color: #fff;
   border: 2px solid #f2f2f2;
 }
@@ -779,7 +779,7 @@ export default {
   border-radius: 5px;
   cursor: pointer;
   transition: all 0.3s;
-  font-size: 14px;
+  font-size: 20px;
   background-color: #fff;
   border: 2px solid #f2f2f2;
 }

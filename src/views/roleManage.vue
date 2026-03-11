@@ -14,11 +14,11 @@
       <div class="buttons">
         <div class="sercah-btn" @click="search">
           <img src="@/assets/yonghu/icon16.png" alt="" style="margin-left: 8px" />
-          <span style="font-size: 16px; margin-left: 15%">搜索</span>
+          <span style="font-size: 20px; margin-left: 15%">搜索</span>
         </div>
         <div class="clear-btn" @click="clear">
           <img src="@/assets/yuangong/icon4.png" alt="" style="margin-left: 10px" />
-          <span style="font-size: 16px; margin-left: 15%; color: #5a5a5a">清空</span>
+          <span style="font-size: 20px; margin-left: 15%; color: #5a5a5a">清空</span>
         </div>
       </div>
     </div>
@@ -26,15 +26,15 @@
       <div class="command-box">
         <div class="add-btn" style="margin-left: 10px" @click="add_dialogFormVisible = true" v-if="staffPermissionIds.includes(36)">
           <img src="@/assets/yuangong/icon6.png" alt="" style="margin-left: 8px" />
-          <span style="font-size: 16px; margin-left: 10px; color: #5a5a5a">新增</span>
+          <span style="font-size: 20px; margin-left: 10px; color: #5a5a5a">新增</span>
         </div>
         <div class="delete-btn" style="margin-left: 10px" @click="delete_click" v-if="staffPermissionIds.includes(37)">
           <img src="@/assets/yuangong/icon4.png" alt="" style="margin-left: 8px" />
-          <span style="font-size: 16px; margin-left: 10px; color: #5a5a5a">删除</span>
+          <span style="font-size: 20px; margin-left: 10px; color: #5a5a5a">删除</span>
         </div>
         <div class="edit-btn" style="margin-left: 10px" :class="{ 'btn-single-only-disabled': multipleSelection.length !== 1 }" @click="multipleSelection.length === 1 && edit_click()" v-if="staffPermissionIds.includes(38)">
           <img src="@/assets/yuangong/icon3.png" alt="" style="margin-left: 8px" />
-          <span style="font-size: 16px; margin-left: 10px; color: #5a5a5a">编辑</span>
+          <span style="font-size: 20px; margin-left: 10px; color: #5a5a5a">编辑</span>
         </div>
         <!-- <div class="export-in-btn" style="margin-left: 10px; width: 110px">
           <img src="@/assets/yuangong/icon1.png" alt="" style="margin-left: 7px" />
@@ -86,7 +86,7 @@
         <div class="title">
           <div style="margin-left: 10px; display: flex; align-items: center">
             <img src="@/assets/yuangong/icon6.png" alt="" style="margin-right: 10px" />
-            <span style="font-size: 18px">新增</span>
+            <span style="font-size: 20px">新增</span>
           </div>
           <div style="margin-right: 10px; cursor: pointer" @click="add_dialogFormVisible = false">
             <img src="@/assets/close.png" alt="" />
@@ -99,7 +99,7 @@
           </div>
           <div class="edit-input" style="width: 50%; margin-right: 0">
             <span>权限内容</span>
-            <el-select v-model="addData.permissionList" multiple clearable collapse-tags placeholder="请选择权限内容" popper-class="custom-header" :max-collapse-tags="1">
+            <el-select  class="big-font-el-select" v-model="addData.permissionList" multiple clearable collapse-tags placeholder="请选择权限内容" popper-class="custom-header" :max-collapse-tags="1">
               <template #header>
                 <el-checkbox class="user-checkbox" v-model="checkAll" :indeterminate="indeterminate" @change="handleCheckAll"> 全选 </el-checkbox>
               </template>
@@ -110,11 +110,11 @@
         <div class="btn">
           <div class="confirm-btn" @click="addConfirm">
             <el-icon style="margin-left: 15%"><Check /></el-icon>
-            <span style="font-size: 16px; margin-left: 15%">确认</span>
+            <span style="font-size: 20px; margin-left: 15%">确认</span>
           </div>
           <div class="cancel-btn" @click="add_cancel">
             <el-icon style="margin-left: 15%; color: #45ba7e"><Close /></el-icon>
-            <span style="font-size: 16px; margin-left: 15%; color: #5a5a5a">取消</span>
+            <span style="font-size: 20px; margin-left: 15%; color: #5a5a5a">取消</span>
           </div>
         </div>
       </div>
@@ -125,7 +125,7 @@
         <div class="title">
           <div style="margin-left: 10px; display: flex; align-items: center">
             <img src="@/assets/yuangong/icon4.png" alt="" style="margin-right: 10px" />
-            <span style="font-size: 18px">删除</span>
+            <span style="font-size: 20px">删除</span>
           </div>
           <div style="margin-right: 10px; cursor: pointer" @click="delete_dialogFormVisible = false">
             <img src="@/assets/close.png" alt="" />
@@ -138,22 +138,22 @@
         <div class="btn">
           <div class="confirm-btn" @click="deleteConfirm">
             <el-icon style="margin-left: 15%"><Check /></el-icon>
-            <span style="font-size: 16px; margin-left: 15%">确认</span>
+            <span style="font-size: 20px; margin-left: 15%">确认</span>
           </div>
           <div class="cancel-btn" @click="delete_dialogFormVisible = false">
             <el-icon style="margin-left: 15%; color: #45ba7e"><Close /></el-icon>
-            <span style="font-size: 16px; margin-left: 15%; color: #5a5a5a">取消</span>
+            <span style="font-size: 20px; margin-left: 15%; color: #5a5a5a">取消</span>
           </div>
         </div>
       </div>
     </div>
     <!-- 编辑按钮弹出框 -->
-    <div class="add-dialog" v-if="edit_dialogFormVisible">
-      <div class="add-role-dialog-content">
+    <div class="edit-dialog" v-if="edit_dialogFormVisible">
+      <div class="edit-dialog-content-1 ">
         <div class="title">
           <div style="margin-left: 10px; display: flex; align-items: center">
             <img src="@/assets/yuangong/icon3.png" alt="" style="margin-right: 10px" />
-            <span style="font-size: 18px">编辑</span>
+            <span style="font-size: 20px">编辑</span>
           </div>
           <div style="margin-right: 10px; cursor: pointer" @click="edit_dialogFormVisible = false">
             <img src="@/assets/close.png" alt="" />
@@ -177,11 +177,11 @@
         <div class="btn">
           <div class="confirm-btn" @click="editConfirm">
             <el-icon style="margin-left: 15%"><Check /></el-icon>
-            <span style="font-size: 16px; margin-left: 15%">确认</span>
+            <span style="font-size: 20px; margin-left: 15%">确认</span>
           </div>
           <div class="cancel-btn" @click="edit_dialogFormVisible = false">
             <el-icon style="margin-left: 15%; color: #45ba7e"><Close /></el-icon>
-            <span style="font-size: 16px; margin-left: 15%; color: #5a5a5a">取消</span>
+            <span style="font-size: 20px; margin-left: 15%; color: #5a5a5a">取消</span>
           </div>
         </div>
       </div>
@@ -677,6 +677,24 @@ export default {
   --el-color-primary: #46b97e;
 }
 
+/* 修改分页整体字号（包括“共 x 条”） */
+:deep(.el-pagination) {
+  font-size: 16px;
+}
+
+/* 修改页码数字按钮的大小 */
+:deep(.el-pagination .el-pager li) {
+  font-size: 16px;
+  min-width: 35px; /* 数字变大后，按钮也要相应加宽 */
+  height: 35px;
+  line-height: 35px;
+}
+
+/* 如果有下拉选择每页条数，修改其内部文字 */
+:deep(.el-pagination .el-select .el-input) {
+  font-size: 16px;
+}
+
 :deep(.el-tree) {
   --el-fill-color-light: #46b97e;
   --el-fill-color-blank: #e8f3ed;
@@ -734,7 +752,7 @@ export default {
 }
 
 .search-input > span {
-  font-size: 14px;
+  font-size: 20px;
   margin-bottom: 5px;
 }
 
@@ -743,7 +761,7 @@ export default {
 }
 
 .time-input > span {
-  font-size: 14px;
+  font-size: 20px;
   margin-bottom: 5px;
   align-self: center;
   margin-left: 5px;
@@ -752,7 +770,7 @@ export default {
 
 .buttons {
   display: flex;
-  width: 240px;
+  width: 260px;
   height: 100%;
   align-items: center;
   margin-left: 100px;
@@ -817,13 +835,13 @@ export default {
 .export-out-btn {
   display: flex;
   align-items: center;
-  width: 80px; /* 设置按钮的宽度 */
-  height: 32px; /* 设置按钮的高度 */
+  width: 90px; /* 设置按钮的宽度 */
+  height: 35px; /* 设置按钮的高度 */
   color: white;
   border-radius: 5px;
   cursor: pointer;
   transition: all 0.3s;
-  font-size: 14px;
+  font-size: 20px;
   background-color: #fff;
   border: 2px solid #f2f2f2;
 }
@@ -838,7 +856,7 @@ export default {
   border-radius: 5px;
   cursor: pointer;
   transition: all 0.3s;
-  font-size: 14px;
+  font-size: 20px;
   background-color: #fff;
   border: 2px solid #f2f2f2;
 }
@@ -866,45 +884,44 @@ export default {
 .delete-dialog,
 .edit-dialog {
   position: fixed;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  right: 0;
+  inset: 0; /* 代替 top/bottom/left/right: 0 */
   z-index: 199;
-  background-color: rgb(31 33 38 / 15%);
+  background-color: rgba(31, 33, 38, 0.15);
+
+  /* 关键：让子元素自动居中 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .add-role-dialog-content,
 .delete-dialog-content,
 .edit-dialog-content-1 {
-  width: 50%;
   border: 1px solid #fafafa;
   background-color: #fafafa;
   border-radius: 5px;
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translateX(-50%);
   display: flex;
   flex-direction: column;
   align-items: center;
+  /* 删掉 position, left, top, transform */
 }
 
+/* 针对不同对话框设置具体的尺寸 */
 .add-role-dialog-content {
   width: 60%;
-  height: 250px;
-  margin-top: -210px;
+  min-height: 250px; /* 改用 min-height 防止内容多时溢出 */
+  /* 删掉 margin-top */
 }
+
 .delete-dialog-content {
   width: 35%;
   height: 300px;
-  margin-top: -150px;
 }
 
+/* 编辑框根据你的图片，建议也给个保底高度 */
 .edit-dialog-content-1 {
-  height: 420px;
   width: 60%;
-  margin-top: -210px;
+  min-height: 280px;
 }
 
 .title {
@@ -926,7 +943,8 @@ export default {
   display: flex;
   flex-direction: column;
   align-items: center;
-  overflow-y: auto;
+  /* 关键修改：将 auto 改为 visible 或 hidden (明确不会溢出时删除滚动条) */
+  overflow-y: visible;
 }
 
 .add-role-content {
@@ -972,7 +990,7 @@ export default {
 }
 
 .edit-input > span {
-  font-size: 16px;
+  font-size: 20px;
   margin-bottom: 5px;
 }
 
@@ -1003,7 +1021,7 @@ export default {
 }
 
 .add-input > span {
-  font-size: 15px;
+  font-size: 20px;
   margin-bottom: 5px;
   color: #575556;
 }
@@ -1025,7 +1043,7 @@ export default {
 .confirm-btn,
 .cancel-btn {
   height: 35px;
-  width: 90px;
+  width: 100px;
   cursor: pointer;
   border: 1px solid #f2f2f2;
   border-radius: 5px;

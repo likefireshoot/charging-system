@@ -1,15 +1,16 @@
+<!--超级大文件，dialog全写里面了-->
 <template>
   <div class="jinggao-container">
     <div class="serach-box">
       <div class="search-input" style="margin-left: 10px" v-if="companyId === 1">
         <span>所属水厂</span>
-        <el-select v-model="params.company" placeholder="请选择所属水厂">
+        <el-select  class="big-font-el-select" v-model="params.company" placeholder="请选择所属水厂">
           <el-option v-for="item in companyList" :key="item.id" :value="item.id" :label="item.name"></el-option>
         </el-select>
       </div>
       <div class="search-input" style="margin-left: 10px">
         <span>警告类型</span>
-        <el-select v-model="params.warningType">
+        <el-select class="big-font-el-select" v-model="params.warningType">
           <el-option label="欠费用户" value="欠费用户"></el-option>
           <el-option label="水表0用量用户" value="水表0用量用户"></el-option>
           <el-option label="水表大用量用户" value="水表大用量用户"></el-option>
@@ -36,11 +37,11 @@
       <div class="buttons">
         <div class="sercah-btn" @click="getWaringData">
           <img src="@/assets/yonghu/icon16.png" alt="" style="margin-left: 12px" />
-          <span style="font-size: 16px; margin-left: 10px">搜索</span>
+          <span style="font-size: 20px; margin-left: 10px">搜索</span>
         </div>
         <div class="clear-btn" @click="clear">
           <img src="@/assets/yonghu/icon4.png" alt="" style="margin-left: 12px" />
-          <span style="font-size: 16px; margin-left: 10px; color: #5a5a5a">清空</span>
+          <span style="font-size: 20px; margin-left: 10px; color: #5a5a5a">清空</span>
         </div>
       </div>
     </div>
@@ -50,17 +51,17 @@
           <img src="@/assets/fapiao/icon3.png" alt="" style="margin-left: 7px" />
           <span style="font-size: 16px; margin-left: 10px; color: #5a5a5a">导入</span>
         </div> -->
-        <div class="add-btn" style="margin-left: 10px; width: 110px" @click="add_dialogFormVisible = true" v-if="staffPermissionIds.includes(28)">
+        <div class="add-btn" style="margin-left: 10px; width: 130px" @click="add_dialogFormVisible = true" v-if="staffPermissionIds.includes(28)">
           <img src="@/assets/yuangong/icon6.png" alt="" style="margin-left: 8px" />
-          <span style="font-size: 16px; margin-left: 10px; color: #5a5a5a">警告配置</span>
+          <span style="font-size: 20px; margin-left: 10px; color: #5a5a5a">警告配置</span>
         </div>
-        <div class="add-btn" style="margin-left: 10px; width: 150px" @click="get_dialogFormVisible = true">
+        <div class="add-btn" style="margin-left: 10px; width: 170px" @click="get_dialogFormVisible = true">
           <img src="@/assets/yuangong/icon5.png" alt="" style="margin-left: 8px" />
-          <span style="font-size: 16px; margin-left: 10px; color: #5a5a5a">获取警告配置</span>
+          <span style="font-size: 20px; margin-left: 10px; color: #5a5a5a">获取警告配置</span>
         </div>
         <div class="export-out-btn" style="margin-left: 10px" @click="exportExcel">
           <img src="@/assets/fapiao/icon5.png" alt="" style="margin-left: 7px" />
-          <span style="font-size: 16px; margin-left: 10px; color: #5a5a5a">导出</span>
+          <span style="font-size: 20px; margin-left: 10px; color: #5a5a5a">导出</span>
         </div>
         <div class="reflush" style="margin-left: 10px" @click="reflush">
           <img src="@/assets/yonghu/icon15.png" alt="" />
@@ -119,7 +120,7 @@
         <div class="title">
           <div style="margin-left: 10px; display: flex; align-items: center">
             <img src="@/assets/fapiao/icon8.png" alt="" style="margin-right: 10px" />
-            <span style="font-size: 18px">警告配置</span>
+            <span style="font-size: 20px">警告配置</span>
           </div>
           <div style="margin-right: 10px; cursor: pointer" @click="add_dialogFormVisible = false">
             <img src="@/assets/close.png" alt="" />
@@ -137,12 +138,12 @@
         </div>
         <div class="btn">
           <div class="confirm-btn" @click="confirm">
-            <el-icon style="margin-left: 15%"><Check /></el-icon>
-            <span style="font-size: 16px; margin-left: 15%">确认</span>
+            <el-icon style="margin-left: 5%"><Check /></el-icon>
+            <span style="font-size: 20px; margin-left: 15%">确认</span>
           </div>
           <div class="cancel-btn" @click="add_dialogFormVisible = false">
-            <el-icon style="margin-left: 15%; color: #45ba7e"><Close /></el-icon>
-            <span style="font-size: 16px; margin-left: 15%; color: #5a5a5a">取消</span>
+            <el-icon style="margin-left: 5%; color: #45ba7e"><Close /></el-icon>
+            <span style="font-size: 20px; margin-left: 15%; color: #5a5a5a">取消</span>
           </div>
         </div>
       </div>
@@ -153,7 +154,7 @@
         <div class="title">
           <div style="margin-left: 10px; display: flex; align-items: center">
             <img src="@/assets/fapiao/icon8.png" alt="" style="margin-right: 10px" />
-            <span style="font-size: 18px">警告配置</span>
+            <span style="font-size: 20px">警告配置</span>
           </div>
           <div style="margin-right: 10px; cursor: pointer" @click="get_dialogFormVisible = false">
             <img src="@/assets/close.png" alt="" />
@@ -171,12 +172,12 @@
         </div>
         <div class="btn">
           <div class="confirm-btn" @click="get_dialogFormVisible = false">
-            <el-icon style="margin-left: 15%"><Check /></el-icon>
-            <span style="font-size: 16px; margin-left: 15%">确认</span>
+            <el-icon style="margin-left: 5%"><Check /></el-icon>
+            <span style="font-size: 20px; margin-left: 15%">确认</span>
           </div>
           <div class="cancel-btn" @click="get_dialogFormVisible = false">
-            <el-icon style="margin-left: 15%; color: #45ba7e"><Close /></el-icon>
-            <span style="font-size: 16px; margin-left: 15%; color: #5a5a5a">取消</span>
+            <el-icon style="margin-left: 5%; color: #45ba7e"><Close /></el-icon>
+            <span style="font-size: 20px; margin-left: 15%; color: #5a5a5a">取消</span>
           </div>
         </div>
       </div>
@@ -712,6 +713,24 @@ export default {
   --el-color-primary: #46b97e;
 }
 
+/* 修改分页整体字号（包括“共 x 条”） */
+:deep(.el-pagination) {
+  font-size: 16px;
+}
+
+/* 修改页码数字按钮的大小 */
+:deep(.el-pagination .el-pager li) {
+  font-size: 16px;
+  min-width: 35px; /* 数字变大后，按钮也要相应加宽 */
+  height: 35px;
+  line-height: 35px;
+}
+
+/* 如果有下拉选择每页条数，修改其内部文字 */
+:deep(.el-pagination .el-select .el-input) {
+  font-size: 16px;
+}
+
 :deep(.el-tree) {
   --el-fill-color-light: #46b97e;
   --el-fill-color-blank: #e8f3ed;
@@ -769,7 +788,7 @@ export default {
 }
 
 .search-input > span {
-  font-size: 14px;
+  font-size: 20px;
   margin-bottom: 5px;
 }
 
@@ -853,13 +872,13 @@ export default {
 .export-out-btn {
   display: flex;
   align-items: center;
-  width: 80px; /* 设置按钮的宽度 */
-  height: 32px; /* 设置按钮的高度 */
+  width: 90px; /* 设置按钮的宽度 */
+  height: 35px; /* 设置按钮的高度 */
   color: white;
   border-radius: 5px;
   cursor: pointer;
   transition: all 0.3s;
-  font-size: 14px;
+  font-size: 20px;
   background-color: #fff;
   border: 2px solid #f2f2f2;
 }
@@ -874,7 +893,7 @@ export default {
   border-radius: 5px;
   cursor: pointer;
   transition: all 0.3s;
-  font-size: 14px;
+  font-size: 20px;
   background-color: #fff;
   border: 2px solid #f2f2f2;
 }
@@ -996,7 +1015,7 @@ export default {
 }
 
 .add-input > span {
-  font-size: 15px;
+  font-size: 20px;
   margin-bottom: 5px;
   color: #575556;
 }
@@ -1019,7 +1038,7 @@ export default {
 .confirm-btn,
 .cancel-btn {
   height: 35px;
-  width: 90px;
+  width: 100px;
   cursor: pointer;
   border: 1px solid #f2f2f2;
   border-radius: 5px;

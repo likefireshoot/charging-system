@@ -3,7 +3,7 @@
     <div class="serach-box">
       <div class="search-input" v-if="companyId === 1">
         <span>所属水厂</span>
-        <el-select v-model="param.company" placeholder="请选择所属水厂">
+        <el-select  class="big-font-el-select" v-model="param.company" placeholder="请选择所属水厂">
           <el-option v-for="item in companyList" :key="item.id" :label="item.name" :value="item.id"></el-option>
         </el-select>
       </div>
@@ -25,19 +25,19 @@
       </div>
       <div class="search-input">
         <span>水表类型</span>
-        <el-select v-model="param.meterType" placeholder="请选择水表类型">
+        <el-select class="big-font-el-select" v-model="param.meterType" placeholder="请选择水表类型">
           <el-option v-for="item in shuibiao_list" :key="item.id" :value="item.label"></el-option>
         </el-select>
       </div>
 
       <div class="buttons">
         <div class="sercah-btn" @click="search">
-          <img src="@/assets/yonghu/icon16.png" alt="" style="margin-left: 12px" />
-          <span style="font-size: 16px; margin-left: 15%">搜索</span>
+          <img src="@/assets/yonghu/icon16.png" alt="" style="margin-left: 10px" />
+          <span style="font-size: 20px; margin-left: 15%">搜索</span>
         </div>
         <div class="clear-btn" @click="clear">
-          <img src="@/assets/yonghu/icon4.png" alt="" style="margin-left: 12px" />
-          <span style="font-size: 16px; margin-left: 15%; color: #5a5a5a">清空</span>
+          <img src="@/assets/yonghu/icon4.png" alt="" style="margin-left: 10px" />
+          <span style="font-size: 20px; margin-left: 15%; color: #5a5a5a">清空</span>
         </div>
       </div>
     </div>
@@ -50,46 +50,46 @@
         <div class="delete-btn" style="margin-left: 5px" @click="delete_btn_click"
           v-if="staffPermissionIds.includes(6)">
           <img src="@/assets/yonghu/icon4.png" alt="" style="margin-left: 8px" />
-          <span style="font-size: 16px; margin-left: 8px; color: #5a5a5a">删除</span>
+          <span style="font-size: 18px; margin-left: 8px; color: #5a5a5a">删除</span>
         </div>
-        <div class="command-btn" style="margin-left: 10px; width: 110px" :class="{ 'btn-single-only-disabled': multipleSelection.length !== 1 }" @click="multipleSelection.length === 1 && handleCommand()">
+        <div class="command-btn" style="margin-left: 10px; width: 120px" :class="{ 'btn-single-only-disabled': multipleSelection.length !== 1 }" @click="multipleSelection.length === 1 && handleCommand()">
           <img src="@/assets/yonghu/icon5.png" alt="" style="margin-left: 8px" />
-          <span style="font-size: 16px; margin-left: 8px; color: #5a5a5a">命令下发</span>
+          <span style="font-size: 18px; margin-left: 8px; color: #5a5a5a">命令下发</span>
         </div>
-        <div class="command-btn" style="margin-left: 5px; width: 110px" @click="valveOpen_dialogFormVisible = true"
+        <div class="command-btn" style="margin-left: 5px; width: 120px" @click="valveOpen_dialogFormVisible = true"
           v-if="staffPermissionIds.includes(7)">
           <img src="@/assets/yonghu/icon18.png" alt="" style="margin-left: 8px; margin-top: 3px" />
-          <span style="font-size: 16px; margin-left: 8px; color: #5a5a5a">开阀控制</span>
+          <span style="font-size: 18px; margin-left: 8px; color: #5a5a5a">开阀控制</span>
         </div>
-        <div class="command-btn" style="margin-left: 5px; width: 110px" @click="valve_dialogFormVisible = true"
+        <div class="command-btn" style="margin-left: 5px; width: 120px" @click="valve_dialogFormVisible = true"
           v-if="staffPermissionIds.includes(8)">
           <img src="@/assets/yonghu/icon17.png" alt="" style="margin-left: 8px; margin-top: 3px" />
-          <span style="font-size: 16px; margin-left: 8px; color: #5a5a5a">关阀控制</span>
+          <span style="font-size: 18px; margin-left: 8px; color: #5a5a5a">关阀控制</span>
         </div>
         <div class="recharge-btn" style="margin-left: 5px; width: 110px" :class="{ 'btn-single-only-disabled': multipleSelection.length !== 1 }" @click="multipleSelection.length === 1 && change_balance_btn_click()"
           v-if="staffPermissionIds.includes(9)">
           <img src="@/assets/yonghu/icon20.png" alt="" style="margin-left: 8px" />
-          <span style="font-size: 16px; margin-left: 8px; color: #5a5a5a">余额调整</span>
+          <span style="font-size: 18px; margin-left: 8px; color: #5a5a5a">余额调整</span>
         </div>
         <div class="recharge-btn" style="margin-left: 5px" :class="{ 'btn-single-only-disabled': multipleSelection.length !== 1 }" @click="multipleSelection.length === 1 && recharge_btn_click()"
           v-if="staffPermissionIds.includes(10)">
           <img src="@/assets/yonghu/icon6.png" alt="" style="margin-left: 8px" />
-          <span style="font-size: 16px; margin-left: 8px; color: #5a5a5a">充值</span>
+          <span style="font-size: 18px; margin-left: 8px; color: #5a5a5a">充值</span>
         </div>
-        <div class="recharge-record-btn" style="margin-left: 5px; width: 110px" @click="recharge_record_btn_click"
+        <div class="recharge-record-btn" style="margin-left: 5px; width: 120px" @click="recharge_record_btn_click"
           v-if="staffPermissionIds.includes(11)">
           <img src="@/assets/yonghu/icon7.png" alt="" style="margin-left: 8px" />
-          <span style="font-size: 16px; margin-left: 8px; color: #5a5a5a">充值记录</span>
+          <span style="font-size: 18px; margin-left: 8px; color: #5a5a5a">充值记录</span>
         </div>
         <div class="water-meter-btn" style="margin-left: 5px" :class="{ 'btn-single-only-disabled': multipleSelection.length !== 1 }" @click="multipleSelection.length === 1 && change_btn_click()"
           v-if="staffPermissionIds.includes(13)">
           <img src="@/assets/yonghu/icon8.png" alt="" style="margin-left: 8px" />
-          <span style="font-size: 16px; margin-left: 8px; color: #5a5a5a">换表</span>
+          <span style="font-size: 18px; margin-left: 8px; color: #5a5a5a">换表</span>
         </div>
-        <div class="water-meter-record-btn" style="margin-left: 5px; width: 110px" @click="change_record_btn_click"
+        <div class="water-meter-record-btn" style="margin-left: 5px; width: 120px" @click="change_record_btn_click"
           v-if="staffPermissionIds.includes(14)">
           <img src="@/assets/yonghu/icon9.png" alt="" style="margin-left: 8px" />
-          <span style="font-size: 16px; margin-left: 8px; color: #5a5a5a">换表记录</span>
+          <span style="font-size: 18px; margin-left: 8px; color: #5a5a5a">换表记录</span>
         </div>
         <!-- <div class="export-out-btn" style="margin-left: 5px; width: 110px" @click="download">
           <img src="@/assets/yonghu/icon1.png" alt="" style="margin-left: 7px" />
@@ -102,21 +102,21 @@
         </div> -->
         <div class="export-out-btn" style="margin-left: 5px" @click="exportExcel">
           <img src="@/assets/yonghu/icon2.png" alt="" style="margin-left: 7px" />
-          <span style="font-size: 16px; margin-left: 10px; color: #5a5a5a">导出</span>
+          <span style="font-size: 18px; margin-left: 10px; color: #5a5a5a">导出</span>
         </div>
-        <div class="export-out-btn" style="margin-left: 5px; width: 155px" @click="common_meter_template_click">
+        <div class="export-out-btn" style="margin-left: 5px; width: 175px" @click="common_meter_template_click">
           <img src="@/assets/yonghu/icon1.png" alt="" style="margin-left: 7px" />
-          <span style="font-size: 16px; margin-left: 10px; color: #5a5a5a">普表用水量模板</span>
+          <span style="font-size: 18px; margin-left: 10px; color: #5a5a5a">普表用水量模板</span>
         </div>
-        <div class="export-in-btn" style="margin-left: 5px; width: 150px" @click="triggerCommonMeterImport">
+        <div class="export-in-btn" style="margin-left: 5px; width: 175px" @click="triggerCommonMeterImport">
           <img src="@/assets/yonghu/icon1.png" alt="" style="margin-left: 7px" />
-          <span style="font-size: 16px; margin-left: 5px; color: #5a5a5a">普表用水量导入</span>
+          <span style="font-size: 18px; margin-left: 5px; color: #5a5a5a">普表用水量导入</span>
           <input ref="commonMeterInput" type="file" accept=".xls,.xlsx" style="display: none"
             @change="common_meter_click" />
         </div>
         <div class="export-in-btn" style="margin-left: 5px; width: 150px" @click="multi_edit_meter_price">
           <img src="@/assets/jiage/icon3.png" alt="" style="margin-left: 7px" />
-          <span style="font-size: 16px; margin-left: 5px; color: #5a5a5a">批量修改水价</span>
+          <span style="font-size: 18px; margin-left: 5px; color: #5a5a5a">批量修改水价</span>
         </div>
 
         <div class="reflush" style="margin-left: 5px" @click="reflush">
@@ -289,7 +289,7 @@
         <div class="title">
           <div style="margin-left: 10px; display: flex; align-items: center">
             <img src="@/assets/jiage/icon3.png" alt="" style="margin-right: 10px" />
-            <span style="font-size: 18px">批量修改用户水价</span>
+            <span style="font-size: 20px">批量修改用户水价</span>
           </div>
           <div style="margin-right: 10px; cursor: pointer" @click="priceDialogVisible = false">
             <img src="@/assets/close.png" alt="" />
@@ -306,11 +306,11 @@
         <div class="btn">
           <div class="confirm-btn" @click="confirm_edit_price">
             <el-icon style="margin-left: 15%"><Check /></el-icon>
-            <span style="font-size: 16px; margin-left: 15%">确认</span>
+            <span style="font-size: 20px; margin-left: 15%">确认</span>
           </div>
           <div class="cancel-btn" @click="priceDialogVisible = false">
             <el-icon style="margin-left: 15%; color: #45ba7e"><Close /></el-icon>
-            <span style="font-size: 16px; margin-left: 15%; color: #5a5a5a">取消</span>
+            <span style="font-size: 20px; margin-left: 15%; color: #5a5a5a">取消</span>
           </div>
         </div>
       </div>
@@ -1274,6 +1274,24 @@ export default {
   --el-color-primary: #46b97e;
 }
 
+/* 修改分页整体字号（包括“共 x 条”） */
+:deep(.el-pagination) {
+  font-size: 16px;
+}
+
+/* 修改页码数字按钮的大小 */
+:deep(.el-pagination .el-pager li) {
+  font-size: 16px;
+  min-width: 35px; /* 数字变大后，按钮也要相应加宽 */
+  height: 35px;
+  line-height: 35px;
+}
+
+/* 如果有下拉选择每页条数，修改其内部文字 */
+:deep(.el-pagination .el-select .el-input) {
+  font-size: 16px;
+}
+
 :deep(.el-tree) {
   --el-fill-color-light: #46b97e;
   --el-fill-color-blank: #e8f3ed;
@@ -1345,7 +1363,7 @@ export default {
 }
 
 .search-input>span {
-  font-size: 14px;
+  font-size: 18px;
   margin-bottom: 5px;
 }
 
@@ -1434,13 +1452,13 @@ export default {
   align-items: center;
   width: 80px;
   /* 设置按钮的宽度 */
-  height: 32px;
+  height: 35px;
   /* 设置按钮的高度 */
   color: white;
   border-radius: 5px;
   cursor: pointer;
   transition: all 0.3s;
-  font-size: 14px;
+  font-size: 18px;
   background-color: #fff;
   border: 2px solid #f2f2f2;
 }
@@ -1457,7 +1475,7 @@ export default {
   border-radius: 5px;
   cursor: pointer;
   transition: all 0.3s;
-  font-size: 14px;
+  font-size: 18px;
   background-color: #fff;
   border: 2px solid #f2f2f2;
 }
@@ -1610,7 +1628,7 @@ export default {
 }
 
 .add-dialog-content .add-input > span {
-  font-size: 15px;
+  font-size: 20px;
   margin-bottom: 5px;
   color: #575556;
 }

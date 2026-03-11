@@ -5,7 +5,7 @@
       <div class="title">
         <div style="margin-left: 10px; display: flex; align-items: center">
           <img src="@/assets/yonghu/icon5.png" alt="" style="margin-right: 8px" />
-          <span style="font-size: 18px">命令下发</span>
+          <span style="font-size: 20px">命令下发</span>
         </div>
         <div style="margin-right: 10px; cursor: pointer; width: 50px" @click="closeCommandDialog">
           <img src="@/assets/close.png" alt="" />
@@ -26,7 +26,7 @@
         </div>
         <div class="command-params">
           <div class="set-params">
-            <span style="font-size: 16px; margin-top: 10px; margin-bottom: 5px">设置参数</span>
+            <span style="font-size: 25px; margin-top: 10px; margin-bottom: 5px">设置参数</span>
             <div class="flex-container">
               <div style="width: 4px; height: 4px; background-color: #46b87d; margin-right: 5px"></div>
               <div style="width: 4px; height: 4px; background-color: #90d5b2; margin-right: 5px"></div>
@@ -41,45 +41,26 @@
                 </div>
               </div>
               <div v-else>
-                <!-- 新增：阀门控制 - 表单校验包裹 -->
-                <el-form 
-                  :model="params_set_tai" 
-                  :rules="valveRules" 
-                  ref="valveForm" 
-                  class="set-content-container"
-                  v-if="node.label === '阀门控制'"
-                >
+                <div class="set-content-container" v-if="node.label === '阀门控制'">
                   <div class="set-input">
                     <span>阀门状态</span>
-                    <el-form-item prop="famenstate" style="margin: 0;">
-                      <el-select v-model="params_set_tai.famenstate">
-                        <el-option label="开阀" value="1"></el-option>
-                        <el-option label="关阀" value="0"></el-option>
-                      </el-select>
-                    </el-form-item>
+                    <el-select v-model="params_set_tai.famenstate">
+                      <el-option label="开阀" value="1"></el-option>
+                      <el-option label="关阀" value="0"></el-option>
+                    </el-select>
                   </div>
-                </el-form>
-
-                <!-- 新增：写累计流量 - 表单校验包裹 -->
-                <el-form 
-                  :model="params_set_tai" 
-                  :rules="trafficRules" 
-                  ref="trafficForm" 
-                  class="set-content-container"
-                  v-if="node.label === '写累计流量'"
-                >
+                </div>
+                <div class="set-content-container" v-if="node.label === '写累计流量'">
                   <div class="set-input">
                     <span>累计流量</span>
-                    <el-form-item prop="cumulativeTraffic" style="margin: 0;">
-                      <el-input v-model="params_set_tai.cumulativeTraffic"></el-input>
-                    </el-form-item>
+                    <el-input v-model="params_set_tai.cumulativeTraffic"></el-input>
                   </div>
-                </el-form>
+                </div>
               </div>
             </div>
           </div>
           <div class="get-params">
-            <span style="font-size: 16px; margin-top: 10px; margin-bottom: 5px">返回值</span>
+            <span style="font-size: 25px; margin-top: 10px; margin-bottom: 5px">返回值</span>
             <div class="flex-container">
               <div style="width: 4px; height: 4px; background-color: #46b87d; margin-right: 5px"></div>
               <div style="width: 4px; height: 4px; background-color: #90d5b2; margin-right: 5px"></div>
@@ -97,12 +78,12 @@
           </div>
           <div class="btns">
             <div class="confirm-btn" @click="commit_shengxin">
-              <el-icon style="margin-left: 15%"><Check /></el-icon>
-              <span style="font-size: 16px; margin-left: 15%">确认</span>
+              <el-icon style="margin-left: -3%"><Check /></el-icon>
+              <span style="font-size: 20px; margin-left: 5%">确认</span>
             </div>
             <div class="cancel-btn" @click="closeCommandDialog">
-              <el-icon style="margin-left: 15%; color: #45ba7e"><Close /></el-icon>
-              <span style="font-size: 16px; margin-left: 15%; color: #5a5a5a">取消</span>
+              <el-icon style="margin-left: -3%; color: #45ba7e"><Close /></el-icon>
+              <span style="font-size: 20px; margin-left: 5%; color: #5a5a5a">取消</span>
             </div>
           </div>
         </div>
@@ -296,7 +277,7 @@ export default {
 };
 </script>
 
-<style>
+<style scoped>
 .command-dialog {
   position: fixed;
   top: 0;
@@ -386,7 +367,7 @@ export default {
 }
 
 .set-input > span {
-  font-size: 14px;
+  font-size: 20px;
   color: #747374;
   margin-bottom: 5px;
 }

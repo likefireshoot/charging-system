@@ -3,7 +3,7 @@
     <div class="serach-box">
       <div class="search-input" style="width: 10%; margin-right: 10px">
         <span>类型</span>
-        <el-select v-model="title" placeholder="请选择" style="width: 100%">
+        <el-select class="big-font-el-select" v-model="title" placeholder="请选择" style="width: 100%">
           <el-option v-for="item in transactionOrChargeRecordList" :key="item.value" :label="item.label" :value="item.value"> </el-option>
         </el-select>
       </div>
@@ -35,11 +35,11 @@
       <div class="buttons" style="margin-left: 10%; margin-right: 10px">
         <div class="sercah-btn" @click="search">
           <img src="@/assets/yonghu/icon16.png" alt="" style="margin-left: 8px" />
-          <span style="font-size: 16px; margin-left: 15%">搜索</span>
+          <span style="font-size: 20px; margin-left: 15%">搜索</span>
         </div>
         <div class="clear-btn" @click="clear">
           <img src="@/assets/yonghu/icon4.png" alt="" style="margin-left: 8px" />
-          <span style="font-size: 16px; margin-left: 15%; color: #5a5a5a">清空</span>
+          <span style="font-size: 20px; margin-left: 15%; color: #5a5a5a">清空</span>
         </div>
       </div>
     </div>
@@ -56,7 +56,7 @@
             </div> -->
         <div class="export-out-btn" style="margin-right: 10px" @click="exportExcel">
           <img src="@/assets/yonghu/icon2.png" alt="" style="margin-left: 7px" />
-          <span style="font-size: 16px; margin-left: 10px; color: #5a5a5a">导出</span>
+          <span style="font-size: 20px; margin-left: 10px; color: #5a5a5a">导出</span>
         </div>
         <div class="reflush" style="margin-right: 10px" @click="reflush">
           <img src="@/assets/yonghu/icon15.png" alt="" />
@@ -511,6 +511,7 @@ export default {
 </script>
 
 <style>
+/*这里谨慎scoped,可能造成未知bug,目前一直transactionRecord.vue依赖其部分样式(搜索清空键)*/
 .transaction-record-dialog {
   position: fixed;
   top: 0;
@@ -569,9 +570,43 @@ export default {
 }
 
 .search-input > span {
-  font-size: 14px;
+  font-size: 20px;
   margin-bottom: 5px;
 }
+
+.buttons {
+  display: flex;
+  width: 260px;
+  height: 100%;
+  margin-left: 15%;
+  align-items: center;
+}
+
+.buttons>* {
+  width: 120px;
+  margin-right: 30px;
+}
+
+.sercah-btn,
+.clear-btn {
+  display: flex;
+  align-items: center;
+  height: 35px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.3s;
+  color: #fff;
+}
+
+.sercah-btn {
+  background-color: #45ba7e;
+}
+
+.clear-btn {
+  background-color: #fff;
+  border: 2px solid #f2f2f2;
+}
+
 
 .time-input {
   display: flex;
@@ -627,7 +662,7 @@ export default {
   border-radius: 5px;
   cursor: pointer;
   transition: all 0.3s;
-  font-size: 14px;
+  font-size: 20px;
   background-color: #fff;
   border: 2px solid #f2f2f2;
 }
@@ -644,7 +679,7 @@ export default {
   border-radius: 5px;
   cursor: pointer;
   transition: all 0.3s;
-  font-size: 14px;
+  font-size: 20px;
   background-color: #fff;
   border: 2px solid #f2f2f2;
 }

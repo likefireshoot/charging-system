@@ -5,7 +5,7 @@
       <div class="title">
         <div style="margin-left: 10px; display: flex; align-items: center">
           <img src="@/assets/yonghu/icon5.png" alt="" style="margin-right: 8px" />
-          <span style="font-size: 18px">命令下发</span>
+          <span style="font-size: 22px">命令下发</span>
         </div>
         <div style="margin-right: 10px; cursor: pointer; width: 50px" @click="closeCommandDialog">
           <img src="@/assets/close.png" alt="" />
@@ -13,15 +13,20 @@
       </div>
       <div class="command-content">
         <div class="command-select">
-          <el-input v-model="commandFilterText" placeholder="请输入命令名称..."
-            style="height: 40px; margin-bottom: 10px; margin-top: 10px"></el-input>
-          <el-tree ref="commandTreeRef" style="width: 230px; height: 460px; overflow-y: auto"
-            :data="command_jiwanxun_data" :props="commandProps" default-expand-all
-            :filter-node-method="command_filterNode" @node-click="handleNodeClick"></el-tree>
+          <el-input v-model="commandFilterText" placeholder="请输入命令名称..." style="height: 40px; margin-bottom: 10px; margin-top: 10px"></el-input>
+          <el-tree
+            ref="commandTreeRef"
+            style="width: 230px; height: 460px; overflow-y: auto"
+            :data="command_jiwanxun_data"
+            :props="commandProps"
+            default-expand-all
+            :filter-node-method="command_filterNode"
+            @node-click="handleNodeClick"
+          ></el-tree>
         </div>
         <div class="command-params">
           <div class="set-params">
-            <span style="font-size: 16px; margin-top: 10px; margin-bottom: 5px">设置参数</span>
+            <span style="font-size: 25px; margin-top: 10px; margin-bottom: 5px">设置参数</span>
             <div class="flex-container">
               <div style="width: 4px; height: 4px; background-color: #46b87d; margin-right: 5px"></div>
               <div style="width: 4px; height: 4px; background-color: #90d5b2; margin-right: 5px"></div>
@@ -36,32 +41,20 @@
                 </div>
               </div>
               <div v-else>
-                <!-- <div class="set-content-container" v-if="node.label === '阀门控制'">
+                <div class="set-content-container" v-if="node.label === '阀门控制'">
                   <div class="set-input">
-                    <span>阀门状态</span>
+                    <span style="font-size: 20px">阀门状态</span>
                     <el-select v-model="params_set_tai.famenstate">
                       <el-option label="开阀" value="1"></el-option>
                       <el-option label="关阀" value="0"></el-option>
                     </el-select>
                   </div>
-                </div> -->
-                <el-form :model="params_set_tai" :rules="valveControlRules" ref="valveControlForm"
-                  class="set-content-container" v-if="node.label === '阀门控制'">
-                  <div class="set-input">
-                    <span>阀门状态</span>
-                    <el-form-item prop="famenstate" style="margin: 0;">
-                      <el-select v-model="params_set_tai.famenstate">
-                        <el-option label="开阀" value="1"></el-option>
-                        <el-option label="关阀" value="0"></el-option>
-                      </el-select>
-                    </el-form-item>
-                  </div>
-                </el-form>
+                </div>
               </div>
             </div>
           </div>
           <div class="get-params">
-            <span style="font-size: 16px; margin-top: 10px; margin-bottom: 5px">返回值</span>
+            <span style="font-size: 25px; margin-top: 10px; margin-bottom: 5px">返回值</span>
             <div class="flex-container">
               <div style="width: 4px; height: 4px; background-color: #46b87d; margin-right: 5px"></div>
               <div style="width: 4px; height: 4px; background-color: #90d5b2; margin-right: 5px"></div>
@@ -79,16 +72,12 @@
           </div>
           <div class="btns">
             <div class="confirm-btn" @click="commit_jiwanxun">
-              <el-icon style="margin-left: 15%">
-                <Check />
-              </el-icon>
-              <span style="font-size: 16px; margin-left: 15%">确认</span>
+              <el-icon style="margin-left: -3%"><Check /></el-icon>
+              <span style="font-size: 20px; margin-left: 5%">确认</span>
             </div>
             <div class="cancel-btn" @click="closeCommandDialog">
-              <el-icon style="margin-left: 15%; color: #45ba7e">
-                <Close />
-              </el-icon>
-              <span style="font-size: 16px; margin-left: 15%; color: #5a5a5a">取消</span>
+              <el-icon style="margin-left:-3%; color: #45ba7e"><Close /></el-icon>
+              <span style="font-size: 20px; margin-left: 5%; color: #5a5a5a">取消</span>
             </div>
           </div>
         </div>
@@ -222,7 +211,7 @@ export default {
 };
 </script>
 
-<style>
+<style>/*由于多文件混杂样式叠加,这里加scoped反而会造成不可预知的bug*/
 .command-dialog {
   position: fixed;
   top: 0;
@@ -234,8 +223,9 @@ export default {
 }
 
 .command-dialog-content {
-  width: 60%;
-  height: 600px;
+  width: 70%; /* 稍微加宽一点，视觉更舒展 */
+  height: auto; /* 关键：取消固定 300px */
+  min-height: 650px; /* 设置一个合理的初始高度 */
   border: 1px solid #fafafa;
   background-color: #fafafa;
   border-radius: 5px;
@@ -250,12 +240,12 @@ export default {
 
 .command-content {
   width: 96%;
-  height: 540px;
+  height: auto; /* 关键：取消固定 540px */
+  overflow-y: visible; /* 关键：取消滚动条 */
+  margin-bottom: 25px; /* 给底部按钮留点呼吸空间 */
   background-color: #fff;
   border-radius: 5px;
   margin-top: 10px;
-  margin-bottom: 10px;
-  overflow-y: auto;
   padding: 0 10px;
   background: none;
   display: flex;
@@ -289,6 +279,7 @@ export default {
   padding-left: 10px;
   display: flex;
   flex-direction: column;
+  min-height: 40%;
 }
 
 .set-content,
@@ -304,21 +295,20 @@ export default {
 
 .set-input {
   display: flex;
-  justify-content: center;
-  /* 确保子元素在父容器中垂直居中 */
+  justify-content: center; /* 确保子元素在父容器中垂直居中 */
   flex-direction: column;
   width: 31.5%;
   height: 75px;
   margin-right: 10px;
 }
 
-.set-input>span {
-  font-size: 14px;
+.set-input > span {
+  font-size: 18px;
   color: #747374;
   margin-bottom: 5px;
 }
 
-.set-input>.el-input {
+.set-input > .el-input {
   height: 35px;
   width: 100%;
 }
@@ -344,40 +334,57 @@ export default {
 
 .btns {
   width: 100%;
-  height: 40px;
   display: flex;
+  /* 关键：确保主轴对齐方式为尾部对齐 */
   justify-content: flex-end;
   align-items: center;
-  margin-top: 0px;
+  /* 增加垂直间距，防止贴着上方元素 */
+  margin-top: 25px;
+  /* 两个按钮之间的间距 */
+  gap: 12px;
 }
 
 .confirm-btn,
 .cancel-btn {
-  height: 35px;
-  width: 90px;
+  /* 适当加宽：从 130px 增加到 150px 或更多 */
+  width: 100px;
+  height: 40px;
   cursor: pointer;
-  border: 1px solid #f2f2f2;
-  border-radius: 5px;
+  border-radius: 6px;
   display: flex;
   align-items: center;
+  justify-content: center; /* 确保按钮文字居中 */
+  font-size: 14px;
+  transition: all 0.2s ease; /* 增加平滑过渡 */
 }
 
+/* 区分一下确认和取消的视觉权重 */
 .confirm-btn {
   background-color: #45ba7e;
-  margin-right: 15px;
-  color: #fff;
+  color: white;
+  border: none;
+}
+
+.confirm-btn:hover {
+  background-color: #228b22;
 }
 
 .cancel-btn {
-  background-color: #fff;
-  margin-right: 5%;
+  background-color: white;
+  color: #666;
+  border: 1px solid #dcdfe6;
+}
+
+.cancel-btn:hover {
+  background-color: #f5f7fa;
+  border-color: #c0c4cc;
 }
 </style>
 
 <style lang="scss" scoped>
 :deep(.el-tree) {
   .is-current {
-    >.el-tree-node__content {
+    > .el-tree-node__content {
       background-color: var(--el-tree-node-hover-bg-color);
       color: white;
     }

@@ -11,13 +11,13 @@
         </div> -->
         <div class="search-input" style="margin-left: 10px; margin-left: 10px" v-if="companyId === 1">
           <span>所属水厂</span>
-          <el-select v-model="params.company" placeholder="请选择所属水厂">
+          <el-select class="big-font-el-select" v-model="params.company" placeholder="请选择所属水厂">
             <el-option v-for="item in companyList" :key="item.id" :value="item.id" :label="item.name"></el-option>
           </el-select>
         </div>
         <div class="search-input" style="margin-left: 10px; margin-left: 10px">
           <span>区域</span>
-          <el-select v-model="params.region">
+          <el-select class="big-font-el-select" v-model="params.region">
             <el-option v-for="item in quyu_data" :key="item.id" :label="item.label" :value="item.label"> </el-option>
           </el-select>
         </div>
@@ -37,11 +37,11 @@
       <div class="buttons">
         <div class="sercah-btn" @click="getTradeData">
           <img src="@/assets/baobiao/icon6.png" alt="" style="margin-left: 10px" />
-          <span style="font-size: 16px; margin-left: 15%">搜索</span>
+          <span style="font-size: 20px; margin-left: 15%">搜索</span>
         </div>
         <div class="clear-btn" @click="clear">
           <img src="@/assets/baobiao/icon5.png" alt="" style="margin-left: 10px" />
-          <span style="font-size: 16px; margin-left: 15%; color: #5a5a5a">清空</span>
+          <span style="font-size: 20px; margin-left: 15%; color: #5a5a5a">清空</span>
         </div>
       </div>
     </div>
@@ -49,10 +49,10 @@
       <div class="baobiao-chart">
         <div class="week-report">
           <div class="week-report-title">
-            <span style="font-size: 16px; margin-top: 10px; margin-bottom: 5px">{{ currentName }}周报表统计（{{ params.startTime }}至{{
+            <span style="font-size: 22px; margin-top: 10px; margin-bottom: 5px">{{ currentName }}周报表统计（{{ params.startTime }}至{{
               params.endTime }}）
 
-              <a href="javascript:;" style="font-size: 14px; margin-left: 0px;color: #000;"
+              <a href="javascript:;" style="font-size: 22px; margin-left: 0px;color: #000;"
                 @click="exportYearChartPNG(weekchart, currentName+'周报表')">(导出)</a>
 
 
@@ -68,10 +68,10 @@
         </div>
         <div class="week-huanbi">
           <div class="week-huanbi-title">
-            <span style="font-size: 16px; margin-top: 10px; margin-bottom: 5px">{{ currentName }}周报表统计环比（{{ params.startTime }}至{{
+            <span style="font-size: 22px; margin-top: 10px; margin-bottom: 5px">{{ currentName }}周报表统计环比（{{ params.startTime }}至{{
               params.endTime }}）
 
-              <a href="javascript:;" style="font-size: 14px; margin-left: 0px;color: #000;"
+              <a href="javascript:;" style="font-size: 22px; margin-left: 0px;color: #000;"
                  @click="exportYearChartPNG(weekhuanbichart, currentName+'周报表统计环比')">(导出)</a>
 
 
@@ -87,11 +87,11 @@
         </div>
         <div class="week-tongbi">
           <div class="week-tongbi-title">
-            <span style="font-size: 16px; margin-top: 10px; margin-bottom: 5px">{{ currentName }}周报表统计同比（{{ params.startTime }}至{{
+            <span style="font-size: 22px; margin-top: 10px; margin-bottom: 5px">{{ currentName }}周报表统计同比（{{ params.startTime }}至{{
               params.endTime }}）
 
 
-              <a href="javascript:;" style="font-size: 14px; margin-left: 0px;color: #000;"
+              <a href="javascript:;" style="font-size: 22px; margin-left: 0px;color: #000;"
                 @click="exportYearChartPNG(weektongbichart, currentName+'周报表统计同比')">(导出)</a>
 
 
@@ -695,7 +695,7 @@ export default {
 }
 
 .search-input>span {
-  font-size: 14px;
+  font-size: 20px;
   margin-bottom: 5px;
 }
 

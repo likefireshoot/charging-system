@@ -3,7 +3,7 @@
     <div class="serach-box">
       <div class="search-input" style="width: 10%; margin-right: 10px">
         <span>类型</span>
-        <el-select v-model="title" placeholder="请选择" style="width: 100%">
+        <el-select class="big-font-el-select" v-model="title" placeholder="请选择" style="width: 100%">
           <el-option v-for="item in transactionOrChargeRecordList" :key="item.value" :label="item.label" :value="item.value"> </el-option>
         </el-select>
       </div>
@@ -35,28 +35,28 @@
       <div class="buttons" style="margin-left: 10%; margin-right: 10px">
         <div class="sercah-btn" @click="search">
           <img src="@/assets/yonghu/icon16.png" alt="" style="margin-left: 8px" />
-          <span style="font-size: 16px; margin-left: 15%">搜索</span>
+          <span style="font-size: 20px; margin-left: 15%">搜索</span>
         </div>
         <div class="clear-btn" @click="clear">
           <img src="@/assets/yonghu/icon4.png" alt="" style="margin-left: 8px" />
-          <span style="font-size: 16px; margin-left: 15%; color: #5a5a5a">清空</span>
+          <span style="font-size: 20px; margin-left: 15%; color: #5a5a5a">清空</span>
         </div>
       </div>
     </div>
     <div class="transaction-list">
       <div class="command-buttons">
-        <div class="export-out-btn" style="margin-right: 10px; width: 100px" :class="{ 'btn-single-only-disabled': multipleSelection.length !== 1 }" @click="multipleSelection.length === 1 && receipt()">
+        <div class="export-out-btn" style="margin-right: 10px; width: 110px" :class="{ 'btn-single-only-disabled': multipleSelection.length !== 1 }" @click="multipleSelection.length === 1 && receipt()">
           <img src="@/assets/yonghu/icon26.png" alt="" style="margin-left: 7px" />
-          <span style="font-size: 16px; margin-left: 10px; color: #5a5a5a">开收据</span>
+          <span style="font-size: 20px; margin-left: 10px; color: #5a5a5a">开收据</span>
         </div>
         <!-- <div class="export-in-btn" style="margin-right: 10px" @click="triggerFileInput">
               <img src="@/assets/yonghu/icon1.png" alt="" style="margin-left: 7px" />
               <span style="font-size: 16px; margin-left: 10px; color: #5a5a5a">导入</span>
               <input ref="fileInput" type="file" accept=".xls,.xlsx" style="display: none" @change="exportIn" />
             </div> -->
-        <div class="export-out-btn" style="margin-right: 10px" @click="exportExcel">
+        <div class="export-out-btn" style="margin-right: 10px;width: 90px" @click="exportExcel">
           <img src="@/assets/yonghu/icon2.png" alt="" style="margin-left: 7px" />
-          <span style="font-size: 16px; margin-left: 10px; color: #5a5a5a">导出</span>
+          <span style="font-size: 20px; margin-left: 10px; color: #5a5a5a">导出</span>
         </div>
         <div class="reflush" style="margin-right: 10px" @click="reflush">
           <img src="@/assets/yonghu/icon15.png" alt="" />
@@ -578,7 +578,7 @@ export default {
 }
 
 .search-input > span {
-  font-size: 14px;
+  font-size: 20px;
   margin-bottom: 5px;
 }
 
@@ -636,7 +636,7 @@ export default {
   border-radius: 5px;
   cursor: pointer;
   transition: all 0.3s;
-  font-size: 14px;
+  font-size: 20px;
   background-color: #fff;
   border: 2px solid #f2f2f2;
 }
@@ -653,7 +653,7 @@ export default {
   border-radius: 5px;
   cursor: pointer;
   transition: all 0.3s;
-  font-size: 14px;
+  font-size: 20px;
   background-color: #fff;
   border: 2px solid #f2f2f2;
 }

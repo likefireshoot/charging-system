@@ -105,7 +105,7 @@
       <div class="title">
         <div style="margin-left: 10px; display: flex; align-items: center">
           <img src="@/assets/yonghu/icon10.png" alt="" style="margin-right: 8px" />
-          <span style="font-size: 18px">个人信息编辑</span>
+          <span style="font-size: 22px">个人信息编辑</span>
         </div>
         <div style="margin-right: 10px; cursor: pointer" @click="user_info_dialogFormVisible = false">
           <img src="@/assets/close.png" alt="" />
@@ -141,12 +141,12 @@
       </div>
       <div class="btn">
         <div class="confirm-btn" @click="Confirm">
-          <el-icon style="margin-left: 15%"><Check /></el-icon>
-          <span style="font-size: 16px; margin-left: 15%">确认</span>
+          <el-icon style="margin-left: 5%"><Check /></el-icon>
+          <span style="font-size: 18px; margin-left: 15%">确认</span>
         </div>
         <div class="cancel-btn" @click="user_info_dialogFormVisible = false">
-          <el-icon style="margin-left: 15%; color: #45ba7e"><Close /></el-icon>
-          <span style="font-size: 16px; margin-left: 15%; color: #5a5a5a">取消</span>
+          <el-icon style="margin-left: 5%; color: #45ba7e"><Close /></el-icon>
+          <span style="font-size: 18px; margin-left: 15%; color: #5a5a5a">取消</span>
         </div>
       </div>
     </div>
@@ -879,8 +879,8 @@ const slide = ref(true);
   position: absolute;
   left: 50%;
   top: 50%;
-  transform: translateY(-50%);
-  transform: translateX(-50%);
+  /* 合并写法：中间用空格隔开 */
+  transform: translate(-50%, -50%);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -909,7 +909,7 @@ const slide = ref(true);
 }
 
 .user-info-input > span {
-  font-size: 14px;
+  font-size: 20px;
   color: #747374;
   margin-bottom: 5px;
 }

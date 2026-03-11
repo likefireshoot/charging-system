@@ -5,7 +5,7 @@
       <div class="title">
         <div style="margin-left: 10px; display: flex; align-items: center">
           <img src="@/assets/yonghu/icon20.png" alt="" style="margin-right: 8px" />
-          <span style="font-size: 18px">余额调整</span>
+          <span style="font-size: 20px">余额调整</span>
         </div>
         <div style="margin-right: 10px; cursor: pointer" @click="handleRechargeClose">
           <img src="@/assets/close.png" alt="" />
@@ -35,12 +35,12 @@
       </div>
       <div class="btn">
         <div class="confirm-btn" @click="handleConfirm">
-          <el-icon style="margin-left: 15%"><Check /></el-icon>
-          <span style="font-size: 16px; margin-left: 15%">确认</span>
+          <el-icon style="margin-left: 5%"><Check /></el-icon>
+          <span style="font-size: 20px; margin-left: 15%">确认</span>
         </div>
         <div class="cancel-btn" @click="handleRechargeClose">
-          <el-icon style="margin-left: 15%; color: #45ba7e"><Close /></el-icon>
-          <span style="font-size: 16px; margin-left: 15%; color: #5a5a5a">取消</span>
+          <el-icon style="margin-left: 5%; color: #45ba7e"><Close /></el-icon>
+          <span style="font-size: 20px; margin-left: 15%; color: #5a5a5a">取消</span>
         </div>
       </div>
     </div>
@@ -155,7 +155,7 @@ export default {
 };
 </script>
 
-<style>
+<style scoped>
 .recharge-dialog {
   position: fixed;
   top: 0;
@@ -204,7 +204,7 @@ export default {
 }
 
 .recharge-input > span {
-  font-size: 14px;
+  font-size: 20px;
   color: #747374;
   margin-bottom: 5px;
 }
@@ -242,8 +242,8 @@ export default {
 
 .confirm-btn,
 .cancel-btn {
-  height: 35px;
-  width: 90px;
+  height: 42px;
+  width: 110px;
   cursor: pointer;
   border: 1px solid #f2f2f2;
   border-radius: 5px;

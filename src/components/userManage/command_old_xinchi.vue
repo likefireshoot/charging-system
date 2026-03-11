@@ -5,7 +5,7 @@
       <div class="title">
         <div style="margin-left: 10px; display: flex; align-items: center">
           <img src="@/assets/yonghu/icon5.png" alt="" style="margin-right: 8px" />
-          <span style="font-size: 18px">命令下发</span>
+          <span style="font-size: 20px">命令下发</span>
         </div>
         <div style="margin-right: 10px; cursor: pointer; width: 50px" @click="closeCommandDialog">
           <img src="@/assets/close.png" alt="" />
@@ -13,15 +13,20 @@
       </div>
       <div class="command-content">
         <div class="command-select">
-          <el-input v-model="commandFilterText" placeholder="请输入命令名称..."
-            style="height: 40px; margin-bottom: 10px; margin-top: 10px"></el-input>
-          <el-tree ref="commandTreeRef" style="width: 210px; height: 460px; overflow-y: auto"
-            :data="command_xinchi_data" :props="commandProps" default-expand-all
-            :filter-node-method="command_filterNode" @node-click="handleNodeClick"></el-tree>
+          <el-input v-model="commandFilterText" placeholder="请输入命令名称..." style="height: 40px; margin-bottom: 10px; margin-top: 10px"></el-input>
+          <el-tree
+            ref="commandTreeRef"
+            style="width: 230px; height: 460px; overflow-y: auto"
+            :data="command_xinchi_data"
+            :props="commandProps"
+            default-expand-all
+            :filter-node-method="command_filterNode"
+            @node-click="handleNodeClick"
+          ></el-tree>
         </div>
         <div class="command-params">
           <div class="set-params">
-            <span style="font-size: 16px; margin-top: 10px; margin-bottom: 5px">设置参数</span>
+            <span style="font-size: 25px; margin-top: 10px; margin-bottom: 5px">设置参数</span>
             <div class="flex-container">
               <div style="width: 4px; height: 4px; background-color: #46b87d; margin-right: 5px"></div>
               <div style="width: 4px; height: 4px; background-color: #90d5b2; margin-right: 5px"></div>
@@ -36,7 +41,7 @@
                 </div>
               </div>
               <div v-else>
-                <!-- <div class="set-content-container" v-if="node.label === '设置周期上报参数'">
+                <div class="set-content-container" v-if="node.label === '设置周期上报参数'">
                   <div class="set-input">
                     <span>周期频率</span>
                     <el-select v-model="params_set_tai.zhouqishangbao.way">
@@ -57,76 +62,16 @@
                   <div class="set-input" style="width: 100%">
                     <span>开始时间</span>
                     <div style="width: 100%; display: flex; justify-content: space-between">
-                      <el-input style="margin-right: 10px" v-model="params_set_tai.zhouqishangbao.year"
-                        placeholder="年"></el-input>
-                      <el-input style="margin-right: 10px" v-model="params_set_tai.zhouqishangbao.month"
-                        placeholder="月"></el-input>
-                      <el-input style="margin-right: 10px" v-model="params_set_tai.zhouqishangbao.day"
-                        placeholder="日"></el-input>
-                      <el-input style="margin-right: 10px" v-model="params_set_tai.zhouqishangbao.hour"
-                        placeholder="时"></el-input>
-                      <el-input style="margin-right: 10px" v-model="params_set_tai.zhouqishangbao.minute"
-                        placeholder="分"></el-input>
-                      <el-input style="margin-right: 10px" v-model="params_set_tai.zhouqishangbao.second"
-                        placeholder="秒"></el-input>
+                      <el-input style="margin-right: 10px" v-model="params_set_tai.zhouqishangbao.year" placeholder="年"></el-input>
+                      <el-input style="margin-right: 10px" v-model="params_set_tai.zhouqishangbao.month" placeholder="月"></el-input>
+                      <el-input style="margin-right: 10px" v-model="params_set_tai.zhouqishangbao.day" placeholder="日"></el-input>
+                      <el-input style="margin-right: 10px" v-model="params_set_tai.zhouqishangbao.hour" placeholder="时"></el-input>
+                      <el-input style="margin-right: 10px" v-model="params_set_tai.zhouqishangbao.minute" placeholder="分"></el-input>
+                      <el-input style="margin-right: 10px" v-model="params_set_tai.zhouqishangbao.second" placeholder="秒"></el-input>
                     </div>
                   </div>
-                </div> -->
-                <!-- 修复后的模板：核心是保证model/prop/rules完全对应 -->
-                <el-form :model="params_set_tai.zhouqishangbao" :rules="cycleReportRules" ref="cycleReportForm"
-                  class="set-content-container" v-if="node.label === '设置周期上报参数'">
-                  <div class="set-input">
-                    <span>周期频率</span>
-                    <!-- prop必须和model里的字段名一致：way -->
-                    <el-form-item prop="way" style="margin: 0;">
-                      <el-select v-model="params_set_tai.zhouqishangbao.way">
-                        <el-option label="每小时" value="5"></el-option>
-                        <el-option label="每天" value="6"></el-option>
-                        <el-option label="每周" value="7"></el-option>
-                        <el-option label="每月" value="8"></el-option>
-                      </el-select>
-                    </el-form-item>
-                  </div>
-                  <div class="set-input">
-                    <span>星期</span>
-                    <!-- prop必须和model里的字段名一致：week -->
-                    <el-form-item prop="week" style="margin: 0;">
-                      <el-input v-model="params_set_tai.zhouqishangbao.week" placeholder="有效值为0~7"></el-input>
-                    </el-form-item>
-                  </div>
-                  <div class="set-input">
-                    <span>周期间隔</span>
-                    <!-- prop必须和model里的字段名一致：interval -->
-                    <el-form-item prop="interval" style="margin: 0;">
-                      <el-input v-model="params_set_tai.zhouqishangbao.interval"></el-input>
-                    </el-form-item>
-                  </div>
-                  <div class="set-input" style="width: 100%">
-                    <span>开始时间</span>
-                    <div style="width: 100%; display: flex; justify-content: space-between">
-                      <!-- 每个时间字段的prop必须和model里的字段名严格一致 -->
-                      <el-form-item prop="year" style="margin: 0; flex: 1; margin-right: 10px;">
-                        <el-input v-model="params_set_tai.zhouqishangbao.year" placeholder="年"></el-input>
-                      </el-form-item>
-                      <el-form-item prop="month" style="margin: 0; flex: 1; margin-right: 10px;">
-                        <el-input v-model="params_set_tai.zhouqishangbao.month" placeholder="月"></el-input>
-                      </el-form-item>
-                      <el-form-item prop="day" style="margin: 0; flex: 1; margin-right: 10px;">
-                        <el-input v-model="params_set_tai.zhouqishangbao.day" placeholder="日"></el-input>
-                      </el-form-item>
-                      <el-form-item prop="hour" style="margin: 0; flex: 1; margin-right: 10px;">
-                        <el-input v-model="params_set_tai.zhouqishangbao.hour" placeholder="时"></el-input>
-                      </el-form-item>
-                      <el-form-item prop="minute" style="margin: 0; flex: 1; margin-right: 10px;">
-                        <el-input v-model="params_set_tai.zhouqishangbao.minute" placeholder="分"></el-input>
-                      </el-form-item>
-                      <el-form-item prop="second" style="margin: 0; flex: 1; margin-right: 10px;">
-                        <el-input v-model="params_set_tai.zhouqishangbao.second" placeholder="秒"></el-input>
-                      </el-form-item>
-                    </div>
-                  </div>
-                </el-form>
-                <!-- <div class="set-content-container" v-if="node.label === '阀门控制'">
+                </div>
+                <div class="set-content-container" v-if="node.label === '阀门控制'">
                   <div class="set-input">
                     <span>阀门状态</span>
                     <el-select v-model="params_set_tai.famenstate">
@@ -140,33 +85,12 @@
                     <span>读数</span>
                     <el-input v-model="params_set_tai.count" type="number"></el-input>
                   </div>
-                </div> -->
-                <el-form :model="params_set_tai" :rules="valveControlRules" ref="valveControlForm"
-                  class="set-content-container" v-if="node.label === '阀门控制'">
-                  <div class="set-input">
-                    <span>阀门状态</span>
-                    <el-form-item prop="famenstate" style="margin: 0;">
-                      <el-select v-model="params_set_tai.famenstate" placeholder="请选择阀门状态">
-                        <el-option label="开阀" value="1"></el-option>
-                        <el-option label="关阀" value="0"></el-option>
-                      </el-select>
-                    </el-form-item>
-                  </div>
-                </el-form>
-                <el-form :model="params_set_tai" :rules="readCountRules" ref="readCountForm"
-                  class="set-content-container" v-if="node.label === '设置读数'">
-                  <div class="set-input">
-                    <span>读数</span>
-                    <el-form-item prop="count" style="margin: 0;">
-                      <el-input v-model="params_set_tai.count" type="number" placeholder="请输入正整数读数"></el-input>
-                    </el-form-item>
-                  </div>
-                </el-form>
+                </div>
               </div>
             </div>
           </div>
           <div class="get-params">
-            <span style="font-size: 16px; margin-top: 10px; margin-bottom: 5px">返回值</span>
+            <span style="font-size: 25px; margin-top: 10px; margin-bottom: 5px">返回值</span>
             <div class="flex-container">
               <div style="width: 4px; height: 4px; background-color: #46b87d; margin-right: 5px"></div>
               <div style="width: 4px; height: 4px; background-color: #90d5b2; margin-right: 5px"></div>
@@ -184,16 +108,12 @@
           </div>
           <div class="btns">
             <div class="confirm-btn" @click="commit_xinchi">
-              <el-icon style="margin-left: 15%">
-                <Check />
-              </el-icon>
-              <span style="font-size: 16px; margin-left: 15%">确认</span>
+              <el-icon style="margin-left: -3%"><Check /></el-icon>
+              <span style="font-size: 20px; margin-left: 5%">确认</span>
             </div>
             <div class="cancel-btn" @click="closeCommandDialog">
-              <el-icon style="margin-left: 15%; color: #45ba7e">
-                <Close />
-              </el-icon>
-              <span style="font-size: 16px; margin-left: 15%; color: #5a5a5a">取消</span>
+              <el-icon style="margin-left: -3%; color: #45ba7e"><Close /></el-icon>
+              <span style="font-size: 20px; margin-left: 5%; color: #5a5a5a">取消</span>
             </div>
           </div>
         </div>
@@ -541,7 +461,7 @@ export default {
 };
 </script>
 
-<style>
+<style scoped>
 .command-dialog {
   position: fixed;
   top: 0;
@@ -626,21 +546,20 @@ export default {
 
 .set-input {
   display: flex;
-  justify-content: center;
-  /* 确保子元素在父容器中垂直居中 */
+  justify-content: center; /* 确保子元素在父容器中垂直居中 */
   flex-direction: column;
   width: 31.5%;
   height: 75px;
   margin-right: 10px;
 }
 
-.set-input>span {
-  font-size: 14px;
+.set-input > span {
+  font-size: 20px;
   color: #747374;
   margin-bottom: 5px;
 }
 
-.set-input>.el-input {
+.set-input > .el-input {
   height: 35px;
   width: 100%;
 }
@@ -699,7 +618,7 @@ export default {
 <style lang="scss" scoped>
 :deep(.el-tree) {
   .is-current {
-    >.el-tree-node__content {
+    > .el-tree-node__content {
       background-color: var(--el-tree-node-hover-bg-color);
       color: white;
     }

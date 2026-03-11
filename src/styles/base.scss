@@ -316,3 +316,13 @@ h5 {
     white-space: nowrap;
   }
 }
+
+/* 解决el-select输入框默认字体过小的问题 */
+.big-font-el-select {
+  .el-select__selected-item,
+  .el-select__placeholder{
+    font-size: 20px !important;
+    /* 如果文字位置不居中，可以微调行高 */
+    line-height: normal;
+  }
+}

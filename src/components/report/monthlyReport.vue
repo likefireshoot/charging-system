@@ -2,15 +2,15 @@
   <div class="baobiao-container">
     <div class="search-box">
       <div class="search-content">
-        <div class="search-input" style="margin-left: 10px; margin-left: 10px" v-if="companyId === 1">
+        <div class="search-input" style="margin-left: 20px; margin-left: 10px" v-if="companyId === 1">
           <span>所属水厂</span>
-          <el-select v-model="params.company" placeholder="请选择所属水厂">
+          <el-select class="big-font-el-select" v-model="params.company" placeholder="请选择所属水厂">
             <el-option v-for="item in companyList" :key="item.id" :value="item.id" :label="item.name"></el-option>
           </el-select>
         </div>
-        <div class="search-input" style="margin-left: 10px; margin-left: 10px">
+        <div class="search-input" style="margin-left: 20px; margin-left: 10px">
           <span>区域</span>
-          <el-select v-model="params.region">
+          <el-select class="big-font-el-select" v-model="params.region">
             <el-option v-for="item in quyu_data" :key="item.id" :label="item.label" :value="item.label"> </el-option>
           </el-select>
         </div>
@@ -22,11 +22,11 @@
       <div class="buttons">
         <div class="sercah-btn" @click="getTradeData">
           <img src="@/assets/baobiao/icon6.png" alt="" style="margin-left: 10px" />
-          <span style="font-size: 16px; margin-left: 15%">搜索</span>
+          <span style="font-size: 20px; margin-left: 15%">搜索</span>
         </div>
         <div class="clear-btn" @click="clear">
           <img src="@/assets/baobiao/icon5.png" alt="" style="margin-left: 10px" />
-          <span style="font-size: 16px; margin-left: 15%; color: #5a5a5a">清空</span>
+          <span style="font-size: 20px; margin-left: 15%; color: #5a5a5a">清空</span>
         </div>
       </div>
     </div>
@@ -230,7 +230,7 @@ export default {
           color: "#333",
           fontSize: 12,
         }
-        
+
       },
       monthchartResizeObserver: null,
       monthhuanbichart: null,
@@ -698,7 +698,7 @@ export default {
 }
 
 .search-input > span {
-  font-size: 14px;
+  font-size: 20px;
   margin-bottom: 5px;
 }
 

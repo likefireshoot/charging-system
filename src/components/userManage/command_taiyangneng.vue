@@ -5,7 +5,7 @@
       <div class="title">
         <div style="margin-left: 10px; display: flex; align-items: center">
           <img src="@/assets/yonghu/icon5.png" alt="" style="margin-right: 8px" />
-          <span style="font-size: 18px">命令下发</span>
+          <span style="font-size: 20px">命令下发</span>
         </div>
         <div style="margin-right: 10px; cursor: pointer; width: 50px" @click="closeCommandDialog">
           <img src="@/assets/close.png" alt="" />
@@ -16,7 +16,7 @@
           <el-input v-model="commandFilterText" placeholder="请输入命令名称..." style="height: 40px; margin-bottom: 10px; margin-top: 10px"></el-input>
           <el-tree
             ref="commandTreeRef"
-            style="width: 210px; height: 460px; overflow-y: auto"
+            style="width: 230px; height: 460px; overflow-y: auto"
             :data="command_taiyangneng_data"
             :props="commandProps"
             default-expand-all
@@ -26,7 +26,7 @@
         </div>
         <div class="command-params">
           <div class="set-params">
-            <span style="font-size: 16px; margin-top: 10px; margin-bottom: 5px">设置参数</span>
+            <span style="font-size: 25px; margin-top: 10px; margin-bottom: 5px">设置参数</span>
             <div class="flex-container">
               <div style="width: 4px; height: 4px; background-color: #46b87d; margin-right: 5px"></div>
               <div style="width: 4px; height: 4px; background-color: #90d5b2; margin-right: 5px"></div>
@@ -41,278 +41,142 @@
                 </div>
               </div>
               <div v-else>
-                <!-- 新增：设置心跳上报间隔 - 表单校验包裹 -->
-                <el-form 
-                  :model="params_set_tai" 
-                  :rules="heartIntervalRules" 
-                  ref="heartIntervalForm" 
-                  class="set-content-container"
-                  v-if="node.label == '设置心跳上报间隔'"
-                >
+                <div class="set-content-container" v-if="node.label == '设置心跳上报间隔'">
                   <div class="set-input">
                     <span>心跳上报间隔(秒)</span>
-                    <el-form-item prop="heartInterval" style="margin: 0;">
-                      <el-input v-model="params_set_tai.heartInterval"></el-input>
-                    </el-form-item>
+                    <el-input v-model="params_set_tai.heartInterval"></el-input>
                   </div>
-                </el-form>
-
-                <!-- 新增：设置网络参数 - 表单校验包裹 -->
-                <el-form 
-                  :model="params_set_tai.wangluo" 
-                  :rules="wangluoRules" 
-                  ref="wangluoForm" 
-                  class="set-content-container"
-                  v-if="node.label === '设置网络参数'"
-                >
+                </div>
+                <div class="set-content-container" v-if="node.label === '设置网络参数'">
                   <div class="set-input">
                     <span>IP地址</span>
-                    <el-form-item prop="ip" style="margin: 0;">
-                      <el-input v-model="params_set_tai.wangluo.ip"></el-input>
-                    </el-form-item>
+                    <el-input v-model="params_set_tai.wangluo.ip"></el-input>
                   </div>
                   <div class="set-input">
                     <span>端口号</span>
-                    <el-form-item prop="port" style="margin: 0;">
-                      <el-input v-model="params_set_tai.wangluo.port"></el-input>
-                    </el-form-item>
+                    <el-input v-model="params_set_tai.wangluo.port"></el-input>
                   </div>
-                </el-form>
-
-                <!-- 新增：设置抄表配置 - 表单校验包裹 -->
-                <el-form 
-                  :model="params_set_tai.chaobiaoPeizhi" 
-                  :rules="chaobiaoPeizhiRules" 
-                  ref="chaobiaoPeizhiForm" 
-                  class="set-content-container"
-                  v-if="node.label === '设置抄表配置'"
-                >
+                </div>
+                <div class="set-content-container" v-if="node.label === '设置抄表配置'">
                   <div class="set-input">
                     <span>上传方式</span>
-                    <el-form-item prop="way" style="margin: 0;">
-                      <el-select v-model="params_set_tai.chaobiaoPeizhi.way">
-                        <el-option label="历史上传" value="0"></el-option>
-                        <el-option label="实时上传" value="1"></el-option>
-                      </el-select>
-                    </el-form-item>
+                    <el-select v-model="params_set_tai.chaobiaoPeizhi.way">
+                      <el-option label="历史上传" value="0"></el-option>
+                      <el-option label="实时上传" value="1"></el-option>
+                    </el-select>
                   </div>
                   <div class="set-input" style="width: 100%; flex-direction: row; justify-content: flex-start">
                     <div style="width: 24%; display: flex; flex-direction: column; margin-right: 15px">
-                      <span style="font-size: 14px; color: #747374; margin-bottom: 5px">抄表间隔(小时)</span>
-                      <el-form-item prop="chaobiaoHour" style="margin: 0;">
-                        <el-input style="height: 35px; width: 100%" v-model="params_set_tai.chaobiaoPeizhi.chaobiaoHour"></el-input>
-                      </el-form-item>
+                      <span style="font-size: 20px; color: #747374; margin-bottom: 5px">抄表间隔(小时)</span>
+                      <el-input style="height: 35px; width: 100%" v-model="params_set_tai.chaobiaoPeizhi.chaobiaoHour"></el-input>
                     </div>
                     <div style="width: 24%; display: flex; flex-direction: column; margin-right: 15px">
-                      <span style="font-size: 14px; color: #747374; margin-bottom: 5px">抄表间隔(分钟)</span>
-                      <el-form-item prop="chaobiaoMinute" style="margin: 0;">
-                        <el-input style="height: 35px; width: 100%" v-model="params_set_tai.chaobiaoPeizhi.chaobiaoMinute"></el-input>
-                      </el-form-item>
+                      <span style="font-size: 20px; color: #747374; margin-bottom: 5px">抄表间隔(分钟)</span>
+                      <el-input style="height: 35px; width: 100%" v-model="params_set_tai.chaobiaoPeizhi.chaobiaoMinute"></el-input>
                     </div>
                     <div style="width: 24%; display: flex; flex-direction: column; margin-right: 15px">
-                      <span style="font-size: 14px; color: #747374; margin-bottom: 5px">上传间隔(天)</span>
-                      <el-form-item prop="uploadDate" style="margin: 0;">
-                        <el-input style="height: 35px; width: 100%" v-model="params_set_tai.chaobiaoPeizhi.uploadDate"></el-input>
-                      </el-form-item>
+                      <span style="font-size: 20px; color: #747374; margin-bottom: 5px">上传间隔(天)</span>
+                      <el-input style="height: 35px; width: 100%" v-model="params_set_tai.chaobiaoPeizhi.uploadDate"></el-input>
                     </div>
                     <div style="width: 24%; display: flex; flex-direction: column; margin-right: 15px">
-                      <span style="font-size: 14px; color: #747374; margin-bottom: 5px">上传间隔(小时)</span>
-                      <el-form-item prop="uploadHour" style="margin: 0;">
-                        <el-input style="height: 35px; width: 100%" v-model="params_set_tai.chaobiaoPeizhi.uploadHour"></el-input>
-                      </el-form-item>
+                      <span style="font-size: 20px; color: #747374; margin-bottom: 5px">上传间隔(小时)</span>
+                      <el-input style="height: 35px; width: 100%" v-model="params_set_tai.chaobiaoPeizhi.uploadHour"></el-input>
                     </div>
                   </div>
-                </el-form>
-
-                <!-- 新增：设置阀门维护配置 - 表单校验包裹 -->
-                <el-form 
-                  :model="params_set_tai.famenWeihu" 
-                  :rules="famenWeihuRules" 
-                  ref="famenWeihuForm" 
-                  class="set-content-container"
-                  v-if="node.label === '设置阀门维护配置'"
-                >
+                </div>
+                <div class="set-content-container" v-if="node.label === '设置阀门维护配置'">
                   <div class="set-input">
                     <span>月洗阀次数</span>
-                    <el-form-item prop="count" style="margin: 0;">
-                      <el-select v-model="params_set_tai.famenWeihu.count">
-                        <el-option label="1次" value="1"></el-option>
-                        <el-option label="2次" value="2"></el-option>
-                        <el-option label="3次" value="3"></el-option>
-                        <el-option label="4次" value="4"></el-option>
-                      </el-select>
-                    </el-form-item>
+                    <el-select v-model="params_set_tai.famenWeihu.count">
+                      <el-option label="1次" value="1"></el-option>
+                      <el-option label="2次" value="2"></el-option>
+                      <el-option label="3次" value="3"></el-option>
+                      <el-option label="4次" value="4"></el-option>
+                    </el-select>
                   </div>
                   <div style="width: 100%" class="set-input" v-if="params_set_tai.famenWeihu.count >= 1">
                     <span>第一次洗阀时间</span>
                     <div style="width: 100%; display: flex; justify-content: space-between">
-                      <el-form-item prop="first.day" style="margin: 0; margin-right: 15px;">
-                        <el-input v-model="params_set_tai.famenWeihu.first.day" placeholder="日"></el-input>
-                      </el-form-item>
-                      <el-form-item prop="first.hour" style="margin: 0; margin-right: 15px;">
-                        <el-input v-model="params_set_tai.famenWeihu.first.hour" placeholder="时"></el-input>
-                      </el-form-item>
-                      <el-form-item prop="first.minute" style="margin: 0;">
-                        <el-input v-model="params_set_tai.famenWeihu.first.minute" placeholder="分"></el-input>
-                      </el-form-item>
+                      <el-input style="margin-right: 15px" v-model="params_set_tai.famenWeihu.first.day" placeholder="日"></el-input>
+                      <el-input style="margin-right: 15px" v-model="params_set_tai.famenWeihu.first.hour" placeholder="时"></el-input>
+                      <el-input style="margin-right: 15px" v-model="params_set_tai.famenWeihu.first.minute" placeholder="分"></el-input>
                     </div>
                   </div>
                   <div style="width: 100%" class="set-input" v-if="params_set_tai.famenWeihu.count >= 2">
                     <span>第二次洗阀时间</span>
                     <div style="width: 100%; display: flex; justify-content: space-between">
-                      <el-form-item prop="second.day" style="margin: 0; margin-right: 15px;">
-                        <el-input v-model="params_set_tai.famenWeihu.second.day" placeholder="日"></el-input>
-                      </el-form-item>
-                      <el-form-item prop="second.hour" style="margin: 0; margin-right: 15px;">
-                        <el-input v-model="params_set_tai.famenWeihu.second.hour" placeholder="时"></el-input>
-                      </el-form-item>
-                      <el-form-item prop="second.minute" style="margin: 0;">
-                        <el-input v-model="params_set_tai.famenWeihu.second.minute" placeholder="分"></el-input>
-                      </el-form-item>
+                      <el-input style="margin-right: 15px" v-model="params_set_tai.famenWeihu.second.day" placeholder="日"></el-input>
+                      <el-input style="margin-right: 15px" v-model="params_set_tai.famenWeihu.second.hour" placeholder="时"></el-input>
+                      <el-input style="margin-right: 15px" v-model="params_set_tai.famenWeihu.second.minute" placeholder="分"></el-input>
                     </div>
                   </div>
                   <div style="width: 100%" class="set-input" v-if="params_set_tai.famenWeihu.count >= 3">
                     <span>第三次洗阀时间</span>
                     <div style="width: 100%; display: flex; justify-content: space-between">
-                      <el-form-item prop="third.day" style="margin: 0; margin-right: 15px;">
-                        <el-input v-model="params_set_tai.famenWeihu.third.day" placeholder="日"></el-input>
-                      </el-form-item>
-                      <el-form-item prop="third.hour" style="margin: 0; margin-right: 15px;">
-                        <el-input v-model="params_set_tai.famenWeihu.third.hour" placeholder="时"></el-input>
-                      </el-form-item>
-                      <el-form-item prop="third.minute" style="margin: 0;">
-                        <el-input v-model="params_set_tai.famenWeihu.third.minute" placeholder="分"></el-input>
-                      </el-form-item>
+                      <el-input style="margin-right: 15px" v-model="params_set_tai.famenWeihu.third.day" placeholder="日"></el-input>
+                      <el-input style="margin-right: 15px" v-model="params_set_tai.famenWeihu.third.hour" placeholder="时"></el-input>
+                      <el-input style="margin-right: 15px" v-model="params_set_tai.famenWeihu.third.minute" placeholder="分"></el-input>
                     </div>
                   </div>
                   <div style="width: 100%" class="set-input" v-if="params_set_tai.famenWeihu.count >= 4">
                     <span>第四次洗阀时间</span>
                     <div style="width: 100%; display: flex; justify-content: space-between">
-                      <el-form-item prop="fourth.day" style="margin: 0; margin-right: 15px;">
-                        <el-input v-model="params_set_tai.famenWeihu.fourth.day" placeholder="日"></el-input>
-                      </el-form-item>
-                      <el-form-item prop="fourth.hour" style="margin: 0; margin-right: 15px;">
-                        <el-input v-model="params_set_tai.famenWeihu.fourth.hour" placeholder="时"></el-input>
-                      </el-form-item>
-                      <el-form-item prop="fourth.minute" style="margin: 0;">
-                        <el-input v-model="params_set_tai.famenWeihu.fourth.minute" placeholder="分"></el-input>
-                      </el-form-item>
+                      <el-input style="margin-right: 15px" v-model="params_set_tai.famenWeihu.fourth.day" placeholder="日"></el-input>
+                      <el-input style="margin-right: 15px" v-model="params_set_tai.famenWeihu.fourth.hour" placeholder="时"></el-input>
+                      <el-input style="margin-right: 15px" v-model="params_set_tai.famenWeihu.fourth.minute" placeholder="分"></el-input>
                     </div>
                   </div>
-                </el-form>
-
-                <!-- 新增：设置水表配置 - 表单校验包裹 -->
-                <el-form 
-                  :model="params_set_tai" 
-                  :rules="beilvRules" 
-                  ref="beilvForm" 
-                  class="set-content-container"
-                  v-if="node.label === '设置水表配置'"
-                >
+                </div>
+                <div class="set-content-container" v-if="node.label === '设置水表配置'">
                   <div class="set-input">
                     <span>倍率</span>
-                    <el-form-item prop="beilv" style="margin: 0;">
-                      <el-select v-model="params_set_tai.beilv">
-                        <el-option label="0.1" value="0.1"></el-option>
-                        <el-option label="1" value="1"></el-option>
-                        <el-option label="10" value="10"></el-option>
-                        <el-option label="100" value="100"></el-option>
-                        <el-option label="1000" value="1000"></el-option>
-                      </el-select>
-                    </el-form-item>
+                    <el-select v-model="params_set_tai.beilv">
+                      <el-option label="0.1" value="0.1"></el-option>
+                      <el-option label="1" value="1"></el-option>
+                      <el-option label="10" value="10"></el-option>
+                      <el-option label="100" value="100"></el-option>
+                      <el-option label="1000" value="1000"></el-option>
+                    </el-select>
                   </div>
-                </el-form>
-
-                <!-- 新增：设置读数 - 表单校验包裹 -->
-                <el-form 
-                  :model="params_set_tai" 
-                  :rules="countRules" 
-                  ref="countForm" 
-                  class="set-content-container"
-                  v-if="node.label === '设置读数'"
-                >
+                </div>
+                <div class="set-content-container" v-if="node.label === '设置读数'">
                   <div class="set-input">
                     <span>读数</span>
-                    <el-form-item prop="count" style="margin: 0;">
-                      <el-input v-model="params_set_tai.count"></el-input>
-                    </el-form-item>
+                    <el-input v-model="params_set_tai.count"></el-input>
                   </div>
-                </el-form>
-
-                <!-- 新增：阀门控制 - 表单校验包裹 -->
-                <el-form 
-                  :model="params_set_tai" 
-                  :rules="famenstateRules" 
-                  ref="famenstateForm" 
-                  class="set-content-container"
-                  v-if="node.label === '阀门控制'"
-                >
+                </div>
+                <div class="set-content-container" v-if="node.label === '阀门控制'">
                   <div class="set-input">
                     <span>阀门状态</span>
-                    <el-form-item prop="famenstate" style="margin: 0;">
-                      <el-select v-model="params_set_tai.famenstate">
-                        <el-option label="开阀" value="1"></el-option>
-                        <el-option label="关阀" value="0"></el-option>
-                      </el-select>
-                    </el-form-item>
+                    <el-select v-model="params_set_tai.famenstate">
+                      <el-option label="开阀" value="1"></el-option>
+                      <el-option label="关阀" value="0"></el-option>
+                    </el-select>
                   </div>
-                </el-form>
-
-                <!-- 新增：校时 - 表单校验包裹 -->
-                <el-form 
-                  :model="params_set_tai.jiaoshi" 
-                  :rules="jiaoshiRules" 
-                  ref="jiaoshiForm" 
-                  class="set-content-container"
-                  v-if="node.label === '校时'"
-                >
+                </div>
+                <div class="set-content-container" v-if="node.label === '校时'">
                   <div class="set-input" style="width: 100%">
                     <span>校准的时间</span>
                     <div style="width: 100%; display: flex; justify-content: space-between">
-                      <el-form-item prop="year" style="margin: 0; margin-right: 10px;">
-                        <el-input v-model="params_set_tai.jiaoshi.year" placeholder="年"></el-input>
-                      </el-form-item>
-                      <el-form-item prop="month" style="margin: 0; margin-right: 10px;">
-                        <el-input v-model="params_set_tai.jiaoshi.month" placeholder="月"></el-input>
-                      </el-form-item>
-                      <el-form-item prop="day" style="margin: 0; margin-right: 10px;">
-                        <el-input v-model="params_set_tai.jiaoshi.day" placeholder="日"></el-input>
-                      </el-form-item>
-                      <el-form-item prop="hour" style="margin: 0; margin-right: 10px;">
-                        <el-input v-model="params_set_tai.jiaoshi.hour" placeholder="时"></el-input>
-                      </el-form-item>
-                      <el-form-item prop="minute" style="margin: 0; margin-right: 10px;">
-                        <el-input v-model="params_set_tai.jiaoshi.minute" placeholder="分"></el-input>
-                      </el-form-item>
-                      <el-form-item prop="second" style="margin: 0;">
-                        <el-input v-model="params_set_tai.jiaoshi.second" placeholder="秒"></el-input>
-                      </el-form-item>
+                      <el-input style="margin-right: 10px" v-model="params_set_tai.jiaoshi.year" placeholder="年"></el-input>
+                      <el-input style="margin-right: 10px" v-model="params_set_tai.jiaoshi.month" placeholder="月"></el-input>
+                      <el-input style="margin-right: 10px" v-model="params_set_tai.jiaoshi.day" placeholder="日"></el-input>
+                      <el-input style="margin-right: 10px" v-model="params_set_tai.jiaoshi.hour" placeholder="时"></el-input>
+                      <el-input style="margin-right: 10px" v-model="params_set_tai.jiaoshi.minute" placeholder="分"></el-input>
+                      <el-input style="margin-right: 10px" v-model="params_set_tai.jiaoshi.second" placeholder="秒"></el-input>
                     </div>
                   </div>
-                </el-form>
-
-                <!-- 新增：设置关阀圈数 - 表单校验包裹 -->
-                <el-form 
-                  :model="params_set_tai.guanfa" 
-                  :rules="guanfaRules" 
-                  ref="guanfaForm" 
-                  class="set-content-container"
-                  v-if="node.label === '设置关阀圈数'"
-                >
+                </div>
+                <div class="set-content-container" v-if="node.label === '设置关阀圈数'">
                   <div class="set-input">
                     <span>关阀圈数</span>
-                    <el-form-item prop="count" style="margin: 0;">
-                      <el-input v-model="params_set_tai.guanfa.count"></el-input>
-                    </el-form-item>
+                    <el-input v-model="params_set_tai.guanfa.count"></el-input>
                   </div>
                   <div class="set-input">
                     <span>系列号</span>
-                    <el-form-item prop="xiliehao" style="margin: 0;">
-                      <el-input v-model="params_set_tai.guanfa.xiliehao"></el-input>
-                    </el-form-item>
+                    <el-input v-model="params_set_tai.guanfa.xiliehao"></el-input>
                   </div>
-                </el-form>
-
+                </div>
                 <div class="set-content-container" v-if="node.label === '设备还原'">
                   <div class="set-input" style="width: 100%; height: 175px; justify-content: center; align-items: center">
                     <img src="@/assets/yonghu/0.png" alt="" style="width: auto; height: 75%" />
@@ -323,7 +187,7 @@
             </div>
           </div>
           <div class="get-params">
-            <span style="font-size: 16px; margin-top: 10px; margin-bottom: 5px">返回值</span>
+            <span style="font-size: 25px; margin-top: 10px; margin-bottom: 5px">返回值</span>
             <div class="flex-container">
               <div style="width: 4px; height: 4px; background-color: #46b87d; margin-right: 5px"></div>
               <div style="width: 4px; height: 4px; background-color: #90d5b2; margin-right: 5px"></div>
@@ -505,12 +369,12 @@
           </div>
           <div class="btns">
             <div class="confirm-btn" @click="commit_taiyangneng">
-              <el-icon style="margin-left: 15%"><Check /></el-icon>
-              <span style="font-size: 16px; margin-left: 15%">确认</span>
+              <el-icon style="margin-left: -3%"><Check /></el-icon>
+              <span style="font-size: 20px; margin-left: 5%">确认</span>
             </div>
             <div class="cancel-btn" @click="closeCommandDialog">
-              <el-icon style="margin-left: 15%; color: #45ba7e"><Close /></el-icon>
-              <span style="font-size: 16px; margin-left: 15%; color: #5a5a5a">取消</span>
+              <el-icon style="margin-left: -3%; color: #45ba7e"><Close /></el-icon>
+              <span style="font-size: 20px; margin-left: 5%; color: #5a5a5a">取消</span>
             </div>
           </div>
         </div>
@@ -983,7 +847,7 @@ export default {
               ElMessage.error(error);
             });
         });
-      } 
+      }
       // ========== 新增：表单校验逻辑 - 设置网络参数 ==========
       else if (this.node.label === "设置网络参数") {
         if (!this.$refs.wangluoForm) {
@@ -995,7 +859,7 @@ export default {
           // 原有业务逻辑（未改动）
           ElMessage.error("暂未开通");
         });
-      } 
+      }
       // ========== 新增：表单校验逻辑 - 设置抄表配置 ==========
       else if (this.node.label === "设置抄表配置") {
         if (!this.$refs.chaobiaoPeizhiForm) {
@@ -1024,7 +888,7 @@ export default {
               ElMessage.error(error);
             });
         });
-      } 
+      }
       // ========== 新增：表单校验逻辑 - 设置阀门维护配置 ==========
       else if (this.node.label === "设置阀门维护配置") {
         if (!this.$refs.famenWeihuForm) {
@@ -1111,7 +975,7 @@ export default {
               ElMessage.error(error);
             });
         });
-      } 
+      }
       // ========== 新增：表单校验逻辑 - 设置水表配置 ==========
       else if (this.node.label === "设置水表配置") {
         if (!this.$refs.beilvForm) {
@@ -1136,7 +1000,7 @@ export default {
               ElMessage.error(error);
             });
         });
-      } 
+      }
       // ========== 新增：表单校验逻辑 - 设置读数 ==========
       else if (this.node.label === "设置读数") {
         if (!this.$refs.countForm) {
@@ -1161,7 +1025,7 @@ export default {
               ElMessage.error(error);
             });
         });
-      } 
+      }
       // ========== 新增：表单校验逻辑 - 阀门控制 ==========
       else if (this.node.label === "阀门控制") {
         if (!this.$refs.famenstateForm) {
@@ -1186,7 +1050,7 @@ export default {
               ElMessage.error(error);
             });
         });
-      } 
+      }
       // ========== 新增：表单校验逻辑 - 校时 ==========
       else if (this.node.label === "校时") {
         if (!this.$refs.jiaoshiForm) {
@@ -1212,7 +1076,7 @@ export default {
               ElMessage.error(error);
             });
         });
-      } 
+      }
       // ========== 新增：表单校验逻辑 - 设置关阀圈数 ==========
       else if (this.node.label === "设置关阀圈数") {
         if (!this.$refs.guanfaForm) {
@@ -1238,7 +1102,7 @@ export default {
               ElMessage.error(error);
             });
         });
-      } 
+      }
       // 设备还原（无参数，无需校验）
       else if (this.node.label === "设备还原") {
         const imei = this.data.imei;
@@ -1254,7 +1118,7 @@ export default {
           .catch((error) => {
             ElMessage.error(error);
           });
-      } 
+      }
       // 以下为获取类命令（暂未开通，无需校验）
       else if (this.node.label === "获取心跳上报间隔") {
         const imei = this.data.imei;
@@ -1357,7 +1221,7 @@ export default {
 };
 </script>
 
-<style>
+<style scoped>
 .command-dialog {
   position: fixed;
   top: 0;
@@ -1451,7 +1315,7 @@ export default {
 }
 
 .set-input > span {
-  font-size: 14px;
+  font-size: 20px;
   color: #747374;
   margin-bottom: 5px;
 }

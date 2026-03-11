@@ -1,10 +1,11 @@
+<!--超级大文件，dialog全写里面了-->
 <template>
   <div class="jiage-container">
     <div class="search-box">
       <div class="search-content">
         <div class="search-input" v-if="companyId === 1" style="margin-left: 10px">
           <span>所属水厂</span>
-          <el-select v-model="params.company" placeholder="请选择所属水厂">
+          <el-select class="big-font-el-select" v-model="params.company" placeholder="请选择所属水厂">
             <el-option v-for="item in companyList" :key="item.id" :value="item.id" :label="item.name"></el-option>
           </el-select>
         </div>
@@ -20,11 +21,11 @@
       <div class="buttons">
         <div class="sercah-btn" @click="getPriceData">
           <img src="@/assets/yonghu/icon16.png" alt="" style="margin-left: 8px" />
-          <span style="font-size: 16px; margin-left: 15%">搜索</span>
+          <span style="font-size: 20px; margin-left: 15%">搜索</span>
         </div>
         <div class="clear-btn" @click="clear">
           <img src="@/assets/jiage/icon4.png" alt="" style="margin-left: 10px" />
-          <span style="font-size: 16px; margin-left: 15%; color: #5a5a5a">清空</span>
+          <span style="font-size: 20px; margin-left: 15%; color: #5a5a5a">清空</span>
         </div>
       </div>
     </div>
@@ -32,15 +33,15 @@
       <div class="command-box">
         <div class="add-btn" style="margin-left: 10px" @click="add_click" v-if="staffPermissionIds.includes(20)">
           <img src="@/assets/jiage/icon6.png" alt="" style="margin-left: 8px" />
-          <span style="font-size: 16px; margin-left: 10px; color: #5a5a5a">新增</span>
+          <span style="font-size: 20px; margin-left: 10px; color: #5a5a5a">新增</span>
         </div>
         <div class="delete-btn" style="margin-left: 10px" @click="delete_click" v-if="staffPermissionIds.includes(21)">
           <img src="@/assets/jiage/icon4.png" alt="" style="margin-left: 8px" />
-          <span style="font-size: 16px; margin-left: 10px; color: #5a5a5a">删除</span>
+          <span style="font-size: 20px; margin-left: 10px; color: #5a5a5a">删除</span>
         </div>
         <div class="edit-btn" style="margin-left: 10px" :class="{ 'btn-single-only-disabled': multipleSelection.length !== 1 }" @click="multipleSelection.length === 1 && edit_click()" v-if="staffPermissionIds.includes(22)">
           <img src="@/assets/jiage/icon3.png" alt="" style="margin-left: 8px" />
-          <span style="font-size: 16px; margin-left: 10px; color: #5a5a5a">编辑</span>
+          <span style="font-size: 20px; margin-left: 10px; color: #5a5a5a">编辑</span>
         </div>
         <!-- <div class="export-in-btn" style="margin-left: 10px" @click="triggerFileInput">
           <img src="@/assets/jiage/icon1.png" alt="" style="margin-left: 7px" />
@@ -49,7 +50,7 @@
         </div> -->
         <div class="export-out-btn" style="margin-left: 10px" @click="exportExcel">
           <img src="@/assets/jiage/icon2.png" alt="" style="margin-left: 7px" />
-          <span style="font-size: 16px; margin-left: 10px; color: #5a5a5a">导出</span>
+          <span style="font-size: 20px; margin-left: 10px; color: #5a5a5a">导出</span>
         </div>
         <div class="reflush" style="margin-left: 10px" @click="reflush">
           <img src="@/assets/yonghu/icon15.png" alt="" />
@@ -94,7 +95,7 @@
         <div class="title">
           <div style="margin-left: 10px; display: flex; align-items: center">
             <img src="@/assets/jiage/icon6.png" alt="" style="margin-right: 10px" />
-            <span style="font-size: 18px">新增</span>
+            <span style="font-size: 20px">新增</span>
           </div>
           <div style="margin-right: 10px; cursor: pointer" @click="add_dialogFormVisible = false">
             <img src="@/assets/close.png" alt="" />
@@ -134,7 +135,7 @@
                 <span>水量范围</span>
                 <div class="jieti-range">
                   <el-input v-model="addData.amountFirstStart" :disabled="true" />
-                  <span style="font-size: 16px; margin-bottom: 5px; align-self: center; margin: 0 5px">至</span>
+                  <span style="font-size: 20px; margin-bottom: 5px; align-self: center; margin: 0 5px">至</span>
                   <el-input v-model="addData.amountFirstEnd" />
                 </div>
               </div>
@@ -152,7 +153,7 @@
                 <div class="jieti-range">
                   <!-- :disabled="addData.stepNumber === '1'" -->
                   <el-input v-model="addData.amountSecondStart" :disabled="true" />
-                  <span style="font-size: 16px; margin-bottom: 5px; align-self: center; margin: 0 5px">至</span>
+                  <span style="font-size: 20px; margin-bottom: 5px; align-self: center; margin: 0 5px">至</span>
                   <el-input v-model="addData.amountSecondEnd" :disabled="addData.stepNumber === '1'" />
                 </div>
               </div>
@@ -170,7 +171,7 @@
                 <div class="jieti-range">
                   <!-- :disabled="addData.stepNumber === '1' || addData.stepNumber === '2'" -->
                   <el-input v-model="addData.amountThirdStart" :disabled="true" />
-                  <span style="font-size: 16px; margin-bottom: 5px; align-self: center; margin: 0 5px">至</span>
+                  <span style="font-size: 20px; margin-bottom: 5px; align-self: center; margin: 0 5px">至</span>
                   <el-input v-model="addData.amountThirdEnd"
                     :disabled="addData.stepNumber === '1' || addData.stepNumber === '2'" />
                 </div>
@@ -188,13 +189,13 @@
             <el-icon style="margin-left: 15%">
               <Check />
             </el-icon>
-            <span style="font-size: 16px; margin-left: 15%">确认</span>
+            <span style="font-size: 20px; margin-left: 15%">确认</span>
           </div>
           <div class="cancel-btn" @click="add_cancel">
             <el-icon style="margin-left: 15%; color: #45ba7e">
               <Close />
             </el-icon>
-            <span style="font-size: 16px; margin-left: 15%; color: #5a5a5a">取消</span>
+            <span style="font-size: 20px; margin-left: 15%; color: #5a5a5a">取消</span>
           </div>
         </div>
       </div>
@@ -205,7 +206,7 @@
         <div class="title">
           <div style="margin-left: 10px; display: flex; align-items: center">
             <img src="@/assets/jiage/icon3.png" alt="" style="margin-right: 10px" />
-            <span style="font-size: 18px">编辑</span>
+            <span style="font-size: 20px">编辑</span>
           </div>
           <div style="margin-right: 10px; cursor: pointer" @click="edit_dialogFormVisible = false">
             <img src="@/assets/close.png" alt="" />
@@ -251,7 +252,7 @@
                 <span>水量范围</span>
                 <div class="jieti-range">
                   <el-input v-model="editData.amountFirstStart" />
-                  <span style="font-size: 16px; margin-bottom: 5px; align-self: center; margin: 0 5px">至</span>
+                  <span style="font-size: 20px; margin-bottom: 5px; align-self: center; margin: 0 5px">至</span>
                   <el-input v-model="editData.amountFirstEnd" />
                 </div>
               </div>
@@ -268,7 +269,7 @@
                 <span>水量范围</span>
                 <div class="jieti-range">
                   <el-input v-model="editData.amountSecondStart" :disabled="editData.stepNumber === '1'" />
-                  <span style="font-size: 16px; margin-bottom: 5px; align-self: center; margin: 0 5px">至</span>
+                  <span style="font-size: 20px; margin-bottom: 5px; align-self: center; margin: 0 5px">至</span>
                   <el-input v-model="editData.amountSecondEnd" :disabled="editData.stepNumber === '1'" />
                 </div>
               </div>
@@ -286,7 +287,7 @@
                 <div class="jieti-range">
                   <el-input v-model="editData.amountThirdStart"
                     :disabled="editData.stepNumber === '1' || editData.stepNumber === '2'" />
-                  <span style="font-size: 16px; margin-bottom: 5px; align-self: center; margin: 0 5px">至</span>
+                  <span style="font-size: 20px; margin-bottom: 5px; align-self: center; margin: 0 5px">至</span>
                   <el-input v-model="editData.amountThirdEnd"
                     :disabled="editData.stepNumber === '1' || editData.stepNumber === '2'" />
                 </div>
@@ -304,13 +305,13 @@
             <el-icon style="margin-left: 15%">
               <Check />
             </el-icon>
-            <span style="font-size: 16px; margin-left: 15%">确认</span>
+            <span style="font-size: 20px; margin-left: 15%">确认</span>
           </div>
           <div class="cancel-btn" @click="edit_dialogFormVisible = false">
             <el-icon style="margin-left: 15%; color: #45ba7e">
               <Close />
             </el-icon>
-            <span style="font-size: 16px; margin-left: 15%; color: #5a5a5a">取消</span>
+            <span style="font-size: 20px; margin-left: 15%; color: #5a5a5a">取消</span>
           </div>
         </div>
       </div>
@@ -321,7 +322,7 @@
         <div class="title">
           <div style="margin-left: 10px; display: flex; align-items: center">
             <img src="@/assets/jiage/icon4.png" alt="" style="margin-right: 10px" />
-            <span style="font-size: 18px">删除</span>
+            <span style="font-size: 20px">删除</span>
           </div>
           <div style="margin-right: 10px; cursor: pointer" @click="delete_dialogFormVisible = false">
             <img src="@/assets/close.png" alt="" />
@@ -335,16 +336,16 @@
         </div>
         <div class="btn">
           <div class="confirm-btn" @click="deletePrice">
-            <el-icon style="margin-left: 15%">
+            <el-icon style="margin-left: 5%">
               <Check />
             </el-icon>
-            <span style="font-size: 16px; margin-left: 15%">确认</span>
+            <span style="font-size: 20px; margin-left: 15%">确认</span>
           </div>
           <div class="cancel-btn" @click="delete_dialogFormVisible = false">
-            <el-icon style="margin-left: 15%; color: #45ba7e">
+            <el-icon style="margin-left: 5%; color: #45ba7e">
               <Close />
             </el-icon>
-            <span style="font-size: 16px; margin-left: 15%; color: #5a5a5a">取消</span>
+            <span style="font-size: 20px; margin-left: 15%; color: #5a5a5a">取消</span>
           </div>
         </div>
       </div>
@@ -355,7 +356,7 @@
         <div class="title">
           <div style="margin-left: 10px; display: flex; align-items: center">
             <img src="@/assets/jiage/icon5.png" alt="" style="margin-right: 10px" />
-            <span style="font-size: 18px">查看</span>
+            <span style="font-size: 20px">查看</span>
           </div>
           <div style="margin-right: 10px; cursor: pointer" @click="view_dialogFormVisible = false">
             <img src="@/assets/close.png" alt="" />
@@ -395,7 +396,7 @@
                 <span>水量范围</span>
                 <div class="jieti-range">
                   <el-input v-model="viewData.amountFirstStart" disabled />
-                  <span style="font-size: 16px; margin-bottom: 5px; align-self: center; margin: 0 5px">至</span>
+                  <span style="font-size: 20px; margin-bottom: 5px; align-self: center; margin: 0 5px">至</span>
                   <el-input v-model="viewData.amountFirstEnd" disabled />
                 </div>
               </div>
@@ -412,7 +413,7 @@
                 <span>水量范围</span>
                 <div class="jieti-range">
                   <el-input v-model="viewData.amountSecondStart" disabled />
-                  <span style="font-size: 16px; margin-bottom: 5px; align-self: center; margin: 0 5px">至</span>
+                  <span style="font-size: 20px; margin-bottom: 5px; align-self: center; margin: 0 5px">至</span>
                   <el-input v-model="viewData.amountSecondEnd" disabled />
                 </div>
               </div>
@@ -429,7 +430,7 @@
                 <span>水量范围</span>
                 <div class="jieti-range">
                   <el-input v-model="viewData.amountThirdStart" disabled />
-                  <span style="font-size: 16px; margin-bottom: 5px; align-self: center; margin: 0 5px">至</span>
+                  <span style="font-size: 20px; margin-bottom: 5px; align-self: center; margin: 0 5px">至</span>
                   <el-input v-model="viewData.amountThirdEnd" disabled />
                 </div>
               </div>
@@ -1587,6 +1588,24 @@ export default {
   --el-color-primary: #46b97e;
 }
 
+/* 修改分页整体字号（包括“共 x 条”） */
+:deep(.el-pagination) {
+  font-size: 16px;
+}
+
+/* 修改页码数字按钮的大小 */
+:deep(.el-pagination .el-pager li) {
+  font-size: 16px;
+  min-width: 35px; /* 数字变大后，按钮也要相应加宽 */
+  height: 35px;
+  line-height: 35px;
+}
+
+/* 如果有下拉选择每页条数，修改其内部文字 */
+:deep(.el-pagination .el-select .el-input) {
+  font-size: 16px;
+}
+
 :deep(.el-tree) {
   --el-fill-color-light: #46b97e;
   --el-fill-color-blank: #e8f3ed;
@@ -1645,7 +1664,7 @@ export default {
 }
 
 .search-input>span {
-  font-size: 14px;
+  font-size: 20px;
   margin-bottom: 5px;
 }
 
@@ -1654,7 +1673,7 @@ export default {
 }
 
 .time-input>span {
-  font-size: 14px;
+  font-size: 18px;
   margin-bottom: 5px;
   align-self: center;
   margin-left: 5px;
@@ -1728,7 +1747,7 @@ export default {
 .export-out-btn {
   display: flex;
   align-items: center;
-  width: 80px;
+  width: 90px;
   /* 设置按钮的宽度 */
   height: 32px;
   /* 设置按钮的高度 */
@@ -1736,7 +1755,7 @@ export default {
   border-radius: 5px;
   cursor: pointer;
   transition: all 0.3s;
-  font-size: 14px;
+  font-size: 20px;
   background-color: #fff;
   border: 2px solid #f2f2f2;
 }
@@ -1753,7 +1772,7 @@ export default {
   border-radius: 5px;
   cursor: pointer;
   transition: all 0.3s;
-  font-size: 14px;
+  font-size: 20px;
   background-color: #fff;
   border: 2px solid #f2f2f2;
 }
@@ -1876,7 +1895,7 @@ export default {
 }
 
 .test-input>span {
-  font-size: 16px;
+  font-size: 20px;
   margin-bottom: 5px;
 }
 
@@ -1902,7 +1921,7 @@ export default {
 }
 
 .jieti-item>span {
-  font-size: 16px;
+  font-size: 20px;
   margin-bottom: 5px;
 }
 

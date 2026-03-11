@@ -4,7 +4,7 @@
       <div class="title">
         <div style="margin-left: 10px; display: flex; align-items: center">
           <img src="@/assets/yonghu/icon7.png" alt="" style="margin-right: 8px" />
-          <span style="font-size: 18px">充值记录</span>
+          <span style="font-size: 20px">充值记录</span>
         </div>
         <div style="margin-right: 10px; cursor: pointer" @click="handleRechargeRecordDialogClose">
           <img src="@/assets/close.png" alt="" />
@@ -66,23 +66,23 @@
           <div class="buttons" style="margin-left: 5%; margin-right: 10px">
             <div class="sercah-btn" @click="search">
               <img src="@/assets/yonghu/icon16.png" alt="" style="margin-left: 8px" />
-              <span style="font-size: 16px; margin-left: 15%">搜索</span>
+              <span style="font-size: 20px; margin-left: 8%">搜索</span>
             </div>
             <div class="clear-btn" @click="clear">
               <img src="@/assets/yonghu/icon4.png" alt="" style="margin-left: 8px" />
-              <span style="font-size: 16px; margin-left: 15%; color: #5a5a5a">清空</span>
+              <span style="font-size: 20px; margin-left: 8%; color: #5a5a5a">清空</span>
             </div>
           </div>
         </div>
         <div class="recharge-record-list">
             <div class="command-buttons">
-            <div class="export-out-btn" style="margin-right: 10px; width: 100px" :class="{ 'btn-single-only-disabled': multipleSelection.length !== 1 }" @click="multipleSelection.length === 1 && receipt()">
+            <div class="export-out-btn" style="margin-right: 10px; width: 110px" :class="{ 'btn-single-only-disabled': multipleSelection.length !== 1 }" @click="multipleSelection.length === 1 && receipt()">
               <img src="@/assets/yonghu/icon26.png" alt="" style="margin-left: 7px" />
-              <span style="font-size: 16px; margin-left: 10px; color: #5a5a5a">开收据</span>
+              <span style="font-size: 20px; margin-left: 10px; color: #5a5a5a">开收据</span>
             </div>
-            <div class="export-out-btn" style="margin-right: 10px; width: 115px" :class="{ 'btn-single-only-disabled': multipleSelection.length !== 1 }" @click="multipleSelection.length === 1 && reset()">
+            <div class="export-out-btn" style="margin-right: 10px; width: 130px" :class="{ 'btn-single-only-disabled': multipleSelection.length !== 1 }" @click="multipleSelection.length === 1 && reset()">
               <img src="@/assets/yonghu/icon27.png" alt="" style="margin-left: 7px" />
-              <span style="font-size: 16px; margin-left: 10px; color: #5a5a5a">撤销充值</span>
+              <span style="font-size: 20px; margin-left: 10px; color: #5a5a5a">撤销充值</span>
             </div>
             <!-- <div class="export-out-btn" style="margin-right: 10px; width: 110px">
               <img src="@/assets/yonghu/icon1.png" alt="" style="margin-left: 7px" />
@@ -95,7 +95,7 @@
             </div> -->
             <div class="export-out-btn" style="margin-right: 10px" @click="exportExcel">
               <img src="@/assets/yonghu/icon2.png" alt="" style="margin-left: 7px" />
-              <span style="font-size: 16px; margin-left: 10px; color: #5a5a5a">导出</span>
+              <span style="font-size: 20px; margin-left: 10px; color: #5a5a5a">导出</span>
             </div>
             <div class="reflush" style="margin-left: 10px" @click="reflush">
               <img src="@/assets/yonghu/icon15.png" alt="" />
@@ -616,7 +616,7 @@ export default {
 };
 </script>
 
-<style>
+<style scoped>
 .recharge-record-dialog {
   position: fixed;
   top: 0;
@@ -685,7 +685,7 @@ export default {
 }
 
 .search-input > span {
-  font-size: 14px;
+  font-size: 18px;
   margin-bottom: 5px;
 }
 
@@ -780,13 +780,13 @@ export default {
 .export-out-btn {
   display: flex;
   align-items: center;
-  width: 80px; /* 设置按钮的宽度 */
+  width: 90px; /* 设置按钮的宽度 */
   height: 32px; /* 设置按钮的高度 */
   color: white;
   border-radius: 5px;
   cursor: pointer;
   transition: all 0.3s;
-  font-size: 14px;
+  font-size: 20px;
   background-color: #fff;
   border: 2px solid #f2f2f2;
 }
@@ -801,7 +801,7 @@ export default {
   border-radius: 5px;
   cursor: pointer;
   transition: all 0.3s;
-  font-size: 14px;
+  font-size: 20px;
   background-color: #fff;
   border: 2px solid #f2f2f2;
 }

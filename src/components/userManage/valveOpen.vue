@@ -4,7 +4,7 @@
       <div class="title">
         <div style="margin-left: 10px; display: flex; align-items: center">
           <img src="@/assets/yonghu/icon18.png" alt="" style="margin-right: 8px" />
-          <span style="font-size: 18px">开阀控制</span>
+          <span style="font-size: 20px">开阀控制</span>
         </div>
         <div style="margin-right: 10px; cursor: pointer" @click="handleValveClose">
           <img src="@/assets/close.png" alt="" />
@@ -40,11 +40,11 @@
       <div class="btn">
         <div class="confirm-btn" @click="handleCommit">
           <el-icon style="margin-left: 15%"><Check /></el-icon>
-          <span style="font-size: 16px; margin-left: 15%">确认</span>
+          <span style="font-size: 20px; margin-left: 7%">确认</span>
         </div>
         <div class="cancel-btn" @click="handleValveClose">
           <el-icon style="margin-left: 15%; color: #45ba7e"><Close /></el-icon>
-          <span style="font-size: 16px; margin-left: 15%; color: #5a5a5a">取消</span>
+          <span style="font-size: 20px; margin-left: 7%; color: #5a5a5a">取消</span>
         </div>
       </div>
     </div>
@@ -163,7 +163,7 @@ export default {
 };
 </script>
 
-<style>
+<style scoped>
 .add-dialog {
   position: fixed;
   top: 0;
@@ -212,7 +212,7 @@ export default {
 }
 
 .add-input > span {
-  font-size: 14px;
+  font-size: 18px;
   color: #747374;
   margin-bottom: 5px;
 }
@@ -223,7 +223,7 @@ export default {
 }
 
 .input-item {
-  height: 35px;
+  height: 50px;
   width: 100%;
 }
 

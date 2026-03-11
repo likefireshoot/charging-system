@@ -4,7 +4,7 @@
       <div class="title">
         <div style="margin-left: 10px; display: flex; align-items: center">
           <img src="@/assets/yonghu/icon11.png" alt="" style="margin-right: 8px" />
-          <span style="font-size: 18px">{{ title }}</span>
+          <span style="font-size: 20px">{{ title }}</span>
         </div>
         <div style="margin-right: 10px; cursor: pointer" @click="handleTransactionRecordClose">
           <img src="@/assets/close.png" alt="" />
@@ -121,7 +121,7 @@ export default {
 }
 
 .search-input > span {
-  font-size: 14px;
+  font-size: 20px;
   margin-bottom: 5px;
 }
 
@@ -179,7 +179,7 @@ export default {
   border-radius: 5px;
   cursor: pointer;
   transition: all 0.3s;
-  font-size: 14px;
+  font-size: 20px;
   background-color: #fff;
   border: 2px solid #f2f2f2;
 }
@@ -196,7 +196,7 @@ export default {
   border-radius: 5px;
   cursor: pointer;
   transition: all 0.3s;
-  font-size: 14px;
+  font-size: 20px;
   background-color: #fff;
   border: 2px solid #f2f2f2;
 }

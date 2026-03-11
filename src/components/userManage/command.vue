@@ -1,6 +1,7 @@
+<!--未在项目中使用-->
 <template>
   <!-- 命令下发弹出框-太阳能 -->
-  <div class="command-dialog" v-if="command_dialogFormVisible">
+  <div class="command-diyarn servealog" v-if="command_dialogFormVisible">
     <div class="command-dialog-content" v-if="commandType == 'taiyangneng'">
       <div class="title">
         <div style="margin-left: 10px; display: flex; align-items: center">

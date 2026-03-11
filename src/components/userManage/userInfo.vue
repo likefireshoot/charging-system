@@ -4,7 +4,7 @@
       <div class="title">
         <div style="margin-left: 10px; display: flex; align-items: center">
           <img src="@/assets/yonghu/icon10.png" alt="" style="margin-right: 8px" />
-          <span style="font-size: 18px">用户信息编辑</span>
+          <span style="font-size: 20px">用户信息编辑</span>
         </div>
         <div style="margin-right: 10px; cursor: pointer" @click="handleUserInfoClose">
           <img src="@/assets/close.png" alt="" />
@@ -21,13 +21,13 @@
         </div>
         <div class="user-info-input">
           <span>所属水厂</span>
-          <el-select v-model="userInfoData.company" placeholder="请选择所属水厂">
+          <el-select v-model="userInfoData.company" class="big-font-el-select" placeholder="请选择所属水厂">
             <el-option v-for="item in companyList" :key="item.id" :value="item.name" :label="item.name" :disabled="companyId !== 1"></el-option>
           </el-select>
         </div>
         <div class="user-info-input">
           <span>所属区域</span>
-          <el-select v-model="userInfoData.regionName">
+          <el-select v-model="userInfoData.regionName" class="big-font-el-select">
             <el-option v-for="item in quyu_data" :key="item.id" :label="item.label" :value="item.label"> </el-option>
           </el-select>
         </div>
@@ -45,31 +45,31 @@
         </div>
         <div class="user-info-input">
           <span>水表价格类型</span>
-          <el-select v-model="userInfoData.priceId">
+          <el-select v-model="userInfoData.priceId" class="big-font-el-select">
             <el-option v-for="item in price_list" :key="item.id" :label="item.label" :value="item.id"></el-option>
           </el-select>
         </div>
         <div class="user-info-input">
           <span>短信配置</span>
-          <el-select v-model="userInfoData.smsConfigId">
+          <el-select v-model="userInfoData.smsConfigId" class="big-font-el-select">
             <el-option v-for="item in sms_config_list" :key="item.id" :label="item.label" :value="item.id"></el-option>
           </el-select>
         </div>
         <div class="user-info-input">
           <span>开户审批人1</span>
-          <el-select v-model="userInfoData.approver_1">
+          <el-select v-model="userInfoData.approver_1" class="big-font-el-select">
             <el-option v-for="item in approver_list" :key="item.id" :label="item.label" :value="item.label"> </el-option>
           </el-select>
         </div>
         <div class="user-info-input">
           <span>开户审批人2</span>
-          <el-select v-model="userInfoData.approver_2">
+          <el-select v-model="userInfoData.approver_2" class="big-font-el-select">
             <el-option v-for="item in approver_list" :key="item.id" :label="item.label" :value="item.label"> </el-option>
           </el-select>
         </div>
         <div class="user-info-input">
           <span>开户审批人3</span>
-          <el-select v-model="userInfoData.approver_3">
+          <el-select v-model="userInfoData.approver_3" class="big-font-el-select">
             <el-option v-for="item in approver_list" :key="item.id" :label="item.label" :value="item.label"> </el-option>
           </el-select>
         </div>
@@ -80,12 +80,12 @@
       </div>
       <div class="btn">
         <div class="confirm-btn" @click="handleCommit">
-          <el-icon style="margin-left: 15%"><Check /></el-icon>
-          <span style="font-size: 16px; margin-left: 15%">确认</span>
+          <el-icon style="margin-left: -3%"><Check /></el-icon>
+          <span style="font-size: 20px; margin-left: 9%">确认</span>
         </div>
         <div class="cancel-btn" @click="handleUserInfoClose">
-          <el-icon style="margin-left: 15%; color: #45ba7e"><Close /></el-icon>
-          <span style="font-size: 16px; margin-left: 15%; color: #5a5a5a">取消</span>
+          <el-icon style="margin-left: -3%; color: #45ba7e"><Close /></el-icon>
+          <span style="font-size: 20px; margin-left: 9%; color: #5a5a5a">取消</span>
         </div>
       </div>
     </div>
@@ -423,7 +423,7 @@ export default {
 };
 </script>
 
-<style>
+<style scoped>
 .user-info-dialog {
   position: fixed;
   top: 0;
@@ -473,7 +473,7 @@ export default {
 }
 
 .user-info-input > span {
-  font-size: 14px;
+  font-size: 20px;
   color: #747374;
   margin-bottom: 5px;
 }

@@ -4,7 +4,7 @@
       <div class="search-content">
         <div class="search-input" v-if="companyId === 1" style="margin-left: 10px">
           <span>所属水厂</span>
-          <el-select v-model="params.company" placeholder="请选择所属水厂">
+          <el-select class="big-font-el-select" v-model="params.company" placeholder="请选择所属水厂">
             <el-option v-for="item in companyList" :key="item.id" :value="item.id" :label="item.name"></el-option>
           </el-select>
         </div>
@@ -20,11 +20,11 @@
       <div class="buttons">
         <div class="sercah-btn" @click="search">
           <img src="@/assets/yonghu/icon16.png" alt="" style="margin-left: 8px" />
-          <span style="font-size: 16px; margin-left: 15%">搜索</span>
+          <span style="font-size: 20px; margin-left: 15%">搜索</span>
         </div>
         <div class="clear-btn" @click="clear">
           <img src="@/assets/yuangong/icon4.png" alt="" style="margin-left: 10px" />
-          <span style="font-size: 16px; margin-left: 15%; color: #5a5a5a">清空</span>
+          <span style="font-size: 20px; margin-left: 15%; color: #5a5a5a">清空</span>
         </div>
       </div>
     </div>
@@ -32,19 +32,19 @@
       <div class="command-box">
         <div class="add-btn" style="margin-left: 10px" @click="add_dialogFormVisible = true" v-if="staffPermissionIds.includes(23)">
           <img src="@/assets/yuangong/icon6.png" alt="" style="margin-left: 8px" />
-          <span style="font-size: 16px; margin-left: 10px; color: #5a5a5a">新增</span>
+          <span style="font-size: 20px; margin-left: 10px; color: #5a5a5a">新增</span>
         </div>
         <div class="delete-btn" style="margin-left: 10px" @click="delete_click" v-if="staffPermissionIds.includes(24)">
           <img src="@/assets/yuangong/icon4.png" alt="" style="margin-left: 8px" />
-          <span style="font-size: 16px; margin-left: 10px; color: #5a5a5a">删除</span>
+          <span style="font-size: 20px; margin-left: 10px; color: #5a5a5a">删除</span>
         </div>
         <div class="edit-btn" style="margin-left: 10px" :class="{ 'btn-single-only-disabled': multipleSelection.length !== 1 }" @click="multipleSelection.length === 1 && edit_click()" v-if="staffPermissionIds.includes(25)">
           <img src="@/assets/yuangong/icon3.png" alt="" style="margin-left: 8px" />
-          <span style="font-size: 16px; margin-left: 10px; color: #5a5a5a">编辑</span>
+          <span style="font-size: 20px; margin-left: 10px; color: #5a5a5a">编辑</span>
         </div>
         <div
           class="water_outage-btn"
-          style="margin-left: 10px"
+          style="margin-left: 10px;width: 130px"
           @click="
             water_outage_dialogFormVisible = true;
             flag = 1;
@@ -52,7 +52,7 @@
           v-if="staffPermissionIds.includes(26)"
         >
           <img src="@/assets/yonghu/icon19.png" alt="" style="margin-left: 8px" />
-          <span style="font-size: 16px; margin-left: 10px; color: #5a5a5a">停水通知</span>
+          <span style="font-size: 20px; margin-left: 10px; color: #5a5a5a">停水通知</span>
         </div>
         <!-- <div class="export-in-btn" style="margin-left: 10px" @click="triggerFileInput">
           <img src="@/assets/yuangong/icon1.png" alt="" style="margin-left: 7px" />
@@ -61,7 +61,7 @@
         </div> -->
         <div class="export-out-btn" style="margin-left: 10px" @click="exportExcel">
           <img src="@/assets/yuangong/icon2.png" alt="" style="margin-left: 7px" />
-          <span style="font-size: 16px; margin-left: 10px; color: #5a5a5a">导出</span>
+          <span style="font-size: 20px; margin-left: 10px; color: #5a5a5a">导出</span>
         </div>
         <div class="reflush" style="margin-left: 10px" @click="reflush">
           <img src="@/assets/yonghu/icon15.png" alt="" />
@@ -103,7 +103,7 @@
         <div class="title">
           <div style="margin-left: 10px; display: flex; align-items: center">
             <img src="@/assets/yuangong/icon6.png" alt="" style="margin-right: 10px" />
-            <span style="font-size: 18px">新增</span>
+            <span style="font-size: 20px">新增</span>
           </div>
           <div style="margin-right: 10px; cursor: pointer" @click="add_dialogFormVisible = false">
             <img src="@/assets/close.png" alt="" />
@@ -116,7 +116,7 @@
           </div>
           <div class="test-input">
             <span>发送方式</span>
-            <el-select v-model="addData.smsSendType" style="height: 35px">
+            <el-select class="big-font-el-select" v-model="addData.smsSendType" style="height: 35px">
               <el-option label="实时发送" value="实时发送"></el-option>
               <el-option label="定时发送" value="定时发送"></el-option>
             </el-select>
@@ -135,7 +135,7 @@
           </div>
           <div class="test-input" style="margin-right: 0" v-if="companyId === 1">
             <span>所属水厂</span>
-            <el-select v-model="addData.companyId" placeholder="请选择所属水厂">
+            <el-select class="big-font-el-select" v-model="addData.companyId" placeholder="请选择所属水厂">
               <el-option v-for="item in companyList" :key="item.id" :label="item.name" :value="item.id"></el-option>
             </el-select>
           </div>
@@ -143,11 +143,11 @@
         <div class="btn">
           <div class="confirm-btn" @click="addConfirm">
             <el-icon style="margin-left: 15%"><Check /></el-icon>
-            <span style="font-size: 16px; margin-left: 15%">确认</span>
+            <span style="font-size: 20px; margin-left: 15%">确认</span>
           </div>
           <div class="cancel-btn" @click="add_cancel">
             <el-icon style="margin-left: 15%; color: #45ba7e"><Close /></el-icon>
-            <span style="font-size: 16px; margin-left: 15%; color: #5a5a5a">取消</span>
+            <span style="font-size: 20px; margin-left: 15%; color: #5a5a5a">取消</span>
           </div>
         </div>
       </div>
@@ -158,7 +158,7 @@
         <div class="title">
           <div style="margin-left: 10px; display: flex; align-items: center">
             <img src="@/assets/yuangong/icon4.png" alt="" style="margin-right: 10px" />
-            <span style="font-size: 18px">删除</span>
+            <span style="font-size: 20px">删除</span>
           </div>
           <div style="margin-right: 10px; cursor: pointer" @click="delete_dialogFormVisible = false">
             <img src="@/assets/close.png" alt="" />
@@ -171,11 +171,11 @@
         <div class="btn">
           <div class="confirm-btn" @click="deleteConfirm">
             <el-icon style="margin-left: 15%"><Check /></el-icon>
-            <span style="font-size: 16px; margin-left: 15%">确认</span>
+            <span style="font-size: 20px; margin-left: 15%">确认</span>
           </div>
           <div class="cancel-btn" @click="delete_dialogFormVisible = false">
             <el-icon style="margin-left: 15%; color: #45ba7e"><Close /></el-icon>
-            <span style="font-size: 16px; margin-left: 15%; color: #5a5a5a">取消</span>
+            <span style="font-size: 20px; margin-left: 15%; color: #5a5a5a">取消</span>
           </div>
         </div>
       </div>
@@ -186,7 +186,7 @@
         <div class="title">
           <div style="margin-left: 10px; display: flex; align-items: center">
             <img src="@/assets/yuangong/icon3.png" alt="" style="margin-right: 10px" />
-            <span style="font-size: 18px">编辑</span>
+            <span style="font-size: 20px">编辑</span>
           </div>
           <div style="margin-right: 10px; cursor: pointer" @click="edit_dialogFormVisible = false">
             <img src="@/assets/close.png" alt="" />
@@ -199,7 +199,7 @@
           </div>
           <div class="test-input">
             <span>发送方式</span>
-            <el-select v-model="editData.smsSendType">
+            <el-select class="big-font-el-select" v-model="editData.smsSendType">
               <el-option label="实时发送" value="实时发送"></el-option>
               <el-option label="定时发送" value="定时发送"></el-option>
             </el-select>
@@ -218,7 +218,7 @@
           </div> -->
           <div class="test-input" style="margin-right: 0" v-if="companyId === 1">
             <span>所属水厂</span>
-            <el-select v-model="editData.companyName" placeholder="请选择所属水厂">
+            <el-select class="big-font-el-select" v-model="editData.companyName" placeholder="请选择所属水厂">
               <el-option v-for="item in companyList" :key="item.id" :value="item.name" :label="item.name"></el-option>
             </el-select>
           </div>
@@ -226,11 +226,11 @@
         <div class="btn">
           <div class="confirm-btn" @click="editConfirm">
             <el-icon style="margin-left: 15%"><Check /></el-icon>
-            <span style="font-size: 16px; margin-left: 15%">确认</span>
+            <span style="font-size: 20px; margin-left: 15%">确认</span>
           </div>
           <div class="cancel-btn" @click="edit_dialogFormVisible = false">
             <el-icon style="margin-left: 15%; color: #45ba7e"><Close /></el-icon>
-            <span style="font-size: 16px; margin-left: 15%; color: #5a5a5a">取消</span>
+            <span style="font-size: 20px; margin-left: 15%; color: #5a5a5a">取消</span>
           </div>
         </div>
       </div>
@@ -241,7 +241,7 @@
         <div class="title">
           <div style="margin-left: 10px; display: flex; align-items: center">
             <img src="@/assets/yonghu/icon19.png" alt="" style="margin-right: 10px" />
-            <span style="font-size: 18px">停水通知</span>
+            <span style="font-size: 20px">停水通知</span>
           </div>
           <div style="margin-right: 10px; cursor: pointer" @click="water_outage_dialogFormVisible = false">
             <img src="@/assets/close.png" alt="" />
@@ -250,19 +250,19 @@
         <div class="test-content">
           <div class="test-input" v-if="companyId === 1">
             <span>所属水厂</span>
-            <el-select v-model="waterOutageData.companyId" placeholder="请选择所属水厂">
+            <el-select class="big-font-el-select" v-model="waterOutageData.companyId" placeholder="请选择所属水厂">
               <el-option v-for="item in companyList" :key="item.id" :label="item.name" :value="item.id"></el-option>
             </el-select>
           </div>
           <div class="test-input">
             <span>区域</span>
-            <el-select v-model="waterOutageData.region" placeholder="请选择所属区域">
+            <el-select class="big-font-el-select" v-model="waterOutageData.region" placeholder="请选择所属区域">
               <el-option v-for="item in quyu_data" :key="item.id" :label="item.label" :value="item.id"></el-option>
             </el-select>
           </div>
           <div class="test-input">
             <span>用户列表</span>
-            <el-select v-model="waterOutageData.userList" multiple clearable collapse-tags placeholder="请选择用户" popper-class="custom-header" :max-collapse-tags="1">
+            <el-select class="big-font-el-select"  v-model="waterOutageData.userList" multiple clearable collapse-tags placeholder="请选择用户" popper-class="custom-header" :max-collapse-tags="1">
               <template #header>
                 <el-checkbox class="user-checkbox" v-model="checkAll" :indeterminate="indeterminate" @change="handleCheckAll"> 全选 </el-checkbox>
               </template>
@@ -294,11 +294,11 @@
         <div class="btn">
           <div class="confirm-btn" @click="addOutageConfirm">
             <el-icon style="margin-left: 15%"><Check /></el-icon>
-            <span style="font-size: 16px; margin-left: 15%">确认</span>
+            <span style="font-size: 20px; margin-left: 15%">确认</span>
           </div>
           <div class="cancel-btn" @click="addOutage_cancel">
             <el-icon style="margin-left: 15%; color: #45ba7e"><Close /></el-icon>
-            <span style="font-size: 16px; margin-left: 15%; color: #5a5a5a">取消</span>
+            <span style="font-size: 20px; margin-left: 15%; color: #5a5a5a">取消</span>
           </div>
         </div>
       </div>
@@ -1188,6 +1188,24 @@ export default {
   --el-color-primary: #46b97e;
 }
 
+/* 修改分页整体字号（包括“共 x 条”） */
+:deep(.el-pagination) {
+  font-size: 16px;
+}
+
+/* 修改页码数字按钮的大小 */
+:deep(.el-pagination .el-pager li) {
+  font-size: 16px;
+  min-width: 35px; /* 数字变大后，按钮也要相应加宽 */
+  height: 35px;
+  line-height: 35px;
+}
+
+/* 如果有下拉选择每页条数，修改其内部文字 */
+:deep(.el-pagination .el-select .el-input) {
+  font-size: 16px;
+}
+
 :deep(.el-tree) {
   --el-fill-color-light: #46b97e;
   --el-fill-color-blank: #e8f3ed;
@@ -1245,7 +1263,7 @@ export default {
 }
 
 .search-input > span {
-  font-size: 14px;
+  font-size: 20px;
   margin-bottom: 5px;
 }
 
@@ -1254,7 +1272,7 @@ export default {
 }
 
 .time-input > span {
-  font-size: 14px;
+  font-size: 20px;
   margin-bottom: 5px;
   align-self: center;
   margin-left: 5px;
@@ -1328,13 +1346,13 @@ export default {
 .export-out-btn {
   display: flex;
   align-items: center;
-  width: 80px; /* 设置按钮的宽度 */
-  height: 32px; /* 设置按钮的高度 */
+  width: 90px; /* 设置按钮的宽度 */
+  height: 35px; /* 设置按钮的高度 */
   color: white;
   border-radius: 5px;
   cursor: pointer;
   transition: all 0.3s;
-  font-size: 14px;
+  font-size: 20px;
   background-color: #fff;
   border: 2px solid #f2f2f2;
 }
@@ -1359,7 +1377,7 @@ export default {
   border-radius: 5px;
   cursor: pointer;
   transition: all 0.3s;
-  font-size: 14px;
+  font-size: 20px;
   background-color: #fff;
   border: 2px solid #f2f2f2;
 }
@@ -1478,7 +1496,7 @@ export default {
 }
 
 .test-input > span {
-  font-size: 16px;
+  font-size: 20px;
   margin-bottom: 5px;
 }
 
