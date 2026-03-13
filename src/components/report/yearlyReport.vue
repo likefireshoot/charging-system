@@ -606,14 +606,14 @@ export default {
 }
 
 .detail-info > span {
-  font-size: 16px;
+  font-size: 22px;
   color: #fff;
 }
 
 .cashdetail-info > span,
 .weichatdetail-info > span,
 .alipaydetail-info > span {
-  font-size: 16px;
+  font-size: 22px;
   color: #000;
 }
 

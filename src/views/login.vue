@@ -448,7 +448,7 @@ async function resetPassword() {
     --el-border-color: #dff0ed;
     line-height: 32px;
     --el-text-color-placeholder: #a0a0a0;
-    font-size: 18px;
+    font-size: 22px;
     padding-left: 0px;
   }
 }
@@ -474,7 +474,7 @@ async function resetPassword() {
       align-items: center;
       justify-content: center;
       h2 {
-        font-size: 32px;
+        font-size: 34px;
         color: #46b97e;
         text-shadow: 2px -2px 0px rgba(255, 255, 255, 1);
       }
@@ -519,7 +519,7 @@ async function resetPassword() {
         background: #d6e9e8;
       }
       h2 {
-        font-size: 22px;
+        font-size: 24px;
         color: #46b97e;
         font-weight: bold;
         margin: 0 30px;
@@ -545,7 +545,7 @@ async function resetPassword() {
           }
           input {
             flex: 1;
-            font-size: 18px;
+            font-size: 22px;
             color: #585657;
             &::placeholder {
               color: #a0a0a0;
@@ -555,13 +555,18 @@ async function resetPassword() {
         button {
           margin-left: 10px;
           padding: 10px 20px;
-          width: 120px;
+          width: 150px;
           height: 40px;
           background-color: #46b97e;
           color: #fff;
           border: none;
           border-radius: 5px;
           cursor: pointer;
+          /* --- 新增居中代码 --- */
+          display: inline-flex;    /* 或者 display: flex */
+          justify-content: center; /* 水平居中 */
+          align-items: center;     /* 垂直居中 */
+          /* ------------------ */
           &:hover {
             background-color: #4eb480;
           }
@@ -575,7 +580,7 @@ async function resetPassword() {
       display: flex;
       align-items: center;
       a {
-        font-size: 16px;
+        font-size: 20px;
         color: #46b97e;
         transition: all 0.2s;
         &.forget {
@@ -596,7 +601,7 @@ async function resetPassword() {
       justify-content: center;
       border-radius: 10px;
       background: #46b97e;
-      font-size: 18px;
+      font-size: 22px;
       color: #ffffff;
       transition: all 0.2s;
       &:hover {

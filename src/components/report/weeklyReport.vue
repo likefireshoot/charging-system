@@ -726,7 +726,7 @@ export default {
 }
 
 .time-input>span {
-  font-size: 14px;
+  font-size: 20px;
   margin-bottom: 5px;
   display: flex;
   align-items: center;
@@ -817,14 +817,14 @@ export default {
 }
 
 .detail-info>span {
-  font-size: 16px;
+  font-size: 22px;
   color: #fff;
 }
 
 .cashdetail-info>span,
 .weichatdetail-info>span,
 .alipaydetail-info>span {
-  font-size: 16px;
+  font-size: 22px;
   color: #000;
 }
 

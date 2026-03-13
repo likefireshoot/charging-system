@@ -96,9 +96,9 @@
       <div class="baobiao-chart">
         <div class="month-report">
           <div class="month-report-title">
-            <span style="font-size: 16px; margin-top: 10px; margin-bottom: 5px">收费月报表统计（{{ params.month }}）
+            <span style="font-size: 20px; margin-top: 10px; margin-bottom: 5px">收费月报表统计（{{ params.month }}）
 
-               <a href="javascript:;" style="font-size: 14px; margin-left: 0px;color: #000;" @click="exportYearChartPNG(monthchart,'收费月报表统计')">(导出)</a>
+               <a href="javascript:;" style="font-size: 20px; margin-left: 0px;color: #000;" @click="exportYearChartPNG(monthchart,'收费月报表统计')">(导出)</a>
 
 
             </span>
@@ -113,8 +113,8 @@
         </div>
         <div class="month-huanbi">
           <div class="month-huanbi-title">
-            <span style="font-size: 16px; margin-top: 10px; margin-bottom: 5px">收费月报表统计环比（{{ params.month }}）
-                  <a href="javascript:;" style="font-size: 14px; margin-left: 0px;color: #000;" @click="exportYearChartPNG(monthhuanbichart,'收费月报表统计环比')">(导出)</a>
+            <span style="font-size: 20px; margin-top: 10px; margin-bottom: 5px">收费月报表统计环比（{{ params.month }}）
+                  <a href="javascript:;" style="font-size: 20px; margin-left: 0px;color: #000;" @click="exportYearChartPNG(monthhuanbichart,'收费月报表统计环比')">(导出)</a>
 
 
             </span>
@@ -129,9 +129,9 @@
         </div>
         <div class="month-tongbi">
           <div class="month-tongbi-title">
-            <span style="font-size: 16px; margin-top: 10px; margin-bottom: 5px">收费月报表统计同比（{{ params.month }}）
+            <span style="font-size: 20px; margin-top: 10px; margin-bottom: 5px">收费月报表统计同比（{{ params.month }}）
 
-                 <a href="javascript:;" style="font-size: 14px; margin-left: 0px;color: #000;" @click="exportYearChartPNG(monthtongbichart,'收费月报表统计同比')">(导出)</a>
+                 <a href="javascript:;" style="font-size: 20px; margin-left: 0px;color: #000;" @click="exportYearChartPNG(monthtongbichart,'收费月报表统计同比')">(导出)</a>
 
             </span>
             <div class="flex-container">
@@ -782,14 +782,14 @@ export default {
 }
 
 .detail-info > span {
-  font-size: 16px;
+  font-size: 22px;
   color: #fff;
 }
 
 .cashdetail-info > span,
 .weichatdetail-info > span,
 .alipaydetail-info > span {
-  font-size: 16px;
+  font-size: 22px;
   color: #000;
 }
 
@@ -842,9 +842,11 @@ export default {
 .month-report-chart,
 .month-huanbi-chart,
 .month-tongbi-chart {
+  height: calc(100% - 50px); /* 减去标题和装饰线的高度 */
   height: 100%;
   width: 100%;
   margin-bottom: 10px;
   overflow-x: auto;
+  min-height: 200px; /* 新增：确保最小高度 */
 }
 </style>
