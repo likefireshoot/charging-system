@@ -59,7 +59,7 @@
                     <el-input v-model="params_set_tai.wangluo.port"></el-input>
                   </div>
                 </div> -->
-                <div class="set-content-container" v-if="node.label === '设置周期上报参数'">
+                <!-- <div class="set-content-container" v-if="node.label === '设置周期上报参数'">
                   <div class="set-input">
                     <span>周期频率</span>
                     <el-select v-model="params_set_tai.zhouqishangbao.way">
@@ -81,17 +81,17 @@
                     <span>开始时间</span>
                     <div style="width: 100%; display: flex; justify-content: space-between">
                       <el-input style="margin-right: 10px" v-model="params_set_tai.zhouqishangbao.year"
-                                placeholder="年"></el-input>
+                        placeholder="年"></el-input>
                       <el-input style="margin-right: 10px" v-model="params_set_tai.zhouqishangbao.month"
-                                placeholder="月"></el-input>
+                        placeholder="月"></el-input>
                       <el-input style="margin-right: 10px" v-model="params_set_tai.zhouqishangbao.day"
-                                placeholder="日"></el-input>
+                        placeholder="日"></el-input>
                       <el-input style="margin-right: 10px" v-model="params_set_tai.zhouqishangbao.hour"
-                                placeholder="时"></el-input>
+                        placeholder="时"></el-input>
                       <el-input style="margin-right: 10px" v-model="params_set_tai.zhouqishangbao.minute"
-                                placeholder="分"></el-input>
+                        placeholder="分"></el-input>
                       <el-input style="margin-right: 10px" v-model="params_set_tai.zhouqishangbao.second"
-                                placeholder="秒"></el-input>
+                        placeholder="秒"></el-input>
                     </div>
                   </div>
                 </div>
@@ -109,7 +109,82 @@
                     <span>读数</span>
                     <el-input v-model="params_set_tai.count" type="number"></el-input>
                   </div>
-                </div>
+                </div> -->
+
+                <el-form :model="params_set_tai.zhouqishangbao" :rules="cycleReportRules" ref="cycleReportForm"
+                  class="set-content-container" v-if="node.label === '设置周期上报参数'">
+                  <div class="set-input">
+                    <span>周期频率</span>
+                    <el-form-item prop="way" style="margin: 0;">
+                      <el-select v-model="params_set_tai.zhouqishangbao.way">
+                        <el-option label="每小时" value="5"></el-option>
+                        <el-option label="每天" value="6"></el-option>
+                        <el-option label="每周" value="7"></el-option>
+                        <el-option label="每月" value="8"></el-option>
+                      </el-select>
+                    </el-form-item>
+                  </div>
+                  <div class="set-input">
+                    <span>星期</span>
+                    <el-form-item prop="week" style="margin: 0;">
+                      <el-input v-model="params_set_tai.zhouqishangbao.week" placeholder="有效值为0~7"></el-input>
+                    </el-form-item>
+                  </div>
+                  <div class="set-input">
+                    <span>周期间隔</span>
+                    <el-form-item prop="interval" style="margin: 0;">
+                      <el-input v-model="params_set_tai.zhouqishangbao.interval"></el-input>
+                    </el-form-item>
+                  </div>
+                  <div class="set-input" style="width: 100%">
+                    <span>开始时间</span>
+                    <div style="width: 100%; display: flex; justify-content: space-between">
+                      <el-form-item prop="year" style="margin: 0; flex: 1; margin-right: 10px;">
+                        <el-input v-model="params_set_tai.zhouqishangbao.year" placeholder="年"></el-input>
+                      </el-form-item>
+                      <el-form-item prop="month" style="margin: 0; flex: 1; margin-right: 10px;">
+                        <el-input v-model="params_set_tai.zhouqishangbao.month" placeholder="月"></el-input>
+                      </el-form-item>
+                      <el-form-item prop="day" style="margin: 0; flex: 1; margin-right: 10px;">
+                        <el-input v-model="params_set_tai.zhouqishangbao.day" placeholder="日"></el-input>
+                      </el-form-item>
+                      <el-form-item prop="hour" style="margin: 0; flex: 1; margin-right: 10px;">
+                        <el-input v-model="params_set_tai.zhouqishangbao.hour" placeholder="时"></el-input>
+                      </el-form-item>
+                      <el-form-item prop="minute" style="margin: 0; flex: 1; margin-right: 10px;">
+                        <el-input v-model="params_set_tai.zhouqishangbao.minute" placeholder="分"></el-input>
+                      </el-form-item>
+                      <el-form-item prop="second" style="margin: 0; flex: 1; margin-right: 10px;">
+                        <el-input v-model="params_set_tai.zhouqishangbao.second" placeholder="秒"></el-input>
+                      </el-form-item>
+                    </div>
+                  </div>
+                </el-form>
+
+                <!-- 阀门控制：新增el-form包裹，绑定model和rules -->
+                <el-form :model="params_set_tai" :rules="valveControlRules" ref="valveControlForm"
+                  class="set-content-container" v-if="node.label === '阀门控制'">
+                  <div class="set-input">
+                    <span>阀门状态</span>
+                    <el-form-item prop="famenstate" style="margin: 0;">
+                      <el-select v-model="params_set_tai.famenstate">
+                        <el-option label="开阀" value="1"></el-option>
+                        <el-option label="关阀" value="0"></el-option>
+                      </el-select>
+                    </el-form-item>
+                  </div>
+                </el-form>
+
+                <!-- 设置读数：新增el-form包裹，绑定model和rules -->
+                <el-form :model="params_set_tai" :rules="readCountRules" ref="readCountForm"
+                  class="set-content-container" v-if="node.label === '设置读数'">
+                  <div class="set-input">
+                    <span>读数</span>
+                    <el-form-item prop="count" style="margin: 0;">
+                      <el-input v-model="params_set_tai.count" type="number"></el-input>
+                    </el-form-item>
+                  </div>
+                </el-form>
                 <!-- <div class="set-content-container" v-if="node.label === '设置失联检测参数'">
                   <div class="set-input">
                     <span>失联天数</span>

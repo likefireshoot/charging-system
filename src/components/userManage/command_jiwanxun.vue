@@ -41,15 +41,27 @@
                 </div>
               </div>
               <div v-else>
-                <div class="set-content-container" v-if="node.label === '阀门控制'">
+              <!-- <div class="set-content-container" v-if="node.label === '阀门控制'">
                   <div class="set-input">
-                    <span style="font-size: 20px">阀门状态</span>
+                    <span>阀门状态</span>
                     <el-select v-model="params_set_tai.famenstate">
                       <el-option label="开阀" value="1"></el-option>
                       <el-option label="关阀" value="0"></el-option>
                     </el-select>
                   </div>
-                </div>
+                </div> -->
+                <el-form :model="params_set_tai" :rules="valveControlRules" ref="valveControlForm"
+                  class="set-content-container" v-if="node.label === '阀门控制'">
+                  <div class="set-input">
+                    <span>阀门状态</span>
+                    <el-form-item prop="famenstate" style="margin: 0;">
+                      <el-select v-model="params_set_tai.famenstate">
+                        <el-option label="开阀" value="1"></el-option>
+                        <el-option label="关阀" value="0"></el-option>
+                      </el-select>
+                    </el-form-item>
+                  </div>
+                </el-form>
               </div>
             </div>
           </div>

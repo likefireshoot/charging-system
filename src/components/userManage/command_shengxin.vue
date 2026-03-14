@@ -41,21 +41,40 @@
                 </div>
               </div>
               <div v-else>
-                <div class="set-content-container" v-if="node.label === '阀门控制'">
+             <!-- 新增：阀门控制 - 表单校验包裹 -->
+                <el-form 
+                  :model="params_set_tai" 
+                  :rules="valveRules" 
+                  ref="valveForm" 
+                  class="set-content-container"
+                  v-if="node.label === '阀门控制'"
+                >
                   <div class="set-input">
                     <span>阀门状态</span>
-                    <el-select v-model="params_set_tai.famenstate">
-                      <el-option label="开阀" value="1"></el-option>
-                      <el-option label="关阀" value="0"></el-option>
-                    </el-select>
+                    <el-form-item prop="famenstate" style="margin: 0;">
+                      <el-select v-model="params_set_tai.famenstate">
+                        <el-option label="开阀" value="1"></el-option>
+                        <el-option label="关阀" value="0"></el-option>
+                      </el-select>
+                    </el-form-item>
                   </div>
-                </div>
-                <div class="set-content-container" v-if="node.label === '写累计流量'">
+                </el-form>
+
+                <!-- 新增：写累计流量 - 表单校验包裹 -->
+                <el-form 
+                  :model="params_set_tai" 
+                  :rules="trafficRules" 
+                  ref="trafficForm" 
+                  class="set-content-container"
+                  v-if="node.label === '写累计流量'"
+                >
                   <div class="set-input">
                     <span>累计流量</span>
-                    <el-input v-model="params_set_tai.cumulativeTraffic"></el-input>
+                    <el-form-item prop="cumulativeTraffic" style="margin: 0;">
+                      <el-input v-model="params_set_tai.cumulativeTraffic"></el-input>
+                    </el-form-item>
                   </div>
-                </div>
+                </el-form>
               </div>
             </div>
           </div>
