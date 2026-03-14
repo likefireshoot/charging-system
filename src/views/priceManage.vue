@@ -542,17 +542,17 @@ export default {
       if (parseFloat(newVal) === 0) {
         this.addData.amountFirstStart = "0";
       } else {
-        this.addData.amountFirstStart = (parseFloat(newVal) + 0.01).toFixed(2);
+        this.addData.amountFirstStart = (parseFloat(newVal)).toFixed(2);
       }
     },
     "addData.amountFirstEnd": function (newVal) {
       if (parseInt(this.addData.stepNumber) > 1) {
-        this.addData.amountSecondStart = (parseFloat(newVal) + 0.01).toFixed(2);
+        this.addData.amountSecondStart = (parseFloat(newVal)).toFixed(2);
       }
     },
     "addData.amountSecondEnd": function (newVal) {
       if (parseInt(this.addData.stepNumber) > 2) {
-        this.addData.amountThirdStart = (parseFloat(newVal) + 0.01).toFixed(2);
+        this.addData.amountThirdStart = (parseFloat(newVal)).toFixed(2);
       }
     },
     "addData.stepNumber": function (newVal) {
@@ -571,19 +571,19 @@ export default {
       if (parseFloat(newVal) === 0) {
         this.editData.amountFirstStart = "0";
       } else {
-        this.editData.amountFirstStart = (parseFloat(newVal) + 0.01).toFixed(2);
+        this.editData.amountFirstStart = (parseFloat(newVal)).toFixed(2);
       }
     },
     "editData.amountFirstEnd": function (newVal) {
       if (!this.editData) return; // 如果 editData 还未初始化，直接返回
       if (parseInt(this.editData.stepNumber) > 1) {
-        this.editData.amountSecondStart = (parseFloat(newVal) + 0.01).toFixed(2);
+        this.editData.amountSecondStart = (parseFloat(newVal)).toFixed(2);
       }
     },
     "editData.amountSecondEnd": function (newVal) {
       if (!this.editData) return; // 如果 editData 还未初始化，直接返回
       if (parseInt(this.editData.stepNumber) > 2) {
-        this.editData.amountThirdStart = (parseFloat(newVal) + 0.01).toFixed(2);
+        this.editData.amountThirdStart = (parseFloat(newVal)).toFixed(2);
       }
     },
     "editData.stepNumber": function (newVal) {
