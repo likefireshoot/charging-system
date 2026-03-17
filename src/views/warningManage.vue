@@ -105,6 +105,11 @@
             <!-- <el-table-column property="imei" label="IMEI号" :width="imeihaoWidth" align="center" /> -->
             <el-table-column property="createTime" label="警告时间" :width="warningTimeWidth" align="center" />
             <el-table-column property="warningType" label="警告类型" :width="warningTypeWidth" align="center" />
+            <el-table-column v-if="showOweAmountColumn" property="oweAmount" label="欠费金额" :width="oweAmountWidth" align="center">
+              <template #default="{ row }">
+                {{ formatOweAmount(row.oweAmount) }}
+              </template>
+            </el-table-column>
           </el-table>
         </div>
       </div>
@@ -232,6 +237,7 @@ export default {
       imeihaoWidth: 0,
       warningTimeWidth: 0,
       warningTypeWidth: 0,
+      oweAmountWidth: 0,
       companyWidth: 0,
       // 父容器元素
       parentContainer: null,
@@ -264,6 +270,11 @@ export default {
     "params.pageNo"() {
       this.getWaringData();
     },
+    "params.warningType"() {
+      this.$nextTick(() => {
+        this.calculateColumnWidths();
+      });
+    },
     get_dialogFormVisible() {
       if (this.get_dialogFormVisible) {
         service
@@ -294,8 +305,27 @@ export default {
     shouldReadFromPinia() {
       return this.isFromHomeClick;
     },
+    showOweAmountColumn() {
+      return (this.params.warningType || "").includes("欠费");
+    },
     // 定义每列的百分比宽度
     columnPercentages() {
+      if (this.showOweAmountColumn) {
+        return {
+          selection: 4,
+          id: 6,
+          userName: 9,
+          address: 10,
+          quyu: 9,
+          company: 8,
+          phone: 9,
+          biaohao: 10,
+          imeihao: 9,
+          warningTime: 12,
+          warningType: 6,
+          oweAmount: 8,
+        };
+      }
       return {
         selection: 4,
         id: 7,
@@ -398,7 +428,14 @@ export default {
         this.imeihaoWidth = (this.columnPercentages.imeihao / 100) * parentWidth;
         this.warningTimeWidth = (this.columnPercentages.warningTime / 100) * parentWidth;
         this.warningTypeWidth = (this.columnPercentages.warningType / 100) * parentWidth;
+        this.oweAmountWidth = this.showOweAmountColumn ? (this.columnPercentages.oweAmount / 100) * parentWidth : 0;
       }
+    },
+    formatOweAmount(val) {
+      if (val === null || val === undefined || val === "") return "--";
+      const num = Number(val);
+      if (Number.isFinite(num)) return `${num.toFixed(2)} 元`;
+      return `${val} 元`;
     },
     getCompanyList() {
       service
