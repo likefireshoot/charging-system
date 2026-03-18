@@ -32,6 +32,10 @@
     </div>
     <div class="user-info">
       <div class="command-box">
+        <div class="export-out-btn" style="margin-left: 5px; width: 200px" @click="addAndBind_dialogFormVisible = true" v-if="staffPermissionIds.includes(2) && staffPermissionIds.includes(3)">
+          <img src="@/assets/yonghu/icon13.png" alt="" style="margin-left: 7px" />
+          <span style="font-size: 20px; margin-left: 10px; color: #5a5a5a">开户 & 绑定设备</span>
+        </div>
         <div class="add-btn" style="margin-left: 5px" @click="add_dialogFormVisible = true" v-if="staffPermissionIds.includes(2)">
           <img src="@/assets/yonghu/icon13.png" alt="" style="margin-left: 8px" />
           <span style="font-size: 20px; margin-left: 8px; color: #5a5a5a">开户</span>
@@ -113,6 +117,7 @@
     </div>
 
     <!-- 新增按钮弹出框 -->
+    <addUserAndBindVue v-if="addAndBind_dialogFormVisible" :dialogVisible="addAndBind_dialogFormVisible" @close="closeAddAndBindDialog" />
     <addVue v-if="add_dialogFormVisible" :add_dialogFormVisible="add_dialogFormVisible" @close="closeAddDialog"></addVue>
 
     <!-- 删除按钮弹出框 -->
@@ -126,6 +131,7 @@
 import addVue from "@/components/accountManage/add.vue";
 import deleteVue from "@/components/accountManage/delete.vue";
 import deviceBindingVue from "@/components/accountManage/deviceBinding.vue";
+import addUserAndBindVue from "@/components/accountManage/addUserAndBind.vue";
 
 import service from "@/api/request";
 import { ElMessage } from "element-plus";
@@ -136,6 +142,7 @@ export default {
     addVue,
     deleteVue,
     deviceBindingVue,
+    addUserAndBindVue,
   },
   data() {
     return {
@@ -185,7 +192,7 @@ export default {
       fileName: "用户数据列表",
 
       //弹出框显示与否
-
+      addAndBind_dialogFormVisible: false,
       add_dialogFormVisible: false,
       delete_dialogFormVisible: false,
       deviceBinding_dialogFormVisible: false,
@@ -280,6 +287,11 @@ export default {
       }
     },
 
+    closeAddAndBindDialog() {
+      this.addAndBind_dialogFormVisible = false;
+      this.multipleSelection = [];
+      this.reflush();
+    },
     closeAddDialog() {
       this.add_dialogFormVisible = false;
       this.multipleSelection = [];

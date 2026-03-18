@@ -25,13 +25,13 @@
         </div>
         <div class="edit-input" style="margin-right: 1%" v-if="companyId == 1">
           <span>所属水厂</span>
-          <el-select v-model="addData.companyId" class="input-item">
+          <el-select v-model="addData.companyId" class="input-item big-font-el-select">
             <el-option v-for="item in companyList" :key="item.id" :label="item.name" :value="item.id" :disabled="companyId !== 1"> </el-option>
           </el-select>
         </div>
         <div class="edit-input" style="margin-right: 1%">
           <span>所属区域</span>
-          <el-select v-model="addData.regionName" class="input-item">
+          <el-select v-model="addData.regionName" class="input-item big-font-el-select">
             <el-option v-for="item in quyu_data" :key="item.id" :label="item.label" :value="item.label"> </el-option>
           </el-select>
         </div>
@@ -70,6 +70,8 @@ export default {
     },
   },
   data() {
+    // 获取当前日期 YYYY-MM-DD 格式
+    const currentDate = new Date().toISOString().split("T")[0];
     return {
       addData: {
         userName: "",
@@ -78,7 +80,7 @@ export default {
         regionName: "",
         companyId: null, // 新增水厂字段
         userPhone: "",
-        createTime: "",
+        createTime: currentDate,
       },
       companyId: JSON.parse(sessionStorage.getItem("userData")).companyId,
       price_list: [],
