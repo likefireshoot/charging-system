@@ -309,7 +309,7 @@ export default {
     },
     getCompanyList() {
       service
-        .get("/getAllCompany", {
+        .get("/getAllUnblockCompany", {
           headers: {
             Authorization: this.token,
           },

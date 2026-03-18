@@ -489,7 +489,7 @@ export default {
     },
     getCompanyList() {
       service
-        .get("/getAllCompany")
+        .get("/getAllUnblockCompany")
         .then((response) => {
           if (response.code === 200) {
             this.companyList = response.data.map((item) => {
