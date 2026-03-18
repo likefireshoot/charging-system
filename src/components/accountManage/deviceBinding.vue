@@ -13,7 +13,7 @@
       <div class="device-add-content">
         <div class="edit-input" style="margin-right: 1%">
           <span>所属水厂</span>
-          <el-select v-model="addData.companyId" class="input-item">
+          <el-select v-model="addData.companyId" class="input-item big-font-el-select">
             <el-option v-for="item in companyList" :key="item.id" :label="item.name" :value="item.id" :disabled="companyId !== 1"> </el-option>
           </el-select>
         </div>
@@ -31,31 +31,31 @@
         </div>
         <div class="edit-input" style="margin-right: 1%">
           <span>价格类型</span>
-          <el-select v-model="addData.priceId" class="input-item">
+          <el-select v-model="addData.priceId" class="input-item big-font-el-select">
             <el-option v-for="item in price_list" :key="item.id" :label="item.label" :value="item.id"></el-option>
           </el-select>
         </div>
         <div class="edit-input" style="margin-right: 1%">
           <span>短信配置</span>
-          <el-select v-model="addData.smsConfigId" class="input-item">
+          <el-select v-model="addData.smsConfigId" class="input-item big-font-el-select">
             <el-option v-for="item in sms_config_list" :key="item.id" :label="item.label" :value="item.id"></el-option>
           </el-select>
         </div>
         <div class="edit-input" style="margin-right: 1%">
           <span>开户审批人1</span>
-          <el-select v-model="addData.approver_1" class="input-item">
+          <el-select v-model="addData.approver_1" class="input-item big-font-el-select">
             <el-option v-for="item in approver_list" :key="item.id" :label="item.label" :value="item.label"></el-option>
           </el-select>
         </div>
         <div class="edit-input" style="margin-right: 1%">
           <span>开户审批人2</span>
-          <el-select v-model="addData.approver_2" class="input-item">
+          <el-select v-model="addData.approver_2" class="input-item big-font-el-select">
             <el-option v-for="item in approver_list" :key="item.id" :label="item.label" :value="item.label"></el-option>
           </el-select>
         </div>
         <div class="edit-input" style="margin-right: 1%">
           <span>开户审批人3</span>
-          <el-select v-model="addData.approver_3" class="input-item">
+          <el-select v-model="addData.approver_3" class="input-item big-font-el-select">
             <el-option v-for="item in approver_list" :key="item.id" :label="item.label" :value="item.label"></el-option>
           </el-select>
         </div>
@@ -87,9 +87,20 @@ export default {
     },
   },
   data() {
+    const userDataStr = sessionStorage.getItem("userData");
+    if (!userDataStr) {
+      throw new Error("未找到用户登录信息，请重新登录！");
+    }
+  
+    const userData = JSON.parse(userDataStr);
+  
+  // 验证必要字段是否存在
+  if (!userData.staffName || !userData.companyId) {
+    throw new Error("用户信息不完整，请重新登录！");
+  }
     return {
       addData: {
-        companyId: JSON.parse(sessionStorage.getItem("userData")).companyId, // 新增水厂字段
+        companyId: userData.companyId, // 新增水厂字段
         //regionName: "",
         userId: "",
         userName: "",
@@ -97,9 +108,9 @@ export default {
         meterCode: "",
         priceId: null,
         smsConfigId: null,
-        approver_1: "",
-        approver_2: "",
-        approver_3: "",
+        approver_1: userData.staffName || "",  // 修改：默认当前用户
+        approver_2: userData.staffName || "",  // 修改：默认当前用户
+        approver_3: userData.staffName || "",  // 修改：默认当前用户
         //balance: "",
       },
       companyId: JSON.parse(sessionStorage.getItem("userData")).companyId,
@@ -122,6 +133,14 @@ export default {
     };
   },
   mounted() {
+    // 二次检查 sessionStorage 数据
+    // (避免form组件由于sessionStorage缺少信息, 加载失败, 直接白屏的情况出现)
+    const userData = JSON.parse(sessionStorage.getItem("userData"));
+    if (!userData || !userData.staffName) {
+      ElMessage.error("员工信息不完整，请重新登录！");
+      this.handleClose();
+      return;
+    }
     this.getCompanyList();
     // this.getPriceList();
     // this.getSmsConfigList();
@@ -181,7 +200,7 @@ export default {
     },
     getCompanyList() {
       service
-        .get("/getAllCompany")
+        .get("/getAllUnblockCompany")
         .then((response) => {
           if (response.code === 200) {
             this.companyList = response.data.map((item) => {

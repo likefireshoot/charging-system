@@ -186,7 +186,7 @@ const forgetPasswordParam = reactive({
 
 function getCompanyList() {
   service
-    .get("/getAllCompany")
+    .get("/getAllUnblockCompany")
     .then((response) => {
       if (response.code === 200) {
         companyList.value = response.data.map((item) => {
