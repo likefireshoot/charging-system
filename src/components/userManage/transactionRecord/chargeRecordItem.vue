@@ -87,6 +87,11 @@
           <el-table-column property="newBalance" label="余额" min-width="70" align="center" />
           <el-table-column property="createTime" label="扣费时间" min-width="120" align="center" />
           <el-table-column property="companyName" label="所属水厂" min-width="70" align="center" />
+          <el-table-column label="扣费类型" min-width="90" align="center">
+            <template #default="scope">
+              <span>{{ formatChargeType(scope.row.type) }}</span>
+            </template>
+          </el-table-column>
         </el-table>
       </div>
     </div>
@@ -156,6 +161,15 @@ export default {
     this.getTransactionRecordData();
   },
   methods: {
+    formatChargeType(type) {
+      if (type === 0 || type === "0") {
+        return "抄表扣费";
+      }
+      if (type === 1 || type === "1") {
+        return "保底扣费";
+      }
+      return "-";
+    },
     selectable() {
       return true; // 目前允许所有行选择，你可以加上你的业务逻辑
     },

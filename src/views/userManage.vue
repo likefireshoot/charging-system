@@ -456,7 +456,7 @@ export default {
       }
     },
     currentPage() {
-      this.search();
+      this.fetchUserList(this.currentPage);
     },
     multipleSelection() {
       console.log(this.multipleSelection);
@@ -476,6 +476,60 @@ export default {
     this.getCompanyList();
   },
   methods: {
+    syncCompanyIdParam() {
+      if (this.companyId === 1) {
+        this.param.companyId = this.param.company || "";
+      } else {
+        this.param.companyId = this.companyId;
+      }
+    },
+    buildQueryString(params) {
+      let queryString = "";
+      for (const key in params) {
+        if (Object.prototype.hasOwnProperty.call(params, key)) {
+          const value = params[key];
+          if (queryString) {
+            queryString += `&${key}=${encodeURIComponent(value)}`;
+          } else {
+            queryString += `?${key}=${encodeURIComponent(value)}`;
+          }
+        }
+      }
+      return queryString;
+    },
+    fetchUserList(page = this.currentPage || 1) {
+      this.syncCompanyIdParam();
+      const nonEmptyParams = this.filterNonEmptyParams(this.param);
+      if (this.quyu_selected !== null) {
+        nonEmptyParams.region = this.quyu_selected.label;
+      }
+      const url = `/userManage/userCharge/showUserMeters/${page}${this.buildQueryString(nonEmptyParams)}`;
+      console.log(url);
+      return service
+        .get(url, {
+          headers: {
+            Authorization: this.token,
+          },
+        })
+        .then((response) => {
+          if (response.code === 200) {
+            this.yonghuData = response.data.userInfoData;
+            this.yonghuData.forEach((item) => {
+              item.updateTime = item.updateTime.replace("T", " ");
+            });
+            this.total = response.data.totalElements;
+            if (this.currentPage !== response.data.currentPages) {
+              this.currentPage = response.data.currentPages;
+            }
+          } else {
+            ElMessage.error(response.msg);
+          }
+        })
+        .catch((error) => {
+          const errorMessage = error.response?.data?.msg || "璇锋眰鍙戠敓閿欒";
+          ElMessage.error(errorMessage);
+        });
+    },
     multi_edit_meter_price() {
       console.log(this.multipleSelection.length);
       if (!this.multipleSelection || this.multipleSelection.length === 0) {
@@ -1230,6 +1284,58 @@ export default {
           console.error("导出失败:", error);
           ElMessage.error("导出失败: " + error.message);
         });
+    },
+    handleNodeClick(data) {
+      this.quyu_selected = data;
+      console.log(this.quyu_selected);
+      if (this.currentPage !== 1) {
+        this.currentPage = 1;
+        return;
+      }
+      this.fetchUserList(1);
+    },
+    getUserInfo() {
+      this.param.order = 0;
+      this.fetchUserList(1);
+    },
+    reflush() {
+      this.fetchUserList(this.currentPage || 1);
+    },
+    clear(isSearch) {
+      this.param = {
+        userName: "",
+        userId: "",
+        imei: "",
+        meterCode: null,
+        meterType: "",
+        time: {
+          type: "",
+          accurateTime: "",
+        },
+        company: null,
+        companyId: null,
+        order: 0,
+      };
+      this.sortOrder = null;
+      if (typeof isSearch !== "number" || isNaN(isSearch)) {
+        this.filterText = "";
+        if (this.$refs.treeRef) {
+          this.$refs.treeRef.setCurrentKey(null);
+        }
+        this.quyu_selected = null;
+        if (this.currentPage !== 1) {
+          this.currentPage = 1;
+          return;
+        }
+        this.fetchUserList(1);
+      }
+    },
+    search() {
+      if (this.currentPage !== 1) {
+        this.currentPage = 1;
+        return;
+      }
+      this.fetchUserList(1);
     },
   },
 };

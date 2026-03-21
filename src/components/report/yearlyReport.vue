@@ -18,6 +18,10 @@
           <span>时间</span>
           <el-date-picker v-model="params.year" type="year" placeholder="选择年份" style="flex-grow: 0; width: 100%; height: 35px" format="YYYY" value-format="YYYY" />
         </div>
+        <div class="search-input" style="margin-left: 20px">
+          <span>收费人</span>
+          <el-input v-model="params.rechargeUser" placeholder="请输入收费人" clearable />
+        </div>
       </div>
       <div class="buttons">
         <div class="sercah-btn" @click="getTradeData">
@@ -97,7 +101,7 @@
         <div class="year-report">
           <div class="year-report-title">
             <span style="font-size: 20px; margin-top: 10px; margin-bottom: 5px">收费年报表统计（{{ params.year }}年）
-               <a href="javascript:;" style="font-size: 20px; margin-left: 0px;color: #000;" @click="exportYearChartPNG(yearchart,'图表数据')">(导出)</a>
+               <a href="javascript:;" style="font-size: 20px; margin-left: 0px;color: #000;" @click="exportChartExcel(yearchart, '收费年报表统计')">(导出)</a>
 
             </span>
             <div class="flex-container">
@@ -112,7 +116,7 @@
         <div class="year-huanbi">
           <div class="year-huanbi-title">
             <span style="font-size: 20px; margin-top: 10px; margin-bottom: 5px">收费年报表统计环比及同比（{{ params.year }}年）
-                            <a href="javascript:;" style="font-size: 20px; margin-left: 0px;color: #000;" @click="exportYearChartPNG(yearhuanbichart,'图表数据')">(导出)</a>
+                            <a href="javascript:;" style="font-size: 20px; margin-left: 0px;color: #000;" @click="exportChartExcel(yearhuanbichart, '收费年报表统计环比及同比')">(导出)</a>
 
 
             </span>
@@ -135,7 +139,7 @@ import * as echarts from "echarts";
 import { markRaw } from "vue";
 import service from "@/api/request";
 import { ElMessage } from "element-plus";
-import {exportYearChartPNG} from "@/api/otherapi/other.js";
+import {exportChartExcel} from "@/api/otherapi/other.js";
 export default {
   data() {
     return {
@@ -143,6 +147,7 @@ export default {
         region: "",
         year: new Date().getFullYear().toString(),
         company: null,
+        rechargeUser: "",
       },
       companyId: JSON.parse(sessionStorage.getItem("userData")).companyId,
       companyList: [],
@@ -288,7 +293,7 @@ export default {
     this.getTradeData();
   },
   methods: {
-    exportYearChartPNG,
+    exportChartExcel,
     debounce(func, delay) {
       let timer = null;
       return function () {
@@ -400,8 +405,14 @@ export default {
       } else {
         params.companyId = this.companyId; // 所属水厂ID
       }
+      const query = new URLSearchParams({
+        region: this.params.region || "",
+        year: year || "",
+        companyId: params.companyId ?? "",
+        rechargeUser: this.params.rechargeUser || "",
+      }).toString();
       service
-        .get(`/yearReport?region=${this.params.region}&year=${year}&companyId=${params.companyId}`)
+        .get(`/yearReport?${query}`)
         .then((response) => {
           if (response.code === 200) {
             this.trade_data = response.data.currentDurationReport;
@@ -451,6 +462,7 @@ export default {
       this.params.region = "";
       this.params.year = "";
       this.params.company = null;
+      this.params.rechargeUser = "";
     },
   },
 };
@@ -496,7 +508,9 @@ export default {
   margin-top: 15px;
   margin-bottom: 20px;
   width: 100%;
-  height: 98px;
+  min-height: 98px;
+  height: auto;
+  padding: 12px 0;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -507,8 +521,10 @@ export default {
 
 .search-content {
   display: flex;
-  width: 95%;
-  height: 100%;
+  flex-wrap: wrap;
+  align-content: center;
+  width: calc(100% - 240px);
+  min-height: 100%;
 }
 
 .search-input {
@@ -516,9 +532,11 @@ export default {
   justify-content: flex-start;
   justify-content: center; /* 确保子元素在父容器中垂直居中 */
   flex-direction: column;
-  width: 25%;
-  height: 100%;
+  width: 18%;
+  min-width: 180px;
+  height: auto;
   margin-right: 20px;
+  margin-bottom: 10px;
 }
 
 .search-input > span {

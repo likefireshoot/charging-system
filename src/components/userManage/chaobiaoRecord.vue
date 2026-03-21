@@ -473,16 +473,13 @@ export default {
         });
     },
     exportExcel() {
-      console.log(this.data);
+      const params = this.filterNonEmptyParams(this.chaobiaoData);
       // 调用后端接口
       axios({
         url: "/userManage/meterRead/exportMeterReportRecord", // 后端接口地址
         method: "GET",
         responseType: "blob", // 指定响应类型为二进制流
-        params: {
-          companyId: this.data.companyId,
-          userId: this.data.userId,
-        },
+        params,
       })
         .then((response) => {
           if (response.status !== 200) {

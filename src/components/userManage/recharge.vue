@@ -180,14 +180,11 @@ export default {
         ElMessage.error(message);
         return;
       }
-
-      const rechargeUser = JSON.parse(sessionStorage.getItem("userData"))?.staffName || "";
       let dataParams = {
         meterCode: formData.meterCode,
         rechargeType: formData.rechargeType,
         rechargeAmount: null,
-        region: formData.region,
-        rechargeUser: rechargeUser,
+        region: formData.region
       };
       if (formData.quickmoney) {
         dataParams.rechargeAmount = formData.quickmoney;

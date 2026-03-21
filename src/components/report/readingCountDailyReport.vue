@@ -46,7 +46,7 @@
           }}）
 
             <a href="javascript:;" style="font-size: 20px; margin-left: 0px;color: #000;"
-              @click="exportYearChartPNG(weekchart, currentName + '日报表统计')">(导出)</a>
+              @click="exportChartExcel(weekchart, currentName + '日报表统计')">(导出)</a>
 
 
           </span>
@@ -68,7 +68,7 @@ import * as echarts from "echarts";
 import { markRaw } from "vue";
 import service from "@/api/request";
 import { ElMessage } from "element-plus";
-import { exportYearChartPNG } from "@/api/otherapi/other.js";
+import { exportChartExcel } from "@/api/otherapi/other.js";
 export default {
   data() {
     const now = new Date();
@@ -183,7 +183,7 @@ export default {
     this.getWeekTradeData();
   },
   methods: {
-    exportYearChartPNG,
+    exportChartExcel,
     debounce(func, delay) {
       let timer = null;
       return function () {

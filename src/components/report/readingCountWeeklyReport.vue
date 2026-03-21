@@ -53,7 +53,7 @@
               params.endTime }}）
 
               <a href="javascript:;" style="font-size: 22px; margin-left: 0px;color: #000;"
-                @click="exportYearChartPNG(weekchart, currentName+'周报表')">(导出)</a>
+                @click="exportChartExcel(weekchart, currentName+'周报表')">(导出)</a>
 
 
             </span>
@@ -72,7 +72,7 @@
               params.endTime }}）
 
               <a href="javascript:;" style="font-size: 22px; margin-left: 0px;color: #000;"
-                 @click="exportYearChartPNG(weekhuanbichart, currentName+'周报表统计环比')">(导出)</a>
+                 @click="exportChartExcel(weekhuanbichart, currentName+'周报表统计环比')">(导出)</a>
 
 
             </span>
@@ -92,7 +92,7 @@
 
 
               <a href="javascript:;" style="font-size: 22px; margin-left: 0px;color: #000;"
-                @click="exportYearChartPNG(weektongbichart, currentName+'周报表统计同比')">(导出)</a>
+                @click="exportChartExcel(weektongbichart, currentName+'周报表统计同比')">(导出)</a>
 
 
             </span>
@@ -115,7 +115,7 @@ import * as echarts from "echarts";
 import { markRaw } from "vue";
 import service from "@/api/request";
 import { ElMessage } from "element-plus";
-import { exportYearChartPNG } from "@/api/otherapi/other.js";
+import { exportChartExcel } from "@/api/otherapi/other.js";
 export default {
   data() {
     const now = new Date();
@@ -382,7 +382,7 @@ export default {
     },
   },
   methods: {
-    exportYearChartPNG,
+    exportChartExcel,
     debounce(func, delay) {
       let timer = null;
       return function () {

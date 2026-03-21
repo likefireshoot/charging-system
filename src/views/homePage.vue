@@ -36,7 +36,7 @@
           <span style="font-size: 22px; margin-top: 10px; margin-bottom: 5px"
             >近7天缴费总额
 
-            <a href="javascript:;" style="font-size: 22px; margin-left: 0px; color: #46b97e" @click="exportYearChartPNG(weekchart, '近7天缴费总额')">(导出)</a>
+            <a href="javascript:;" style="font-size: 22px; margin-left: 0px; color: #46b97e" @click="exportChartExcel(weekchart, '近7天缴费总额')">(导出)</a>
           </span>
           <div class="flex-container">
             <div style="width: 4px; height: 4px; background-color: #46b87d; margin-right: 5px"></div>
@@ -93,6 +93,13 @@
               <span style="font-size: 22px; font-family: 'Microsoft YaHei'; font-weight: bold; margin-top: 5px">{{ shebeiWarning.shebeiyichang }}</span>
             </div>
           </div>
+           <div class="shebei-warning-item">
+            <img src="@/assets/shouye/icon7.png"  alt="" />
+            <div class="shebei-warning-item-text">
+              <span style="font-size: 22px">当月新增用户数</span>
+              <span style="font-size: 22px; font-family: 'Microsoft YaHei'; font-weight: bold; margin-top: 5px">{{ shebeiWarning.currentMonthNewUserCount}}</span>
+            </div>
+          </div>
         </div>
       </div>
       <div class="month-year-report">
@@ -100,8 +107,8 @@
           <span style="font-size: 22px; margin-top: 10px; margin-bottom: 5px"
             >本月缴费情况
 
-            <!-- <a href="javascript:;" style="font-size: 14px; margin-left: 20px;color: #1a73e8;" @click="exportYearChartPNG(monthchart,'图表数据')">导出PNG</a> -->
-            <a href="javascript:;" style="font-size: 22px; margin-left: 0px; color: #46b97e" @click="exportYearChartPNG(monthchart, '本月缴费情况')">(导出)</a>
+            <!-- <a href="javascript:;" style="font-size: 14px; margin-left: 20px;color: #1a73e8;" @click="exportChartExcel(monthchart,'图表数据')">导出PNG</a> -->
+            <a href="javascript:;" style="font-size: 22px; margin-left: 0px; color: #46b97e" @click="exportChartExcel(monthchart, '本月缴费情况')">(导出)</a>
           </span>
           <div class="flex-container">
             <div style="width: 4px; height: 4px; background-color: #46b87d; margin-right: 5px"></div>
@@ -114,8 +121,8 @@
         <div class="year-report">
           <span style="font-size: 22px; margin-top: 10px; margin-bottom: 5px"
             >本年度结算总额情况
-            <!-- <a href="javascript:;" style="font-size: 14px; margin-left: 20px;color: #1a73e8;" @click="exportYearChartPNG(yearchart,'图表数据')">导出PNG</a> -->
-            <a href="javascript:;" style="font-size: 22px; margin-left: 0px; color: #46b97e" @click="exportYearChartPNG(yearchart, '本年度结算总额情况')">(导出)</a>
+            <!-- <a href="javascript:;" style="font-size: 14px; margin-left: 20px;color: #1a73e8;" @click="exportChartExcel(yearchart,'图表数据')">导出PNG</a> -->
+            <a href="javascript:;" style="font-size: 22px; margin-left: 0px; color: #46b97e" @click="exportChartExcel(yearchart, '本年度结算总额情况')">(导出)</a>
           </span>
 
           <div class="flex-container">
@@ -137,7 +144,7 @@ import { markRaw } from "vue";
 import service from "@/api/request";
 import { ElMessage } from "element-plus";
 import { useWarningStore } from "@/store/warningStore.js";
-import { exportYearChartPNG } from "@/api/otherapi/other.js";
+import { exportChartExcel } from "@/api/otherapi/other.js";
 export default {
   data() {
     const now = new Date();
@@ -471,6 +478,8 @@ export default {
         dayongliang: 0,
         weishangbao: 0,
         shebeiyichang: 0,
+        currentMonthNewUserCount:0
+        
       },
     };
   },
@@ -499,7 +508,7 @@ export default {
     // });
   },
   methods: {
-    exportYearChartPNG,
+    exportChartExcel,
     toWarnPath(val) {
       this.$router.push({ path: "/warningManage", query: { warningType: val } });
     },
@@ -740,6 +749,7 @@ export default {
             this.shebeiWarning.dayongliang = response.data.largeUsageCount;
             this.shebeiWarning.weishangbao = response.data.longTimeUnReportCount;
             this.shebeiWarning.shebeiyichang = response.data.errCount;
+            this.shebeiWarning.currentMonthNewUserCount = response.data.currentMonthNewUserCount
           } else {
             ElMessage.error(response.msg);
           }

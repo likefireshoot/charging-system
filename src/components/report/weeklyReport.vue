@@ -26,6 +26,10 @@
               value-format="YYYY-MM-DD" />
           </div>
         </div>
+        <div class="search-input" style="margin-left: 20px">
+          <span>收费人</span>
+          <el-input v-model="params.rechargeUser" placeholder="请输入收费人" clearable />
+        </div>
       </div>
       <div class="buttons">
         <div class="sercah-btn" @click="getTradeData">
@@ -111,7 +115,7 @@
             <span style="font-size: 22px; margin-top: 10px; margin-bottom: 5px">收费周报表统计（{{ params.startTime }}至{{
               params.endTime }}）
             <a href="javascript:;" style="font-size: 22px; margin-left: 0px;color: #000;"
-                @click="exportYearChartPNG(weekchart, '图表数据')">(导出)</a>
+                @click="exportChartExcel(weekchart, '收费周报表统计')">(导出)</a>
 
             </span>
             <div class="flex-container">
@@ -128,7 +132,7 @@
             <span style="font-size: 22px; margin-top: 10px; margin-bottom: 5px">收费周报表统计环比（{{ params.startTime }}至{{
               params.endTime }}）
              <a href="javascript:;" style="font-size: 22px; margin-left: 0px;color: #000;"
-                @click="exportYearChartPNG(weekhuanbichart, '图表数据')">(导出)</a>
+                @click="exportChartExcel(weekhuanbichart, '收费周报表统计环比')">(导出)</a>
             </span>
             <div class="flex-container">
               <div style="width: 4px; height: 4px; background-color: #46b87d; margin-right: 5px"></div>
@@ -145,7 +149,7 @@
               params.endTime }}）
 
               <a href="javascript:;" style="font-size: 22px; margin-left: 0px;color: #000;"
-                @click="exportYearChartPNG(weektongbichart, '图表数据')">(导出)</a>
+                @click="exportChartExcel(weektongbichart, '收费周报表统计同比')">(导出)</a>
 
             </span>
             <div class="flex-container">
@@ -167,7 +171,7 @@ import * as echarts from "echarts";
 import { markRaw } from "vue";
 import service from "@/api/request";
 import { ElMessage } from "element-plus";
-import { exportYearChartPNG } from "@/api/otherapi/other.js";
+import { exportChartExcel } from "@/api/otherapi/other.js";
 export default {
   data() {
     const now = new Date();
@@ -187,6 +191,7 @@ export default {
         startTime: startDate,
         endTime: endDate,
         company: null,
+        rechargeUser: "",
       },
       companyId: JSON.parse(sessionStorage.getItem("userData")).companyId,
       companyList: [],
@@ -422,7 +427,7 @@ export default {
     },
   },
   methods: {
-    exportYearChartPNG,
+    exportChartExcel,
     debounce(func, delay) {
       let timer = null;
       return function () {
@@ -553,9 +558,15 @@ export default {
       } else {
         params.companyId = this.companyId; // 所属水厂ID
       }
-      console.log(this.params);
+      const query = new URLSearchParams({
+        startTime: this.params.startTime || "",
+        endTime: this.params.endTime || "",
+        region: this.params.region || "",
+        companyId: params.companyId ?? "",
+        rechargeUser: this.params.rechargeUser || "",
+      }).toString();
       service
-        .get(`/weekReport?startTime=${this.params.startTime}&endTime=${this.params.endTime}&region=${this.params.region}&companyId=${params.companyId}`)
+        .get(`/weekReport?${query}`)
         .then((response) => {
           if (response.code === 200) {
             this.trade_data = response.data.currentDurationReport;
@@ -645,6 +656,7 @@ export default {
       this.params.endTime = "";
       this.params.region = "";
       this.params.company = null;
+      this.params.rechargeUser = "";
     },
   },
 };
@@ -690,7 +702,9 @@ export default {
   margin-top: 15px;
   margin-bottom: 20px;
   width: 100%;
-  height: 98px;
+  min-height: 98px;
+  height: auto;
+  padding: 12px 0;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -701,8 +715,10 @@ export default {
 
 .search-content {
   display: flex;
-  width: 95%;
-  height: 100%;
+  flex-wrap: wrap;
+  align-content: center;
+  width: calc(100% - 240px);
+  min-height: 100%;
 }
 
 .search-input {
@@ -711,9 +727,11 @@ export default {
   justify-content: center;
   /* 确保子元素在父容器中垂直居中 */
   flex-direction: column;
-  width: 25%;
-  height: 100%;
+  width: 18%;
+  min-width: 180px;
+  height: auto;
   margin-right: 20px;
+  margin-bottom: 10px;
 }
 
 .search-input>span {

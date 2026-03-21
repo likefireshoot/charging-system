@@ -43,7 +43,7 @@
           <div class="year-report-title">
             <span style="font-size: 22px; margin-top: 10px; margin-bottom: 5px">{{currentName}}年报表统计（{{ params.year }}年）
 
-               <a href="javascript:;" style="font-size: 22px; margin-left: 0px;color: #000;" @click="exportYearChartPNG(yearchart,'图表数据')">(导出)</a>
+               <a href="javascript:;" style="font-size: 22px; margin-left: 0px;color: #000;" @click="exportChartExcel(yearchart, currentName + '年报表统计')">(导出)</a>
 
 
             </span>
@@ -60,7 +60,7 @@
           <div class="year-huanbi-title">
             <span style="font-size: 22px; margin-top: 10px; margin-bottom: 5px">{{currentName}}年报表统计环比及同比（{{ params.year }}年）
 
-               <a href="javascript:;" style="font-size: 22px; margin-left: 0px;color: #000;" @click="exportYearChartPNG(yearhuanbichart,'图表数据')">(导出)</a>
+               <a href="javascript:;" style="font-size: 22px; margin-left: 0px;color: #000;" @click="exportChartExcel(yearhuanbichart, currentName + '年报表统计环比及同比')">(导出)</a>
 
 
             </span>
@@ -83,7 +83,7 @@ import * as echarts from "echarts";
 import { markRaw } from "vue";
 import service from "@/api/request";
 import { ElMessage } from "element-plus";
-import {exportYearChartPNG} from "@/api/otherapi/other.js";
+import {exportChartExcel} from "@/api/otherapi/other.js";
 export default {
   data() {
     return {
@@ -248,7 +248,7 @@ export default {
     this.getTradeData();
   },
   methods: {
-    exportYearChartPNG,
+    exportChartExcel,
     debounce(func, delay) {
       let timer = null;
       return function () {
