@@ -1265,7 +1265,7 @@ export default {
           return false;
         }
         const amountSecondStartVal = parseFloat(amountSecondStart);
-        if (amountSecondStartVal <= amountFirstEndVal) {
+        if (amountSecondStartVal < amountFirstEndVal) {
           ElMessage.error("第二阶梯开始值必须大于第一阶梯结束值");
           return false;
         }
@@ -1309,7 +1309,7 @@ export default {
           return false;
         }
         const amountThirdStartVal = parseFloat(amountThirdStart);
-        if (amountThirdStartVal <= parseFloat(amountSecondEnd)) {
+        if (amountThirdStartVal < parseFloat(amountSecondEnd)) {
           ElMessage.error("第三阶梯开始值必须大于第二阶梯结束值");
           return false;
         }
@@ -1468,7 +1468,7 @@ export default {
           return false;
         }
         const amountSecondStartVal = parseFloat(amountSecondStart);
-        if (amountSecondStartVal <= amountFirstEndVal) {
+        if (amountSecondStartVal < amountFirstEndVal) {
           ElMessage.error("第二阶梯开始值必须大于第一阶梯结束值");
           return false;
         }
@@ -1509,7 +1509,7 @@ export default {
           return false;
         }
         const amountThirdStartVal = parseFloat(amountThirdStart);
-        if (amountThirdStartVal <= parseFloat(amountSecondEnd)) {
+        if (amountThirdStartVal < parseFloat(amountSecondEnd)) {
           ElMessage.error("第三阶梯开始值必须大于第二阶梯结束值");
           return false;
         }
