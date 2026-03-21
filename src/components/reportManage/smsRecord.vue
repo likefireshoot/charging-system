@@ -349,6 +349,45 @@ export default {
     },
 
     exportExcel() {
+      const exportParams = {
+        ...this.params,
+        companyId: this.companyId === 1 ? this.params.company || null : this.companyId,
+      };
+      delete exportParams.company;
+      delete exportParams.pageNo;
+      delete exportParams.pageSize;
+      const requestParams = Object.fromEntries(Object.entries(exportParams).filter(([_, value]) => value !== null && value !== ""));
+      axios({
+        url: "/sms/exportSmsRecord",
+        method: "POST",
+        responseType: "blob",
+        data: requestParams,
+      })
+        .then((response) => {
+          if (response.status !== 200) {
+            throw new Error("导出失败: " + response.statusText);
+          }
+
+          const blob = new Blob([response.data], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+
+          if (blob.size === 0) {
+            ElMessage.warning("内容为空，无法下载");
+            return;
+          }
+
+          const link = document.createElement("a");
+          link.href = window.URL.createObjectURL(blob);
+          link.download = "短信记录数据列表.xlsx";
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          window.URL.revokeObjectURL(link.href);
+        })
+        .catch((error) => {
+          console.error("导出失败:", error);
+          ElMessage.error("导出失败: " + error.message);
+        });
+      return;
       let url = "";
       let params = {};
       if (this.companyId === 1) {

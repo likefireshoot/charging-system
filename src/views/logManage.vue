@@ -401,6 +401,47 @@ export default {
         });
     },
     exportExcel() {
+      const exportParams = {
+        ...this.params,
+        companyId: this.companyId === 1 ? this.params.company || null : this.companyId,
+        belong: this.belong,
+      };
+      delete exportParams.company;
+      delete exportParams.pageNo;
+      delete exportParams.pageSize;
+      delete exportParams.operationBelong;
+      const requestParams = Object.fromEntries(Object.entries(exportParams).filter(([_, value]) => value !== null && value !== ""));
+      axios({
+        url: "/log/exportLogsReport",
+        method: "POST",
+        responseType: "blob",
+        data: requestParams,
+      })
+        .then((response) => {
+          if (response.status !== 200) {
+            throw new Error("导出失败: " + response.statusText);
+          }
+
+          const blob = new Blob([response.data], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+
+          if (blob.size === 0) {
+            ElMessage.warning("内容为空，无法下载");
+            return;
+          }
+
+          const link = document.createElement("a");
+          link.href = window.URL.createObjectURL(blob);
+          link.download = "日志数据列表.xlsx";
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          window.URL.revokeObjectURL(link.href);
+        })
+        .catch((error) => {
+          console.error("导出失败:", error);
+          ElMessage.error("导出失败: " + error.message);
+        });
+      return;
       let url = "";
       let params = {};
 

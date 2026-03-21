@@ -604,7 +604,8 @@ export default {
       // 调用后端接口
       axios({
         url: url, // 后端接口地址
-        method: "GET",
+        method: "POST",
+        data: params,
         responseType: "blob", // 指定响应类型为二进制流
       })
         .then((response) => {

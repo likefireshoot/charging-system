@@ -137,6 +137,7 @@ export default {
           accurateTime: "",
         },
         meterCode: "",
+        imei: "",
         companyId: null,
       },
       companyId: JSON.parse(sessionStorage.getItem("userData")).companyId, // 公司ID

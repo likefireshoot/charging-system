@@ -1239,7 +1239,50 @@ export default {
       }
     },
     exportExcel() {
-      let url = "";
+      const exportParams = {
+        ...this.param,
+        companyId: this.companyId === 1 ? this.param.company || null : this.companyId,
+      };
+      const params = Object.fromEntries(
+        Object.entries(this.filterNonEmptyParams(exportParams)).filter(([_, value]) => value !== null && value !== undefined && value !== "")
+      );
+      if (this.quyu_selected !== null) {
+        params.region = this.quyu_selected.label;
+      }
+      axios({
+        url: "/userManage/userCharge/exportUserMeterBind",
+        method: "GET",
+        responseType: "blob",
+        params,
+        headers: {
+          Authorization: this.token,
+        },
+      })
+        .then((response) => {
+          if (response.status !== 200) {
+            throw new Error("导出失败: " + response.statusText);
+          }
+
+          const blob = new Blob([response.data], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+
+          if (blob.size === 0) {
+            ElMessage.warning("内容为空，无法下载");
+            return;
+          }
+
+          const link = document.createElement("a");
+          link.href = window.URL.createObjectURL(blob);
+          link.download = "用户数据列表.xlsx";
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          window.URL.revokeObjectURL(link.href);
+        })
+        .catch((error) => {
+          console.error("导出失败:", error);
+          ElMessage.error("导出失败: " + error.message);
+        });
+      return;
       if (this.companyId === 1) {
         if (this.param.companyId) {
           url = `/userManage/userCharge/exportUserMeterBind?companyId=${this.param.companyId}`; // 所属水厂ID

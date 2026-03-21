@@ -565,25 +565,17 @@ export default {
         });
     },
     exportExcel() {
-      let companyId = "";
-      if (this.companyId === 1) {
-        if (this.rechargeRecordeData.companyId) {
-          companyId = this.rechargeRecordeData.companyId;
-        } else {
-          companyId = "";
-        }
-      } else {
-        companyId = this.companyId;
-      }
+      const exportParams = {
+        ...this.rechargeRecordeData,
+        companyId: this.companyId === 1 ? this.rechargeRecordeData.companyId || "" : this.companyId,
+      };
+      const params = this.filterNonEmptyParams(exportParams);
       // 调用后端接口
       axios({
         url: "/userManage/userCharge/exportRechargeRecord", // 后端接口地址
         method: "GET",
         responseType: "blob", // 指定响应类型为二进制流
-        params: {
-          companyId: companyId,
-          userId: this.data.userId,
-        },
+        params,
       })
         .then((response) => {
           if (response.status !== 200) {

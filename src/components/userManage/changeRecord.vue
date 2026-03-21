@@ -406,19 +406,17 @@ export default {
       }
     },
     // 过滤掉值为空的参数
-    filterNonEmptyParams(params) {
-      if (this.companyId === 1) {
-        if (this.changeRecordeData.companyId) {
-        } else {
-          this.changeRecordeData.companyId = "";
-        }
-      } else {
-        this.changeRecordeData.companyId = this.companyId;
-      }
+    filterNonEmptyParams(params, includeCompanyId = true) {
+      const paramsToFilter = includeCompanyId
+        ? {
+            ...params,
+            companyId: this.companyId === 1 ? params.companyId || "" : this.companyId,
+          }
+        : params;
       const filteredParams = {};
-      for (const key in params) {
-        if (params.hasOwnProperty(key)) {
-          const value = params[key];
+      for (const key in paramsToFilter) {
+        if (Object.prototype.hasOwnProperty.call(paramsToFilter, key)) {
+          const value = paramsToFilter[key];
           if (typeof value === "object") {
             if (key === "time" && value.accurateTime) {
               let formattedTime = "";
@@ -443,7 +441,7 @@ export default {
                 filteredParams["createTime"] = formattedTime;
               }
             } else {
-              const subFiltered = this.filterNonEmptyParams(value);
+              const subFiltered = this.filterNonEmptyParams(value, false);
               if (Object.keys(subFiltered).length > 0) {
                 filteredParams[key] = subFiltered;
               }
@@ -598,13 +596,6 @@ export default {
       }
     },
     exportExcel() {
-      if (this.companyId === 1) {
-        if (!this.changeRecordeData.companyId) {
-          this.changeRecordeData.companyId = "";
-        }
-      } else {
-        this.changeRecordeData.companyId = this.companyId;
-      }
       const params = this.filterNonEmptyParams(this.changeRecordeData);
       // 调用后端接口
       axios({

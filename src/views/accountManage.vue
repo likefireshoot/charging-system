@@ -741,21 +741,16 @@ export default {
       }
     },
     exportExcel() {
-      let queryParams = {
-        // regionId: this.param.regionId,
-        // userId: this.param.userId,
-        // meterCode: this.param.meterCode,
-        // userName: this.param.userName,
-        companyId: null,
+      const exportParams = {
+        ...this.param,
+        companyId: this.companyId === 1 ? this.param.company || null : this.companyId,
       };
-      if (this.companyId === 1) {
-        if (this.param.company) {
-          queryParams.companyId = this.param.company;
-        }
-      } else {
-        queryParams.companyId = this.companyId;
+      const queryParams = Object.fromEntries(
+        Object.entries(this.filterNonEmptyParams(exportParams)).filter(([_, value]) => value !== null && value !== undefined && value !== "")
+      );
+      if (this.quyu_selected !== null) {
+        queryParams.regionId = this.quyu_selected.id;
       }
-      // const filteredParams = Object.fromEntries(Object.entries(queryParams).filter(([_, value]) => value !== null && value !== ""));
       // 调用后端接口
       axios({
         url: "/userManage/userCharge/exportUserInfo", // 后端接口地址

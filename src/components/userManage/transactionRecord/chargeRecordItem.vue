@@ -484,6 +484,38 @@ export default {
       }
     },
     exportExcel() {
+      const params = this.filterNonEmptyParams(this.transactionData);
+      axios({
+        url: "/userManage/userCharge/exportChargeRecord",
+        method: "GET",
+        responseType: "blob",
+        params,
+      })
+        .then((response) => {
+          if (response.status !== 200) {
+            throw new Error("导出失败: " + response.statusText);
+          }
+
+          const blob = new Blob([response.data], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+
+          if (blob.size === 0) {
+            ElMessage.warning("内容为空，无法下载");
+            return;
+          }
+
+          const link = document.createElement("a");
+          link.href = window.URL.createObjectURL(blob);
+          link.download = "用户历史扣费记录.xlsx";
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          window.URL.revokeObjectURL(link.href);
+        })
+        .catch((error) => {
+          console.error("导出失败:", error);
+          ElMessage.error("导出失败: " + error.message);
+        });
+      return;
       // 调用后端接口
       axios({
         url: "/userManage/userCharge/exportChargeRecord", // 后端接口地址
