@@ -90,6 +90,7 @@
           <el-table-column property="oldBalance" label="充值前余额/元" min-width="70" align="center" />
           <el-table-column property="newBalance" label="充值后余额/元" min-width="70" align="center" />
           <el-table-column property="createTime" label="交易时间" min-width="120" align="center" />
+          <el-table-column property="rechargeUser" label="收费人" min-width="70" align="center" />
         </el-table>
       </div>
     </div>

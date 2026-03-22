@@ -87,7 +87,6 @@
           <el-table-column property="newBalance" label="余额" min-width="70" align="center" />
           <el-table-column property="createTime" label="扣费时间" min-width="120" align="center" />
           <el-table-column property="companyName" label="所属水厂" min-width="70" align="center" />
-           <el-table-column property="rechargeUser" label="收费人" min-width="70" align="center" />
           <el-table-column label="扣费类型" min-width="90" align="center">
             <template #default="scope">
               <span>{{ formatChargeType(scope.row.type) }}</span>

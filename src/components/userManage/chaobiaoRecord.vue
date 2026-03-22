@@ -90,6 +90,8 @@
               <el-table-column property="userName" label="用户名称" min-width="120" align="center" />
               <el-table-column property="meterCode" label="表号" min-width="160" align="center" />
               <el-table-column property="readingCount" label="水表读数/吨" min-width="160" align="center" />
+              <el-table-column property="deltaWater" label="本次用水量/吨" min-width="160" align="center" />
+              <el-table-column property="feeThisTime" label="本次扣费/元" min-width="160" align="center" />
               <el-table-column property="valveStatus" label="阀门状态" min-width="160" align="center" />
               <!-- <el-table-column property="balance" label="余额/元" width="120" align="center" /> -->
               <el-table-column property="battery" label="电量" min-width="160" align="center" />
