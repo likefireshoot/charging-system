@@ -138,7 +138,17 @@
             <!-- <el-table-column label="序号" width="160" align="center" fixed="left" #default="scope">
               {{ scope.$index + 1 + (currentPage - 1) * pageSize }}
             </el-table-column> -->
-            <el-table-column property="userId" label="用户号" min-width="50" align="center" fixed="left" />
+            <el-table-column property="userId" label="用户号" min-width="50" align="center" fixed="left">
+              <template #header="scope">
+                <div class="sortable-header" @click="toggleSort('userId')">
+                  <span>{{ scope.column.label }}</span>
+                  <div class="sort-icons">
+                    <div :class="['asc-icon', { active: isSortActive('userId', 'asc') }]" />
+                    <div :class="['desc-icon', { active: isSortActive('userId', 'desc') }]" />
+                  </div>
+                </div>
+              </template>
+            </el-table-column>
             <el-table-column label="用户名称" min-width="70" align="center">
               <template #default="scope">
                 <span @click="handleUserInfo(scope.row)"
@@ -156,14 +166,12 @@
             <el-table-column property="valveStatus" label="阀门状态" min-width="70" align="center" />
             <el-table-column property="battery" label="电池电量" min-width="70" align="center" />
             <el-table-column label="抄表时间" min-width="100" align="center">
-              <template #header>
-                <div style="display: flex; align-items: center; justify-content: center">
-                  <span>抄表时间</span>
-                  <div style="display: flex; flex-direction: column; margin-left: 10px; border: none">
-                    <div :class="['asc-icon', { active: sortOrder === 'asc' }]"
-                      style="cursor: pointer; width: 12px; height: 12px; border: none" @click="ascClick" />
-                    <div :class="['desc-icon', { active: sortOrder === 'desc' }]"
-                      style="cursor: pointer; width: 12px; height: 12px; border: none" @click="descClick" />
+              <template #header="scope">
+                <div class="sortable-header" @click="toggleSort('time')">
+                  <span>{{ scope.column.label }}</span>
+                  <div class="sort-icons">
+                    <div :class="['asc-icon', { active: isSortActive('time', 'asc') }]" />
+                    <div :class="['desc-icon', { active: isSortActive('time', 'desc') }]" />
                   </div>
                 </div>
               </template>
@@ -384,7 +392,7 @@ export default {
         },
         company: null, // 新增所属水厂参数
         companyId: null, // 所属水厂ID
-        order: 0,
+        order: 2,
       },
       price_list: [],
       priceDialogVisible: false,
@@ -423,7 +431,8 @@ export default {
       commandType: "",
       companyList: [],
 
-      sortOrder: null,
+      sortField: "userId",
+      sortOrder: "asc",
 
       //弹出框显示与否
       user_info_dialogFormVisible: false,
@@ -899,14 +908,30 @@ export default {
       this.multipleSelection = [];
       this.reflush();
     },
-    ascClick() {
-      this.sortOrder = "asc";
-      this.param.order = 1; // 设置升序
-      this.search();
+    getOrderValue(field, direction) {
+      const orderMap = {
+        time: {
+          asc: 1,
+          desc: 0,
+        },
+        userId: {
+          asc: 2,
+          desc: 3,
+        },
+      };
+      return orderMap[field][direction];
     },
-    descClick() {
-      this.sortOrder = "desc";
-      this.param.order = 0; // 设置降序
+    isSortActive(field, direction) {
+      return this.sortField === field && this.sortOrder === direction;
+    },
+    toggleSort(field) {
+      if (this.sortField === field) {
+        this.sortOrder = this.sortOrder === "asc" ? "desc" : "asc";
+      } else {
+        this.sortField = field;
+        this.sortOrder = "asc";
+      }
+      this.param.order = this.getOrderValue(field, this.sortOrder);
       this.search();
     },
     getCompanyList() {
@@ -1338,7 +1363,7 @@ export default {
       this.fetchUserList(1);
     },
     getUserInfo() {
-      this.param.order = 0;
+      this.param.order = this.getOrderValue(this.sortField, this.sortOrder);
       this.fetchUserList(1);
     },
     reflush() {
@@ -1357,9 +1382,10 @@ export default {
         },
         company: null,
         companyId: null,
-        order: 0,
+        order: 2,
       };
-      this.sortOrder = null;
+      this.sortField = "userId";
+      this.sortOrder = "asc";
       if (typeof isSearch !== "number" || isNaN(isSearch)) {
         this.filterText = "";
         if (this.$refs.treeRef) {
@@ -1816,10 +1842,26 @@ export default {
   }
 }
 
+.sortable-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  user-select: none;
+}
+
+.sort-icons {
+  display: flex;
+  flex-direction: column;
+  margin-left: 10px;
+}
+
 .asc-icon {
   background-image: url("@/assets/yonghu/icon25.png");
   background-repeat: no-repeat;
   background-size: contain;
+  width: 12px;
+  height: 12px;
 }
 
 .asc-icon:hover {
@@ -1838,6 +1880,8 @@ export default {
   background-image: url("@/assets/yonghu/icon23.png");
   background-repeat: no-repeat;
   background-size: contain;
+  width: 12px;
+  height: 12px;
 }
 
 .desc-icon:hover {
