@@ -135,9 +135,9 @@
             :header-cell-style="{ background: '#46B97E', color: '#FFFFFF' }" @selection-change="handleSelectionChange"
             id="yonghu-table">
             <el-table-column type="selection" :selectable="selectable" min-width="40" align="center" fixed="left" />
-            <!-- <el-table-column label="序号" width="160" align="center" fixed="left" #default="scope">
+            <el-table-column label="序号" width="90" align="center" fixed="left" #default="scope">
               {{ scope.$index + 1 + (currentPage - 1) * pageSize }}
-            </el-table-column> -->
+            </el-table-column>
             <el-table-column property="userId" label="用户号" min-width="50" align="center" fixed="left">
               <template #header="scope">
                 <div class="sortable-header" @click="toggleSort('userId')">
