@@ -14,7 +14,7 @@
             <el-option v-for="item in quyu_data" :key="item.id" :label="item.label" :value="item.label"> </el-option>
           </el-select>
         </div>
-        <div class="search-input" style="margin-left: 20px; width: 50%">
+        <div class="search-input" style="margin-left: 20px;width:auto">
           <span>时间</span>
           <div class="time-input">
             <el-date-picker v-model="params.startTime" type="date" placeholder="选择日期"
@@ -28,7 +28,9 @@
         </div>
         <div class="search-input" style="margin-left: 20px">
           <span>收费人</span>
-          <el-input v-model="params.rechargeUser" placeholder="请输入收费人" clearable />
+          <el-select v-model="params.rechargeUser" clearable filterable placeholder="请选择收费人">
+            <el-option v-for="item in staffNameOptions" :key="item" :label="item" :value="item"></el-option>
+          </el-select>
         </div>
       </div>
       <div class="buttons">
@@ -196,6 +198,7 @@ export default {
       companyId: JSON.parse(sessionStorage.getItem("userData")).companyId,
       companyList: [],
       quyu_data: [],
+      staffNameOptions: [],
       trade_data: {},
       weekchart: null,
       weekchart_option: {
@@ -380,6 +383,7 @@ export default {
   mounted() {
     this.getCompanyList();
     this.getRegionData();
+    this.getStaffNames();
     this.getTradeData();
   },
   watch: {
@@ -547,6 +551,20 @@ export default {
         })
         .catch((error) => {
           ElMessage.error("获取区域数据失败");
+        });
+    },
+    getStaffNames() {
+      service
+        .get("/staff/getStaffNames")
+        .then((response) => {
+          if (response.code === 200) {
+            this.staffNameOptions = [...new Set((response.data || []).filter(Boolean))];
+          } else {
+            ElMessage.error(response.msg);
+          }
+        })
+        .catch(() => {
+          ElMessage.error("获取收费人列表失败");
         });
     },
     getTradeData() {

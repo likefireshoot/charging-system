@@ -20,7 +20,7 @@
           </div>
           <div class="search-input" style="width: 18%; margin-right: 10px">
             <span>区域</span>
-            <el-select v-model="rechargeRecordeData.region">
+            <el-select v-model="rechargeRecordeData.region" clearable filterable placeholder="区域">
               <el-option v-for="item in quyu_data" :key="item.id" :label="item.label" :value="item.label"> </el-option>
             </el-select>
           </div>
@@ -38,7 +38,9 @@
           </div>
           <div class="search-input" style="width: 15%; margin-right: 10px">
             <span>收费人</span>
-            <el-input v-model="rechargeRecordeData.rechargeUser" placeholder="请输入..." />
+            <el-select v-model="rechargeRecordeData.rechargeUser" clearable filterable placeholder="请选择收费人">
+              <el-option v-for="item in staffNameOptions" :key="item" :label="item" :value="item"></el-option>
+            </el-select>
           </div>
           <div class="search-input" style="width: 18%; margin-right: 10px">
             <span>收费类型</span>
@@ -134,6 +136,24 @@
               <el-table-column property="createTime" label="充值时间" min-width="100" align="center" />
             </el-table>
           </div>
+          <div class="summary-box">
+            <div class="summary-item">
+              <span class="summary-label">微信总金额</span>
+              <span class="summary-value">{{ rechargeSummary.weChatTotalAmount }}</span>
+            </div>
+            <div class="summary-item">
+              <span class="summary-label">支付宝总金额</span>
+              <span class="summary-value">{{ rechargeSummary.alipayTotalAmount }}</span>
+            </div>
+            <div class="summary-item">
+              <span class="summary-label">现金总金额</span>
+              <span class="summary-value">{{ rechargeSummary.cashTotalAmount }}</span>
+            </div>
+            <div class="summary-item">
+              <span class="summary-label">全部总金额</span>
+              <span class="summary-value">{{ rechargeSummary.totalAmount }}</span>
+            </div>
+          </div>
         </div>
         <div class="page-box">
           <div class="demo-pagination-block">
@@ -185,6 +205,13 @@ export default {
       multipleSelection: [],
       companyList: [],
       quyu_data: [],
+      staffNameOptions: [],
+      rechargeSummary: {
+        weChatTotalAmount: "0",
+        alipayTotalAmount: "0",
+        cashTotalAmount: "0",
+        totalAmount: "0",
+      },
     };
   },
   computed: {
@@ -194,7 +221,7 @@ export default {
   },
   watch: {
     currentPage() {
-      this.search();
+      this.fetchRechargeRecordData(this.currentPage);
     },
     "rechargeRecordeData.companyId"() {
       this.rechargeRecordeData.region = "";
@@ -205,6 +232,7 @@ export default {
     this.getRechargeRecordData();
     this.getCompanyList();
     this.getRegionData();
+    this.getStaffNames();
   },
   methods: {
     selectable() {
@@ -264,38 +292,73 @@ export default {
           ElMessage.error("获取区域数据失败");
         });
     },
-    getRechargeRecordData() {
-      let param = {
-        companyId: "",
-      };
-      if (this.companyId === 1) {
-        if (this.rechargeRecordeData.companyId) {
-          param.companyId = this.rechargeRecordeData.companyId;
-        } else {
-          param.companyId = "";
-        }
-      } else {
-        param.companyId = this.companyId;
-      }
+    getStaffNames() {
       service
-        .get(`/userManage/userCharge/showRechargeMeterRecords/${this.currentPage}?companyId=${param.companyId}`)
+        .get("/staff/getStaffNames")
         .then((response) => {
           if (response.code === 200) {
-            // this.rechargeRecordTableData = response.data.userRechargeRecordData;
-            // console.log(this.rechargeRecordTableData);
-            // this.rechargeRecordTableData.forEach((item) => {
-            //   item.createTime = item.createTime.replace("T", " ");
-            // });
-            this.rechargeRecordTableData = [];
-            response.data.userRechargeRecordData.map((v, i) => {
-              v.theId = this.pageSize * (response.data.currentPages - 1) + i + 1;
-            });
-            this.tableData = response.data.userRechargeRecordData;
-            this.tableData.forEach((item) => {
-              item.createTime = item.createTime.replace("T", " ");
-            });
-            this.total = response.data.totalElements;
-            this.currentPage = response.data.currentPages; // 重置当前页码
+            this.staffNameOptions = [...new Set((response.data || []).filter(Boolean))];
+          } else {
+            ElMessage.error(response.msg);
+          }
+        })
+        .catch(() => {
+          ElMessage.error("获取收费人列表失败");
+        });
+    },
+    getEffectiveCompanyId() {
+      if (this.companyId === 1) {
+        return this.rechargeRecordeData.companyId || "";
+      }
+      return this.companyId;
+    },
+    buildRechargeRecordParams() {
+      return {
+        ...this.rechargeRecordeData,
+        companyId: this.getEffectiveCompanyId(),
+      };
+    },
+    buildQueryString(params) {
+      let queryString = "";
+      for (const key in params) {
+        if (Object.prototype.hasOwnProperty.call(params, key)) {
+          const value = params[key];
+          if (queryString) {
+            queryString += `&${key}=${encodeURIComponent(value)}`;
+          } else {
+            queryString += `?${key}=${encodeURIComponent(value)}`;
+          }
+        }
+      }
+      return queryString;
+    },
+    handleRechargeRecordResponse(response) {
+      const records = response.data.userRechargeRecordData || [];
+      records.forEach((item, index) => {
+        item.theId = this.pageSize * (response.data.currentPages - 1) + index + 1;
+        if (item.createTime) {
+          item.createTime = item.createTime.replace("T", " ");
+        }
+      });
+      this.rechargeRecordTableData = [];
+      this.tableData = records;
+      this.total = response.data.totalElements;
+      this.currentPage = response.data.currentPages;
+      this.rechargeSummary = {
+        weChatTotalAmount: response.data.weChatTotalAmount ?? "0",
+        alipayTotalAmount: response.data.alipayTotalAmount ?? "0",
+        cashTotalAmount: response.data.cashTotalAmount ?? "0",
+        totalAmount: response.data.totalAmount ?? "0",
+      };
+    },
+    fetchRechargeRecordData(page = this.currentPage) {
+      const params = this.filterNonEmptyParams(this.buildRechargeRecordParams());
+      const queryString = this.buildQueryString(params);
+      service
+        .get(`/userManage/userCharge/showRechargeMeterRecordsV2/${page}${queryString}`)
+        .then((response) => {
+          if (response.code === 200) {
+            this.handleRechargeRecordResponse(response);
           } else {
             ElMessage.error(response.msg);
           }
@@ -304,45 +367,16 @@ export default {
           console.log(error);
         });
     },
+    getRechargeRecordData() {
+      this.fetchRechargeRecordData(this.currentPage);
+    },
     reflush() {
       this.clear(1);
-      let param = {
-        companyId: "",
-      };
-      if (this.companyId === 1) {
-        if (this.rechargeRecordeData.companyId) {
-          param.companyId = this.rechargeRecordeData.companyId;
-        } else {
-          param.companyId = "";
-        }
-      } else {
-        param.companyId = this.companyId;
+      if (this.currentPage !== 1) {
+        this.currentPage = 1;
+        return;
       }
-      service
-        .get(`/userManage/userCharge/showRechargeMeterRecords/1?companyId=${param.companyId}`)
-        .then((response) => {
-          if (response.code === 200) {
-            // this.rechargeRecordTableData = response.data.userRechargeRecordData;
-            // this.rechargeRecordTableData.forEach((item) => {
-            //   item.createTime = item.createTime.replace("T", " ");
-            // });
-            this.rechargeRecordTableData = [];
-            response.data.userRechargeRecordData.map((v, i) => {
-              v.theId = this.pageSize * (response.data.currentPages - 1) + i + 1;
-            });
-            this.tableData = response.data.userRechargeRecordData;
-            this.tableData.forEach((item) => {
-              item.createTime = item.createTime.replace("T", " ");
-            });
-            this.total = response.data.totalElements;
-            this.currentPage = 1;
-          } else {
-            ElMessage.error(response.msg);
-          }
-        })
-        .catch((error) => {
-          console.log(error);
-        });
+      this.fetchRechargeRecordData(1);
     },
     clear(isSearch) {
       this.rechargeRecordeData.region = "";
@@ -356,6 +390,12 @@ export default {
       this.rechargeRecordeData.userId = "";
       this.rechargeRecordeData.rechargeUser = "";
       this.rechargeRecordeData.rechargeType = "";
+      this.rechargeSummary = {
+        weChatTotalAmount: "0",
+        alipayTotalAmount: "0",
+        cashTotalAmount: "0",
+        totalAmount: "0",
+      };
       if (typeof isSearch != 'number' || isNaN(isSearch)) {
         this.currentPage = 1;
         this.search();
@@ -370,12 +410,14 @@ export default {
           const value = params[key];
 
           // 时间范围：拆分为后端需要的 startDate / endDate
-          if (key === "dateRange" && Array.isArray(value) && value.length === 2) {
-            if (value[0]) {
-              filteredParams.startDate = value[0];
-            }
-            if (value[1]) {
-              filteredParams.endDate = value[1];
+          if (key === "dateRange") {
+            if (Array.isArray(value) && value.length === 2) {
+              if (value[0]) {
+                filteredParams.startDate = value[0];
+              }
+              if (value[1]) {
+                filteredParams.endDate = value[1];
+              }
             }
             continue;
           }
@@ -392,60 +434,11 @@ export default {
     },
 
     search() {
-      if (this.companyId === 1) {
-        if (this.rechargeRecordeData.companyId) {
-        } else {
-          this.rechargeRecordeData.companyId = "";
-        }
-      } else {
-        this.rechargeRecordeData.companyId = this.companyId;
+      if (this.currentPage !== 1) {
+        this.currentPage = 1;
+        return;
       }
-      const nonEmptyParams = this.filterNonEmptyParams(this.rechargeRecordeData);
-      console.log(nonEmptyParams);
-      // 初始化查询字符串
-      let queryString = "";
-      // 遍历 nonEmptyParams 对象，将键值对拼接成查询字符串
-      for (const key in nonEmptyParams) {
-        if (nonEmptyParams.hasOwnProperty(key)) {
-          const value = nonEmptyParams[key];
-          // 如果查询字符串不为空，添加 & 符号分隔参数
-          if (queryString) {
-            queryString += `&${key}=${encodeURIComponent(value)}`;
-          } else {
-            // 第一个参数前添加 ? 符号
-            queryString += `?${key}=${encodeURIComponent(value)}`;
-          }
-        }
-      }
-      // 拼接完整的 URL
-      const url = `/userManage/userCharge/showRechargeMeterRecords/${this.currentPage}${queryString}`;
-      service
-        .get(url)
-        .then((response) => {
-          if (response.code === 200) {
-            // this.rechargeRecordTableData = response.data.userRechargeRecordData;
-            // console.log(this.rechargeRecordTableData);
-            // this.rechargeRecordTableData.forEach((item) => {
-            //   item.createTime = item.createTime.replace("T", " ");
-            // });
-            this.rechargeRecordTableData = [];
-            response.data.userRechargeRecordData.map((v, i) => {
-              v.theId = this.pageSize * (response.data.currentPages - 1) + i + 1;
-            });
-            this.tableData = response.data.userRechargeRecordData;
-            this.tableData.forEach((item) => {
-              item.createTime = item.createTime.replace("T", " ");
-            });
-            this.rechargeRecordTableData = [];
-            this.total = response.data.totalElements;
-            this.currentPage = response.data.currentPages;
-          } else {
-            ElMessage.error(response.msg);
-          }
-        })
-        .catch((error) => {
-          ElMessage.error(error);
-        });
+      this.fetchRechargeRecordData(1);
     },
     // 触发文件输入框点击
     triggerFileInput() {
@@ -565,10 +558,7 @@ export default {
         });
     },
     exportExcel() {
-      const exportParams = {
-        ...this.rechargeRecordeData,
-        companyId: this.companyId === 1 ? this.rechargeRecordeData.companyId || "" : this.companyId,
-      };
+      const exportParams = this.buildRechargeRecordParams();
       const params = this.filterNonEmptyParams(exportParams);
       // 调用后端接口
       axios({
@@ -620,7 +610,9 @@ export default {
 }
 
 .recharge-record-dialog-content {
-  width: 85%;
+  width: 94%;
+  max-width: 2100px;
+  max-height: 96vh;
   border: 1px solid #fafafa;
   background-color: #fafafa;
   border-radius: 5px;
@@ -635,7 +627,8 @@ export default {
 
 .recharge-record-content {
   width: 100%;
-  min-height: 42vh;
+  min-height: 72vh;
+  max-height: calc(88vh - 45px);
   background-color: #fff;
   border-radius: 5px;
   margin-top: 0px;
@@ -705,7 +698,7 @@ export default {
   align-items: center;
   margin-top: 10px;
   padding: 0 10px;
-  margin-bottom: 50px;
+  margin-bottom: 10px;
 }
 
 .recharge-record-table {
@@ -768,6 +761,34 @@ export default {
   margin-bottom: 5px;
 }
 
+.summary-box {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(180px, 1fr));
+  gap: 12px;
+  margin-top: 12px;
+  margin-bottom: 8px;
+}
+
+.summary-item {
+  border: 1px solid #d9efe2;
+  background-color: #f7fbf8;
+  border-radius: 5px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.summary-label {
+  color: #5a5a5a;
+}
+
+.summary-value {
+  color: #2d8f63;
+  font-weight: 600;
+}
+
 .export-in-btn,
 .export-out-btn {
   display: flex;
@@ -811,7 +832,7 @@ export default {
   display: flex;
   justify-content: center;
   align-items: center;
-  position: absolute;
-  bottom: 0;
+  position: static;
+  margin-top: 5px;
 }
 </style>

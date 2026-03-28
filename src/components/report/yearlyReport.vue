@@ -2,25 +2,36 @@
   <div class="baobiao-container">
     <div class="search-box">
       <div class="search-content">
-        <div class="search-input" style="margin-left: 10px; margin-left: 10px" v-if="companyId === 1">
+        <div class="search-input" style="margin-left: 10px" v-if="companyId === 1">
           <span>所属水厂</span>
-          <el-select class="big-font-el-select" v-model="params.company" placeholder="请选择所属水厂">
+          <el-select class="big-font-el-select" v-model="params.company" clearable placeholder="请选择所属水厂">
             <el-option v-for="item in companyList" :key="item.id" :value="item.id" :label="item.name"></el-option>
           </el-select>
         </div>
-        <div class="search-input" style="margin-left: 10px; margin-left: 10px">
+        <div class="search-input" style="margin-left: 10px">
           <span>区域</span>
-          <el-select class="big-font-el-select" v-model="params.region">
-            <el-option v-for="item in quyu_data" :key="item.id" :label="item.label" :value="item.label"> </el-option>
+          <el-select class="big-font-el-select" v-model="params.region" clearable filterable placeholder="请选择区域">
+            <el-option v-for="item in quyu_data" :key="item.id" :label="item.label" :value="item.label"></el-option>
           </el-select>
         </div>
         <div class="search-input" style="margin-left: 20px">
-          <span>时间</span>
-          <el-date-picker v-model="params.year" type="year" placeholder="选择年份" style="flex-grow: 0; width: 100%; height: 35px" format="YYYY" value-format="YYYY" />
+          <span>时间范围</span>
+          <el-date-picker
+            v-model="params.monthRange"
+            type="monthrange"
+            range-separator="至"
+            start-placeholder="开始月份"
+            end-placeholder="结束月份"
+            style="flex-grow: 0; width: 100%; height: 35px"
+            format="YYYY-MM"
+            value-format="YYYY-MM"
+          />
         </div>
         <div class="search-input" style="margin-left: 20px">
           <span>收费人</span>
-          <el-input v-model="params.rechargeUser" placeholder="请输入收费人" clearable />
+          <el-select v-model="params.rechargeUser" clearable filterable placeholder="请选择收费人">
+            <el-option v-for="item in staffNameOptions" :key="item" :label="item" :value="item"></el-option>
+          </el-select>
         </div>
       </div>
       <div class="buttons">
@@ -38,7 +49,7 @@
       <div class="baobiao-list">
         <div class="total-info">
           <div class="detail-info">
-            <span>本年交易总额</span>
+            <span>当前范围交易总额</span>
             <div class="message">
               <span style="font-size: 24px; margin-bottom: 20px; font-family: 'Microsoft YaHei'; font-weight: bold">{{ trade_data.totalMoney }}</span>
               <span style="margin-bottom: 20px">元</span>
@@ -53,7 +64,7 @@
         </div>
         <div class="cash-info">
           <div class="cashdetail-info">
-            <span>本年现金交易总金额</span>
+            <span>当前范围现金交易总额</span>
             <div class="message">
               <span style="font-size: 24px; margin-bottom: 20px; font-family: 'Microsoft YaHei'; font-weight: bold">{{ trade_data.cashMoney }}</span>
               <span style="margin-bottom: 20px">元</span>
@@ -68,7 +79,7 @@
         </div>
         <div class="weichat-info">
           <div class="weichatdetail-info">
-            <span>本年微信支付交易总金额</span>
+            <span>当前范围微信支付总额</span>
             <div class="message">
               <span style="font-size: 24px; margin-bottom: 20px; font-family: 'Microsoft YaHei'; font-weight: bold">{{ trade_data.weChatMoney }}</span>
               <span style="margin-bottom: 20px; font-family: 'Microsoft YaHei'">元</span>
@@ -83,7 +94,7 @@
         </div>
         <div class="alipay-info">
           <div class="alipaydetail-info">
-            <span>本年支付宝支付交易总金额</span>
+            <span>当前范围支付宝交易总额</span>
             <div class="message">
               <span style="font-size: 24px; margin-bottom: 20px; font-family: 'Microsoft YaHei'; font-weight: bold">{{ trade_data.alipayMoney }}</span>
               <span style="margin-bottom: 20px">元</span>
@@ -100,9 +111,9 @@
       <div class="baobiao-chart">
         <div class="year-report">
           <div class="year-report-title">
-            <span style="font-size: 20px; margin-top: 10px; margin-bottom: 5px">收费年报表统计（{{ params.year }}年）
-               <a href="javascript:;" style="font-size: 20px; margin-left: 0px;color: #000;" @click="exportChartExcel(yearchart, '收费年报表统计')">(导出)</a>
-
+            <span style="font-size: 20px; margin-top: 10px; margin-bottom: 5px">
+              收费统计（{{ monthRangeText }}）
+              <a href="javascript:;" style="font-size: 20px; margin-left: 0; color: #000" @click="exportChartExcel(yearchart, '收费统计')">(导出)</a>
             </span>
             <div class="flex-container">
               <div style="width: 4px; height: 4px; background-color: #46b87d; margin-right: 5px"></div>
@@ -115,10 +126,9 @@
         </div>
         <div class="year-huanbi">
           <div class="year-huanbi-title">
-            <span style="font-size: 20px; margin-top: 10px; margin-bottom: 5px">收费年报表统计环比及同比（{{ params.year }}年）
-                            <a href="javascript:;" style="font-size: 20px; margin-left: 0px;color: #000;" @click="exportChartExcel(yearhuanbichart, '收费年报表统计环比及同比')">(导出)</a>
-
-
+            <span style="font-size: 20px; margin-top: 10px; margin-bottom: 5px">
+              收费同比统计（{{ monthRangeText }}）
+              <a href="javascript:;" style="font-size: 20px; margin-left: 0; color: #000" @click="exportChartExcel(yearhuanbichart, '收费同比统计')">(导出)</a>
             </span>
             <div class="flex-container">
               <div style="width: 4px; height: 4px; background-color: #46b87d; margin-right: 5px"></div>
@@ -139,20 +149,67 @@ import * as echarts from "echarts";
 import { markRaw } from "vue";
 import service from "@/api/request";
 import { ElMessage } from "element-plus";
-import {exportChartExcel} from "@/api/otherapi/other.js";
+import { exportChartExcel } from "@/api/otherapi/other.js";
+
+const pad = (value) => String(value).padStart(2, "0");
+
+const createMonthDate = (year, month) => new Date(year, month - 1, 1);
+
+const parseMonth = (value) => {
+  if (!value) {
+    return null;
+  }
+  const [year, month] = value.split("-").map(Number);
+  return createMonthDate(year, month);
+};
+
+const formatMonth = (date) => `${date.getFullYear()}-${pad(date.getMonth() + 1)}`;
+
+const addYearsToMonth = (value, years) => {
+  const date = parseMonth(value);
+  if (!date) {
+    return "";
+  }
+  date.setFullYear(date.getFullYear() + years);
+  return formatMonth(date);
+};
+
+const getCurrentYearMonthRange = () => {
+  const now = new Date();
+  return [`${now.getFullYear()}-01`, `${now.getFullYear()}-${pad(now.getMonth() + 1)}`];
+};
+
+const createTradeData = () => ({
+  totalMoney: "0",
+  totalNumber: "0",
+  cashMoney: "0",
+  cashNumber: "0",
+  weChatMoney: "0",
+  weChatNumber: "0",
+  alipayMoney: "0",
+  alipayNumber: "0",
+});
+
+const normalizeList = (list) => (Array.isArray(list) ? list : []);
+
+const toAmountList = (list) => list.map((item) => Number(item.totalMoney || 0));
+
+const toMonthAxis = (list) => list.map((item) => (item.reportTimeStart || "").slice(0, 7));
+
 export default {
   data() {
     return {
       params: {
         region: "",
-        year: new Date().getFullYear().toString(),
+        monthRange: getCurrentYearMonthRange(),
         company: null,
         rechargeUser: "",
       },
       companyId: JSON.parse(sessionStorage.getItem("userData")).companyId,
       companyList: [],
       quyu_data: [],
-      trade_data: {},
+      staffNameOptions: [],
+      trade_data: createTradeData(),
       yearchart: null,
       yearchart_option: {
         grid: {
@@ -171,49 +228,46 @@ export default {
           splitLine: {
             show: true,
             lineStyle: {
-              type: "dashed", // 设置 x 轴背景网格线为虚线
-              color: "#ccc", // 可以根据需要调整虚线颜色
+              type: "dashed",
+              color: "#ccc",
             },
           },
         },
         tooltip: {
           trigger: "item",
-          formatter: function (params) {
-            return params.name + ": " + params.value;
+          formatter(params) {
+            return `${params.name}: ${params.value}`;
           },
         },
         series: [
           {
             data: [],
             type: "line",
-            // 设置曲线为光滑曲线
             smooth: true,
             areaStyle: {
-              // 使用线性渐变来设置面积的颜色
               color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
                 { offset: 0, color: "rgba(75,187,129, 0.8)" },
                 { offset: 1, color: "rgba(75,187,129, 0.1)" },
               ]),
             },
-            symbol: "circle", // 设置点的形状为圆形
-            symbolSize: 8, // 设置圆圈的大小
+            symbol: "circle",
+            symbolSize: 8,
             itemStyle: {
-              color: "#fff", // 设置点的填充颜色为白色（空心效果）
-              borderColor: "#4BBB81", // 设置点的边框颜色
-              borderWidth: 3, // 设置点的边框宽度
+              color: "#fff",
+              borderColor: "#4BBB81",
+              borderWidth: 3,
             },
             lineStyle: {
-              color: "rgba(75,187,129, 1)", // 设置曲线的颜色，这里使用了和面积渐变起始色相同的颜色并设置不透明度为 1
+              color: "rgba(75,187,129, 1)",
             },
           },
         ],
-        // ⭐⭐⭐⭐ 关键：启用静态 label ⭐⭐⭐⭐
         label: {
           show: true,
           position: "top",
           color: "#333",
           fontSize: 12,
-        }
+        },
       },
       yearchartResizeObserver: null,
       yearhuanbichart: null,
@@ -238,8 +292,8 @@ export default {
           splitLine: {
             show: true,
             lineStyle: {
-              type: "dashed", // 设置 x 轴背景网格线为虚线
-              color: "#ccc", // 可以根据需要调整虚线颜色
+              type: "dashed",
+              color: "#ccc",
             },
           },
         },
@@ -254,9 +308,9 @@ export default {
               borderRadius: [5, 5, 5, 5],
             },
             label: {
-              show: true, // 显示标签
-              position: "top", // 标签显示在柱形顶部
-              color: "#575757", // 标签文字颜色
+              show: true,
+              position: "top",
+              color: "#575757",
               fontSize: 10,
             },
           },
@@ -270,9 +324,9 @@ export default {
               borderRadius: [5, 5, 5, 5],
             },
             label: {
-              show: true, // 显示标签
-              position: "top", // 标签显示在柱形顶部
-              color: "#575757", // 标签文字颜色
+              show: true,
+              position: "top",
+              color: "#575757",
               fontSize: 10,
             },
           },
@@ -280,6 +334,12 @@ export default {
       },
       yearhuanbichartResizeObserver: null,
     };
+  },
+  computed: {
+    monthRangeText() {
+      const [startMonth, endMonth] = this.params.monthRange || [];
+      return startMonth && endMonth ? `${startMonth} ~ ${endMonth}` : "";
+    },
   },
   watch: {
     "params.company"() {
@@ -290,7 +350,11 @@ export default {
   mounted() {
     this.getCompanyList();
     this.getRegionData();
+    this.getStaffNames();
     this.getTradeData();
+  },
+  beforeUnmount() {
+    this.disposeCharts();
   },
   methods: {
     exportChartExcel,
@@ -305,59 +369,92 @@ export default {
         }, delay);
       };
     },
+    getEffectiveCompanyId() {
+      if (this.companyId === 1) {
+        return this.params.company || "";
+      }
+      return this.companyId;
+    },
+    getStaffNames() {
+      service
+        .get("/staff/getStaffNames")
+        .then((response) => {
+          if (response.code === 200) {
+            this.staffNameOptions = [...new Set((response.data || []).filter(Boolean))];
+          } else {
+            ElMessage.error(response.msg);
+          }
+        })
+        .catch(() => {
+          ElMessage.error("获取收费人列表失败");
+        });
+    },
     yearChart() {
-      this.yearchart = markRaw(echarts.init(document.getElementById("year")));
+      const chartDom = document.getElementById("year");
+      if (!chartDom) {
+        return;
+      }
+      this.yearchart = markRaw(echarts.init(chartDom));
       this.yearchart.setOption(this.yearchart_option);
-
-      // 创建 ResizeObserver 实例来监听 yearshouyi div 大小变化
       this.yearchartResizeObserver = new ResizeObserver(
         this.debounce(() => {
-          this.yearchart.resize(); // 当大小变化时，调用 resize 来调整图表的尺寸
+          if (this.yearchart) {
+            this.yearchart.resize();
+          }
         }, 200)
-      ); // 200 毫秒的防抖延时
-
-      // 开始监听 yearshouyi div 的大小变化
-      this.yearchartResizeObserver.observe(document.getElementById("year"));
+      );
+      this.yearchartResizeObserver.observe(chartDom);
     },
     yearHuanbiChart() {
-      this.yearhuanbichart = markRaw(echarts.init(document.getElementById("year-huanbi")));
+      const chartDom = document.getElementById("year-huanbi");
+      if (!chartDom) {
+        return;
+      }
+      this.yearhuanbichart = markRaw(echarts.init(chartDom));
       this.yearhuanbichart.setOption(this.yearhuanbichart_option);
-
-      // 创建 ResizeObserver 实例来监听 yearshouyi div 大小变化
       this.yearhuanbichartResizeObserver = new ResizeObserver(
         this.debounce(() => {
-          this.yearhuanbichart.resize(); // 当大小变化时，调用 resize 来调整图表的尺寸
+          if (this.yearhuanbichart) {
+            this.yearhuanbichart.resize();
+          }
         }, 200)
-      ); // 200 毫秒的防抖延时
-
-      // 开始监听 yearshouyi div 的大小变化
-      this.yearhuanbichartResizeObserver.observe(document.getElementById("year-huanbi"));
+      );
+      this.yearhuanbichartResizeObserver.observe(chartDom);
     },
-    beforeUnmount() {
+    disposeCharts() {
       if (this.yearchartResizeObserver) {
         this.yearchartResizeObserver.disconnect();
+        this.yearchartResizeObserver = null;
       }
       if (this.yearchart) {
-        this.yearchart.dispose(); // 销毁 ECharts 实例
+        this.yearchart.dispose();
+        this.yearchart = null;
       }
       if (this.yearhuanbichartResizeObserver) {
         this.yearhuanbichartResizeObserver.disconnect();
+        this.yearhuanbichartResizeObserver = null;
       }
       if (this.yearhuanbichart) {
-        this.yearhuanbichart.dispose(); // 销毁 ECharts 实例
+        this.yearhuanbichart.dispose();
+        this.yearhuanbichart = null;
       }
+    },
+    renderCharts() {
+      this.disposeCharts();
+      this.$nextTick(() => {
+        this.yearChart();
+        this.yearHuanbiChart();
+      });
     },
     getCompanyList() {
       service
         .get("/getAllUnblockCompany")
         .then((response) => {
           if (response.code === 200) {
-            this.companyList = response.data.map((item) => {
-              return {
-                id: item.companyId,
-                name: item.companyName,
-              };
-            });
+            this.companyList = response.data.map((item) => ({
+              id: item.companyId,
+              name: item.companyName,
+            }));
           } else {
             ElMessage.error(response.msg);
           }
@@ -367,102 +464,72 @@ export default {
         });
     },
     getRegionData() {
-      let url = "";
-      if (this.companyId === 1) {
-        if (this.params.company) {
-          url = `/getRegion?companyId=${this.params.company}`; // 所属水厂ID
-        } else {
-          url = `/getRegion`; // 所属水厂ID
-        }
-      } else {
-        url = `/getRegion?companyId=${this.companyId}`; // 所属水厂ID
-      }
+      const url = this.companyId === 1 ? (this.params.company ? `/getRegion?companyId=${this.params.company}` : "/getRegion") : `/getRegion?companyId=${this.companyId}`;
       service
-        .get(`${url}`)
+        .get(url)
         .then((response) => {
           if (response.code === 200) {
-            this.quyu_data = response.data.map((item) => {
-              return {
-                id: item.regionId,
-                value: item.regionId,
-                label: item.regionName,
-              };
-            });
-            console.log(this.quyu_data);
+            this.quyu_data = response.data.map((item) => ({
+              id: item.regionId,
+              value: item.regionId,
+              label: item.regionName,
+            }));
           }
         })
-        .catch((error) => {
+        .catch(() => {
           ElMessage.error("获取区域数据失败");
         });
     },
     getTradeData() {
-      const year = this.params.year + "-01-01";
-      let params = { companyId: "" };
-      if (this.companyId === 1) {
-        if (this.params.company) {
-          params.companyId = this.params.company; // 所属水厂ID
-        }
-      } else {
-        params.companyId = this.companyId; // 所属水厂ID
+      const [startMonth, endMonth] = this.params.monthRange || [];
+      if (!startMonth || !endMonth) {
+        ElMessage.warning("请选择时间范围");
+        return;
       }
       const query = new URLSearchParams({
         region: this.params.region || "",
-        year: year || "",
-        companyId: params.companyId ?? "",
+        startTime: `${startMonth}-01`,
+        endTime: `${endMonth}-01`,
+        companyId: this.getEffectiveCompanyId(),
         rechargeUser: this.params.rechargeUser || "",
       }).toString();
       service
-        .get(`/yearReport?${query}`)
+        .get(`/yearReportV2?${query}`)
         .then((response) => {
-          if (response.code === 200) {
-            this.trade_data = response.data.currentDurationReport;
-            //获取横坐标
-            const reportTimeStarts = response.data.currentSingularReport.map((item) => {
-              return item.reportTimeStart.slice(5, 7) + "月";
-            });
-            this.yearchart_option.xAxis.data = reportTimeStarts;
-            this.yearhuanbichart_option.xAxis.data = reportTimeStarts;
-            //获取图例
-            const fristItem = response.data.currentSingularReport[0];
-            if (fristItem) {
-              const year = fristItem.reportTimeStart.slice(0, 4);
-              const lastYear = (parseInt(year) - 1).toString();
-              const result = {
-                one: `${lastYear}年`,
-                two: `${year}年`,
-              };
-              this.yearhuanbichart_option.series[0].name = result.one;
-              this.yearhuanbichart_option.series[1].name = result.two;
-              this.yearhuanbichart_option.legend.data = [result.one, result.two];
-            }
-            //计算本年总额
-            const totalMoneys = response.data.currentSingularReport.map((item) => {
-              return item.totalMoney;
-            });
-            this.yearchart_option.series[0].data = totalMoneys;
-            this.yearhuanbichart_option.series[1].data = totalMoneys;
-            //计算环同比数值
-            const tongbimoneys = response.data.tsingularReports.map((item) => {
-              return item.totalMoney;
-            });
-            this.yearhuanbichart_option.series[0].data = tongbimoneys;
-            //更新图表
-            this.beforeUnmount();
-            this.yearChart();
-            this.yearHuanbiChart();
-          } else {
+          if (response.code !== 200) {
             ElMessage.error(response.msg);
+            return;
           }
+
+          const currentList = normalizeList(response.data.currentSingularReport);
+          const tongbiList = normalizeList(response.data.tsingularReports);
+          const currentLabel = `${startMonth} ~ ${endMonth}`;
+          const tongbiLabel = `${addYearsToMonth(startMonth, -1)} ~ ${addYearsToMonth(endMonth, -1)}`;
+
+          this.trade_data = response.data.currentDurationReport || createTradeData();
+
+          this.yearchart_option.xAxis.data = toMonthAxis(currentList);
+          this.yearchart_option.series[0].data = toAmountList(currentList);
+
+          this.yearhuanbichart_option.xAxis.data = toMonthAxis(currentList);
+          this.yearhuanbichart_option.legend.data = [tongbiLabel, currentLabel];
+          this.yearhuanbichart_option.series[0].name = tongbiLabel;
+          this.yearhuanbichart_option.series[0].data = toAmountList(tongbiList);
+          this.yearhuanbichart_option.series[1].name = currentLabel;
+          this.yearhuanbichart_option.series[1].data = toAmountList(currentList);
+
+          this.renderCharts();
         })
         .catch((error) => {
-          ElMessage.error(error);
+          console.error(error);
         });
     },
     clear() {
       this.params.region = "";
-      this.params.year = "";
+      this.params.monthRange = getCurrentYearMonthRange();
       this.params.company = null;
       this.params.rechargeUser = "";
+      this.getRegionData();
     },
   },
 };
@@ -497,7 +564,7 @@ export default {
   justify-content: center;
   width: 100%;
   height: 98%;
-  padding: 0px 20px;
+  padding: 0 20px;
 }
 
 .baobiao-container > * {
@@ -529,8 +596,7 @@ export default {
 
 .search-input {
   display: flex;
-  justify-content: flex-start;
-  justify-content: center; /* 确保子元素在父容器中垂直居中 */
+  justify-content: center;
   flex-direction: column;
   width: 18%;
   min-width: 180px;
@@ -571,6 +637,7 @@ export default {
   background-color: #45ba7e;
   margin-right: 30px;
 }
+
 .clear-btn {
   background-color: #fff;
   border: 2px solid #f2f2f2;
@@ -602,7 +669,6 @@ export default {
   align-items: center;
   background-color: #46b97e;
   border: 1px solid #e9e9e9;
-  border-radius: 5px;
   border-radius: 8px;
   width: 100%;
   height: 23%;
