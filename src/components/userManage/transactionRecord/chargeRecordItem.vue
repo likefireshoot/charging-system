@@ -168,6 +168,9 @@ export default {
       if (type === 1 || type === "1") {
         return "保底扣费";
       }
+      if(type === 2 || type === "2"){
+        return "补扣费用";
+      }
       return "-";
     },
     selectable() {
