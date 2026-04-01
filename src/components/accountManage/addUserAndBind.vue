@@ -38,8 +38,8 @@
             </el-select>
           </div>
           <div class="edit-input" style="margin-right: 1%">
-            <span>联系电话</span>
-            <el-input v-model="form.userPhone" class="input-item" />
+            <span>联系电话(选填)</span>
+            <el-input v-model="form.userPhone" class="input-item" placeholder="选填"/>
           </div>
           <div class="edit-input" style="margin-right: 1%">
             <span>开户时间</span>
@@ -118,14 +118,14 @@ export default {
   if (!userDataStr) {
     throw new Error("未找到用户登录信息，请重新登录！");
   }
-  
+
   const userData = JSON.parse(userDataStr);
-  
+
   // 验证必要字段是否存在
   if (!userData.staffName || !userData.companyId) {
     throw new Error("用户信息不完整，请重新登录！");
   }
-  
+
   // 获取当前日期 YYYY-MM-DD 格式
   const currentDate = new Date().toISOString().split("T")[0];
   return {
@@ -275,7 +275,6 @@ export default {
         "userName",
         "userAddr",
         "regionId",
-        "userPhone",
         "createTime",
         "meterCode",
         "priceId",
@@ -309,7 +308,7 @@ export default {
       }
 
       const phoneRegex = /^1[3-9]\d{9}$/;
-      if (this.form.userPhone && !phoneRegex.test(this.form.userPhone)) {
+      if (this.form.userPhone && this.form.userPhone !== "无" && !phoneRegex.test(this.form.userPhone)) {
         ElMessage.error("请输入正确格式的联系电话！");
         return false;
       }
@@ -319,6 +318,26 @@ export default {
     async handleCommit() {
       if (this.submitting) return;
       if (!this.validate()) return;
+      // // 检查电话号码是否为空，如果为空则提示用户
+      // const isPhoneEmpty = !this.form.userPhone || this.form.userPhone.trim() === "";
+      // if (isPhoneEmpty) {
+      //   try {
+      //     await ElMessageBox.confirm(
+      //       '联系电话未填写，系统将自动设置为"无"。\n\n⚠️ 注意：短信提醒功能将不可用！\n\n是否继续提交？',
+      //       '提示',
+      //       {
+      //         confirmButtonText: '继续提交',
+      //         cancelButtonText: '取消',
+      //         type: 'warning',
+      //         dangerouslyUseHTMLString: false,
+      //       }
+      //     );
+      //   } catch (error) {
+      //     // 用户点击取消按钮或关闭对话框
+      //     return;
+      //   }
+      // }
+
 
       const effectiveCompanyId = this.companyId === 1 ? this.form.companyId : this.companyId;
       const companyName = (this.companyList.find((c) => c.id === effectiveCompanyId) || {}).name || "";
@@ -331,7 +350,7 @@ export default {
           userAddr: this.form.userAddr,
           regionName,
           regionId: this.form.regionId,
-          userPhone: this.form.userPhone,
+          userPhone: !this.form.userPhone || this.form.userPhone.trim() === "" ? "无" : this.form.userPhone,
           companyName,
           companyId: effectiveCompanyId,
           createTime: this.form.createTime,

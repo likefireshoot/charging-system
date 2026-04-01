@@ -36,8 +36,8 @@
           </el-select>
         </div>
         <div class="edit-input" style="margin-right: 1%">
-          <span>联系电话</span>
-          <el-input v-model="addData.userPhone" class="input-item" />
+          <span>联系电话 (选填)</span>
+          <el-input v-model="addData.userPhone" class="input-item" placeholder="选填"/>
         </div>
         <div class="edit-input" style="margin-right: 1%">
           <span>开户时间</span>
@@ -167,6 +167,12 @@ export default {
         formData.companyId = this.companyId;
       }
 
+
+      // 将空的联系电话转换为"无"
+      if (!formData.userPhone || formData.userPhone.trim() === "") {
+        formData.userPhone = "无";
+      }
+
       // 定义字段名映射，将属性名映射为友好的显示名称
       const fieldNameMap = {
         userName: "用户名称",
@@ -179,7 +185,7 @@ export default {
       };
 
       // 可选字段列表（允许为空）
-      const optionalFields = ["userId"];
+      const optionalFields = ["userId","userPhone"];
 
       // 递归遍历对象属性
       function traverseObject(obj, parentKey = "") {
@@ -210,7 +216,7 @@ export default {
       traverseObject(formData);
 
       // 对联系电话和余额进行额外校验
-      if (formData.userPhone) {
+      if (formData.userPhone&&formData.userPhone!=""&&formData.userPhone!="无") {
         const phoneRegex = /^1[3-9]\d{9}$/;
         if (!phoneRegex.test(formData.userPhone)) {
           ElMessage.error("请输入正确格式的联系电话！");
