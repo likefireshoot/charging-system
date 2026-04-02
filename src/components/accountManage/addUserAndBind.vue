@@ -72,13 +72,13 @@
             </el-select>
           </div>
           <div class="edit-input" style="margin-right: 1%">
-            <span>开户审批人2</span>
+            <span>出厂日期</span>
             <el-select v-model="form.approver_2" class="input-item big-font-el-select" placeholder="请选择">
               <el-option v-for="item in approverList" :key="item.id" :label="item.label" :value="item.label" />
             </el-select>
           </div>
           <div class="edit-input" style="margin-right: 1%">
-            <span>开户审批人3</span>
+            <span>首检日期</span>
             <el-select v-model="form.approver_3" class="input-item big-font-el-select" placeholder="请选择">
               <el-option v-for="item in approverList" :key="item.id" :label="item.label" :value="item.label" />
             </el-select>

@@ -55,7 +55,7 @@
               <span style="margin-bottom: 20px">户</span>
             </div>
           </div>
-          <img src="@/assets/baobiao/icon1.png" alt="" style="width: 60px; height: 60px; margin-right: 60px" />
+          <img src="@/assets/menu/icon4.png" alt="" style="width: 60px; height: 60px; margin-right: 60px" />
         </div>
       </div>
       <div class="week-report">
@@ -93,7 +93,7 @@ const createDate = (year, month, day) => new Date(year, month - 1, day);
 const getCurrentMonthRange = () => {
   const now = new Date();
   const before = new Date(now);
-  before.setDate(now.getDate() - 365); // 30天前
+  before.setDate(now.getDate() - 30); // 30天前
 
   const format = (date) => {
     const y = date.getFullYear();
@@ -114,7 +114,7 @@ export default {
     return {
       params: {
         region: "",
-        dateRange: [],
+        dateRange: getCurrentMonthRange(),
         company: null,
         rechargeUser: "",
       },
@@ -366,7 +366,7 @@ export default {
     },
     clear() {
       this.params.region = "";
-      this.params.dateRange = [];
+      this.params.dateRange = getCurrentMonthRange();
       this.params.company = null;
       this.params.rechargeUser = "";
       this.getTradeData()
