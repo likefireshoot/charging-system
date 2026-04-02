@@ -40,13 +40,10 @@
           <span>充值金额（元）</span>
           <el-input v-model="rechargeData.money" />
         </div>
-        <div class="recharge-input" style="margin-right: 1%">
-          <span>交易方式</span>
-          <el-select v-model="rechargeData.rechargeType">
-            <el-option label="现金" value="现金" />
-            <el-option label="微信支付" value="微信支付" />
-            <el-option label="支付宝支付" value="支付宝支付" />
-          </el-select>
+        <!-- 添加的提示文字 -->
+        <div style="font-size: 17px; color: #999; padding-top: 18px;">
+          <div style="height: 19px"></div>
+          <span style="margin-left: 16px">   快捷充值金额 与 充值金额 二选一即可</span>
         </div>
       </div>
       <div class="btn">
@@ -86,7 +83,7 @@ export default {
         balance: "",
         quickmoney: "",
         money: "",
-        rechargeType: "",
+        rechargeType: "现金",
         region: "",
       },
     };
@@ -121,7 +118,6 @@ export default {
         balance: "余额",
         quickmoney: "快捷充值金额",
         money: "充值金额",
-        rechargeType: "交易方式",
       };
 
       // 检查快捷充值金额和充值金额是否同时存在
@@ -182,7 +178,7 @@ export default {
       }
       let dataParams = {
         meterCode: formData.meterCode,
-        rechargeType: formData.rechargeType,
+        rechargeType: "现金",
         rechargeAmount: null,
         region: formData.region
       };
