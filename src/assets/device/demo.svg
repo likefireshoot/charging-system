@@ -1,0 +1,23 @@
+<svg width="640" height="480" xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+ <!-- Created with SVG-edit - https://github.com/SVG-Edit/svgedit-->
+ <defs>
+  <symbol data-name="图层 1" id="svg_2" viewBox="0 0 30 30" xmlns="http://www.w3.org/2000/svg">
+   <defs>
+    <style>.cls-1,.cls-2{fill:none;}.cls-1{stroke:#a0a0a0;stroke-linecap:round;stroke-linejoin:round;stroke-width:1.3px;}</style>
+   </defs>
+   <path class="cls-1" d="m12.33,5.59l5.34,0a2,2 0 0 1 2,2l0,0.92a0,0 0 0 1 0,0l-9.34,0a0,0 0 0 1 0,0l0,-0.92a2,2 0 0 1 2,-2z"/>
+   <path class="cls-1" d="m1.37,18.28l5.34,0a2,2 0 0 1 2,2l0,0.92a0,0 0 0 1 0,0l-9.34,0a0,0 0 0 1 0,0l0,-0.92a2,2 0 0 1 2,-2z" transform="translate(-15.7 23.78) rotate(-90)"/>
+   <path class="cls-1" d="m23.29,18.28l5.34,0a2,2 0 0 1 2,2l0,0.92a0,0 0 0 1 0,0l-9.34,0a0,0 0 0 1 0,0l0,-0.92a2,2 0 0 1 2,-2z" transform="translate(45.7 -6.22) rotate(90)"/>
+   <polygon class="cls-1" points="19.25 15.65 19.25 8.51 10.76 8.51 10.76 15.65 5.5 15.65 5.5 24.14 10.76 24.14 19.25 24.14 24.5 24.14 24.5 15.65 19.25 15.65"/>
+   <rect class="cls-2" height="30" width="30"/>
+  </symbol>
+ </defs>
+ <g class="layer">
+  <title>Layer 1</title>
+  <use id="svg_3" transform="matrix(2.95831 0 0 3.88039 632.509 430.707)" xlink:href="#svg_2"/>
+  <g id="svg_4"/>
+  <g id="svg_6"/>
+  <use id="svg_7" transform="rotate(-90 272.667 237) matrix(0.574112 0 0 0.574112 446.312 400.924)" x="-622.459841" xlink:href="#svg_2" y="-525.527048"/>
+  <g id="svg_8"/>
+ </g>
+</svg>
