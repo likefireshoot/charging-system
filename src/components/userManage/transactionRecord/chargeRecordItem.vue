@@ -129,6 +129,8 @@ export default {
         timeType: "", // 用于选择时间类型
         createTime: "", // 用于存储选择的时间
         meterCode: "",
+        userId: "",
+        companyId: "",
         pageSizeV2: 30
       },
       startData: {
@@ -248,6 +250,8 @@ export default {
     },
     assignmentData() {
       this.transactionData.meterCode = this.data.meterCode;
+      this.transactionData.userId = this.data.userId;
+      this.transactionData.companyId = this.data.companyId;
       this.startData.meterCode = this.data.meterCode;
       console.log(this.startData);
     },
@@ -295,7 +299,7 @@ export default {
 
         // 拼接完整的 URL
         console.log(this.currentPage);
-        const url = `/userManage/userCharge/showMeterChargeRecordsV2/${this.currentPage}${queryString}`;
+        const url = `/userManage/userCharge/showMeterChargeRecords/${this.currentPage}${queryString}`;
         console.log(url);
         service
           .get(url)
@@ -327,7 +331,7 @@ export default {
     reflush() {
       this.clear(1);
       service
-        .get(`/userManage/userCharge/showMeterChargeRecordsV2/1?meterCode=${this.data.meterCode}`)
+        .get(`/userManage/userCharge/showMeterChargeRecords/1?meterCode=${this.data.meterCode}&userId=${this.data.userId}&companyId=${this.data.companyId}`)
         .then((response) => {
           if (response.code === 200) {
             response.data.userSingleRechargeRecordData.map((v, i) => {
@@ -355,7 +359,7 @@ export default {
       if (typeof isSearch != 'number' || isNaN(isSearch)) {
         this.currentPage = 1;
         service
-          .get(`/userManage/userCharge/showMeterChargeRecordsV2/1?meterCode=${this.data.meterCode}`)
+          .get(`/userManage/userCharge/showMeterChargeRecords/1?meterCode=${this.data.meterCode}&userId=${this.data.userId}&companyId=${this.data.companyId}`)
           .then((response) => {
             if (response.code === 200) {
               response.data.userSingleRechargeRecordData.map((v, i) => {
@@ -450,7 +454,7 @@ export default {
           }
         }
         // 拼接完整的 URL
-        const url = `/userManage/userCharge/showMeterChargeRecordsV2/1${queryString}`;
+        const url = `/userManage/userCharge/showMeterChargeRecords/1${queryString}`;
         service
           .get(url)
           .then((response) => {
