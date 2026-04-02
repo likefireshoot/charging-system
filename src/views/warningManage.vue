@@ -92,6 +92,7 @@
             :header-cell-style="{ background: '#46B97E', color: '#FFFFFF' }"
             @selection-change="handleSelectionChange"
             id="jinggao-table"
+            v-loading="isLoading"
           >
             <el-table-column type="selection" :width="selectionWidth" align="center" fixed="left" />
             <el-table-column property="theId" label="序号" :width="idWidth" align="center" fixed="left"> </el-table-column>
@@ -115,7 +116,8 @@
       </div>
       <div class="page-box">
         <div class="demo-pagination-block">
-          <el-pagination v-model:current-page="params.pageNo" v-model:page-size="params.pageSize" :page-sizes="[5, 10, 15]" layout="total,  prev, pager, next, jumper" :total="total" />
+          <el-pagination v-model:current-page="params.pageNo" v-model:page-size="params.pageSize" :page-sizes="[5, 10, 15]" layout="total,  prev, pager, next, jumper" :total="total"
+          @current-change="handlePageChange"/>
         </div>
       </div>
     </div>
@@ -254,6 +256,9 @@ export default {
         amountQuota: null,
         delayDays: null,
       },
+
+      // ****** 锁
+      isLoading: false
     };
   },
   watch: {
@@ -267,9 +272,9 @@ export default {
     // region() {
     //   this.getWaringDataByRegion();
     // },
-    "params.pageNo"() {
-      this.getWaringData();
-    },
+    // "params.pageNo"() {
+    //   this.getWaringData();
+    // },
     "params.warningType"() {
       this.$nextTick(() => {
         this.calculateColumnWidths();
@@ -376,6 +381,14 @@ export default {
     }
   },
   methods: {
+    // ****** 手动处理分页变化，避免 watch 循环 ******
+    handlePageChange(page) {
+      if (this.isLoading) return;
+      // this.isLoading = true;
+      this.params.pageNo = page;
+      this.getWaringData();
+    },
+
     filterNode(value, data) {
       if (!value) return true;
       return data.label.includes(value);
@@ -487,6 +500,8 @@ export default {
         });
     },
     getWaringData() {
+      if(this.isLoading) return
+      this.isLoading = true
       if (this.companyId === 1) {
         if (this.params.company) {
           this.params.companyId = this.params.company; // 所属水厂ID
@@ -523,7 +538,7 @@ export default {
             });
             this.jinggaoData = response.data.records;
             this.total = response.data.total;
-            this.params.pageNo = response.data.current;
+            // this.params.pageNo = response.data.current;
           } else {
             ElMessage.error(response.msg);
           }
@@ -531,7 +546,9 @@ export default {
         .catch((error) => {
           //ElMessage.error(error);
           console.log(error);
-        });
+        }).finally(()=>{
+          this.isLoading = false
+      });
     },
     getWaringDataByPage() {
       let params = this.filterNonEmptyParams(this.params);

@@ -89,6 +89,7 @@
           :header-cell-style="{ background: '#46B97E', color: '#FFFFFF' }"
           @selection-change="handleSelectionChange"
           id="log-table"
+          v-loading="isLoading"
         >
           <el-table-column type="selection" :selectable="selectable" min-width="40" align="center" fixed="left" />
           <!-- <el-table-column label="序号" width="120" align="center" fixed="left" #default="scope">
@@ -113,7 +114,8 @@
       </div>
       <div class="page-box">
         <div class="demo-pagination-block">
-          <el-pagination v-model:current-page="params.pageNo" v-model:page-size="params.pageSize" :page-sizes="[5, 10, 15]" layout="total,  prev, pager, next, jumper" :total="total" />
+          <el-pagination v-model:current-page="params.pageNo" v-model:page-size="params.pageSize" :page-sizes="[5, 10, 15]" layout="total,  prev, pager, next, jumper" :total="total"
+          @current-change="handlePageChange"/>
         </div>
       </div>
     </div>
@@ -150,14 +152,17 @@ export default {
       //表格勾选行
       selection: [],
       companyList: [],
+
+      // ****** 锁
+      isLoading: false
     };
   },
   watch: {
-    "params.pageNo": {
-      handler() {
-        this.getSmsRecordData();
-      },
-    },
+    // "params.pageNo": {
+    //   handler() {
+    //     this.getSmsRecordData();
+    //   },
+    // },
     "params.startTime": {
       handler(newVal) {
         this.checkDateRange();
@@ -181,6 +186,14 @@ export default {
     this.getCompanyList();
   },
   methods: {
+    // ****** 手动处理分页变化，避免 watch 循环 ******
+    handlePageChange(page) {
+      if (this.isLoading) return;
+      // this.isLoading = true;
+      this.params.pageNo = page;
+      this.getSmsRecordData();
+    },
+
     selectable() {
       return true; // 目前允许所有行选择，你可以加上你的业务逻辑
     },
@@ -274,6 +287,8 @@ export default {
     },
 
     getSmsRecordData() {
+      if(this.isLoading) return
+      this.isLoading = true
       if (this.companyId === 1) {
         if (this.params.company) {
           this.params.companyId = this.params.company; // 所属水厂ID
@@ -288,14 +303,16 @@ export default {
           if (response.code === 200) {
             this.smsData = response.data.records;
             this.total = response.data.total;
-            this.params.pageNo = response.data.current; // 更新当前页码
+            // this.params.pageNo = response.data.current; // 更新当前页码
           } else {
             ElMessage.error(response.msg);
           }
         })
         .catch((error) => {
           ElMessage.error(error);
-        });
+        }).finally(()=>{
+          this.isLoading = false
+      });
     },
 
     search() {

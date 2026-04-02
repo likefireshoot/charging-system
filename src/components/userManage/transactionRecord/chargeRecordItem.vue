@@ -73,6 +73,7 @@
           :header-cell-style="{ background: '#46B97E', color: '#FFFFFF' }"
           @selection-change="handleSelectionChange"
           id="transaction-record-table"
+          v-loading="isLoading"
         >
           <el-table-column type="selection" :selectable="selectable" min-width="40" align="center" fixed="left" />
           <!-- <el-table-column property="theId" label="序号" width="100" align="center" fixed="left" /> -->
@@ -94,10 +95,17 @@
           </el-table-column>
         </el-table>
       </div>
+      <div class="summary-box">
+        <div class="summary-item">
+          <span class="summary-label">扣费总额</span>
+          <span class="summary-value">{{ totalMoney }}</span>
+        </div>
+      </div>
     </div>
     <div class="page-box">
       <div class="demo-pagination-block">
-        <el-pagination v-model:current-page="currentPage" v-model:page-size="pageSize" :page-sizes="[5, 10, 15]" layout="total,  prev, pager, next, jumper" :total="total" />
+        <el-pagination v-model:current-page="currentPage" v-model:page-size="pageSize" :page-sizes="[5, 10, 15]" layout="total,  prev, pager, next, jumper" :total="total"
+        @current-change="handlePageChange"/>
       </div>
     </div>
   </div>
@@ -121,6 +129,7 @@ export default {
         timeType: "", // 用于选择时间类型
         createTime: "", // 用于存储选择的时间
         meterCode: "",
+        pageSizeV2: 30
       },
       startData: {
         meterCode: "",
@@ -141,6 +150,12 @@ export default {
           label: "历史扣费记录",
         },
       ],
+
+      // ****** 锁
+      isLoading: false,
+
+      // 扣费总数
+      totalMoney: 0
     };
   },
   computed: {
@@ -149,9 +164,9 @@ export default {
     },
   },
   watch: {
-    currentPage() {
-      this.getTransactionRecordData();
-    },
+    // currentPage() {
+    //   this.getTransactionRecordData();
+    // },
     title(newVal, oldVal) {
       this.$emit("changeTye");
     },
@@ -159,8 +174,57 @@ export default {
   mounted() {
     this.assignmentData();
     this.getTransactionRecordData();
+    this.getTotalMoney();
   },
   methods: {
+    // 获取扣费总数
+    getTotalMoney(){
+      const nonEmptyParams = this.filterNonEmptyParams(this.transactionData);
+      console.log(nonEmptyParams);
+      // 如果有非空参数，则发起请求
+      if (Object.keys(nonEmptyParams).length > 0) {
+        // 初始化查询字符串
+        let queryString = "";
+        // 遍历 nonEmptyParams 对象，将键值对拼接成查询字符串
+        for (const key in nonEmptyParams) {
+          if (nonEmptyParams.hasOwnProperty(key)) {
+            const value = nonEmptyParams[key];
+            // 如果查询字符串不为空，添加 & 符号分隔参数
+            if (queryString) {
+              queryString += `&${key}=${encodeURIComponent(value)}`;
+            } else {
+              // 第一个参数前添加 ? 符号
+              queryString += `?${key}=${encodeURIComponent(value)}`;
+            }
+          }
+        }
+        // 拼接完整的 URL
+        const url = `/userManage/userCharge/getTotalChargeAmount${queryString}`;
+        service
+          .get(url)
+          .then((response) => {
+            if (response.code === 200) {
+              this.totalMoney = response.data;
+            } else {
+              //ElMessage.error(response.msg);
+              console.log(response.msg);
+            }
+          })
+          .catch((error) => {
+            ElMessage.error(error);
+            //console.log(error);
+          });
+      }
+    },
+
+    // ****** 手动处理分页变化，避免 watch 循环 ******
+    handlePageChange(page) {
+      if (this.isLoading) return;
+      // this.isLoading = true;
+      this.currentPage = page;
+      this.getTransactionRecordData();
+    },
+
     formatChargeType(type) {
       if (type === 0 || type === "0") {
         return "抄表扣费";
@@ -188,7 +252,29 @@ export default {
       console.log(this.startData);
     },
     getTransactionRecordData() {
-      const nonEmptyParams = this.filterNonEmptyParams(this.startData);
+      if (this.isLoading) return
+      this.isLoading = true
+      // const nonEmptyParams = this.filterNonEmptyParams(this.startData);
+      // // 如果有非空参数，则发起请求
+      // if (Object.keys(nonEmptyParams).length > 0) {
+      //   // 初始化查询字符串
+      //   let queryString = "";
+      //   // 遍历 nonEmptyParams 对象，将键值对拼接成查询字符串
+      //   for (const key in nonEmptyParams) {
+      //     if (nonEmptyParams.hasOwnProperty(key)) {
+      //       const value = nonEmptyParams[key];
+      //       // 如果查询字符串不为空，添加 & 符号分隔参数
+      //       if (queryString) {
+      //         queryString += `&${key}=${encodeURIComponent(value)}`;
+      //       } else {
+      //         // 第一个参数前添加 ? 符号
+      //         queryString += `?${key}=${encodeURIComponent(value)}`;
+      //       }
+      //     }
+      //   }
+
+      const nonEmptyParams = this.filterNonEmptyParams(this.transactionData);
+      console.log(nonEmptyParams);
       // 如果有非空参数，则发起请求
       if (Object.keys(nonEmptyParams).length > 0) {
         // 初始化查询字符串
@@ -206,9 +292,10 @@ export default {
             }
           }
         }
+
         // 拼接完整的 URL
         console.log(this.currentPage);
-        const url = `/userManage/userCharge/showMeterChargeRecords/${this.currentPage}${queryString}`;
+        const url = `/userManage/userCharge/showMeterChargeRecordsV2/${this.currentPage}${queryString}`;
         console.log(url);
         service
           .get(url)
@@ -222,21 +309,25 @@ export default {
                 item.createTime = item.createTime.replace("T", " ");
               });
               this.total = response.data.totalElements;
-              this.currentPage = response.data.currentPages;
+              // this.currentPage = response.data.currentPages;
               console.log(this.transactionTableData);
+              this.getTotalMoney();
+
             } else {
               ElMessage.error(response.msg);
             }
           })
           .catch((error) => {
             ElMessage.error(error);
-          });
+          }).finally(()=>{
+            this.isLoading = false
+        });
       }
     },
     reflush() {
       this.clear(1);
       service
-        .get(`/userManage/userCharge/showMeterChargeRecords/1?meterCode=${this.data.meterCode}`)
+        .get(`/userManage/userCharge/showMeterChargeRecordsV2/1?meterCode=${this.data.meterCode}`)
         .then((response) => {
           if (response.code === 200) {
             response.data.userSingleRechargeRecordData.map((v, i) => {
@@ -248,6 +339,8 @@ export default {
             });
             this.total = response.data.totalElements;
             this.currentPage = 1;
+            this.getTotalMoney();
+
           } else {
             ElMessage.error(response.msg);
           }
@@ -262,7 +355,7 @@ export default {
       if (typeof isSearch != 'number' || isNaN(isSearch)) {
         this.currentPage = 1;
         service
-          .get(`/userManage/userCharge/showMeterChargeRecords/1?meterCode=${this.data.meterCode}`)
+          .get(`/userManage/userCharge/showMeterChargeRecordsV2/1?meterCode=${this.data.meterCode}`)
           .then((response) => {
             if (response.code === 200) {
               response.data.userSingleRechargeRecordData.map((v, i) => {
@@ -274,6 +367,7 @@ export default {
               });
               this.total = response.data.totalElements;
               this.currentPage = 1;
+              this.getTotalMoney();
             } else {
               ElMessage.error(response.msg);
             }
@@ -356,7 +450,7 @@ export default {
           }
         }
         // 拼接完整的 URL
-        const url = `/userManage/userCharge/showMeterChargeRecords/${this.currentPage}${queryString}`;
+        const url = `/userManage/userCharge/showMeterChargeRecordsV2/1${queryString}`;
         service
           .get(url)
           .then((response) => {
@@ -371,6 +465,7 @@ export default {
               });
               this.total = response.data.totalElements;
               this.currentPage = response.data.currentPages;
+              this.getTotalMoney();
             } else {
               ElMessage.error(response.msg);
             }
@@ -760,5 +855,33 @@ export default {
   align-items: center;
   position: absolute;
   bottom: 0;
+}
+
+.summary-box {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(180px, 1fr));
+  gap: 12px;
+  margin-top: 12px;
+  margin-bottom: 8px;
+}
+
+.summary-item {
+  border: 1px solid #d9efe2;
+  background-color: #f7fbf8;
+  border-radius: 5px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.summary-label {
+  color: #5a5a5a;
+}
+
+.summary-value {
+  color: #2d8f63;
+  font-weight: 600;
 }
 </style>

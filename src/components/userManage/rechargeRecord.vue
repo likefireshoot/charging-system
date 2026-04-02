@@ -115,6 +115,7 @@
               @selection-change="handleSelectionChange"
               id="recharge-record-table"
               class="table"
+              v-loading="isLoading"
             >
               <el-table-column type="selection" :selectable="selectable" min-width="40" align="center" fixed="left" />
               <!-- <el-table-column property="theId" label="序号" width="100" align="center" fixed="left" /> -->
@@ -157,7 +158,8 @@
         </div>
         <div class="page-box">
           <div class="demo-pagination-block">
-            <el-pagination v-model:current-page="currentPage" v-model:page-size="pageSize" :page-sizes="[5, 10, 15]" layout="total,  prev, pager, next, jumper" :total="total" />
+            <el-pagination v-model:current-page="currentPage" v-model:page-size="pageSize" :page-sizes="[5, 10, 15]" layout="total,  prev, pager, next, jumper" :total="total"
+            @current-change="handlePageChange"/>
           </div>
         </div>
       </div>
@@ -212,6 +214,9 @@ export default {
         cashTotalAmount: "0",
         totalAmount: "0",
       },
+
+      // ****** 锁
+      isLoading: false
     };
   },
   computed: {
@@ -220,9 +225,9 @@ export default {
     },
   },
   watch: {
-    currentPage() {
-      this.fetchRechargeRecordData(this.currentPage);
-    },
+    // currentPage() {
+    //   this.fetchRechargeRecordData(this.currentPage);
+    // },
     "rechargeRecordeData.companyId"() {
       this.rechargeRecordeData.region = "";
       this.getRegionData();
@@ -235,6 +240,14 @@ export default {
     this.getStaffNames();
   },
   methods: {
+    // ****** 手动处理分页变化，避免 watch 循环 ******
+    handlePageChange(page) {
+      if (this.isLoading) return;
+      // this.isLoading = true;
+      this.currentPage = page;
+      this.fetchRechargeRecordData(page);
+    },
+
     selectable() {
       return true; // 目前允许所有行选择，你可以加上你的业务逻辑
     },
@@ -343,7 +356,7 @@ export default {
       this.rechargeRecordTableData = [];
       this.tableData = records;
       this.total = response.data.totalElements;
-      this.currentPage = response.data.currentPages;
+      // this.currentPage = response.data.currentPages;
       this.rechargeSummary = {
         weChatTotalAmount: response.data.weChatTotalAmount ?? "0",
         alipayTotalAmount: response.data.alipayTotalAmount ?? "0",
@@ -352,6 +365,8 @@ export default {
       };
     },
     fetchRechargeRecordData(page = this.currentPage) {
+      if (this.isLoading) return
+      this.isLoading = true
       const params = this.filterNonEmptyParams(this.buildRechargeRecordParams());
       const queryString = this.buildQueryString(params);
       service
@@ -365,7 +380,10 @@ export default {
         })
         .catch((error) => {
           console.log(error);
-        });
+        }).finally(()=>{
+          this.isLoading = false
+      });
+
     },
     getRechargeRecordData() {
       this.fetchRechargeRecordData(this.currentPage);

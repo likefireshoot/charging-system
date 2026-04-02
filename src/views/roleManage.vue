@@ -64,6 +64,7 @@
           :header-cell-style="{ background: '#46B97E', color: '#FFFFFF' }"
           @selection-change="handleSelectionChange"
           id="yuangong-table"
+          v-loading="isLoading"
         >
           <el-table-column type="selection" :selectable="selectable" :width="selectionWidth" align="center" />
           <el-table-column label="序号" :width="indexWidth" align="center" fixed="left" #default="scope">
@@ -76,7 +77,8 @@
       </div>
       <div class="page-box">
         <div class="demo-pagination-block">
-          <el-pagination v-model:current-page="params.pageNo" v-model:page-size="params.pageSize" :page-sizes="[5, 10, 15]" layout="total,  prev, pager, next, jumper" :total="total" />
+          <el-pagination v-model:current-page="params.pageNo" v-model:page-size="params.pageSize" :page-sizes="[5, 10, 15]" layout="total,  prev, pager, next, jumper" :total="total"
+          @current-change="handlePageChange"/>
         </div>
       </div>
     </div>
@@ -252,14 +254,17 @@ export default {
         id: null,
         username: null,
       },
+
+      // ****** 锁
+      isLoading: false
     };
   },
   watch: {
-    "params.pageNo": {
-      handler() {
-        this.getRoleData();
-      },
-    },
+    // "params.pageNo": {
+    //   handler() {
+    //     this.getRoleData();
+    //   },
+    // },
     "addData.permissionList": {
       handler(val) {
         if (val.length === 0) {
@@ -322,6 +327,14 @@ export default {
     }
   },
   methods: {
+    // ****** 手动处理分页变化，避免 watch 循环 ******
+    handlePageChange(page) {
+      if (this.isLoading) return;
+      // this.isLoading = true;
+      this.params.pageNo = page;
+      this.getRoleData();
+    },
+
     selectable() {
       return true; // 目前允许所有行选择，你可以加上你的业务逻辑
     },
@@ -409,6 +422,8 @@ export default {
         });
     },
     getRoleData() {
+      if(this.isLoading) return
+      this.isLoading = true
       const filteredParams = Object.fromEntries(Object.entries(this.params).filter(([_, value]) => value !== null && value !== ""));
       service
         .post("/role/list", filteredParams)
@@ -435,12 +450,14 @@ export default {
             console.log("123");
             this.total = res.data.total;
             console.log("123");
-            this.params.pageNo = res.data.currentPages;
+            // this.params.pageNo = res.data.currentPages;
           }
         })
         .catch((err) => {
           ElMessage.error("1");
-        });
+        }).finally(()=>{
+          this.isLoading = false
+      });
     },
     search() {
       this.getRoleData();

@@ -83,7 +83,9 @@
               border
               :header-cell-style="{ background: '#46B97E', color: '#FFFFFF' }"
               @selection-change="handleSelectionChange"
-              id="chaobiao-record-table">
+              id="chaobiao-record-table"
+              v-loading="isLoading"
+            >
               <el-table-column type="selection" :selectable="selectable" min-width="55" align="center" fixed="left" />
               <!-- <el-table-column property="theId" label="序号" width="100" align="center" fixed="left" /> -->
               <el-table-column property="userId" label="用户号" min-width="150" align="center" fixed="left" />
@@ -92,6 +94,7 @@
               <el-table-column property="readingCount" label="水表读数/吨" min-width="160" align="center" />
               <el-table-column property="deltaWater" label="本次用水量/吨" min-width="160" align="center" />
               <el-table-column property="feeThisTime" label="本次扣费/元" min-width="160" align="center" />
+              <el-table-column property="balanceThisTime" label="本次余额/元" min-width="160" align="center"/>
               <el-table-column property="valveStatus" label="阀门状态" min-width="160" align="center" />
               <!-- <el-table-column property="balance" label="余额/元" width="120" align="center" /> -->
               <el-table-column property="battery" label="电量" min-width="160" align="center" />
@@ -104,11 +107,17 @@
               <!-- <el-table-column property="imei" label="IMEI号" width="240" align="center" /> -->
             </el-table>
           </div>
+          <div class="summary-box">
+            <div class="summary-item">
+              <span class="summary-label">用水总量</span>
+              <span class="summary-value">{{ totalWater }}</span>
+            </div>
+          </div>
         </div>
         <div class="page-box">
           <div class="demo-pagination-block">
             <el-pagination v-model:current-page="currentPage" v-model:page-size="pageSize" :page-sizes="[5, 10, 15]"
-                           layout="total,  prev, pager, next, jumper" :total="total" />
+                           layout="total,  prev, pager, next, jumper" :total="total"  @current-change = "handlePageChange"/>
           </div>
         </div>
       </div>
@@ -155,6 +164,12 @@ export default {
       currentPage: 1,
       pageSize: 30,
       total: null,
+
+      // ****** 锁
+      isLoading: false,
+
+      // ****** 用水总量
+      totalWater: 0
     };
   },
   computed: {
@@ -163,15 +178,89 @@ export default {
     },
   },
   watch: {
-    currentPage() {
-      this.getChaboBiaoRecordData();
-    },
+    // currentPage() {
+    //   this.getChaboBiaoRecordData();
+    // },
   },
   mounted() {
     this.assignmentData();
     this.getChaboBiaoRecordData();
+    this.getTotalWater();
   },
   methods: {
+    // ****** 获取总用水量 ******
+    getTotalWater(){
+      // const nonEmptyParams = {
+      //   meterCode: this.startData.meterCode,
+      //   imei: this.startData.imei,
+      //   companyId: this.startData.companyId,
+      //   createTime: this.chaobiaoData.time.accurateTime,
+      //   timeType: this.chaobiaoData.time.type
+      // };
+      // // 如果有非空参数，则发起请求
+      // if (Object.keys(nonEmptyParams).length > 0) {
+      //   // 初始化查询字符串
+      //   let queryString = "";
+      //   // 遍历 nonEmptyParams 对象，将键值对拼接成查询字符串
+      //   for (const key in nonEmptyParams) {
+      //     if (nonEmptyParams.hasOwnProperty(key)) {
+      //       const value = nonEmptyParams[key];
+      //       // 如果查询字符串不为空，添加 & 符号分隔参数
+      //       if (queryString) {
+      //         queryString += `&${key}=${encodeURIComponent(value)}`;
+      //       } else {
+      //         // 第一个参数前添加 ? 符号
+      //         queryString += `?${key}=${encodeURIComponent(value)}`;
+      //       }
+      //     }
+      //   }
+      const nonEmptyParams = this.filterNonEmptyParams(this.chaobiaoData);
+      console.log(nonEmptyParams);
+      // 如果有非空参数，则发起请求
+      if (Object.keys(nonEmptyParams).length > 0) {
+        // 初始化查询字符串
+        let queryString = "";
+        // 遍历 nonEmptyParams 对象，将键值对拼接成查询字符串
+        for (const key in nonEmptyParams) {
+          if (nonEmptyParams.hasOwnProperty(key)) {
+            const value = nonEmptyParams[key];
+            // 如果查询字符串不为空，添加 & 符号分隔参数
+            if (queryString) {
+              queryString += `&${key}=${encodeURIComponent(value)}`;
+            } else {
+              // 第一个参数前添加 ? 符号
+              queryString += `?${key}=${encodeURIComponent(value)}`;
+            }
+          }
+        }
+        // 拼接完整的 URL
+        const url = `/userManage/meterRead/getTotalWater${queryString}`;
+        service
+          .get(url)
+          .then((response) => {
+            if (response.code === 200) {
+
+              this.totalWater = response.data;
+            } else {
+              //ElMessage.error(response.msg);
+              console.log(response.msg);
+            }
+          })
+          .catch((error) => {
+            ElMessage.error(error);
+            //console.log(error);
+          });
+      }
+    },
+
+    // ****** 手动处理分页变化，避免 watch 循环 ******
+    handlePageChange(page) {
+      if (this.isLoading) return;
+      // this.isLoading = true;
+      this.currentPage = page;
+      this.getChaboBiaoRecordData();
+    },
+
     selectable() {
       return true; // 目前允许所有行选择，你可以加上你的业务逻辑
     },
@@ -190,6 +279,8 @@ export default {
       this.startData.companyId = this.data.companyId;
     },
     getChaboBiaoRecordData() {
+      if (this.isLoading) return
+      this.isLoading = true
       const nonEmptyParams = this.filterNonEmptyParams(this.startData);
       // 如果有非空参数，则发起请求
       if (Object.keys(nonEmptyParams).length > 0) {
@@ -225,7 +316,8 @@ export default {
                 });
               }
               this.total = response.data.totalElements;
-              this.currentPage = response.data.currentPages;
+              // this.currentPage = response.data.currentPages;
+              this.getTotalWater();
             } else {
               //ElMessage.error(response.msg);
               console.log(response.msg);
@@ -234,7 +326,9 @@ export default {
           .catch((error) => {
             ElMessage.error(error);
             //console.log(error);
-          });
+          }).finally(()=>{
+            this.isLoading = false
+        });
       }
     },
     reflush() {
@@ -254,6 +348,7 @@ export default {
             }
             this.total = response.data.totalElements;
             this.currentPage = 1;
+            this.getTotalWater();
           } else {
             ElMessage.error(response.msg);
           }
@@ -282,6 +377,7 @@ export default {
               }
               this.total = response.data.totalElements;
               this.currentPage = 1;
+              this.getTotalWater();
             } else {
               ElMessage.error(response.msg);
             }
@@ -371,6 +467,7 @@ export default {
               }
               this.total = response.data.totalElements;
               this.currentPage = response.data.currentPages;
+              this.getTotalWater();
             }
           })
           .catch((error) => {
@@ -714,4 +811,35 @@ export default {
   position: absolute;
   bottom: 0;
 }
+
+
+.summary-box {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(180px, 1fr));
+  gap: 12px;
+  margin-top: 12px;
+  margin-bottom: 8px;
+}
+
+.summary-item {
+  border: 1px solid #d9efe2;
+  background-color: #f7fbf8;
+  border-radius: 5px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.summary-label {
+  color: #5a5a5a;
+}
+
+.summary-value {
+  color: #2d8f63;
+  font-weight: 600;
+}
+
+
 </style>

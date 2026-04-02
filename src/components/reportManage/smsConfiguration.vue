@@ -77,6 +77,7 @@
           :header-cell-style="{ background: '#46B97E', color: '#FFFFFF' }"
           @selection-change="handleSelectionChange"
           id="duanxin-table"
+          v-loading="isLoading"
         >
           <el-table-column type="selection" :selectable="selectable" :width="selectionWidth" align="center" />
           <el-table-column label="序号" :width="indexWidth" align="center" #default="scope">
@@ -93,7 +94,8 @@
       </div>
       <div class="page-box">
         <div class="demo-pagination-block">
-          <el-pagination v-model:current-page="params.pageNo" v-model:page-size="params.pageSize" :page-sizes="[5, 10, 15]" layout="total,  prev, pager, next, jumper" :total="total" />
+          <el-pagination v-model:current-page="params.pageNo" v-model:page-size="params.pageSize" :page-sizes="[5, 10, 15]" layout="total,  prev, pager, next, jumper" :total="total"
+          @current-change="handlePageChange"/>
         </div>
       </div>
     </div>
@@ -405,14 +407,17 @@ export default {
 
       //表格勾选行
       selection: [],
+
+      // ****** 锁
+      isLoading: false
     };
   },
   watch: {
-    "params.pageNo": {
-      handler() {
-        this.getSmsConfigData();
-      },
-    },
+    // "params.pageNo": {
+    //   handler() {
+    //     this.getSmsConfigData();
+    //   },
+    // },
     "addData.smsSendType": {
       handler() {
         if (this.isAddSendTimeDisabled) {
@@ -500,6 +505,14 @@ export default {
     }
   },
   methods: {
+    // ****** 手动处理分页变化，避免 watch 循环 ******
+    handlePageChange(page) {
+      if (this.isLoading) return;
+      // this.isLoading = true;
+      this.params.pageNo = page;
+      this.getSmsConfigData();
+    },
+
     selectable() {
       return true; // 目前允许所有行选择，你可以加上你的业务逻辑
     },
@@ -598,6 +611,8 @@ export default {
     },
 
     getSmsConfigDataByPage() {
+      if (this.isLoading) return
+      this.isLoading = true
       const params = {
         pageNo: this.params.pageNo,
         pageSize: this.params.pageSize,
@@ -621,7 +636,9 @@ export default {
         })
         .catch((error) => {
           ElMessage.error(error);
-        });
+        }).finally(()=>{
+          this.isLoading = false
+      });
     },
 
     reflush() {

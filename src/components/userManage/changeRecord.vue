@@ -113,6 +113,7 @@
               :header-cell-style="{ background: '#46B97E', color: '#FFFFFF' }"
               @selection-change="handleSelectionChange"
               id="change-record-table"
+              v-loading="isLoading"
             >
               <el-table-column type="selection" :selectable="selectable" min-width="40" align="center" fixed="left" />
               <!-- <el-table-column property="theId" label="序号" width="100" align="center" fixed="left" /> -->
@@ -146,7 +147,8 @@
         </div>
         <div class="page-box">
           <div class="demo-pagination-block">
-            <el-pagination v-model:current-page="currentPage" v-model:page-size="pageSize" :page-sizes="[5, 10, 15]" layout="total,  prev, pager, next, jumper" :total="total" />
+            <el-pagination v-model:current-page="currentPage" v-model:page-size="pageSize" :page-sizes="[5, 10, 15]" layout="total,  prev, pager, next, jumper" :total="total"
+            @current-change="handlePageChange"/>
           </div>
         </div>
       </div>
@@ -194,6 +196,9 @@ export default {
       pageSize: 30,
       total: null,
       companyList: [],
+
+      // ****** 锁
+      isLoading: false
     };
   },
   computed: {
@@ -202,9 +207,9 @@ export default {
     },
   },
   watch: {
-    currentPage() {
-      this.getChangeRecordData();
-    },
+    // currentPage() {
+    //   this.getChangeRecordData();
+    // },
     "changeRecordeData.companyId"() {
       this.changeRecordeData.region = "";
       this.getRegionData();
@@ -216,6 +221,14 @@ export default {
     this.getRegionData();
   },
   methods: {
+    // ****** 手动处理分页变化，避免 watch 循环 ******
+    handlePageChange(page) {
+      if (this.isLoading) return;
+      // this.isLoading = true;
+      this.currentPage = page;
+      this.getChangeRecordData();
+    },
+
     withdraw(meterChangeRecordId) {
       console.log(meterChangeRecordId);
       let url = `/userManage/meterRead/withdrawChangeMeter/` + meterChangeRecordId; // 所属水厂ID
@@ -272,6 +285,8 @@ export default {
         });
     },
     getChangeRecordData() {
+      if (this.isLoading) return
+      this.isLoading = true
       let url = "";
       if (this.companyId === 1) {
         if (this.changeRecordeData.companyId) {
@@ -296,7 +311,7 @@ export default {
               });
             }
             this.total = res.data.totalElements;
-            this.currentPage = res.data.currentPages;
+            // this.currentPage = res.data.currentPages;
           } else {
             ElMessage.error(res.msg);
           }
@@ -304,7 +319,9 @@ export default {
         .catch((err) => {
           ElMessage.error(err);
           console.error("查询失败:", err);
-        });
+        }).finally(()=>{
+          this.isLoading = false
+      });
     },
     getCompanyList() {
       service

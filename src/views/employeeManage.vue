@@ -91,6 +91,7 @@
           :header-cell-style="{ background: '#46B97E', color: '#FFFFFF' }"
           @selection-change="handleSelectionChange"
           id="yuangong-table"
+          v-loading="isLoading"
         >
           <el-table-column type="selection" :selectable="selectable" :width="selectionWidth" align="center" />
           <el-table-column label="序号" :width="indexWidth" align="center" fixed="left" #default="scope">
@@ -109,7 +110,8 @@
       </div>
       <div class="page-box">
         <div class="demo-pagination-block">
-          <el-pagination v-model:current-page="params.pageNo" v-model:page-size="params.pageSize" :page-sizes="[5, 10, 15]" layout="total,  prev, pager, next, jumper" :total="total" />
+          <el-pagination v-model:current-page="params.pageNo" v-model:page-size="params.pageSize" :page-sizes="[5, 10, 15]" layout="total,  prev, pager, next, jumper" :total="total"
+          @current-change="handlePageChange"/>
         </div>
       </div>
     </div>
@@ -443,14 +445,17 @@ export default {
       indeterminate: false,
       regionList: [],
       flag: 0,
+
+      // ****** 锁
+      isLoading: false
     };
   },
   watch: {
-    "params.pageNo": {
-      handler() {
-        this.getEmployeeData();
-      },
-    },
+    // "params.pageNo": {
+    //   handler() {
+    //     this.getEmployeeData();
+    //   },
+    // },
     deleteRegion_dialogFormVisible: {
       handler() {
         if (this.companyId !== 1) {
@@ -527,6 +532,14 @@ export default {
     }
   },
   methods: {
+    // ****** 手动处理分页变化，避免 watch 循环 ******
+    handlePageChange(page) {
+      if (this.isLoading) return;
+      // this.isLoading = true;
+      this.params.pageNo = page;
+      this.getEmployeeData();
+    },
+
     editCompanyStatus(companyId) {
       editCompanyStatus(companyId).then(res => {
         ElMessage.success("操作成功");
@@ -645,6 +658,8 @@ export default {
         });
     },
     getEmployeeData() {
+      if (this.isLoading) return
+      this.isLoading = true
       //this.params.companyId = this.params.company ? this.params.company : this.companyId;
       if (this.companyId === 1) {
         if (this.params.company) {
@@ -687,7 +702,9 @@ export default {
         })
         .catch((error) => {
           ElMessage.error(error);
-        });
+        }).finally(()=>{
+          this.isLoading = false
+      });
     },
     getEmployeeDataByPage() {
       const params = {
