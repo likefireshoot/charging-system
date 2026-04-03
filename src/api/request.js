@@ -6,9 +6,9 @@ if (process.env.NODE_ENV == "development") {
   axios.defaults.baseURL = "/api";
   // axios.defaults.baseURL = "http://jingzhoudb.mynatapp.cc";
 } else {
-  // axios.defaults.baseURL = "https://jingzhoudb.mynatapp.cc";
+  axios.defaults.baseURL = "https://jingzhoudb.mynatapp.cc";
   // axios.defaults.baseURL = "https://192.168.0.13:8080";
-  axios.defaults.baseURL = "https://sushijie.mynatapp.cc";
+//   axios.defaults.baseURL = "https://sushijie.mynatapp.cc";
   // axios.defaults.baseURL = "http://127.0.0.1:8080";
   // axios.defaults.baseURL = "/api";
 }
