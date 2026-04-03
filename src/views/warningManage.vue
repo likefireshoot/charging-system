@@ -16,6 +16,7 @@
           <el-option label="水表大用量用户" value="水表大用量用户"></el-option>
           <el-option label="数据长时间未上报" value="数据长时间未上报"></el-option>
           <el-option label="设备异常" value="设备异常"></el-option>
+          <el-option label="关阀状态下仍扣费/水表吨数增加" value="关阀状态下仍扣费/水表吨数增加"></el-option>
         </el-select>
       </div>
       <div class="search-input">
@@ -107,10 +108,17 @@
             <el-table-column property="createTime" label="警告时间" :width="warningTimeWidth" align="center" />
             <el-table-column property="warningType" label="警告类型" :width="warningTypeWidth" align="center" />
             <el-table-column v-if="showOweAmountColumn" property="oweAmount" label="欠费金额" :width="oweAmountWidth" align="center">
-              <template #default="{ row }">
-                {{ formatOweAmount(row.oweAmount) }}
+<!--              <template #default="{ row }">-->
+<!--                {{ formatOweAmount(row.oweAmount) }}-->
+<!--              </template>-->
+<!--            </el-table-column>-->
+              <template #default="scope">
+                <span @click="handleDetail(scope.row)"
+                      style="color: #46b97e; display: block; width: 100%; text-align: center">{{ formatOweAmount(scope.row.oweAmount)}}</span>
               </template>
             </el-table-column>
+            <el-table-column property="totalWater" label="水表读数/吨" :width="userNameWidth" align="center" />
+            <el-table-column v-if="showOweAmountColumn" property="qianfeiDays" label="欠费天数" :width="addressWidth" align="center" />
           </el-table>
         </div>
       </div>
@@ -121,6 +129,11 @@
         </div>
       </div>
     </div>
+
+    <transactionRecord v-if="transaction_dialogFormVisible"
+                       :transaction_dialogFormVisible="transaction_dialogFormVisible" :data="multipleSelection[0]"
+                       @close="closeTransaction"></transactionRecord>
+
     <!-- 警告配置 -->
     <div class="add-dialog" v-if="add_dialogFormVisible">
       <div class="add-dialog-content">
@@ -198,8 +211,10 @@ import { ElMessage } from "element-plus";
 import axios from "axios";
 import { useWarningStore } from "@/store/warningStore.js";
 import { mapState } from "pinia";
+import transactionRecord from "@/components/userManage/transactionRecord.vue";
 
 export default {
+  components: { transactionRecord },
   data() {
     return {
       params: {
@@ -258,7 +273,13 @@ export default {
       },
 
       // ****** 锁
-      isLoading: false
+      isLoading: false,
+
+      // ****** 收支明细弹出框
+      transaction_dialogFormVisible: false,
+
+      //存储当前勾选的行的数据信息
+      multipleSelection: [],
     };
   },
   watch: {
@@ -381,6 +402,17 @@ export default {
     }
   },
   methods: {
+    // ****** 欠费金额可点击
+    handleDetail(row) {
+      this.transaction_dialogFormVisible = true;
+      this.multipleSelection[0] = row;
+    },
+    closeTransaction() {
+      this.transaction_dialogFormVisible = false;
+      this.multipleSelection = [];
+      this.reflush();
+    },
+
     // ****** 手动处理分页变化，避免 watch 循环 ******
     handlePageChange(page) {
       if (this.isLoading) return;
@@ -1028,12 +1060,13 @@ export default {
 }
 
 .jinggao-table {
-  width: 90%;
-  /* flex-grow: 1; */
-  height: calc(100%-10px);
+  width: 80%;
+  flex-grow: 1;
+  height: calc(100% - 10px);
   display: flex;
   justify-content: center;
   align-items: center;
+  overflow-y: auto;
 }
 
 .page-box {
@@ -1152,6 +1185,26 @@ export default {
   background-color: #fff;
   margin-right: 5%;
 }
+
+/* 自定义el-dialog的遮罩层背景色 */
+.el-overlay {
+  background: rgba(0, 0, 0, 0.5) !important;
+}
+/* 确保el-dialog弹出框本身不被覆盖 */
+.el-dialog__wrapper {
+  background: transparent !important;
+}
+
+.transaction-record-dialog{
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 199;
+  background-color: rgb(31 33 38 / 15%);
+}
+
 </style>
 
 <style lang="scss" scoped>

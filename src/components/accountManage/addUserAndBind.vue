@@ -71,17 +71,25 @@
               <el-option v-for="item in approverList" :key="item.id" :label="item.label" :value="item.label" />
             </el-select>
           </div>
+<!--          <div class="edit-input" style="margin-right: 1%">-->
+<!--            <span>开户审批人2</span>-->
+<!--            <el-select v-model="form.approver_2" class="input-item big-font-el-select" placeholder="请选择">-->
+<!--              <el-option v-for="item in approverList" :key="item.id" :label="item.label" :value="item.label" />-->
+<!--            </el-select>-->
+<!--          </div>-->
+<!--          <div class="edit-input" style="margin-right: 1%">-->
+<!--            <span>开户审批人3</span>-->
+<!--            <el-select v-model="form.approver_3" class="input-item big-font-el-select" placeholder="请选择">-->
+<!--              <el-option v-for="item in approverList" :key="item.id" :label="item.label" :value="item.label" />-->
+<!--            </el-select>-->
+<!--          </div>-->
           <div class="edit-input" style="margin-right: 1%">
-            <span>开户审批人2</span>
-            <el-select v-model="form.approver_2" class="input-item big-font-el-select" placeholder="请选择">
-              <el-option v-for="item in approverList" :key="item.id" :label="item.label" :value="item.label" />
-            </el-select>
+            <span>出厂日期</span>
+            <el-date-picker v-model="form.factoryDate" type="date" placeholder="选择日期" style="flex-grow: 1; width: 100%; max-height: 35px" format="YYYY-MM-DD" value-format="YYYY-MM-DD" />
           </div>
           <div class="edit-input" style="margin-right: 1%">
-            <span>开户审批人3</span>
-            <el-select v-model="form.approver_3" class="input-item big-font-el-select" placeholder="请选择">
-              <el-option v-for="item in approverList" :key="item.id" :label="item.label" :value="item.label" />
-            </el-select>
+            <span>首检日期</span>
+            <el-date-picker v-model="form.firstInspectDate" type="date" placeholder="选择日期" style="flex-grow: 1; width: 100%; max-height: 35px" format="YYYY-MM-DD" value-format="YYYY-MM-DD" />
           </div>
         </div>
       </div>
@@ -146,6 +154,8 @@ export default {
       approver_1: userData.staffName || "",  // 修改：默认当前用户
       approver_2: userData.staffName || "",  // 修改：默认当前用户
       approver_3: userData.staffName || "",  // 修改：默认当前用户
+      factoryDate: null,
+      firstInspectDate: null
     },
     companyList: [],
     regionList: [],
@@ -299,6 +309,8 @@ export default {
         approver_1: "开户审批人1",
         approver_2: "开户审批人2",
         approver_3: "开户审批人3",
+        factoryDate: "出厂日期",
+        firstInspectDate: "首检日期"
       };
 
       const missing = required.filter((k) => this.form[k] === undefined || this.form[k] === null || this.form[k] === "");
@@ -362,8 +374,12 @@ export default {
           priceId: this.form.priceId,
           smsConfigId: this.form.smsConfigId,
           approver_1: this.form.approver_1,
-          approver_2: this.form.approver_2,
-          approver_3: this.form.approver_3,
+          // approver_2: this.form.approver_2,
+          // approver_3: this.form.approver_3,
+
+          // ****** 新增出厂日期、首检日期参数 ******
+          factoryDate: this.form.factoryDate,
+          firstInspectDate: this.form.firstInspectDate
         },
       };
 

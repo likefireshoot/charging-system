@@ -47,17 +47,25 @@
             <el-option v-for="item in approver_list" :key="item.id" :label="item.label" :value="item.label"></el-option>
           </el-select>
         </div>
+<!--        <div class="edit-input" style="margin-right: 1%">-->
+<!--          <span>出厂日期</span>-->
+<!--          <el-select v-model="addData.approver_2" class="input-item big-font-el-select">-->
+<!--            <el-option v-for="item in approver_list" :key="item.id" :label="item.label" :value="item.label"></el-option>-->
+<!--          </el-select>-->
+<!--        </div>-->
+<!--        <div class="edit-input" style="margin-right: 1%">-->
+<!--          <span>首检日期</span>-->
+<!--          <el-select v-model="addData.approver_3" class="input-item big-font-el-select">-->
+<!--            <el-option v-for="item in approver_list" :key="item.id" :label="item.label" :value="item.label"></el-option>-->
+<!--          </el-select>-->
+<!--        </div>-->
         <div class="edit-input" style="margin-right: 1%">
-          <span>开户审批人2</span>
-          <el-select v-model="addData.approver_2" class="input-item big-font-el-select">
-            <el-option v-for="item in approver_list" :key="item.id" :label="item.label" :value="item.label"></el-option>
-          </el-select>
+          <span>出厂日期</span>
+          <el-date-picker v-model="addData.factoryDate" type="date" placeholder="选择日期" style="flex-grow: 1; width: 100%; max-height: 35px" format="YYYY-MM-DD" value-format="YYYY-MM-DD" />
         </div>
         <div class="edit-input" style="margin-right: 1%">
-          <span>开户审批人3</span>
-          <el-select v-model="addData.approver_3" class="input-item big-font-el-select">
-            <el-option v-for="item in approver_list" :key="item.id" :label="item.label" :value="item.label"></el-option>
-          </el-select>
+          <span>首检日期</span>
+          <el-date-picker v-model="addData.firstInspectDate" type="date" placeholder="选择日期" style="flex-grow: 1; width: 100%; max-height: 35px" format="YYYY-MM-DD" value-format="YYYY-MM-DD" />
         </div>
       </div>
       <div class="btn">
@@ -112,6 +120,10 @@ export default {
         approver_2: userData.staffName || "",  // 修改：默认当前用户
         approver_3: userData.staffName || "",  // 修改：默认当前用户
         //balance: "",
+
+        // ****** 新增出厂日期和首检日期
+        factoryDate: null,
+        firstInspectDate: null
       },
       companyId: JSON.parse(sessionStorage.getItem("userData")).companyId,
       price_list: [],
@@ -311,6 +323,10 @@ export default {
         approver_1: this.addData.approver_1,
         approver_2: this.addData.approver_2,
         approver_3: this.addData.approver_3,
+
+        // ****** 新增出厂日期和首检日期字段
+        factoryDate: this.addData.factoryDate,
+        firstInspectDate: this.addData.firstInspectDate
       };
 
       // 定义字段名映射，将属性名映射为友好的显示名称
@@ -325,6 +341,10 @@ export default {
         approver_1: "开户审批人1",
         approver_2: "开户审批人2",
         approver_3: "开户审批人3",
+
+        // ****** 新增出厂和首检日期字段
+        factoryDate: "出厂日期",
+        firstInspectDate: "首检日期"
       };
 
       // 递归遍历对象属性
