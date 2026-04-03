@@ -281,6 +281,11 @@
       :command_dialogFormVisible="command_dialogFormVisible_shengxin" :commandType="commandType"
       :data="multipleSelection[0]" @close="closeCommandDialog"></commandShengXin>
 
+    <!-- 命令下发弹出框-旧圣鑫 -->
+    <commandOldShengXin v-if="command_dialogFormVisible_old_shengxin"
+      :command_dialogFormVisible="command_dialogFormVisible_old_shengxin" :commandType="commandType"
+      :data="multipleSelection[0]" @close="closeCommandDialog"></commandOldShengXin>
+
     <!-- 命令下发弹出框-卓正 -->
     <commandZhuoZheng v-if="command_dialogFormVisible_zhuozheng"
       :command_dialogFormVisible="command_dialogFormVisible_zhuozheng" :commandType="commandType"
@@ -336,6 +341,7 @@ import commandZhuoZheng from "@/components/userManage/command_zhuozheng.vue";
 import commandJiWanXun from "@/components/userManage/command_jiwanxun.vue";
 import commandShengXin from "@/components/userManage/command_shengxin.vue";
 import commandOldXinchi from "@/components/userManage/command_old_xinchi.vue";
+import commandOldShengXin from "@/components/userManage/command_oldshengxin.vue";
 import rechargeVue from "@/components/userManage/recharge.vue";
 import rechargeRecordVue from "@/components/userManage/rechargeRecord.vue";
 import changeVue from "@/components/userManage/change.vue";
@@ -377,6 +383,7 @@ export default {
     commandQianBaoTong,
     commandJiWanXun,
     commandOldXinchi,
+    commandOldShengXin,
   },
   data() {
     return {
@@ -451,6 +458,7 @@ export default {
       command_dialogFormVisible_jiwanxun: false,
       command_dialogFormVisible_shengxin: false,
       command_dialogFormVisible_old_xinchi: false,
+      command_dialogFormVisible_old_shengxin: false,
       valve_dialogFormVisible: false,
       valveOpen_dialogFormVisible: false,
       changeBalance_dialogFormVisible: false,
@@ -854,6 +862,9 @@ export default {
         case "圣鑫":
           this.command_dialogFormVisible_shengxin = true;
           break;
+        case "旧圣鑫":
+          this.command_dialogFormVisible_old_shengxin = true;
+          break;
         default:
           ElMessage.error(this.commandType + " 为未知设备厂商，无法下发命令");
       }
@@ -866,6 +877,7 @@ export default {
       this.command_dialogFormVisible_jiwanxun = false;
       this.command_dialogFormVisible_shengxin = false;
       this.command_dialogFormVisible_old_xinchi = false;
+      this.command_dialogFormVisible_old_shengxin = false;
       this.multipleSelection = [];
       this.commandType = "";
       this.reflush();
