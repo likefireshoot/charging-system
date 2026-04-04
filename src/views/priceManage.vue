@@ -60,7 +60,7 @@
         <el-table ref="multipleTableRef" :data="priceData" row-key="priceId"
           style="width: auto; height: 100%; table-layout: fixed; overflow-x: auto; overflow-y: auto" border
           :header-cell-style="{ background: '#46B97E', color: '#FFFFFF' }" @selection-change="handleSelectionChange"
-          id="jiage-table">
+          id="jiage-table" v-loading="isLoading">
           <el-table-column type="selection" :selectable="selectable" :width="selectionWidth" align="center" />
           <el-table-column label="序号" :width="idWidth" align="center" #default="scope">
             {{ scope.$index + 1 + (params.pageNo - 1) * params.pageSize }}
@@ -85,7 +85,8 @@
       <div class="page-box">
         <div class="demo-pagination-block">
           <el-pagination v-model:current-page="params.pageNo" v-model:page-size="params.pageSize"
-            :page-sizes="[5, 10, 15]" layout="total,  prev, pager, next, jumper" :total="total" />
+            :page-sizes="[5, 10, 15]" layout="total,  prev, pager, next, jumper" :total="total"
+          @current-change="handlePageChange"/>
         </div>
       </div>
     </div>
@@ -530,14 +531,17 @@ export default {
       //表格勾选行
       selection: [],
       companyList: [],
+
+      // ****** 翻页状态锁，防止抖动 ******
+      isLoading: false
     };
   },
   watch: {
-    "params.pageNo": {
-      handler() {
-        this.getPriceData();
-      },
-    },
+    // "params.pageNo": {
+    //   handler() {
+    //     this.getPriceData();
+    //   },
+    // },
     "addData.amountZeroEnd": function (newVal) {
       if (parseFloat(newVal) === 0) {
         this.addData.amountFirstStart = "0";
@@ -640,6 +644,14 @@ export default {
     }
   },
   methods: {
+    // ****** 手动处理分页变化，避免 watch 循环 ******
+    handlePageChange(page) {
+      if (this.isLoading) return;
+      // this.isLoading = true;
+      this.params.pageNo = page;
+      this.getPriceData();
+    },
+
     getCompanyList() {
       service
         .get("/getAllUnblockCompany")
@@ -758,6 +770,8 @@ export default {
       };
     },
     getPriceData() {
+      if (this.isLoading) return;
+      this.isLoading = true;
       console.log(this.params);
       if (this.companyId === 1) {
         if (this.params.company) {
@@ -772,14 +786,16 @@ export default {
           if (response.code === 200) {
             this.total = response.data.total;
             this.priceData = response.data.records;
-            this.params.pageNo = response.data.current;
+            // this.params.pageNo = response.data.current;
           } else {
             ElMessage.error(response.msg);
           }
         })
         .catch((error) => {
           ElMessage.error(error);
-        });
+        }).finally(()=>{
+          this.isLoading = false
+      });
     },
     addPrice() {
       if (!this.validateAddData()) {

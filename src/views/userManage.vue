@@ -130,7 +130,7 @@
             :filter-node-method="filterNode" @node-click="handleNodeClick" />
         </div>
         <div class="user-table">
-          <el-table ref="multipleTableRef" :data="yonghuData" row-key="imei"
+          <el-table ref="multipleTableRef" :data="yonghuData" row-key="imei" v-loading="isLoading"
             style="width: auto; height: 100%; table-layout: fixed; overflow-x: auto; overflow-y: auto" border
             :header-cell-style="{ background: '#46B97E', color: '#FFFFFF' }" @selection-change="handleSelectionChange"
             id="yonghu-table">
@@ -199,7 +199,7 @@
       <div class="page-box">
         <div class="demo-pagination-block">
           <el-pagination v-model:current-page="currentPage" v-model:page-size="pageSize" :page-sizes="[5, 10, 15]"
-            layout="total, prev, pager, next, jumper" :total="total" />
+            layout="total, prev, pager, next, jumper" :total="total" @current-change="handlePageChange" />
         </div>
       </div>
     </div>
@@ -281,6 +281,11 @@
       :command_dialogFormVisible="command_dialogFormVisible_shengxin" :commandType="commandType"
       :data="multipleSelection[0]" @close="closeCommandDialog"></commandShengXin>
 
+    <!-- 命令下发弹出框-旧圣鑫 -->
+    <commandOldShengXin v-if="command_dialogFormVisible_old_shengxin"
+      :command_dialogFormVisible="command_dialogFormVisible_old_shengxin" :commandType="commandType"
+      :data="multipleSelection[0]" @close="closeCommandDialog"></commandOldShengXin>
+
     <!-- 命令下发弹出框-卓正 -->
     <commandZhuoZheng v-if="command_dialogFormVisible_zhuozheng"
       :command_dialogFormVisible="command_dialogFormVisible_zhuozheng" :commandType="commandType"
@@ -336,6 +341,7 @@ import commandZhuoZheng from "@/components/userManage/command_zhuozheng.vue";
 import commandJiWanXun from "@/components/userManage/command_jiwanxun.vue";
 import commandShengXin from "@/components/userManage/command_shengxin.vue";
 import commandOldXinchi from "@/components/userManage/command_old_xinchi.vue";
+import commandOldShengXin from "@/components/userManage/command_oldshengxin.vue";
 import rechargeVue from "@/components/userManage/recharge.vue";
 import rechargeRecordVue from "@/components/userManage/rechargeRecord.vue";
 import changeVue from "@/components/userManage/change.vue";
@@ -377,6 +383,7 @@ export default {
     commandQianBaoTong,
     commandJiWanXun,
     commandOldXinchi,
+    commandOldShengXin,
   },
   data() {
     return {
@@ -392,7 +399,7 @@ export default {
         },
         company: null, // 新增所属水厂参数
         companyId: null, // 所属水厂ID
-        order: 2,
+        order: 0,   // ****** 默认按照时间顺序倒叙排列表格 ******
       },
       price_list: [],
       priceDialogVisible: false,
@@ -402,7 +409,7 @@ export default {
       staffPermissionIds: JSON.parse(sessionStorage.getItem("userData")).staffPermissionIds,
       token: JSON.parse(sessionStorage.getItem("userData")).token, // 用户token
       currentPage: 1,
-      pageSize: 50,
+      pageSize: 30,
       total: null,
       shuibiao_list: [
         {
@@ -431,8 +438,8 @@ export default {
       commandType: "",
       companyList: [],
 
-      sortField: "userId",
-      sortOrder: "asc",
+      sortField: "time",
+      sortOrder: "desc",
 
       //弹出框显示与否
       user_info_dialogFormVisible: false,
@@ -451,9 +458,13 @@ export default {
       command_dialogFormVisible_jiwanxun: false,
       command_dialogFormVisible_shengxin: false,
       command_dialogFormVisible_old_xinchi: false,
+      command_dialogFormVisible_old_shengxin: false,
       valve_dialogFormVisible: false,
       valveOpen_dialogFormVisible: false,
       changeBalance_dialogFormVisible: false,
+
+      // ****** 请求锁，避免重复请求 ******
+      isLoading: false,
     };
   },
   watch: {
@@ -464,9 +475,9 @@ export default {
         });
       }
     },
-    currentPage() {
-      this.fetchUserList(this.currentPage);
-    },
+    // currentPage() {
+    //   this.fetchUserList(this.currentPage);
+    // },
     multipleSelection() {
       console.log(this.multipleSelection);
     },
@@ -485,6 +496,15 @@ export default {
     this.getCompanyList();
   },
   methods: {
+    // ****** 手动处理分页变化，避免 watch 循环 ******
+    handlePageChange(page) {
+      // 防抖：如果当前正在请求，直接返回，避免重复点击
+      if (this.isLoading) return;
+      // this.isLoading = true;
+      this.currentPage = page;
+      this.fetchUserList(page);
+    },
+
     syncCompanyIdParam() {
       if (this.companyId === 1) {
         this.param.companyId = this.param.company || "";
@@ -507,6 +527,8 @@ export default {
       return queryString;
     },
     fetchUserList(page = this.currentPage || 1) {
+      if (this.isLoading) return;
+      this.isLoading = true;
       this.syncCompanyIdParam();
       const nonEmptyParams = this.filterNonEmptyParams(this.param);
       if (this.quyu_selected !== null) {
@@ -527,9 +549,9 @@ export default {
               item.updateTime = item.updateTime.replace("T", " ");
             });
             this.total = response.data.totalElements;
-            if (this.currentPage !== response.data.currentPages) {
-              this.currentPage = response.data.currentPages;
-            }
+            // if (this.currentPage !== response.data.currentPages) {
+            //   this.currentPage = response.data.currentPages;
+            // }
           } else {
             ElMessage.error(response.msg);
           }
@@ -537,6 +559,9 @@ export default {
         .catch((error) => {
           const errorMessage = error.response?.data?.msg || "璇锋眰鍙戠敓閿欒";
           ElMessage.error(errorMessage);
+        }).finally(() => {
+          // ✅ finally 放在最后，无论成功/失败，都会执行
+          this.isLoading = false;
         });
     },
     multi_edit_meter_price() {
@@ -692,64 +717,64 @@ export default {
       if (!value) return true;
       return data.label.includes(value);
     },
-    handleNodeClick(data) {
-      this.quyu_selected = data;
-      console.log(this.quyu_selected);
-      let region = data.label;
-      if (this.companyId === 1) {
-        if (this.param.companyId) {
-        } else {
-          this.param.companyId = ""; // 如果没有选择水厂，则不传水厂ID
-        }
-      } else {
-        this.param.companyId = this.companyId; // 所属水厂ID
-      }
-      const nonEmptyParams = this.filterNonEmptyParams({ ...this.param, region });
-      // 初始化查询字符串
-      let queryString = "";
-      // 如果有非空参数，则发起请求
-      if (Object.keys(nonEmptyParams).length > 0) {
-        // 遍历 nonEmptyParams 对象，将键值对拼接成查询字符串
-        for (const key in nonEmptyParams) {
-          if (nonEmptyParams.hasOwnProperty(key)) {
-            const value = nonEmptyParams[key];
-            // 如果查询字符串不为空，添加 & 符号分隔参数
-            if (queryString) {
-              queryString += `&${key}=${encodeURIComponent(value)}`;
-            } else {
-              // 第一个参数前添加 ? 符号
-              queryString += `?${key}=${encodeURIComponent(value)}`;
-            }
-          }
-        }
-      }
-      // 拼接完整的 URL
-      const url = `/userManage/userCharge/showUserMeters/${this.currentPage}${queryString}`;
-      console.log(url);
-      service
-        .get(url, {
-          headers: {
-            Authorization: this.token,
-          },
-        })
-        .then((response) => {
-          if (response.code === 200) {
-            this.yonghuData = response.data.userInfoData;
-            this.yonghuData.forEach((item) => {
-              item.updateTime = item.updateTime.replace("T", " ");
-            });
-            this.total = response.data.totalElements;
-            this.currentPage = response.data.currentPages;
-          } else {
-            ElMessage.error(response.msg);
-          }
-        })
-        .catch((error) => {
-          // 提取错误信息
-          const errorMessage = error.response?.data?.msg || "请求发生错误";
-          ElMessage.error(errorMessage);
-        });
-    },
+    // handleNodeClick(data) {
+    //   this.quyu_selected = data;
+    //   console.log(this.quyu_selected);
+    //   let region = data.label;
+    //   if (this.companyId === 1) {
+    //     if (this.param.companyId) {
+    //     } else {
+    //       this.param.companyId = ""; // 如果没有选择水厂，则不传水厂ID
+    //     }
+    //   } else {
+    //     this.param.companyId = this.companyId; // 所属水厂ID
+    //   }
+    //   const nonEmptyParams = this.filterNonEmptyParams({ ...this.param, region });
+    //   // 初始化查询字符串
+    //   let queryString = "";
+    //   // 如果有非空参数，则发起请求
+    //   if (Object.keys(nonEmptyParams).length > 0) {
+    //     // 遍历 nonEmptyParams 对象，将键值对拼接成查询字符串
+    //     for (const key in nonEmptyParams) {
+    //       if (nonEmptyParams.hasOwnProperty(key)) {
+    //         const value = nonEmptyParams[key];
+    //         // 如果查询字符串不为空，添加 & 符号分隔参数
+    //         if (queryString) {
+    //           queryString += `&${key}=${encodeURIComponent(value)}`;
+    //         } else {
+    //           // 第一个参数前添加 ? 符号
+    //           queryString += `?${key}=${encodeURIComponent(value)}`;
+    //         }
+    //       }
+    //     }
+    //   }
+    //   // 拼接完整的 URL
+    //   const url = `/userManage/userCharge/showUserMeters/${this.currentPage}${queryString}`;
+    //   console.log(url);
+    //   service
+    //     .get(url, {
+    //       headers: {
+    //         Authorization: this.token,
+    //       },
+    //     })
+    //     .then((response) => {
+    //       if (response.code === 200) {
+    //         this.yonghuData = response.data.userInfoData;
+    //         this.yonghuData.forEach((item) => {
+    //           item.updateTime = item.updateTime.replace("T", " ");
+    //         });
+    //         this.total = response.data.totalElements;
+    //         this.currentPage = response.data.currentPages;
+    //       } else {
+    //         ElMessage.error(response.msg);
+    //       }
+    //     })
+    //     .catch((error) => {
+    //       // 提取错误信息
+    //       const errorMessage = error.response?.data?.msg || "请求发生错误";
+    //       ElMessage.error(errorMessage);
+    //     });
+    // },
     selectable() {
       return true; // 目前允许所有行选择，你可以加上你的业务逻辑
     },
@@ -837,6 +862,9 @@ export default {
         case "圣鑫":
           this.command_dialogFormVisible_shengxin = true;
           break;
+        case "旧圣鑫":
+          this.command_dialogFormVisible_old_shengxin = true;
+          break;
         default:
           ElMessage.error(this.commandType + " 为未知设备厂商，无法下发命令");
       }
@@ -849,6 +877,7 @@ export default {
       this.command_dialogFormVisible_jiwanxun = false;
       this.command_dialogFormVisible_shengxin = false;
       this.command_dialogFormVisible_old_xinchi = false;
+      this.command_dialogFormVisible_old_shengxin = false;
       this.multipleSelection = [];
       this.commandType = "";
       this.reflush();
@@ -957,69 +986,69 @@ export default {
           console.error(error);
         });
     },
-    getUserInfo() {
-      if (this.companyId === 1) {
-        if (this.param.companyId) {
-        } else {
-          this.param.companyId = ""; // 如果没有选择水厂，则不传水厂ID
-        }
-      } else {
-        this.param.companyId = this.companyId; // 所属水厂ID
-      }
-      service
-        .get(`/userManage/userCharge/showUserMeters/${this.currentPage}?companyId=${this.param.companyId}&order=0`, {
-          headers: {
-            Authorization: this.token,
-          },
-        })
-        .then((response) => {
-          if (response.code === 200) {
-            this.yonghuData = response.data.userInfoData;
-            this.yonghuData.forEach((item) => {
-              item.updateTime = item.updateTime.replace("T", " ");
-            });
-            this.total = response.data.totalElements;
-            this.currentPage = response.data.currentPages;
-            console.log(this.yonghuData);
-          } else {
-            ElMessage.error(response.msg);
-          }
-        })
-        .catch((error) => {
-          ElMessage.error(error);
-        });
-    },
-    reflush() {
-      this.clear(1);//不搜
-      this.filterText = "";
-      this.$refs.treeRef.setCurrentKey(null);
-      this.quyu_selected = null;
-      if (this.companyId === 1) {
-        if (this.param.companyId) {
-        } else {
-          this.param.companyId = ""; // 如果没有选择水厂，则不传水厂ID
-        }
-      } else {
-        this.param.companyId = this.companyId; // 所属水厂ID
-      }
-      service
-        .get(`/userManage/userCharge/showUserMeters/1?companyId=${this.param.companyId}&order=0`, {
-          headers: {
-            Authorization: this.token,
-          },
-        })
-        .then((response) => {
-          this.yonghuData = response.data.userInfoData;
-          this.yonghuData.forEach((item) => {
-            item.updateTime = item.updateTime.replace("T", " ");
-          });
-          this.total = response.data.totalElements;
-          this.currentPage = 1;
-        })
-        .catch((error) => {
-          ElMessage.error("获取用户数据失败");
-        });
-    },
+    // getUserInfo() {
+    //   if (this.companyId === 1) {
+    //     if (this.param.companyId) {
+    //     } else {
+    //       this.param.companyId = ""; // 如果没有选择水厂，则不传水厂ID
+    //     }
+    //   } else {
+    //     this.param.companyId = this.companyId; // 所属水厂ID
+    //   }
+    //   service
+    //     .get(`/userManage/userCharge/showUserMeters/${this.currentPage}?companyId=${this.param.companyId}&order=0`, {
+    //       headers: {
+    //         Authorization: this.token,
+    //       },
+    //     })
+    //     .then((response) => {
+    //       if (response.code === 200) {
+    //         this.yonghuData = response.data.userInfoData;
+    //         this.yonghuData.forEach((item) => {
+    //           item.updateTime = item.updateTime.replace("T", " ");
+    //         });
+    //         this.total = response.data.totalElements;
+    //         this.currentPage = response.data.currentPages;
+    //         console.log(this.yonghuData);
+    //       } else {
+    //         ElMessage.error(response.msg);
+    //       }
+    //     })
+    //     .catch((error) => {
+    //       ElMessage.error(error);
+    //     });
+    // },
+    // reflush() {
+    //   this.clear(1);//不搜
+    //   this.filterText = "";
+    //   this.$refs.treeRef.setCurrentKey(null);
+    //   this.quyu_selected = null;
+    //   if (this.companyId === 1) {
+    //     if (this.param.companyId) {
+    //     } else {
+    //       this.param.companyId = ""; // 如果没有选择水厂，则不传水厂ID
+    //     }
+    //   } else {
+    //     this.param.companyId = this.companyId; // 所属水厂ID
+    //   }
+    //   service
+    //     .get(`/userManage/userCharge/showUserMeters/1?companyId=${this.param.companyId}&order=0`, {
+    //       headers: {
+    //         Authorization: this.token,
+    //       },
+    //     })
+    //     .then((response) => {
+    //       this.yonghuData = response.data.userInfoData;
+    //       this.yonghuData.forEach((item) => {
+    //         item.updateTime = item.updateTime.replace("T", " ");
+    //       });
+    //       this.total = response.data.totalElements;
+    //       this.currentPage = 1;
+    //     })
+    //     .catch((error) => {
+    //       ElMessage.error("获取用户数据失败");
+    //     });
+    // },
     getRegionData() {
       let url = "";
       if (this.companyId === 1) {
@@ -1054,32 +1083,32 @@ export default {
           ElMessage.error("获取区域数据失败");
         });
     },
-    clear(isSearch) {
-      this.param = {
-        userName: "",
-        userId: "",
-        imei: "",
-        meterCode: null,
-        meterType: "", // 水表类型
-        time: {
-          type: "",
-          accurateTime: "",
-        },
-        company: null, // 新增所属水厂参数
-        companyId: null, // 所属水厂ID
-        order: 0,
-      };
-      this.sortOrder = null; // 清除排序状态
-      if (typeof isSearch != 'number' || isNaN(isSearch)) {
-        this.filterText = "";
-        if (this.$refs.treeRef) {
-          this.$refs.treeRef.setCurrentKey(null);
-        }
-        this.quyu_selected = null;
-        this.currentPage = 1;
-        this.search();
-      }
-    },
+    // clear(isSearch) {
+    //   this.param = {
+    //     userName: "",
+    //     userId: "",
+    //     imei: "",
+    //     meterCode: null,
+    //     meterType: "", // 水表类型
+    //     time: {
+    //       type: "",
+    //       accurateTime: "",
+    //     },
+    //     company: null, // 新增所属水厂参数
+    //     companyId: null, // 所属水厂ID
+    //     order: 0,
+    //   };
+    //   this.sortOrder = null; // 清除排序状态
+    //   if (typeof isSearch != 'number' || isNaN(isSearch)) {
+    //     this.filterText = "";
+    //     if (this.$refs.treeRef) {
+    //       this.$refs.treeRef.setCurrentKey(null);
+    //     }
+    //     this.quyu_selected = null;
+    //     this.currentPage = 1;
+    //     this.search();
+    //   }
+    // },
     // 过滤掉值为空的参数
     filterNonEmptyParams(params) {
       const filteredParams = {};
@@ -1122,66 +1151,66 @@ export default {
       }
       return filteredParams;
     },
-    search() {
-      if (this.companyId === 1) {
-        if (this.param.company) {
-          this.param.companyId = this.param.company; // 所属水厂ID
-        }
-      } else {
-        this.param.companyId = this.companyId; // 所属水厂ID
-      }
-      const nonEmptyParams = this.filterNonEmptyParams(this.param);
-      if (this.quyu_selected !== null) {
-        nonEmptyParams.region = this.quyu_selected.label;
-      }
-      // 如果有非空参数，则发起请求
-      if (Object.keys(nonEmptyParams).length > 0) {
-        // 初始化查询字符串
-        let queryString = "";
-        // 遍历 nonEmptyParams 对象，将键值对拼接成查询字符串
-        for (const key in nonEmptyParams) {
-          if (nonEmptyParams.hasOwnProperty(key)) {
-            const value = nonEmptyParams[key];
-            // 如果查询字符串不为空，添加 & 符号分隔参数
-            if (queryString) {
-              queryString += `&${key}=${encodeURIComponent(value)}`;
-            } else {
-              // 第一个参数前添加 ? 符号
-              queryString += `?${key}=${encodeURIComponent(value)}`;
-            }
-          }
-        }
-        // 拼接完整的 URL
-        const url = `/userManage/userCharge/showUserMeters/${this.currentPage}${queryString}`;
-        console.log(url);
-        service
-          .get(url, {
-            headers: {
-              Authorization: this.token,
-            },
-          })
-          .then((response) => {
-            if (response.code === 200) {
-              console.log(response.data.userInfoData);
-              this.yonghuData = response.data.userInfoData;
-              this.yonghuData.forEach((item) => {
-                item.updateTime = item.updateTime.replace("T", " ");
-              });
-              this.total = response.data.totalElements;
-              this.currentPage = response.data.currentPages;
-            } else {
-              ElMessage.error(response.msg);
-            }
-          })
-          .catch((error) => {
-            // 提取错误信息
-            const errorMessage = error.response?.data?.msg || "请求发生错误";
-            ElMessage.error(errorMessage);
-          });
-      } else {
-        ElMessage.error("请输入搜索条件");
-      }
-    },
+    // search() {
+    //   if (this.companyId === 1) {
+    //     if (this.param.company) {
+    //       this.param.companyId = this.param.company; // 所属水厂ID
+    //     }
+    //   } else {
+    //     this.param.companyId = this.companyId; // 所属水厂ID
+    //   }
+    //   const nonEmptyParams = this.filterNonEmptyParams(this.param);
+    //   if (this.quyu_selected !== null) {
+    //     nonEmptyParams.region = this.quyu_selected.label;
+    //   }
+    //   // 如果有非空参数，则发起请求
+    //   if (Object.keys(nonEmptyParams).length > 0) {
+    //     // 初始化查询字符串
+    //     let queryString = "";
+    //     // 遍历 nonEmptyParams 对象，将键值对拼接成查询字符串
+    //     for (const key in nonEmptyParams) {
+    //       if (nonEmptyParams.hasOwnProperty(key)) {
+    //         const value = nonEmptyParams[key];
+    //         // 如果查询字符串不为空，添加 & 符号分隔参数
+    //         if (queryString) {
+    //           queryString += `&${key}=${encodeURIComponent(value)}`;
+    //         } else {
+    //           // 第一个参数前添加 ? 符号
+    //           queryString += `?${key}=${encodeURIComponent(value)}`;
+    //         }
+    //       }
+    //     }
+    //     // 拼接完整的 URL
+    //     const url = `/userManage/userCharge/showUserMeters/${this.currentPage}${queryString}`;
+    //     console.log(url);
+    //     service
+    //       .get(url, {
+    //         headers: {
+    //           Authorization: this.token,
+    //         },
+    //       })
+    //       .then((response) => {
+    //         if (response.code === 200) {
+    //           console.log(response.data.userInfoData);
+    //           this.yonghuData = response.data.userInfoData;
+    //           this.yonghuData.forEach((item) => {
+    //             item.updateTime = item.updateTime.replace("T", " ");
+    //           });
+    //           this.total = response.data.totalElements;
+    //           this.currentPage = response.data.currentPages;
+    //         } else {
+    //           ElMessage.error(response.msg);
+    //         }
+    //       })
+    //       .catch((error) => {
+    //         // 提取错误信息
+    //         const errorMessage = error.response?.data?.msg || "请求发生错误";
+    //         ElMessage.error(errorMessage);
+    //       });
+    //   } else {
+    //     ElMessage.error("请输入搜索条件");
+    //   }
+    // },
     download() {
       let url = "/userManage/userCharge/importMeterReportRecordTemplate";
       // 调用后端接口
@@ -1382,10 +1411,10 @@ export default {
         },
         company: null,
         companyId: null,
-        order: 2,
+        order: 0,
       };
-      this.sortField = "userId";
-      this.sortOrder = "asc";
+      this.sortField = "time";
+      this.sortOrder = "desc";
       if (typeof isSearch !== "number" || isNaN(isSearch)) {
         this.filterText = "";
         if (this.$refs.treeRef) {
@@ -1691,7 +1720,7 @@ export default {
 
 .user-table {
   width: 80%;
-  height: calc(100%-10px);
+  height: calc(100%- 10px);
   flex-grow: 1;
 }
 

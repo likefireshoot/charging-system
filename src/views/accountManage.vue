@@ -89,13 +89,25 @@
             :header-cell-style="{ background: '#46B97E', color: '#FFFFFF' }"
             @selection-change="handleSelectionChange"
             id="yonghu-table"
+            v-loading="isLoading"
           >
             <el-table-column type="selection" :selectable="selectable" min-width="40" align="center" fixed="left" />
-            <!-- <el-table-column property="theId" label="序号" width="100" align="center" fixed="left" /> -->
-            <el-table-column property="userId" label="用户号" min-width="50" align="center" fixed="left" />
+            <el-table-column property="theId" label="序号" width="100" align="center" fixed="left" />
+            <el-table-column property="userId" label="用户号" min-width="50" align="center" fixed="left" >
+              <template #header="scope">
+                <div class="sortable-header" @click="toggleSort('userId')">
+                  <span>{{ scope.column.label }}</span>
+                  <div class="sort-icons">
+                    <div :class="['asc-icon', { active: isSortActive('userId', 'asc') }]" />
+                    <div :class="['desc-icon', { active: isSortActive('userId', 'desc') }]" />
+                  </div>
+                </div>
+              </template>
+            </el-table-column>
             <el-table-column property="userName" label="用户名称" min-width="70" align="center"> </el-table-column>
             <el-table-column property="userPhone" label="联系电话" min-width="100" align="center" />
             <el-table-column property="meterCode" label="表号" min-width="100" align="center" />
+            <el-table-column property="reading" label="水表读数/吨" min-width="70" align="center" />
             <el-table-column property="meterType" label="水表类型" min-width="70" align="center" />
             <el-table-column property="priceName" label="价格类型" min-width="90" align="center" />
             <el-table-column property="smsConfigName" label="短信配置" min-width="90" align="center"></el-table-column>
@@ -103,15 +115,26 @@
             <el-table-column property="companyName" label="所属水厂" min-width="70" align="center" />
             <el-table-column property="regionName" label="所属区域" min-width="80" align="center" />
             <el-table-column property="approver1" label="开户审批人1" min-width="70" align="center" />
-            <el-table-column property="approver2" label="开户审批人2" min-width="70" align="center" />
-            <el-table-column property="approver3" label="开户审批人3" min-width="70" align="center" />
-            <el-table-column property="createTime" label="开户时间" min-width="100" align="center"> </el-table-column>
+            <el-table-column property="factoryDate" label="出厂日期" min-width="70" align="center" />
+            <el-table-column property="firstInspectDate" label="首检日期" min-width="70" align="center" />
+            <el-table-column property="createTime" label="开户时间" min-width="100" align="center">
+              <template #header="scope">
+                <div class="sortable-header" @click="toggleSort('time')">
+                  <span>{{ scope.column.label }}</span>
+                  <div class="sort-icons">
+                    <div :class="['asc-icon', { active: isSortActive('time', 'asc') }]" />
+                    <div :class="['desc-icon', { active: isSortActive('time', 'desc') }]" />
+                  </div>
+                </div>
+              </template>
+            </el-table-column>
           </el-table>
         </div>
       </div>
       <div class="page-box">
         <div class="demo-pagination-block">
-          <el-pagination v-model:current-page="currentPage" v-model:page-size="pageSize" :page-sizes="[5, 10, 15]" layout="total, prev, pager, next, jumper" :total="total" />
+          <el-pagination v-model:current-page="currentPage" v-model:page-size="pageSize" :page-sizes="[5, 10, 15]" layout="total, prev, pager, next, jumper" :total="total"
+          @current-change="handlePageChange"/>
         </div>
       </div>
     </div>
@@ -153,6 +176,7 @@ export default {
         company: null, // 新增所属水厂参数
         companyId: null, // 所属水厂ID
         regionId: null, // 区域ID
+        order: 0  // 默认排序方式
       },
       companyId: JSON.parse(sessionStorage.getItem("userData")).companyId, // 公司ID
       staffPermissionIds: JSON.parse(sessionStorage.getItem("userData")).staffPermissionIds,
@@ -188,6 +212,10 @@ export default {
       commandType: "",
       companyList: [],
 
+      // ****** 记录筛选条件 ******
+      sortField: "time",
+      sortOrder: "desc",
+
       //导出数据文件名称
       fileName: "用户数据列表",
 
@@ -196,6 +224,9 @@ export default {
       add_dialogFormVisible: false,
       delete_dialogFormVisible: false,
       deviceBinding_dialogFormVisible: false,
+
+      // ****** 请求锁，避免重复请求 ******
+      isLoading: false,
     };
   },
   watch: {
@@ -206,9 +237,9 @@ export default {
         });
       }
     },
-    currentPage() {
-      this.search();
-    },
+    // currentPage() {
+    //   this.search();
+    // },
     multipleSelection() {
       console.log(this.multipleSelection);
     },
@@ -227,6 +258,42 @@ export default {
     this.getCompanyList();
   },
   methods: {
+    // ****** 手动处理分页变化，避免 watch 循环 ******
+    handlePageChange(page) {
+      if (this.isLoading) return;
+      // this.isLoading = true;
+      this.currentPage = page;
+      this.search(page);
+    },
+
+    // ****** 筛选点击逻辑 ******
+    isSortActive(field, direction) {
+      return this.sortField === field && this.sortOrder === direction;
+    },
+    toggleSort(field) {
+      if (this.sortField === field) {
+        this.sortOrder = this.sortOrder === "asc" ? "desc" : "asc";
+      } else {
+        this.sortField = field;
+        this.sortOrder = "asc";
+      }
+      this.param.order = this.getOrderValue(field, this.sortOrder);
+      this.search();
+    },
+    getOrderValue(field, direction) {
+      const orderMap = {
+        time: {
+          asc: 1,
+          desc: 0,
+        },
+        userId: {
+          asc: 2,
+          desc: 3,
+        },
+      };
+      return orderMap[field][direction];
+    },
+
     filterNode(value, data) {
       if (!value) return true;
       return data.label.includes(value);
@@ -498,6 +565,8 @@ export default {
       return filteredParams;
     },
     search() {
+      if (this.isLoading) return;
+      this.isLoading = true;
       if (this.companyId === 1) {
         if (this.param.company) {
           this.param.companyId = this.param.company; // 所属水厂ID
@@ -527,13 +596,13 @@ export default {
             //   item.updateTime = item.updateTime.replace("T", " ");
             // });
             this.total = response.data.total;
-            this.currentPage = 1;
+            // this.currentPage = 1;
             this.yonghuData = response.data.list;
             // this.yonghuData.forEach((item) => {
             //   item.updateTime = item.updateTime.replace("T", " ");
             // });
             this.total = response.data.total;
-            this.currentPage = response.data.currentPages;
+            // this.currentPage = response.data.currentPages;
           } else {
             ElMessage.error(response.msg);
           }
@@ -542,6 +611,8 @@ export default {
           // 提取错误信息
           const errorMessage = error.response?.data?.msg || "请求发生错误";
           ElMessage.error(errorMessage);
+        }).finally(()=>{
+          this.isLoading = false
         });
     },
     download() {
@@ -1052,7 +1123,7 @@ export default {
 
 .user-table {
   width: 80%;
-  height: calc(100%-10px);
+  height: calc(100%- 10px);
   flex-grow: 1;
 }
 
@@ -1152,4 +1223,59 @@ export default {
     }
   }
 }
+
+.sortable-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  user-select: none;
+}
+
+.sort-icons {
+  display: flex;
+  flex-direction: column;
+  margin-left: 10px;
+}
+
+.asc-icon {
+  background-image: url("@/assets/yonghu/icon25.png");
+  background-repeat: no-repeat;
+  background-size: contain;
+  width: 12px;
+  height: 12px;
+}
+
+.asc-icon:hover {
+  background-image: url("@/assets/yonghu/icon24.png");
+  background-repeat: no-repeat;
+  background-size: contain;
+}
+
+.asc-icon.active {
+  background-image: url("@/assets/yonghu/icon24.png");
+  background-repeat: no-repeat;
+  background-size: contain;
+}
+
+.desc-icon {
+  background-image: url("@/assets/yonghu/icon23.png");
+  background-repeat: no-repeat;
+  background-size: contain;
+  width: 12px;
+  height: 12px;
+}
+
+.desc-icon:hover {
+  background-image: url("@/assets/yonghu/icon22.png");
+  background-repeat: no-repeat;
+  background-size: contain;
+}
+
+.desc-icon.active {
+  background-image: url("@/assets/yonghu/icon22.png");
+  background-repeat: no-repeat;
+  background-size: contain;
+}
+
 </style>

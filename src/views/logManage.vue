@@ -72,6 +72,7 @@
           :header-cell-style="{ background: '#46B97E', color: '#FFFFFF' }"
           @selection-change="handleSelectionChange"
           id="log-table"
+          v-loading="isLoading"
         >
           <el-table-column type="selection" :selectable="selectable" :width="selectionWidth" align="center" />
           <el-table-column label="序号" :width="indexWidth" align="center" #default="scope">
@@ -90,7 +91,8 @@
       </div>
       <div class="page-box">
         <div class="demo-pagination-block">
-          <el-pagination v-model:current-page="params.pageNo" v-model:page-size="params.pageSize" :page-sizes="[5, 10, 15]" layout="total,  prev, pager, next, jumper" :total="total" />
+          <el-pagination v-model:current-page="params.pageNo" v-model:page-size="params.pageSize" :page-sizes="[5, 10, 15]" layout="total,  prev, pager, next, jumper" :total="total"
+          @current-change="handlePageChange"/>
         </div>
       </div>
     </div>
@@ -145,14 +147,17 @@ export default {
 
       //表格勾选行
       selection: [],
+
+      // ****** 锁
+      isLoading: false
     };
   },
   watch: {
-    "params.pageNo": {
-      handler() {
-        this.getLogsData();
-      },
-    },
+    // "params.pageNo": {
+    //   handler() {
+    //     this.getLogsData();
+    //   },
+    // },
   },
   computed: {
     // 每列的百分比宽度
@@ -193,6 +198,14 @@ export default {
     }
   },
   methods: {
+    // ****** 手动处理分页变化，避免 watch 循环 ******
+    handlePageChange(page) {
+      if (this.isLoading) return;
+      // this.isLoading = true;
+      this.params.pageNo = page;
+      this.getLogsData();
+    },
+
     selectable() {
       return true; // 目前允许所有行选择，你可以加上你的业务逻辑
     },
@@ -278,6 +291,8 @@ export default {
         });
     },
     getLogsData() {
+      if (this.isLoading) return
+      this.isLoading = true
       let params = {
         pageNo: this.params.pageNo,
         pageSize: this.params.pageSize,
@@ -320,14 +335,16 @@ export default {
           if (response.code === 200) {
             this.total = response.data.total;
             this.logData = response.data.records;
-            this.params.pageNo = response.data.current; // 更新当前页码
+            // this.params.pageNo = response.data.current; // 更新当前页码
           } else {
             ElMessage.error(response.msg);
           }
         })
         .catch((error) => {
           ElMessage.error(error);
-        });
+        }).finally(()=>{
+          this.isLoading = false
+      });
     },
     search() {
       this.getLogsData();

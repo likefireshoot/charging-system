@@ -73,6 +73,7 @@
           :header-cell-style="{ background: '#46B97E', color: '#FFFFFF' }"
           @selection-change="handleSelectionChange"
           id="transaction-record-table"
+          v-loading="isLoading"
         >
           <el-table-column type="selection" :selectable="selectable" min-width="40" align="center" fixed="left" />
           <!-- <el-table-column property="theId" label="序号" width="100" align="center" fixed="left" /> -->
@@ -96,7 +97,8 @@
     </div>
     <div class="page-box">
       <div class="demo-pagination-block">
-        <el-pagination v-model:current-page="currentPage" v-model:page-size="pageSize" :page-sizes="[5, 10, 15]" layout="total,  prev, pager, next, jumper" :total="total" />
+        <el-pagination v-model:current-page="currentPage" v-model:page-size="pageSize" :page-sizes="[5, 10, 15]" layout="total,  prev, pager, next, jumper" :total="total"
+        @current-change="handlePageChange"/>
       </div>
     </div>
   </div>
@@ -140,6 +142,9 @@ export default {
           label: "历史扣费记录",
         },
       ],
+
+      // ****** 锁
+      isLoading: false
     };
   },
   computed: {
@@ -148,9 +153,9 @@ export default {
     },
   },
   watch: {
-    currentPage() {
-      this.getTransactionRecordData();
-    },
+    // currentPage() {
+    //   this.getTransactionRecordData();
+    // },
     title(newVal, oldVal) {
       this.$emit("changeTye");
     },
@@ -160,6 +165,14 @@ export default {
     this.getTransactionRecordData();
   },
   methods: {
+    // ****** 手动处理分页变化，避免 watch 循环 ******
+    handlePageChange(page) {
+      if (this.isLoading) return;
+      // this.isLoading = true;
+      this.currentPage = page;
+      this.getTransactionRecordData();
+    },
+
     selectable() {
       return true; // 目前允许所有行选择，你可以加上你的业务逻辑
     },
@@ -175,6 +188,8 @@ export default {
       console.log(this.startData);
     },
     getTransactionRecordData() {
+      if (this.isLoading) return
+      this.isLoading = true
       const nonEmptyParams = this.filterNonEmptyParams(this.startData);
       // 如果有非空参数，则发起请求
       if (Object.keys(nonEmptyParams).length > 0) {
@@ -209,7 +224,7 @@ export default {
                 item.createTime = item.createTime.replace("T", " ");
               });
               this.total = response.data.totalElements;
-              this.currentPage = response.data.currentPages;
+              // this.currentPage = response.data.currentPages;
               console.log(this.transactionTableData);
             } else {
               ElMessage.error(response.msg);
@@ -217,7 +232,9 @@ export default {
           })
           .catch((error) => {
             ElMessage.error(error);
-          });
+          }).finally(()=>{
+            this.isLoading = false
+        });
       }
     },
     reflush() {
