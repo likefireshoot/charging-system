@@ -27,7 +27,7 @@
         </div>
         <div class="edit-input" style="margin-right: 1%">
           <span>表号</span>
-          <el-input v-model="addData.meterCode" class="input-item" />
+          <el-input @blur="handleMeterCodeBlur" v-model="addData.meterCode" class="input-item" />
         </div>
         <div class="edit-input" style="margin-right: 1%">
           <span>价格类型</span>
@@ -67,6 +67,26 @@
           <span>首检日期</span>
           <el-date-picker v-model="addData.firstInspectDate" type="date" placeholder="选择日期" style="flex-grow: 1; width: 100%; max-height: 35px" format="YYYY-MM-DD" value-format="YYYY-MM-DD" />
         </div>
+        <!-- 在首检日期后面添加 -->
+        <div class="edit-input" style="margin-right: 1%">
+          <span>水表读数（吨）</span>
+          <div class="reading-container">
+            <el-input
+              v-model="addData.reading"
+              class="input-item"
+              :disabled="!allowEditReading"
+              placeholder="请输入表号后自动查询"
+            />
+            <span v-if="meterQueryError" class="error-tip">{{ meterQueryError }}</span>
+          </div>
+          <el-checkbox
+            v-model="allowEditReading"
+            class="edit-checkbox"
+            @change="handleAllowEditChange"
+          >
+            <span style="font-size: 16px;">确认修改水表吨数</span>
+          </el-checkbox>
+        </div>
       </div>
       <div class="btn">
         <div class="confirm-btn" @click="handleCommit">
@@ -78,6 +98,42 @@
           <span style="font-size: 20px; margin-left: 15%; color: #5a5a5a">取消</span>
         </div>
       </div>
+      <!-- 在 btn div 后面，device-dialog-content 结束前添加 -->
+      <el-dialog
+        v-model="showConfirmDialog"
+        title="重要提示"
+        width="500px"
+        :close-on-click-modal="false"
+        :close-on-press-escape="false"
+        @close="closeConfirmDialog"
+        center
+        :lock-scroll="false"
+      >
+        <div style="font-size: 22px; color: #333; line-height: 1.8; text-align: center; padding: 10px 0;">
+          <template v-if="allowEditReading">
+            设备绑定后，水表将从
+            <span style="color: #45ba7e; font-weight: bold; font-size: 22px;">{{ addData.reading }}</span>
+            吨开始计费，请核实以避免多余的扣费
+          </template>
+          <template v-else>
+            设备绑定后，水表将从
+            <span style="color: #45ba7e; font-weight: bold; font-size: 22px;">{{ originalReading }}</span>
+            吨开始计费，请核实以避免多余的扣费
+          </template>
+        </div>
+        <template #footer>
+          <div style="display: flex; justify-content: center; gap: 20px;">
+            <div class="confirm-btn" @click="confirmReadingChange" style="background-color: #45ba7e; color: #fff; width: 120px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 5px; cursor: pointer; font-size: 16px;">
+              <el-icon><Check /></el-icon>
+              <span style="margin-left: 8px; font-size: 20px">确认</span>
+            </div>
+            <div class="cancel-btn" @click="closeConfirmDialog" style="background-color: #fff; border: 1px solid #ddd; width: 120px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 5px; cursor: pointer; font-size: 16px;">
+              <el-icon style="color: #45ba7e"><Close /></el-icon>
+              <span style="margin-left: 8px; color: #5a5a5a; font-size: 20px">取消</span>
+            </div>
+          </div>
+        </template>
+      </el-dialog>
     </div>
   </div>
 </template>
@@ -99,31 +155,27 @@ export default {
     if (!userDataStr) {
       throw new Error("未找到用户登录信息，请重新登录！");
     }
-  
+
     const userData = JSON.parse(userDataStr);
-  
-  // 验证必要字段是否存在
-  if (!userData.staffName || !userData.companyId) {
-    throw new Error("用户信息不完整，请重新登录！");
-  }
+
+    if (!userData.staffName || !userData.companyId) {
+      throw new Error("用户信息不完整，请重新登录！");
+    }
     return {
       addData: {
-        companyId: userData.companyId, // 新增水厂字段
-        //regionName: "",
+        companyId: userData.companyId,
         userId: "",
-        userName: "",
         userName: "",
         meterCode: "",
         priceId: null,
         smsConfigId: null,
-        approver_1: userData.staffName || "",  // 修改：默认当前用户
-        approver_2: userData.staffName || "",  // 修改：默认当前用户
-        approver_3: userData.staffName || "",  // 修改：默认当前用户
-        //balance: "",
-
-        // ****** 新增出厂日期和首检日期
+        approver_1: userData.staffName || "",
+        approver_2: userData.staffName || "",
+        approver_3: userData.staffName || "",
         factoryDate: null,
-        firstInspectDate: null
+        firstInspectDate: null,
+        reading: null,        // 新增：水表读数
+        meterId: null         // 新增：水表ID
       },
       companyId: JSON.parse(sessionStorage.getItem("userData")).companyId,
       price_list: [],
@@ -142,6 +194,11 @@ export default {
       ],
       sms_config_list: [],
       approver_list: [],
+      allowEditReading: false,      // 新增：是否允许编辑读数
+      meterQueryError: "",          // 新增：查询错误信息
+      originalReading: null,        // 新增：原始读数
+      showConfirmDialog: false,     // 新增：确认弹窗显示
+      submitting: false             // 新增：提交状态
     };
   },
   mounted() {
@@ -178,6 +235,12 @@ export default {
   },
   methods: {
     handleAddClose() {
+      // 重置所有状态（与 closeDeviceBindingDialog 保持一致）
+      this.allowEditReading = false;
+      this.meterQueryError = "";
+      this.originalReading = null;
+      this.showConfirmDialog = false;
+      this.submitting = false;
       this.$emit("close");
     },
     getRegionData() {
@@ -308,12 +371,16 @@ export default {
         });
     },
     handleCommit() {
+      if (this.submitting) return;
+
+      // 先进行基础验证
       let missingFields = [];
       Object.keys(this.addData).forEach((key) => {
         if (typeof this.addData[key] === "string") {
           this.addData[key] = this.addData[key].trim();
         }
       });
+
       let formData = {
         companyId: this.addData.companyId,
         userId: this.addData.userId,
@@ -323,26 +390,20 @@ export default {
         approver_1: this.addData.approver_1,
         approver_2: this.addData.approver_2,
         approver_3: this.addData.approver_3,
-
-        // ****** 新增出厂日期和首检日期字段
         factoryDate: this.addData.factoryDate,
         firstInspectDate: this.addData.firstInspectDate
       };
 
-      // 定义字段名映射，将属性名映射为友好的显示名称
+      // 定义字段名映射
       const fieldNameMap = {
-        userName: "用户名称",
-        userAddr: "用户住址",
         companyId: "所属水厂",
-        regionName: "所属区域",
+        userId: "用户号",
         meterCode: "表号",
         priceId: "价格类型",
         smsConfigId: "短信配置",
         approver_1: "开户审批人1",
         approver_2: "开户审批人2",
         approver_3: "开户审批人3",
-
-        // ****** 新增出厂和首检日期字段
         factoryDate: "出厂日期",
         firstInspectDate: "首检日期"
       };
@@ -355,10 +416,8 @@ export default {
             const value = obj[key];
 
             if (typeof value === "object" && value !== null) {
-              // 如果是对象，继续递归遍历
               traverseObject(value, fullKey);
             } else {
-              // 检查值是否为空，排除0的情况
               if (value === undefined || value === null || value === "") {
                 missingFields.push(fullKey);
               }
@@ -376,26 +435,142 @@ export default {
         return;
       }
 
-      console.log(formData);
+      // 显示确认弹窗
+      this.showConfirmDialog = true;
+    },
+    // 实际提交方法
+    async doCommit() {
+      let formData = {
+        companyId: this.addData.companyId,
+        userId: this.addData.userId,
+        meterCode: this.addData.meterCode,
+        priceId: this.addData.priceId,
+        smsConfigId: this.addData.smsConfigId,
+        approver_1: this.addData.approver_1,
+        approver_2: this.addData.approver_2,
+        approver_3: this.addData.approver_3,
+        factoryDate: this.addData.factoryDate,
+        firstInspectDate: this.addData.firstInspectDate
+      };
 
-      // 所有字段都不为空，提交数据到后台
-      service
-        .post("/userManage/userCharge/userMeterBind", formData)
-        .then((res) => {
-          if (res.code === 200) {
-            ElMessage.success("设备绑定成功");
-            // 可以在这里添加提交成功后的其他逻辑，比如关闭对话框
-            this.handleAddClose();
-          } else if (res.code === -1) {
-            ElMessage.error(res.msg);
+      this.submitting = true;
+
+      try {
+        // 如果需要更新读数，先更新
+        if (this.allowEditReading && this.addData.reading !== this.originalReading) {
+          const updateSuccess = await this.updateMeterReading();
+          if (!updateSuccess) {
+            this.submitting = false;
+            return;
           }
-        })
-        .catch((err) => {
-          ElMessage.error("提交失败：" + err.message);
-        });
+        }
+
+        // 提交绑定数据
+        const res = await service.post("/userManage/userCharge/userMeterBind", formData);
+        if (res.code === 200) {
+          ElMessage.success("设备绑定成功");
+          this.handleAddClose();
+        } else if (res.code === -1) {
+          ElMessage.error(res.msg);
+        }
+      } catch (err) {
+        ElMessage.error("提交失败：" + err.message);
+      } finally {
+        this.submitting = false;
+      }
     },
     closeDeviceBindingDialog() {
+      // 重置所有状态
+      this.allowEditReading = false;
+      this.meterQueryError = "";
+      this.originalReading = null;
+      this.showConfirmDialog = false;
+      this.submitting = false;
       this.$emit("close");
+    },
+    // 查询水表读数
+    async queryMeterReading() {
+      if (!this.addData.meterCode || this.addData.meterCode.trim() === "") {
+        return;
+      }
+
+      try {
+        const response = await service.get(`/external/externalSimpleMeterQuery?meterCode=${this.addData.meterCode}`);
+
+        if (response.code === 200 && response.data) {
+          this.originalReading = response.data.reading;
+          this.addData.reading = response.data.reading;
+          this.addData.meterId = response.data.meterId;
+          this.meterQueryError = "";
+        } else {
+          this.addData.reading = null;
+          this.addData.meterId = null;
+          this.originalReading = null;
+          this.meterQueryError = "该表资料未录入系统";
+        }
+      } catch (error) {
+        this.addData.reading = null;
+        this.addData.meterId = null;
+        this.originalReading = null;
+        this.meterQueryError = "该表资料未录入系统";
+      }
+    },
+
+// 表号失焦处理
+    handleMeterCodeBlur() {
+      if (!this.addData.meterCode || this.addData.meterCode.trim() === "") {
+        this.addData.reading = null;
+        this.addData.meterId = null;
+        this.originalReading = null;
+        this.meterQueryError = "";
+        this.allowEditReading = false;
+        return;
+      }
+
+      this.queryMeterReading();
+    },
+
+// 复选框变化处理
+    handleAllowEditChange(value) {
+      if (!value && this.originalReading !== null && this.originalReading !== undefined) {
+        this.addData.reading = this.originalReading;
+      }
+    },
+
+// 关闭确认弹窗
+    closeConfirmDialog() {
+      this.showConfirmDialog = false;
+    },
+
+// 确认读数变更
+    confirmReadingChange() {
+      this.showConfirmDialog = false;
+      this.doCommit();
+    },
+
+// 更新水表读数
+    async updateMeterReading() {
+      if (!this.allowEditReading || this.addData.reading === null || this.addData.reading === undefined) {
+        return true;
+      }
+
+      try {
+        const updateResponse = await service.post("/userManage/meterRead/editMeter", {
+          meterId: this.addData.meterId,
+          meterCode: this.addData.meterCode,
+          reading: this.addData.reading
+        });
+
+        if (updateResponse.code !== 200) {
+          ElMessage.error(updateResponse.msg || "更新水表读数失败");
+          return false;
+        }
+
+        return true;
+      } catch (error) {
+        ElMessage.error("更新水表读数失败：" + (error?.message || "未知错误"));
+        return false;
+      }
     },
   },
 };
@@ -414,7 +589,7 @@ export default {
 
 .device-dialog-content {
   width: 70%;
-  height: 400px;
+  height: 510px;
   border: 1px solid #fafafa;
   background-color: #fafafa;
   border-radius: 5px;
@@ -508,5 +683,56 @@ export default {
 .cancel-btn {
   background-color: #fff;
   margin-right: 5%;
+}
+
+/* 添加读数相关样式 */
+.reading-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+}
+
+.reading-container .input-item {
+  flex: 1;
+}
+
+.error-tip {
+  color: red;
+  font-size: 18px;
+  white-space: nowrap;
+  font-weight: bold;
+}
+
+.edit-checkbox {
+  margin-top: 8px;
+  margin-left: 0;
+}
+
+/* 弹窗样式 */
+:deep(.el-dialog) {
+  --el-dialog-width: 500px;
+  --el-dialog-border-radius: 8px;
+}
+
+:deep(.el-dialog__header) {
+  padding: 20px 20px 10px;
+  border-bottom: 1px solid #eee;
+}
+
+:deep(.el-dialog__title) {
+  font-size: 25px;
+  font-weight: 600;
+  color: #333;
+}
+
+:deep(.el-dialog__body) {
+  padding: 30px 40px;
+  text-align: center;
+}
+
+:deep(.el-dialog__footer) {
+  padding: 10px 20px 30px;
+  border-top: none;
 }
 </style>
