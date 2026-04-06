@@ -27,26 +27,29 @@
         <div class="recharge-input" style="margin-right: 1%; width: 100%">
           <span>快捷充值金额</span>
           <el-radio-group v-model="rechargeData.quickmoney">
-            <el-radio value="10" class="recharge-green">10元</el-radio>
-            <el-radio value="50" class="recharge-green">50元</el-radio>
-            <el-radio value="100" class="recharge-green">100元</el-radio>
-            <el-radio value="150" class="recharge-green">150元</el-radio>
-            <el-radio value="200" class="recharge-green">200元</el-radio>
-            <el-radio value="500" class="recharge-green">500元</el-radio>
+            <el-radio value="10" class="recharge-green">10 元</el-radio>
+            <el-radio value="50" class="recharge-green">50 元</el-radio>
+            <el-radio value="100" class="recharge-green">100 元</el-radio>
+            <el-radio value="150" class="recharge-green">150 元</el-radio>
+            <el-radio value="200" class="recharge-green">200 元</el-radio>
+            <el-radio value="500" class="recharge-green">500 元</el-radio>
             <el-radio value="" class="recharge-green">取消</el-radio>
           </el-radio-group>
         </div>
         <div class="recharge-input" style="margin-right: 1%">
           <span>充值金额（元）</span>
-          <el-input v-model="rechargeData.money" />
+          <el-input
+            v-model="rechargeData.money"
+            @input="handleMoneyInput"
+            @blur="handleMoneyBlur"
+            placeholder="请输入充值金额"
+          />
+          <span v-if="moneyError" style="color: #f56c6c; font-size: 14px; margin-top: 5px;">{{ moneyError }}</span>
         </div>
-        <div class="recharge-input" style="margin-right: 1%">
-          <span>交易方式</span>
-          <el-select v-model="rechargeData.rechargeType">
-            <el-option label="现金" value="现金" />
-            <el-option label="微信支付" value="微信支付" />
-            <el-option label="支付宝支付" value="支付宝支付" />
-          </el-select>
+        <!-- 添加的提示文字 -->
+        <div style="font-size: 17px; color: #999; padding-top: 18px;">
+          <div style="height: 19px"></div>
+          <span style="margin-left: 16px">   快捷充值金额 与 充值金额 二选一即可</span>
         </div>
       </div>
       <div class="btn">
@@ -61,11 +64,52 @@
       </div>
     </div>
   </div>
+
+  <!-- 打印确认对话框 -->
+  <el-dialog
+    v-model="printDialogVisible"
+    title="打印收据"
+    width="500px"
+    :close-on-click-modal="false"
+    :show-close="false"
+    custom-class="print-confirm-dialog"
+    :lock-scroll="false"
+  >
+    <div class="print-dialog-content">
+      <div class="print-icon">
+        <el-icon size="80" color="#46B97E"><Printer /></el-icon>
+      </div>
+      <div class="print-message">
+        <p style="font-size: 22px; color: #333; margin: 20px 0;">充值成功！</p>
+        <p style="font-size: 20px; color: #666;">是否立即打印收据？</p>
+      </div>
+
+      <!-- ✅ 添加自动下载勾选框 -->
+      <div class="auto-download-checkbox" style="margin: 20px 0 10px 0;">
+        <el-checkbox v-model="autoDownload" size="large">
+          <span style="font-size: 16px; color: #666;">自动下载PDF文件</span>
+        </el-checkbox>
+        <div style="font-size: 12px; color: #999; margin-top: 5px;">
+          勾选后，打印时将自动保存PDF文件到本地
+        </div>
+      </div>
+    </div>
+    <template #footer>
+      <span class="dialog-footer">
+        <el-button @click="handleSkipPrint" style="width: 100px; font-size: 16px;">稍后打印</el-button>
+        <el-button type="success" @click="handleConfirmPrint" style="width: 100px; font-size: 16px;">立即打印</el-button>
+      </span>
+    </template>
+  </el-dialog>
+
+  <!-- 隐藏的 PDF 容器，用于打印 -->
+  <div id="print-container" style="position: absolute; left: -9999px; top: 0;"></div>
 </template>
 
 <script>
 import { ElMessage } from "element-plus";
 import service from "@/api/request";
+import axios from "axios";
 
 export default {
   props: {
@@ -86,9 +130,15 @@ export default {
         balance: "",
         quickmoney: "",
         money: "",
-        rechargeType: "",
+        rechargeType: "现金",
         region: "",
       },
+      printDialogVisible: false,
+      receiptPDFBlob: null,
+      receiptData: null,
+      autoDownload: true,
+      moneyError: "", // 添加金额错误提示
+      isCharging: false, // 添加充值中状态
     };
   },
   mounted() {
@@ -104,7 +154,95 @@ export default {
       this.rechargeData.meterCode = this.data.meterCode;
       this.rechargeData.region = this.data.regionName;
     },
+    // 处理金额输入
+    handleMoneyInput(value) {
+      this.moneyError = "";
+
+      if (!value) {
+        this.rechargeData.money = "";
+        return;
+      }
+
+      // 只允许数字和小数点输入
+      let cleanedValue = value.replace(/[^\d.]/g, "");
+
+      // 确保只有一个小数点
+      const parts = cleanedValue.split(".");
+      if (parts.length > 2) {
+        cleanedValue = parts[0] + "." + parts.slice(1).join("");
+      }
+
+      // 限制小数位数为 2 位
+      if (cleanedValue.includes(".")) {
+        const decimalParts = cleanedValue.split(".");
+        if (decimalParts[1] && decimalParts[1].length > 2) {
+          cleanedValue = decimalParts[0] + "." + decimalParts[1].substring(0, 2);
+        }
+      }
+
+      this.rechargeData.money = cleanedValue;
+    },
+    // 处理金额失去焦点
+    handleMoneyBlur() {
+      if (!this.rechargeData.money) {
+        this.moneyError = "";
+        return;
+      }
+
+      let value = this.rechargeData.money;
+      let numValue = parseFloat(value);
+
+      // 检查是否为有效数字
+      if (isNaN(numValue)) {
+        this.moneyError = "请输入有效的数字";
+        this.rechargeData.money = "";
+        return;
+      }
+
+      // 检查是否为正数
+      if (numValue <= 0) {
+        this.moneyError = "充值金额必须大于 0";
+        this.rechargeData.money = "";
+        return;
+      }
+
+      // 检查金额上限（可选）
+      if (numValue > 999999.99) {
+        this.moneyError = "充值金额不能超过 999,999.99 元";
+        this.rechargeData.money = "";
+        return;
+      }
+
+      // 自动格式化为两位小数
+      this.rechargeData.money = numValue.toFixed(2);
+      this.moneyError = "";
+    },
     handleConfirm() {
+      if (this.isCharging) {
+        ElMessage.warning('正在处理中，请勿重复操作');
+        return;
+      }
+      // 先进行金额校验
+      if (this.rechargeData.money && !this.rechargeData.quickmoney) {
+        if (this.moneyError) {
+          ElMessage.error(this.moneyError);
+          return;
+        }
+
+        // 再次验证金额格式
+        const numValue = parseFloat(this.rechargeData.money);
+        if (isNaN(numValue) || numValue <= 0) {
+          ElMessage.error("充值金额必须为正数");
+          return;
+        }
+
+        // 验证是否为两位小数格式
+        if (!/^\d+(\.\d{2})?$/.test(this.rechargeData.money)) {
+          ElMessage.error("充值金额必须保留两位小数（例如：10.00）");
+          return;
+        }
+      }
+
       let missingFields = [];
       Object.keys(this.rechargeData).forEach((key) => {
         if (typeof this.rechargeData[key] === "string") {
@@ -114,32 +252,26 @@ export default {
       const formData = this.rechargeData;
       console.log(formData);
 
-      // 定义字段名映射，将属性名映射为友好的显示名称
       const fieldNameMap = {
         userName: "用户名称",
         meterCode: "表号",
         balance: "余额",
         quickmoney: "快捷充值金额",
         money: "充值金额",
-        rechargeType: "交易方式",
       };
 
-      // 检查快捷充值金额和充值金额是否同时存在
       if (formData.quickmoney && formData.money) {
         ElMessage.error("快捷充值金额和充值金额只能选择其一");
         return;
       }
 
-      // 递归遍历对象属性
       function traverseObject(obj, parentKey = "") {
         for (const key in obj) {
           if (obj.hasOwnProperty(key)) {
             const fullKey = parentKey ? `${parentKey}.${key}` : key;
             const value = obj[key];
 
-            // 特殊处理快捷充值金额和充值金额
             if (key === "quickmoney" || key === "money") {
-              // 如果两者都为空，才认为是缺失字段
               if (
                 formData.quickmoney === undefined ||
                 formData.quickmoney === null ||
@@ -147,32 +279,29 @@ export default {
               ) {
                 missingFields.push(fullKey);
               }
-              // 检查 money 是否为正数
               if (key === "money" && value !== null && value !== "") {
                 const numValue = parseFloat(value);
                 if (isNaN(numValue) || numValue <= 0) {
                   ElMessage.error("充值金额必须为正数");
-                  return false; // ❗返回 false 表示校验失败
+                  return false;
                 }
               }
-              continue; // 跳过后续的空值检查
+              continue;
             }
 
             if (typeof value === "object" && value !== null) {
-              // 如果是对象，继续递归遍历
               traverseObject(value, fullKey);
             } else {
-              // 检查值是否为空，排除0的情况
               if (value === undefined || value === null || value === "") {
                 missingFields.push(fullKey);
               }
             }
           }
         }
-        return true; // ✅ 校验通过
+        return true;
       }
       const isValid = traverseObject(formData);
-      if (!isValid) return; // ❗直接终止 handleConfirm 执行
+      if (!isValid) return;
 
       if (missingFields.length > 0) {
         const fieldNames = missingFields.map((field) => fieldNameMap[field] || field);
@@ -182,27 +311,174 @@ export default {
       }
       let dataParams = {
         meterCode: formData.meterCode,
-        rechargeType: formData.rechargeType,
+        rechargeType: "现金",
         rechargeAmount: null,
         region: formData.region
       };
       if (formData.quickmoney) {
-        dataParams.rechargeAmount = formData.quickmoney;
+        dataParams.rechargeAmount = parseFloat(formData.quickmoney).toFixed(2);
       } else if (formData.money) {
-        dataParams.rechargeAmount = formData.money;
+        dataParams.rechargeAmount = parseFloat(formData.money).toFixed(2);
       }
       console.log(dataParams);
+      this.isCharging = true;
       service
         .post("/userManage/userCharge/rechargeUserMeter", dataParams)
         .then((response) => {
           if (response.code === 200) {
-            ElMessage.success("充值成功");
-            this.handleRechargeClose();
+            // 保存收据数据
+            const rechargeAmount = parseFloat(formData.quickmoney || formData.money);
+            // this.receiptData=response.data;
+            this.receiptData = {
+              rechargeRecordId: response.data.rechargeRecordId,
+              userId: this.data.userId || "",
+              date: new Date().toISOString().replace("T", " ").substring(0, 19),
+              userName: this.rechargeData.userName,
+              userAddress: this.data.userAddr || "",
+              operator: JSON.parse(sessionStorage.getItem("userData")).staffName,
+              beforeAmount: parseFloat(this.rechargeData.balance) || 0,
+              amount: rechargeAmount.toFixed(2),
+              afterAmount: ((parseFloat(this.rechargeData.balance) || 0) + rechargeAmount).toFixed(2),
+            };
+
+            // 显示打印确认对话框
+            this.printDialogVisible = true;
           }
         })
         .catch((error) => {
           ElMessage.error(error);
+        }).finally(() => {
+        this.isCharging = false;
+      });
+    },
+    handleSkipPrint() {
+      this.printDialogVisible = false;
+
+      // 保存数据副本
+      const receiptDataCopy = this.receiptData;
+      const autoDownloadEnabled = this.autoDownload;
+
+      // 清空数据和关闭弹窗
+      this.receiptData = null;
+      this.handleRechargeClose();
+
+      // 执行下载
+      if (autoDownloadEnabled && receiptDataCopy) {
+        this.downloadReceiptOnly(receiptDataCopy);
+        ElMessage.info("已跳过打印，PDF文件已自动下载");
+      } else {
+        ElMessage.info("已跳过打印");
+      }
+    },
+    handleConfirmPrint() {
+      this.printDialogVisible = false;
+      this.printAndDownloadReceipt();
+    },
+    // ✅ 新增：仅下载，不打印
+    downloadReceiptOnly(receiptData) {
+      console.log("自动下载收据参数:", receiptData);
+
+      axios({
+        url: "/userManage/userCharge/receipt",
+        method: "POST",
+        responseType: "blob",
+        data: receiptData,
+      })
+        .then((response) => {
+          if (response.status !== 200) {
+            throw new Error("导出失败：" + response.statusText);
+          }
+
+          const blob = new Blob([response.data], { type: "application/pdf" });
+          if (blob.size === 0) {
+            ElMessage.warning("内容为空，无法下载");
+            return;
+          }
+
+          const link = document.createElement("a");
+          link.href = window.URL.createObjectURL(blob);
+          link.download = receiptData.userName + "-充值收据.pdf";
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          window.URL.revokeObjectURL(link.href);
+        })
+        .catch((error) => {
+          console.error("下载失败:", error);
+          ElMessage.error("下载失败：" + error.message);
         });
+    },
+    // ✅ 修改：打印并可选下载
+    printAndDownloadReceipt() {
+      console.log("收据参数:", this.receiptData);
+
+      axios({
+        url: "/userManage/userCharge/receipt",
+        method: "POST",
+        responseType: "blob",
+        data: this.receiptData,
+      })
+        .then((response) => {
+          if (response.status !== 200) {
+            throw new Error("导出失败：" + response.statusText);
+          }
+
+          const blob = new Blob([response.data], { type: "application/pdf" });
+          if (blob.size === 0) {
+            ElMessage.warning("内容为空，无法下载");
+            return;
+          }
+
+          this.receiptPDFBlob = blob;
+
+          // ✅ 步骤 1: 根据 autoDownload 决定是否下载
+          if (this.autoDownload) {
+            const link = document.createElement("a");
+            link.href = window.URL.createObjectURL(blob);
+            link.download = this.receiptData.userName + "-充值收据.pdf";
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(link.href);
+          }
+
+          // 步骤 2: 在新窗口打开 PDF 并触发打印
+          const pdfUrl = window.URL.createObjectURL(blob);
+          const printWindow = window.open(pdfUrl, '_blank');
+          if (printWindow) {
+            printWindow.onload = () => {
+              setTimeout(() => {
+                printWindow.print();
+              }, 500);
+            };
+          }
+
+          this.handleRechargeClose();
+          ElMessage.success("正在打印收据..." + (this.autoDownload ? " PDF文件已自动下载" : ""));
+        })
+        .catch((error) => {
+          console.error("导出失败:", error);
+          ElMessage.error("导出失败：" + error.message);
+        });
+    },
+    printPDFWithWebPrintJS() {
+      // 如果需要使用 web-print-js 的方案（需要先安装）
+      // npm install web-print-js
+      /*
+      import WebPrint from 'web-print-js';
+
+      const webPrint = new WebPrint();
+      const printWindow = window.open('', '_blank');
+
+      const blobUrl = window.URL.createObjectURL(this.receiptPDFBlob);
+
+      webPrint.printToPDF(blobUrl).then(() => {
+        this.handleRechargeClose();
+        ElMessage.success("打印成功");
+      }).catch((error) => {
+        ElMessage.error("打印失败：" + error.message);
+      });
+      */
     },
   },
 };
@@ -221,7 +497,7 @@ export default {
 
 .recharge-dialog-content {
   width: 60%;
-  height: 380px;
+  height: 420px;
   border: 1px solid #fafafa;
   background-color: #fafafa;
   border-radius: 5px;
@@ -250,10 +526,10 @@ export default {
 
 .recharge-input {
   display: flex;
-  justify-content: center; /* 确保子元素在父容器中垂直居中 */
+  justify-content: center;
   flex-direction: column;
   width: 32.3%;
-  height: 75px;
+  height: 85px;
 }
 
 .recharge-input > span {
@@ -313,5 +589,56 @@ export default {
 .cancel-btn {
   background-color: #fff;
   margin-right: 5%;
+}
+
+/* 打印对话框样式 */
+.print-dialog-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+}
+
+.print-icon {
+  margin: 20px 0;
+}
+
+.print-message {
+  text-align: center;
+}
+
+.dialog-footer {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+}
+
+/* ✅ 添加自动下载复选框样式 */
+.auto-download-checkbox {
+  width: 100%;
+  text-align: center;
+}
+</style>
+
+<style>
+/* 全局样式，用于自定义 Dialog 样式 */
+.print-confirm-dialog .el-dialog__header {
+  background-color: #f5f7fa;
+  padding: 15px 20px;
+  border-bottom: 1px solid #e4e7ed;
+}
+
+.print-confirm-dialog .el-dialog__title {
+  font-size: 20px;
+  color: #333;
+}
+
+.print-confirm-dialog .el-dialog__body {
+  padding: 0;
+}
+
+.print-confirm-dialog .el-dialog__footer {
+  padding: 15px 20px;
+  border-top: 1px solid #e4e7ed;
 }
 </style>
