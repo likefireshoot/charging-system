@@ -1,6 +1,6 @@
 <template>
   <div class="change-dialog" v-if="dialogVisible">
-    <div class="combo-dialog-content">
+    <div class="combo-dialog-content" :style="{ height: companyId == 1 ? '780px' : '710px' }">
       <div class="title">
         <div style="margin-left: 10px; display: flex; align-items: center">
           <img src="@/assets/yonghu/icon13.png" alt="" style="margin-right: 8px" />
@@ -13,35 +13,35 @@
       <div class="combo-content">
         <div class="section-title">开户信息</div>
         <div class="section-grid">
-          <div class="edit-input" style="margin-right: 1%" v-if="companyId === 1">
+          <div class="edit-input" v-if="companyId === 1">
             <span>所属水厂</span>
             <el-select v-model="form.companyId" class="input-item big-font-el-select" placeholder="请选择所属水厂">
               <el-option v-for="item in companyList" :key="item.id" :label="item.name" :value="item.id" :disabled="companyId !== 1" />
             </el-select>
           </div>
-          <div class="edit-input" style="margin-right: 1%">
+          <div class="edit-input">
             <span>用户名称</span>
             <el-input v-model="form.userName" class="input-item" />
           </div>
-          <div class="edit-input" style="margin-right: 1%">
-            <span>用户号（选填,不填则自动生成）</span>
-            <el-input v-model="form.userId" class="input-item" placeholder="选填,不填则自动生成" />
+          <div class="edit-input">
+            <span>用户号（选填，不填则自动生成）</span>
+            <el-input v-model="form.userId" class="input-item" placeholder="选填，不填则自动生成" />
           </div>
-          <div class="edit-input" style="margin-right: 1%">
+          <div class="edit-input">
             <span>用户住址</span>
             <el-input v-model="form.userAddr" class="input-item" />
           </div>
-          <div class="edit-input" style="margin-right: 1%">
+          <div class="edit-input">
             <span>所属区域</span>
             <el-select v-model="form.regionId" class="input-item big-font-el-select" placeholder="请选择所属区域">
               <el-option v-for="item in regionList" :key="item.id" :label="item.label" :value="item.id" />
             </el-select>
           </div>
-          <div class="edit-input" style="margin-right: 1%">
-            <span>联系电话(选填)</span>
+          <div class="edit-input">
+            <span>联系电话（选填）</span>
             <el-input v-model="form.userPhone" class="input-item" placeholder="选填"/>
           </div>
-          <div class="edit-input" style="margin-right: 1%">
+          <div class="edit-input">
             <span>开户时间</span>
             <el-date-picker v-model="form.createTime" type="date" placeholder="选择日期" style="flex-grow: 1; width: 100%; max-height: 35px" format="YYYY-MM-DD" value-format="YYYY-MM-DD" />
           </div>
@@ -49,47 +49,55 @@
 
         <div class="section-title" style="margin-top: 10px">绑定信息</div>
         <div class="section-grid">
-          <div class="edit-input" style="margin-right: 1%">
+          <div class="edit-input">
             <span>表号</span>
-            <el-input v-model="form.meterCode" class="input-item" />
+            <el-input v-model="form.meterCode" class="input-item" @blur="handleMeterCodeBlur" />
           </div>
-          <div class="edit-input" style="margin-right: 1%">
+          <div class="edit-input">
             <span>价格类型</span>
             <el-select v-model="form.priceId" class="input-item big-font-el-select" placeholder="请选择价格类型">
               <el-option v-for="item in priceList" :key="item.id" :label="item.label" :value="item.id" />
             </el-select>
           </div>
-          <div class="edit-input" style="margin-right: 1%">
+          <div class="edit-input">
             <span>短信配置</span>
             <el-select v-model="form.smsConfigId" class="input-item big-font-el-select" placeholder="请选择短信配置">
               <el-option v-for="item in smsConfigList" :key="item.id" :label="item.label" :value="item.id" />
             </el-select>
           </div>
-          <div class="edit-input" style="margin-right: 1%">
-            <span>开户审批人1</span>
+          <div class="edit-input">
+            <span>开户审批人 1</span>
             <el-select v-model="form.approver_1" class="input-item big-font-el-select" placeholder="请选择">
               <el-option v-for="item in approverList" :key="item.id" :label="item.label" :value="item.label" />
             </el-select>
           </div>
-<!--          <div class="edit-input" style="margin-right: 1%">-->
-<!--            <span>开户审批人2</span>-->
-<!--            <el-select v-model="form.approver_2" class="input-item big-font-el-select" placeholder="请选择">-->
-<!--              <el-option v-for="item in approverList" :key="item.id" :label="item.label" :value="item.label" />-->
-<!--            </el-select>-->
-<!--          </div>-->
-<!--          <div class="edit-input" style="margin-right: 1%">-->
-<!--            <span>开户审批人3</span>-->
-<!--            <el-select v-model="form.approver_3" class="input-item big-font-el-select" placeholder="请选择">-->
-<!--              <el-option v-for="item in approverList" :key="item.id" :label="item.label" :value="item.label" />-->
-<!--            </el-select>-->
-<!--          </div>-->
-          <div class="edit-input" style="margin-right: 1%">
+          <div class="edit-input">
             <span>出厂日期</span>
             <el-date-picker v-model="form.factoryDate" type="date" placeholder="选择日期" style="flex-grow: 1; width: 100%; max-height: 35px" format="YYYY-MM-DD" value-format="YYYY-MM-DD" />
           </div>
-          <div class="edit-input" style="margin-right: 1%">
+          <div class="edit-input">
             <span>首检日期</span>
             <el-date-picker v-model="form.firstInspectDate" type="date" placeholder="选择日期" style="flex-grow: 1; width: 100%; max-height: 35px" format="YYYY-MM-DD" value-format="YYYY-MM-DD" />
+          </div>
+          <!-- 水表读数放在最后一行，占满整行 -->
+          <div class="edit-input full-width">
+            <span>水表读数（吨）</span>
+            <div class="reading-container">
+              <el-input
+                v-model="form.reading"
+                class="input-item"
+                :disabled="!allowEditReading"
+                placeholder="请输入表号后自动查询"
+              />
+              <span v-if="meterQueryError" class="error-tip">{{ meterQueryError }}</span>
+            </div>
+            <el-checkbox
+              v-model="allowEditReading"
+              class="edit-checkbox"
+              @change="handleAllowEditChange"
+            >
+              <span style="font-size: 18px;">确认修改水表吨数</span>
+            </el-checkbox>
           </div>
         </div>
       </div>
@@ -105,6 +113,42 @@
         </div>
       </div>
     </div>
+
+    <el-dialog
+      v-model="showConfirmDialog"
+      title="重要提示"
+      width="500px"
+      :close-on-click-modal="false"
+      :close-on-press-escape="false"
+      @close="closeConfirmDialog"
+      center
+      :lock-scroll="false"
+    >
+      <div style="font-size: 22px; color: #333; line-height: 1.8; text-align: center; padding: 10px 0;">
+        <template v-if="allowEditReading">
+          用户绑定水表后，将从
+          <span style="color: #45ba7e; font-weight: bold; font-size: 22px;">{{ form.reading }}</span>
+          吨开始计费，请核实以避免多余的扣费
+        </template>
+        <template v-else>
+          用户绑定水表后，将从
+          <span style="color: #45ba7e; font-weight: bold; font-size: 22px;">{{ originalReading }}</span>
+          吨开始计费，请核实以避免多余的扣费
+        </template>
+      </div>
+      <template #footer>
+        <div style="display: flex; justify-content: center; gap: 20px;">
+          <div class="confirm-btn" @click="confirmReadingChange" style="background-color: #45ba7e; color: #fff; width: 120px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 5px; cursor: pointer; font-size: 16px;">
+            <el-icon><Check /></el-icon>
+            <span style="margin-left: 8px; font-size: 20px">确认</span>
+          </div>
+          <div class="cancel-btn" @click="closeConfirmDialog" style="background-color: #fff; border: 1px solid #ddd; width: 120px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 5px; cursor: pointer; font-size: 16px;">
+            <el-icon style="color: #45ba7e"><Close /></el-icon>
+            <span style="margin-left: 8px; color: #5a5a5a; font-size: 20px">取消</span>
+          </div>
+        </div>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -121,60 +165,60 @@ export default {
     },
   },
   data() {
-    // 获取当前用户信息
-  const userDataStr = sessionStorage.getItem("userData");
-  if (!userDataStr) {
-    throw new Error("未找到用户登录信息，请重新登录！");
-  }
+    const userDataStr = sessionStorage.getItem("userData");
+    if (!userDataStr) {
+      throw new Error("未找到用户登录信息，请重新登录！");
+    }
 
-  const userData = JSON.parse(userDataStr);
+    const userData = JSON.parse(userDataStr);
 
-  // 验证必要字段是否存在
-  if (!userData.staffName || !userData.companyId) {
-    throw new Error("用户信息不完整，请重新登录！");
-  }
+    if (!userData.staffName || !userData.companyId) {
+      throw new Error("用户信息不完整，请重新登录！");
+    }
 
-  // 获取当前日期 YYYY-MM-DD 格式
-  const currentDate = new Date().toISOString().split("T")[0];
-  return {
-    companyId: userData.companyId,
-    submitting: false,
-    //表单数据中审批人从前端到后端使用的都是staff_name而非staff_id,有概率出现重名混淆
-    form: {
+    const currentDate = new Date().toISOString().split("T")[0];
+    return {
       companyId: userData.companyId,
-      userName: "",
-      userId: "",
-      userAddr: "",
-      regionId: null,
-      userPhone: "",
-      createTime: currentDate,  // 修改：默认当前日期
-      meterCode: "",
-      priceId: null,
-      smsConfigId: null,
-      approver_1: userData.staffName || "",  // 修改：默认当前用户
-      approver_2: userData.staffName || "",  // 修改：默认当前用户
-      approver_3: userData.staffName || "",  // 修改：默认当前用户
-      factoryDate: null,
-      firstInspectDate: null
-    },
-    companyList: [],
-    regionList: [],
-    priceList: [],
-    smsConfigList: [],
-    approverList: [],
-    // 保存当前用户 ID 用于审批人匹配
-    currentStaffId: userData.staffId || null,
-  };
+      submitting: false,
+      form: {
+        companyId: userData.companyId,
+        userName: "",
+        userId: "",
+        userAddr: "",
+        regionId: null,
+        userPhone: "",
+        createTime: currentDate,
+        meterCode: "",
+        priceId: null,
+        smsConfigId: null,
+        approver_1: userData.staffName || "",
+        approver_2: userData.staffName || "",
+        approver_3: userData.staffName || "",
+        factoryDate: null,
+        firstInspectDate: null,
+        reading: null,
+        meterId: null
+      },
+      companyList: [],
+      regionList: [],
+      priceList: [],
+      smsConfigList: [],
+      approverList: [],
+      currentStaffId: userData.staffId || null,
+      allowEditReading: false,
+      meterQueryError: "",
+      showConfirmDialog: false,
+      pendingSubmit: false,
+      originalReading: null
+    };
   },
   mounted() {
-    // 二次检查 sessionStorage 数据
-    // (避免form组件由于sessionStorage缺少信息, 加载失败, 直接白屏的情况出现)
-  const userData = JSON.parse(sessionStorage.getItem("userData"));
-  if (!userData || !userData.staffName) {
-    ElMessage.error("员工信息不完整，请重新登录！");
-    this.handleClose();
-    return;
-  }
+    const userData = JSON.parse(sessionStorage.getItem("userData"));
+    if (!userData || !userData.staffName) {
+      ElMessage.error("员工信息不完整，请重新登录！");
+      this.handleClose();
+      return;
+    }
     this.getCompanyList();
     this.refreshCompanyRelated();
   },
@@ -270,8 +314,55 @@ export default {
           ElMessage.error("获取审批人失败");
         });
     },
+    handleMeterCodeBlur() {
+      if (!this.form.meterCode || this.form.meterCode.trim() === "") {
+        this.form.reading = null;
+        this.form.meterId = null;
+        this.originalReading = null;  // 清空原始读数
+        this.meterQueryError = "";
+        this.allowEditReading = false;
+        return;
+      }
 
+      this.queryMeterReading();
+    },
+    async queryMeterReading() {
+      try {
+        const response = await service.get(`/external/externalSimpleMeterQuery?meterCode=${this.form.meterCode}`);
 
+        if (response.code === 200 && response.data) {
+          this.originalReading = response.data.reading;  // 保存原始读数
+          this.form.reading = response.data.reading;
+          this.form.meterId = response.data.meterId;
+          this.meterQueryError = "";
+        } else {
+          this.form.reading = null;
+          this.form.meterId = null;
+          this.originalReading = null;
+          this.meterQueryError = "该表资料未录入系统";
+        }
+      } catch (error) {
+        this.form.reading = null;
+        this.form.meterId = null;
+        this.originalReading = null;
+        this.meterQueryError = "该表资料未录入系统";
+      }
+    },
+    handleAllowEditChange(value) {
+      // 勾选时，将 reading 设置为可编辑状态（已经是可编辑）
+      // 取消勾选时，恢复为原始读数
+      if (!value && this.originalReading !== null && this.originalReading !== undefined) {
+        this.form.reading = this.originalReading;
+      }
+    },
+    closeConfirmDialog() {
+      this.showConfirmDialog = false;
+    },
+    confirmReadingChange() {
+      this.showConfirmDialog = false;
+      // 执行提交
+      this.doCommit();
+    },
     debouncedTrim: debounce(function () {
       Object.keys(this.form).forEach((key) => {
         if (typeof this.form[key] === "string") this.form[key] = this.form[key].trim();
@@ -290,8 +381,6 @@ export default {
         "priceId",
         "smsConfigId",
         "approver_1",
-        "approver_2",
-        "approver_3",
       ];
       if (this.companyId === 1) required.push("companyId");
 
@@ -306,16 +395,14 @@ export default {
         meterCode: "表号",
         priceId: "价格类型",
         smsConfigId: "短信配置",
-        approver_1: "开户审批人1",
-        approver_2: "开户审批人2",
-        approver_3: "开户审批人3",
+        approver_1: "开户审批人 1",
         factoryDate: "出厂日期",
         firstInspectDate: "首检日期"
       };
 
       const missing = required.filter((k) => this.form[k] === undefined || this.form[k] === null || this.form[k] === "");
       if (missing.length) {
-        ElMessage.error(missing.map((k) => fieldNameMap[k] || k).join("、") + "不能为空");
+        ElMessage.error(missing.map((k) => fieldNameMap[k] || k).join(",") + "不能为空");
         return false;
       }
 
@@ -327,30 +414,37 @@ export default {
 
       return true;
     },
+    async updateMeterReading() {
+      if (!this.allowEditReading || this.form.reading === null || this.form.reading === undefined) {
+        return true;
+      }
+
+      try {
+        const updateResponse = await service.post("/userManage/meterRead/editMeter", {
+          meterId: this.form.meterId,
+          meterCode: this.form.meterCode,
+          reading: this.form.reading
+        });
+
+        if (updateResponse.code !== 200) {
+          ElMessage.error(updateResponse.msg || "更新水表读数失败");
+          return false;
+        }
+
+        return true;
+      } catch (error) {
+        ElMessage.error("更新水表读数失败：" + (error?.message || "未知错误"));
+        return false;
+      }
+    },
     async handleCommit() {
       if (this.submitting) return;
       if (!this.validate()) return;
-      // // 检查电话号码是否为空，如果为空则提示用户
-      // const isPhoneEmpty = !this.form.userPhone || this.form.userPhone.trim() === "";
-      // if (isPhoneEmpty) {
-      //   try {
-      //     await ElMessageBox.confirm(
-      //       '联系电话未填写，系统将自动设置为"无"。\n\n⚠️ 注意：短信提醒功能将不可用！\n\n是否继续提交？',
-      //       '提示',
-      //       {
-      //         confirmButtonText: '继续提交',
-      //         cancelButtonText: '取消',
-      //         type: 'warning',
-      //         dangerouslyUseHTMLString: false,
-      //       }
-      //     );
-      //   } catch (error) {
-      //     // 用户点击取消按钮或关闭对话框
-      //     return;
-      //   }
-      // }
 
-
+      // 无论是否勾选，都弹出确认弹窗
+      this.showConfirmDialog = true;
+    },
+    async doCommit() {
       const effectiveCompanyId = this.companyId === 1 ? this.form.companyId : this.companyId;
       const companyName = (this.companyList.find((c) => c.id === effectiveCompanyId) || {}).name || "";
       const regionName = (this.regionList.find((r) => r.id === this.form.regionId) || {}).label || "";
@@ -374,10 +468,6 @@ export default {
           priceId: this.form.priceId,
           smsConfigId: this.form.smsConfigId,
           approver_1: this.form.approver_1,
-          // approver_2: this.form.approver_2,
-          // approver_3: this.form.approver_3,
-
-          // ****** 新增出厂日期、首检日期参数 ******
           factoryDate: this.form.factoryDate,
           firstInspectDate: this.form.firstInspectDate
         },
@@ -385,6 +475,15 @@ export default {
 
       this.submitting = true;
       try {
+        // 只有勾选了允许编辑且读数有变化时，才更新水表读数
+        if (this.allowEditReading && this.form.reading !== this.originalReading) {
+          const updateSuccess = await this.updateMeterReading();
+          if (!updateSuccess) {
+            this.submitting = false;
+            return;
+          }
+        }
+
         const res = await service.post("/wx/addUserAndMeterBind", payload);
         if (res.code === 200) {
           ElMessage.success("提交成功");
@@ -415,7 +514,6 @@ export default {
 
 .combo-dialog-content {
   width: 75%;
-  height: 660px;
   border: 1px solid #fafafa;
   background-color: #fafafa;
   border-radius: 5px;
@@ -442,14 +540,15 @@ export default {
 }
 
 .combo-content {
-  height: 560px;
+  flex: 1;
   width: 94%;
   background-color: #fff;
   border-radius: 5px;
   margin-top: 15px;
   margin-bottom: 5px;
   padding: 10px 5px;
-  overflow-y: hidden;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .section-title {
@@ -463,14 +562,21 @@ export default {
   display: flex;
   justify-content: flex-start;
   flex-wrap: wrap;
+  gap: 10px ;
 }
 
 .edit-input {
   display: flex;
   justify-content: center;
   flex-direction: column;
-  width: 32.3%;
+  width: calc(33.33% - 7px);
   height: 73px;
+}
+
+.edit-input.full-width {
+  width: 100%;
+  height: auto;
+  margin-top: 10px;
 }
 
 .edit-input > span {
@@ -482,6 +588,29 @@ export default {
 .input-item {
   height: 35px;
   width: 100%;
+}
+
+.reading-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 33%;
+}
+
+.reading-container .input-item {
+  flex: 1;
+}
+
+.error-tip {
+  color: red;
+  font-size: 18px;
+  white-space: nowrap;
+  font-weight: bold;
+}
+
+.edit-checkbox {
+  margin-top: 8px;
+  margin-left: 0;
 }
 
 ::deep(.el-date-editor.el-input) {
@@ -524,5 +653,32 @@ export default {
 .cancel-btn {
   background-color: #fff;
   margin-right: 5%;
+}
+
+/* 修改 el-dialog 样式 */
+:deep(.el-dialog) {
+  --el-dialog-width: 500px;
+  --el-dialog-border-radius: 8px;
+}
+
+:deep(.el-dialog__header) {
+  padding: 20px 20px 10px;
+  border-bottom: 1px solid #eee;
+}
+
+:deep(.el-dialog__title) {
+  font-size: 25px;
+  font-weight: 600;
+  color: #333;
+}
+
+:deep(.el-dialog__body) {
+  padding: 30px 40px;
+  text-align: center;
+}
+
+:deep(.el-dialog__footer) {
+  padding: 10px 20px 30px;
+  border-top: none;
 }
 </style>

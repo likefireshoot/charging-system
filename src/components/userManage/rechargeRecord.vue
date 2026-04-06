@@ -77,7 +77,7 @@
           </div>
         </div>
         <div class="recharge-record-list">
-            <div class="command-buttons">
+          <div class="command-buttons">
             <div class="export-out-btn" style="margin-right: 10px; width: 110px" :class="{ 'btn-single-only-disabled': multipleSelection.length !== 1 }" @click="multipleSelection.length === 1 && receipt()">
               <img src="@/assets/yonghu/icon26.png" alt="" style="margin-left: 7px" />
               <span style="font-size: 20px; margin-left: 10px; color: #5a5a5a">开收据</span>
@@ -86,15 +86,6 @@
               <img src="@/assets/yonghu/icon27.png" alt="" style="margin-left: 7px" />
               <span style="font-size: 20px; margin-left: 10px; color: #5a5a5a">撤销充值</span>
             </div>
-            <!-- <div class="export-out-btn" style="margin-right: 10px; width: 110px">
-              <img src="@/assets/yonghu/icon1.png" alt="" style="margin-left: 7px" />
-              <span style="font-size: 16px; margin-left: 10px; color: #5a5a5a">模板下载</span>
-            </div>
-            <div class="export-in-btn" style="margin-right: 10px" @click="triggerFileInput">
-              <img src="@/assets/yonghu/icon1.png" alt="" style="margin-left: 7px" />
-              <span style="font-size: 16px; margin-left: 10px; color: #5a5a5a">导入</span>
-              <input ref="fileInput" type="file" accept=".xls,.xlsx" style="display: none" @change="exportIn" />
-            </div> -->
             <div class="export-out-btn" style="margin-right: 10px" @click="exportExcel">
               <img src="@/assets/yonghu/icon2.png" alt="" style="margin-left: 7px" />
               <span style="font-size: 20px; margin-left: 10px; color: #5a5a5a">导出</span>
@@ -118,16 +109,12 @@
               v-loading="isLoading"
             >
               <el-table-column type="selection" :selectable="selectable" min-width="40" align="center" fixed="left" />
-              <!-- <el-table-column property="theId" label="序号" width="100" align="center" fixed="left" /> -->
               <el-table-column property="userId" label="用户号" min-width="50" align="center" fixed="left" />
               <el-table-column property="userName" label="用户名称" min-width="70" align="center" />
               <el-table-column property="userAddr" label="用户地址" min-width="100" align="center" />
               <el-table-column property="regionName" label="所属区域" min-width="100" align="center" />
-              <!-- <el-table-column property="companyName" label="所属水厂" width="240" align="center" /> -->
               <el-table-column property="userPhone" label="联系电话" min-width="100" align="center" />
               <el-table-column property="meterCode" label="表号" min-width="100" align="center" />
-              <!-- <el-table-column property="imei" label="IMEI号" width="240" align="center" /> -->
-              <!-- <el-table-column property="meterType" label="水表类型" min-width="100" align="center" /> -->
               <el-table-column property="payerPhone" label="缴费人手机号" min-width="100" align="center" />
               <el-table-column property="rechargeUser" label="收费人" min-width="80" align="center" />
               <el-table-column property="rechargeType" label="交易方式" min-width="100" align="center" />
@@ -159,12 +146,52 @@
         <div class="page-box">
           <div class="demo-pagination-block">
             <el-pagination v-model:current-page="currentPage" v-model:page-size="pageSize" :page-sizes="[5, 10, 15]" layout="total,  prev, pager, next, jumper" :total="total"
-            @current-change="handlePageChange"/>
+                           @current-change="handlePageChange"/>
           </div>
         </div>
       </div>
     </div>
   </div>
+
+  <!-- 打印确认对话框 -->
+  <el-dialog
+    v-model="printDialogVisible"
+    title="打印收据"
+    width="500px"
+    :close-on-click-modal="false"
+    :show-close="false"
+    custom-class="print-confirm-dialog"
+    :lock-scroll="false"
+  >
+    <div class="print-dialog-content">
+      <div class="print-icon">
+        <el-icon size="80" color="#46B97E"><Printer /></el-icon>
+      </div>
+      <div class="print-message">
+        <p style="font-size: 22px; color: #333; margin: 20px 0;">收据已生成！</p>
+        <p style="font-size: 20px; color: #666;">是否立即打印收据？</p>
+      </div>
+
+      <!-- 添加自动下载勾选框 -->
+      <div class="auto-download-checkbox" style="margin: 20px 0 10px 0;">
+        <el-checkbox v-model="autoDownload" size="large">
+          <span style="font-size: 16px; color: #666;">自动下载PDF文件</span>
+        </el-checkbox>
+        <div style="font-size: 12px; color: #999; margin-top: 5px;">
+          勾选后，打印时将自动保存PDF文件到本地
+        </div>
+      </div>
+    </div>
+    <template #footer>
+      <span class="dialog-footer">
+        <el-button @click="handleSkipPrint" style="width: 100px; font-size: 16px;">仅下载PDF</el-button>
+        <el-button type="success" @click="handleConfirmPrint" style="width: 100px; font-size: 16px;">立即打印</el-button>
+      </span>
+    </template>
+  </el-dialog>
+
+  <!-- 隐藏的 PDF 容器，用于打印 -->
+  <div id="print-container" style="position: absolute; left: -9999px; top: 0;"></div>
 </template>
 
 <script>
@@ -198,7 +225,7 @@ export default {
         rechargeUser: "",
         rechargeType: "",
       },
-      companyId: JSON.parse(sessionStorage.getItem("userData")).companyId, // 公司ID
+      companyId: JSON.parse(sessionStorage.getItem("userData")).companyId,
       rechargeRecordTableData: [],
       tableData: [],
       currentPage: 1,
@@ -214,9 +241,12 @@ export default {
         cashTotalAmount: "0",
         totalAmount: "0",
       },
-
       // ****** 锁
-      isLoading: false
+      isLoading: false,
+      printDialogVisible: false,
+      receiptPDFBlob: null,
+      receiptData: null,
+      autoDownload: false,
     };
   },
   computed: {
@@ -225,9 +255,6 @@ export default {
     },
   },
   watch: {
-    // currentPage() {
-    //   this.fetchRechargeRecordData(this.currentPage);
-    // },
     "rechargeRecordeData.companyId"() {
       this.rechargeRecordeData.region = "";
       this.getRegionData();
@@ -243,7 +270,6 @@ export default {
     // ****** 手动处理分页变化，避免 watch 循环 ******
     handlePageChange(page) {
       if (this.isLoading) return;
-      // this.isLoading = true;
       this.currentPage = page;
       this.fetchRechargeRecordData(page);
     },
@@ -280,14 +306,13 @@ export default {
       let url = "";
       if (this.companyId === 1) {
         if (this.rechargeRecordeData.companyId) {
-          url = `/getRegion?companyId=${this.rechargeRecordeData.companyId}`; // 所属水厂ID
+          url = `/getRegion?companyId=${this.rechargeRecordeData.companyId}`;
         } else {
-          url = `/getRegion`; // 所属水厂ID
+          url = `/getRegion`;
         }
       } else {
-        url = `/getRegion?companyId=${this.companyId}`; // 所属水厂ID
+        url = `/getRegion?companyId=${this.companyId}`;
       }
-      console.log(url);
       service
         .get(`${url}`)
         .then((response) => {
@@ -356,7 +381,6 @@ export default {
       this.rechargeRecordTableData = [];
       this.tableData = records;
       this.total = response.data.totalElements;
-      // this.currentPage = response.data.currentPages;
       this.rechargeSummary = {
         weChatTotalAmount: response.data.weChatTotalAmount ?? "0",
         alipayTotalAmount: response.data.alipayTotalAmount ?? "0",
@@ -381,9 +405,8 @@ export default {
         .catch((error) => {
           console.log(error);
         }).finally(()=>{
-          this.isLoading = false
+        this.isLoading = false
       });
-
     },
     getRechargeRecordData() {
       this.fetchRechargeRecordData(this.currentPage);
@@ -460,7 +483,7 @@ export default {
     },
     // 触发文件输入框点击
     triggerFileInput() {
-      this.$refs.fileInput.value = ""; // 清空文件输入框，确保每次点击都能触发 @change
+      this.$refs.fileInput.value = "";
       this.$refs.fileInput.click();
     },
     // 处理文件上传
@@ -509,49 +532,129 @@ export default {
         ElMessage.warning("请至少选择一条记录");
         return;
       } else {
+        params.rechargeRecordId = this.multipleSelection[0].rechargeRecordId;
         params.userId = this.multipleSelection[0].userId;
         params.date = this.multipleSelection[0].createTime.replace("T", " ");
         params.userName = this.multipleSelection[0].userName;
         params.userAddress = this.multipleSelection[0].userAddr;
-        params.operator = JSON.parse(sessionStorage.getItem("userData")).staffName;
+        params.operator = this.multipleSelection[0].rechargeUser || JSON.parse(sessionStorage.getItem("userData")).staffName;
         params.beforeAmount = this.multipleSelection[0].oldBalance;
         params.amount = this.multipleSelection[0].rechargeAmount;
         params.afterAmount = this.multipleSelection[0].newBalance;
-        console.log(params);
-        // 调用后端接口
-        axios({
-          url: "/userManage/userCharge/receipt", // 后端接口地址
-          method: "POST",
-          responseType: "blob", // 指定响应类型为二进制流
-          data: params,
-        })
-          .then((response) => {
-            if (response.status !== 200) {
-              throw new Error("导出失败: " + response.statusText);
-            }
 
-            // 获取 Blob 对象
-            const blob = new Blob([response.data], { type: "application/pdf" });
-
-            if (blob.size === 0) {
-              ElMessage.warning("内容为空，无法下载");
-              return;
-            }
-
-            // 创建一个链接元素
-            const link = document.createElement("a");
-            link.href = window.URL.createObjectURL(blob); // 创建 Blob URL
-            link.download = this.multipleSelection[0].userName + "-收据.pdf"; // 设置下载文件名
-            document.body.appendChild(link);
-            link.click(); // 触发下载
-            document.body.removeChild(link); // 移除链接元素
-            window.URL.revokeObjectURL(link.href); // 释放 Blob URL
-          })
-          .catch((error) => {
-            console.error("导出失败:", error);
-            ElMessage.error("导出失败: " + error.message);
-          });
+        // 保存收据数据并显示打印确认对话框
+        this.receiptData = params;
+        this.printDialogVisible = true;
       }
+    },
+    handleSkipPrint() {
+      this.printDialogVisible = false;
+      this.autoDownload = false;
+
+      // 保存数据副本
+      const receiptDataCopy = this.receiptData;
+      const autoDownloadEnabled = this.autoDownload;
+
+      // 清空数据和关闭弹窗
+      this.receiptData = null;
+
+      // 执行下载
+      if (receiptDataCopy) {
+        this.downloadReceiptOnly(receiptDataCopy);
+        ElMessage.info("PDF文件已自动下载");
+      } else {
+        ElMessage.info("已取消操作");
+      }
+    },
+    handleConfirmPrint() {
+      this.printDialogVisible = false;
+      this.printAndDownloadReceipt();
+    },
+    downloadReceiptOnly(receiptData) {
+      console.log("自动下载收据参数:", receiptData);
+
+      axios({
+        url: "/userManage/userCharge/receipt",
+        method: "POST",
+        responseType: "blob",
+        data: receiptData,
+      })
+        .then((response) => {
+          if (response.status !== 200) {
+            throw new Error("导出失败：" + response.statusText);
+          }
+
+          const blob = new Blob([response.data], { type: "application/pdf" });
+          if (blob.size === 0) {
+            ElMessage.warning("内容为空，无法下载");
+            return;
+          }
+
+          const link = document.createElement("a");
+          link.href = window.URL.createObjectURL(blob);
+          link.download = receiptData.userName + "-充值收据.pdf";
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          window.URL.revokeObjectURL(link.href);
+        })
+        .catch((error) => {
+          console.error("下载失败:", error);
+          ElMessage.error("下载失败：" + error.message);
+        });
+    },
+    printAndDownloadReceipt() {
+      console.log("收据参数:", this.receiptData);
+
+      axios({
+        url: "/userManage/userCharge/receipt",
+        method: "POST",
+        responseType: "blob",
+        data: this.receiptData,
+      })
+        .then((response) => {
+          if (response.status !== 200) {
+            throw new Error("导出失败：" + response.statusText);
+          }
+
+          const blob = new Blob([response.data], { type: "application/pdf" });
+          if (blob.size === 0) {
+            ElMessage.warning("内容为空，无法下载");
+            return;
+          }
+
+          this.receiptPDFBlob = blob;
+
+          // 根据 autoDownload 决定是否下载
+          if (this.autoDownload) {
+            const link = document.createElement("a");
+            link.href = window.URL.createObjectURL(blob);
+            link.download = this.receiptData.userName + "-充值收据.pdf";
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(link.href);
+          }
+
+          // 在新窗口打开 PDF 并触发打印
+          const pdfUrl = window.URL.createObjectURL(blob);
+          const printWindow = window.open(pdfUrl, '_blank');
+          if (printWindow) {
+            printWindow.onload = () => {
+              setTimeout(() => {
+                printWindow.print();
+              }, 500);
+            };
+          }
+
+          ElMessage.success("正在打印收据..." + (this.autoDownload ? " PDF文件已自动下载" : ""));
+        })
+        .catch((error) => {
+          console.error("导出失败:", error);
+          ElMessage.error("导出失败：" + error.message);
+        }).finally(() => {
+        this.autoDownload=false;
+      });
     },
     reset() {
       if (this.multipleSelection.length === 0) {
@@ -578,11 +681,10 @@ export default {
     exportExcel() {
       const exportParams = this.buildRechargeRecordParams();
       const params = this.filterNonEmptyParams(exportParams);
-      // 调用后端接口
       axios({
-        url: "/userManage/userCharge/exportRechargeRecord", // 后端接口地址
+        url: "/userManage/userCharge/exportRechargeRecord",
         method: "GET",
-        responseType: "blob", // 指定响应类型为二进制流
+        responseType: "blob",
         params,
       })
         .then((response) => {
@@ -681,7 +783,7 @@ export default {
 .search-input {
   display: flex;
   justify-content: flex-start;
-  justify-content: center; /* 确保子元素在父容器中垂直居中 */
+  justify-content: center;
   flex-direction: column;
   width: 14%;
   margin-right: 20px;
@@ -708,7 +810,6 @@ export default {
 
 .recharge-record-content > .recharge-record-list {
   width: 96%;
-  /* height: cacl(100% - 120px); */
   background-color: #fff;
   border-radius: 5px;
   display: flex;
@@ -811,8 +912,8 @@ export default {
 .export-out-btn {
   display: flex;
   align-items: center;
-  width: 90px; /* 设置按钮的宽度 */
-  height: 32px; /* 设置按钮的高度 */
+  width: 90px;
+  height: 32px;
   color: white;
   border-radius: 5px;
   cursor: pointer;
@@ -826,8 +927,8 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 35px; /* 设置按钮的宽度 */
-  height: 32px; /* 设置按钮的高度 */
+  width: 35px;
+  height: 32px;
   color: white;
   border-radius: 5px;
   cursor: pointer;
@@ -837,7 +938,6 @@ export default {
   border: 2px solid #f2f2f2;
 }
 
-/* 仅支持单选的操作在多选或未选时置灰不可点 */
 .btn-single-only-disabled {
   opacity: 0.5;
   cursor: not-allowed !important;
@@ -852,5 +952,56 @@ export default {
   align-items: center;
   position: static;
   margin-top: 5px;
+}
+
+/* 打印对话框样式 */
+.print-dialog-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+}
+
+.print-icon {
+  margin: 20px 0;
+}
+
+.print-message {
+  text-align: center;
+}
+
+.dialog-footer {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+}
+
+/* 添加自动下载复选框样式 */
+.auto-download-checkbox {
+  width: 100%;
+  text-align: center;
+}
+</style>
+
+<style>
+/* 全局样式，用于自定义 Dialog 样式 */
+.print-confirm-dialog .el-dialog__header {
+  background-color: #f5f7fa;
+  padding: 15px 20px;
+  border-bottom: 1px solid #e4e7ed;
+}
+
+.print-confirm-dialog .el-dialog__title {
+  font-size: 20px;
+  color: #333;
+}
+
+.print-confirm-dialog .el-dialog__body {
+  padding: 0;
+}
+
+.print-confirm-dialog .el-dialog__footer {
+  padding: 15px 20px;
+  border-top: 1px solid #e4e7ed;
 }
 </style>

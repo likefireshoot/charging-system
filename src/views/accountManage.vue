@@ -48,23 +48,14 @@
           <img src="@/assets/yonghu/icon4.png" alt="" style="margin-left: 8px" />
           <span style="font-size: 20px; margin-left: 8px; color: #5a5a5a">删除</span>
         </div>
-        <div class="export-out-btn" style="margin-left: 5px; width: 165px" @click="download" v-if="staffPermissionIds.includes(5)">
+        <div class="export-out-btn" style="margin-left: 5px; width: 210px" @click="downloadUserAndBindTemplate" v-if="staffPermissionIds.includes(5)">
           <img src="@/assets/yonghu/icon1.png" alt="" style="margin-left: 7px" />
-          <span style="font-size: 20px; margin-left: 10px; color: #5a5a5a">用户导入模板</span>
+          <span style="font-size: 20px; margin-left: 10px; color: #5a5a5a">开户绑定导入模板</span>
         </div>
-        <div class="export-in-btn" style="margin-left: 5px; width: 130px" @click="triggerUserImport" v-if="staffPermissionIds.includes(5)">
+        <div class="export-in-btn" style="margin-left: 5px; width: 170px" @click="triggerUserAndBindImport" v-if="staffPermissionIds.includes(5)">
           <img src="@/assets/yonghu/icon1.png" alt="" style="margin-left: 7px" />
-          <span style="font-size: 20px; margin-left: 5px; color: #5a5a5a">用户导入</span>
-          <input ref="userFileInput" type="file" accept=".xls,.xlsx" style="display: none" @change="exportIn" />
-        </div>
-        <div class="export-out-btn" style="margin-left: 5px; width: 165px" @click="bindingDownload" v-if="staffPermissionIds.includes(5)">
-          <img src="@/assets/yonghu/icon1.png" alt="" style="margin-left: 7px" />
-          <span style="font-size: 20px; margin-left: 10px; color: #5a5a5a">绑定导入模板</span>
-        </div>
-        <div class="export-in-btn" style="margin-left: 5px; width: 130px" @click="triggerBindImport" v-if="staffPermissionIds.includes(5)">
-          <img src="@/assets/yonghu/icon1.png" alt="" style="margin-left: 7px" />
-          <span style="font-size: 20px; margin-left: 5px; color: #5a5a5a">绑定导入</span>
-          <input ref="bindFileInput" type="file" accept=".xls,.xlsx" style="display: none" @change="bindingExportIn" />
+          <span style="font-size: 20px; margin-left: 5px; color: #5a5a5a">开户绑定导入</span>
+          <input ref="userAndBindFileInput" type="file" accept=".xls,.xlsx" style="display: none" @change="importUserAndBind" />
         </div>
         <div class="export-out-btn" style="margin-left: 5px" @click="exportExcel">
           <img src="@/assets/yonghu/icon2.png" alt="" style="margin-left: 7px" />
@@ -92,8 +83,8 @@
             v-loading="isLoading"
           >
             <el-table-column type="selection" :selectable="selectable" min-width="40" align="center" fixed="left" />
-            <el-table-column property="theId" label="序号" width="100" align="center" fixed="left" />
-            <el-table-column property="userId" label="用户号" min-width="50" align="center" fixed="left" >
+            <el-table-column property="theId" label="序号" width="73" align="center" fixed="left" />
+            <el-table-column property="userId" label="用户号" min-width="95" align="center" fixed="left" >
               <template #header="scope">
                 <div class="sortable-header" @click="toggleSort('userId')">
                   <span>{{ scope.column.label }}</span>
@@ -104,16 +95,16 @@
                 </div>
               </template>
             </el-table-column>
-            <el-table-column property="userName" label="用户名称" min-width="70" align="center"> </el-table-column>
+            <el-table-column property="userName" label="用户名" min-width="70" align="center"> </el-table-column>
             <el-table-column property="userPhone" label="联系电话" min-width="100" align="center" />
             <el-table-column property="meterCode" label="表号" min-width="100" align="center" />
-            <el-table-column property="reading" label="水表读数/吨" min-width="70" align="center" />
-            <el-table-column property="meterType" label="水表类型" min-width="70" align="center" />
+            <el-table-column property="reading" label="读数" min-width="70" align="center" />
+            <el-table-column property="meterType" label="表类型" min-width="70" align="center" />
             <el-table-column property="priceName" label="价格类型" min-width="90" align="center" />
             <el-table-column property="smsConfigName" label="短信配置" min-width="90" align="center"></el-table-column>
             <el-table-column property="userAddr" label="用户地址" min-width="100" align="center" />
-            <el-table-column property="companyName" label="所属水厂" min-width="70" align="center" />
-            <el-table-column property="regionName" label="所属区域" min-width="80" align="center" />
+            <el-table-column property="companyName" label="水厂" min-width="70" align="center" />
+            <el-table-column property="regionName" label="区域" min-width="80" align="center" />
             <el-table-column property="approver1" label="开户审批人1" min-width="70" align="center" />
             <el-table-column property="factoryDate" label="出厂日期" min-width="70" align="center" />
             <el-table-column property="firstInspectDate" label="首检日期" min-width="70" align="center" />
@@ -615,8 +606,8 @@ export default {
           this.isLoading = false
         });
     },
-    download() {
-      let url = "/userManage/userCharge/importUserTemplate";
+    downloadUserAndBindTemplate() {
+      let url = "/userManage/userCharge/importUserAndMeterBindTemplate";
       // 调用后端接口
       axios({
         url: url, // 后端接口地址
@@ -642,7 +633,7 @@ export default {
           // 创建一个链接元素
           const link = document.createElement("a");
           link.href = window.URL.createObjectURL(blob); // 创建 Blob URL
-          link.download = "用户数据导入模板.xlsx"; // 设置下载文件名
+          link.download = "开户绑定导入模板.xlsx"; // 设置下载文件名
           document.body.appendChild(link);
           link.click(); // 触发下载
           document.body.removeChild(link); // 移除链接元素
@@ -692,9 +683,9 @@ export default {
         });
     },
     // 触发文件输入框点击
-    triggerUserImport() {
-      this.$refs.userFileInput.value = "";
-      this.$refs.userFileInput.click();
+    triggerUserAndBindImport() {
+      this.$refs.userAndBindFileInput.value = "";
+      this.$refs.userAndBindFileInput.click();
     },
 
     triggerBindImport() {
@@ -702,8 +693,8 @@ export default {
       this.$refs.bindFileInput.click();
     },
     // 处理文件上传
-    async exportIn() {
-      const fileInput = this.$refs.userFileInput;
+    async importUserAndBind() {
+      const fileInput = this.$refs.userAndBindFileInput;
       const file = fileInput.files[0];
 
       if (!file) {
@@ -719,11 +710,15 @@ export default {
       }
 
       const formData = new FormData();
-      const companyId = this.companyId;
+      const companyId = this.companyId === 1 ? this.param.company : this.companyId;
+      if (!companyId) {
+        ElMessage.warning("请先选择所属水厂");
+        return;
+      }
       formData.append("file", file);
       formData.append("companyId", companyId);
       try {
-        const response = await service.post("/userManage/userCharge/importUser", formData, { responseType: "blob" });
+        const response = await service.post("/userManage/userCharge/importUserAndMeterBind", formData, { responseType: "blob" });
         console.log(response);
         // 获取 Blob 对象
         const blob = new Blob([response.data], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
@@ -740,7 +735,7 @@ export default {
         // 创建一个链接元素
         const link = document.createElement("a");
         link.href = window.URL.createObjectURL(blob); // 创建 Blob URL
-        link.download = "开户导入数据失败列表.xlsx"; // 设置下载文件名
+        link.download = "开户绑定导入失败列表.xlsx"; // 设置下载文件名
         document.body.appendChild(link);
         link.click(); // 触发下载
         document.body.removeChild(link); // 移除链接元素
@@ -777,7 +772,7 @@ export default {
       // }
 
       const formData = new FormData();
-      const companyId = this.companyId;
+      const companyId = this.companyId === 1 ? this.param.company : this.companyId;
       formData.append("file", file);
       formData.append("companyId", companyId);
       try {
