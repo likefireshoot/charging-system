@@ -48,7 +48,7 @@
           <img src="@/assets/yonghu/icon4.png" alt="" style="margin-left: 8px" />
           <span style="font-size: 20px; margin-left: 8px; color: #5a5a5a">删除</span>
         </div>
-        <div class="export-out-btn" style="margin-left: 5px; width: 190px" @click="downloadUserAndBindTemplate" v-if="staffPermissionIds.includes(5)">
+        <div class="export-out-btn" style="margin-left: 5px; width: 210px" @click="downloadUserAndBindTemplate" v-if="staffPermissionIds.includes(5)">
           <img src="@/assets/yonghu/icon1.png" alt="" style="margin-left: 7px" />
           <span style="font-size: 20px; margin-left: 10px; color: #5a5a5a">开户绑定导入模板</span>
         </div>
