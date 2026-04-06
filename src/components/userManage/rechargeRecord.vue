@@ -532,6 +532,7 @@ export default {
         ElMessage.warning("请至少选择一条记录");
         return;
       } else {
+        params.rechargeRecordId = this.multipleSelection[0].rechargeRecordId;
         params.userId = this.multipleSelection[0].userId;
         params.date = this.multipleSelection[0].createTime.replace("T", " ");
         params.userName = this.multipleSelection[0].userName;

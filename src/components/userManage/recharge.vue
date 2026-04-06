@@ -328,7 +328,9 @@ export default {
           if (response.code === 200) {
             // 保存收据数据
             const rechargeAmount = parseFloat(formData.quickmoney || formData.money);
+            // this.receiptData=response.data;
             this.receiptData = {
+              rechargeRecordId: response.data.rechargeRecordId,
               userId: this.data.userId || "",
               date: new Date().toISOString().replace("T", " ").substring(0, 19),
               userName: this.rechargeData.userName,
