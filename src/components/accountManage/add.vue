@@ -86,6 +86,7 @@ export default {
       price_list: [],
       quyu_data: [],
       companyList: [],
+      isSubmitting: false, // 新增:防止重复提交的标志位
     };
   },
   mounted() {
@@ -154,6 +155,10 @@ export default {
         });
     },
     handleCommit() {
+      if (this.isSubmitting) {
+        return;
+      }
+      this.isSubmitting = true;
       let missingFields = [];
       let formData = {};
       Object.keys(this.addData).forEach((key) => {
@@ -234,8 +239,7 @@ export default {
       console.log(formData);
 
       // 所有字段都不为空，提交数据到后台
-      service
-        .post("/userManage/userCharge/addUser", formData)
+        service.post("/userManage/userCharge/addUser", formData)
         .then((res) => {
           if (res.code === 200) {
             ElMessage.success("提交成功");
@@ -247,7 +251,7 @@ export default {
         })
         .catch((err) => {
           ElMessage.error("提交失败：" + err.message);
-        });
+        }).finally(() => { this.isSubmitting = false; });
     },
   },
 };
