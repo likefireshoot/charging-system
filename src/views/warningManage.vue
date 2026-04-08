@@ -100,8 +100,8 @@
             <el-table-column property="userId" label="用户号" :width="idWidth" align="center" />
             <el-table-column property="userName" label="用户名称" :width="userNameWidth" align="center" />
             <el-table-column property="userAddr" label="用户地址" :width="addressWidth" align="center" />
-            <el-table-column property="regionName" label="所属区域" :width="quyuWidth" align="center" />
-            <el-table-column property="companyName" label="所属水厂" :width="companyWidth" align="center" />
+<!--            <el-table-column property="regionName" label="所属区域" :width="quyuWidth" align="center" />-->
+<!--            <el-table-column property="companyName" label="所属水厂" :width="companyWidth" align="center" />-->
             <el-table-column property="userPhone" label="联系电话" :width="phoneWidth" align="center" />
             <el-table-column property="meterCode" label="表号" :width="biaohaoWidth" align="center" />
             <!-- <el-table-column property="imei" label="IMEI号" :width="imeihaoWidth" align="center" /> -->
