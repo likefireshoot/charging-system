@@ -105,7 +105,7 @@
             <el-table-column property="userAddr" label="用户地址" min-width="100" align="center" />
             <el-table-column property="companyName" label="水厂" min-width="70" align="center" />
             <el-table-column property="regionName" label="区域" min-width="80" align="center" />
-            <el-table-column property="approver1" label="开户审批人1" min-width="70" align="center" />
+            <el-table-column property="approver1" label="开户人" min-width="70" align="center" />
             <el-table-column property="factoryDate" label="出厂日期" min-width="70" align="center" />
             <el-table-column property="firstInspectDate" label="首检日期" min-width="70" align="center" />
             <el-table-column property="createTime" label="开户时间" min-width="100" align="center">

@@ -134,12 +134,12 @@ export default {
       title: "历史交易记录",
       transactionOrChargeRecordList: [
         {
-          value: "历史交易记录",
-          label: "历史交易记录",
-        },
-        {
           value: "历史扣费记录",
           label: "历史扣费记录",
+        },
+        {
+          value: "历史交易记录",
+          label: "历史交易记录",
         },
       ],
 

@@ -11,9 +11,9 @@
         </div>
       </div>
 
-      <transactionRecordVue v-if="isShow" :data="data" @changeTye="changeTye"></transactionRecordVue>
+      <chargeRecordItemVue  v-if="isShow" :data="data" @changeTye="changeTye"></chargeRecordItemVue>
 
-      <chargeRecordItemVue v-else :data="data" @changeTye="changeTye"></chargeRecordItemVue>
+      <transactionRecordVue v-else :data="data" @changeTye="changeTye"></transactionRecordVue>>
     </div>
   </div>
 </template>

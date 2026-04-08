@@ -97,12 +97,12 @@
               <el-table-column property="balanceThisTime" label="本次余额/元" min-width="160" align="center"/>
               <el-table-column property="valveStatus" label="阀门状态" min-width="160" align="center" />
               <!-- <el-table-column property="balance" label="余额/元" width="120" align="center" /> -->
-              <el-table-column property="battery" label="电量" min-width="160" align="center" />
-              <el-table-column property="signalValue" label="信号值" min-width="100" align="center" />
+<!--              <el-table-column property="battery" label="电量" min-width="160" align="center" />-->
+<!--              <el-table-column property="signalValue" label="信号值" min-width="100" align="center" />-->
               <el-table-column property="createTime" label="抄表时间" min-width="200" align="center" />
-              <el-table-column property="regionName" label="所属区域" min-width="200" align="center" />
+<!--              <el-table-column property="regionName" label="所属区域" min-width="200" align="center" />-->
               <!-- <el-table-column property="companyName" label="所属水厂" width="200" align="center" /> -->
-              <el-table-column property="userAddr" label="用户地址" min-width="150" align="center" />
+<!--              <el-table-column property="userAddr" label="用户地址" min-width="150" align="center" />-->
               <el-table-column property="userPhone" label="手机号" min-width="180" align="center" />
               <!-- <el-table-column property="imei" label="IMEI号" width="240" align="center" /> -->
             </el-table>
