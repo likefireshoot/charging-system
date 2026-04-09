@@ -122,9 +122,13 @@ export default {
         timeType: "", // 用于选择时间类型
         createTime: "", // 用于存储选择的时间
         meterCode: "",
+        userId: "",
+        companyId: "",
       },
       startData: {
         meterCode: "",
+        userId: "",
+        companyId: "",
       },
       transactionTableData: [],
       multipleSelection: [], //存储当前勾选的行的数据信息
@@ -184,7 +188,11 @@ export default {
     },
     assignmentData() {
       this.transactionData.meterCode = this.data.meterCode;
+      this.transactionData.userId = this.data.userId;
+      this.transactionData.companyId = this.data.companyId;
       this.startData.meterCode = this.data.meterCode;
+      this.startData.userId = this.data.userId;
+      this.startData.companyId = this.data.companyId;
       console.log(this.startData);
     },
     getTransactionRecordData() {
@@ -239,8 +247,21 @@ export default {
     },
     reflush() {
       this.clear(1);
+      const nonEmptyParams = this.filterNonEmptyParams(this.startData);
+      let queryString = "";
+      for (const key in nonEmptyParams) {
+        if (nonEmptyParams.hasOwnProperty(key)) {
+          const value = nonEmptyParams[key];
+          if (queryString) {
+            queryString += `&${key}=${encodeURIComponent(value)}`;
+          } else {
+            queryString += `?${key}=${encodeURIComponent(value)}`;
+          }
+        }
+      }
+      const url = `/userManage/userCharge/showSingleRechargeMeterRecords/1${queryString}`;
       service
-        .get(`/userManage/userCharge/showSingleRechargeMeterRecords/1?meterCode=${this.data.meterCode}`)
+        .get(url)
         .then((response) => {
           if (response.code === 200) {
             response.data.userSingleRechargeRecordData.map((v, i) => {
@@ -265,8 +286,21 @@ export default {
       this.transactionData.createTime = "";
       if (typeof isSearch != 'number' || isNaN(isSearch)) {
         this.currentPage = 1;
+        const nonEmptyParams = this.filterNonEmptyParams(this.startData);
+        let queryString = "";
+        for (const key in nonEmptyParams) {
+          if (nonEmptyParams.hasOwnProperty(key)) {
+            const value = nonEmptyParams[key];
+            if (queryString) {
+              queryString += `&${key}=${encodeURIComponent(value)}`;
+            } else {
+              queryString += `?${key}=${encodeURIComponent(value)}`;
+            }
+          }
+        }
+        const url = `/userManage/userCharge/showSingleRechargeMeterRecords/1${queryString}`;
         service
-          .get(`/userManage/userCharge/showSingleRechargeMeterRecords/1?meterCode=${this.data.meterCode}`)
+          .get(url)
           .then((response) => {
             if (response.code === 200) {
               response.data.userSingleRechargeRecordData.map((v, i) => {
@@ -287,6 +321,7 @@ export default {
           });
       }
     },
+
     // 过滤掉值为空的参数，并格式化时间类型参数
     filterNonEmptyParams(params) {
       const filteredParams = {};
@@ -442,16 +477,18 @@ export default {
         beforeAmount: 0,
         amount: 0,
         afterAmount: 0,
+        rechargeRecordId: "",
       };
       if (this.multipleSelection.length === 0) {
         ElMessage.warning("请至少选择一条记录");
         return;
       } else {
+        params.rechargeRecordId = this.multipleSelection[0].recordId;
         params.userId = this.multipleSelection[0].userId;
         params.date = this.multipleSelection[0].createTime.replace("T", " ");
         params.userName = this.multipleSelection[0].userName;
         params.userAddress = this.data.userAddr;
-        params.operator = JSON.parse(sessionStorage.getItem("userData")).staffName;
+        params.operator = this.multipleSelection[0].rechargeUser || JSON.parse(sessionStorage.getItem("userData")).staffName;
         params.beforeAmount = this.multipleSelection[0].oldBalance;
         params.amount = this.multipleSelection[0].rechargeAmount;
         params.afterAmount = this.multipleSelection[0].newBalance;

@@ -150,6 +150,7 @@ export default {
         meterCode: "",
         imei: "",
         companyId: null,
+        userId: "",
       },
       companyId: JSON.parse(sessionStorage.getItem("userData")).companyId, // 公司ID
       staffPermissionIds: JSON.parse(sessionStorage.getItem("userData")).staffPermissionIds,
@@ -158,6 +159,7 @@ export default {
         meterCode: "",
         imei: "",
         companyId: null,
+        userId: "",
       },
       chaobiaoTableData: [],
       multipleSelection: [], //存储当前勾选的行的数据信息
@@ -277,6 +279,8 @@ export default {
       this.startData.imei = this.data.imei;
       this.chaobiaoData.companyId = this.data.companyId;
       this.startData.companyId = this.data.companyId;
+      this.chaobiaoData.userId = this.data.userId;
+      this.startData.userId = this.data.userId;
     },
     getChaboBiaoRecordData() {
       if (this.isLoading) return
@@ -333,8 +337,21 @@ export default {
     },
     reflush() {
       this.clear(1);
+      const nonEmptyParams = this.filterNonEmptyParams(this.startData);
+      let queryString = "";
+      for (const key in nonEmptyParams) {
+        if (nonEmptyParams.hasOwnProperty(key)) {
+          const value = nonEmptyParams[key];
+          if (queryString) {
+            queryString += `&${key}=${encodeURIComponent(value)}`;
+          } else {
+            queryString += `?${key}=${encodeURIComponent(value)}`;
+          }
+        }
+      }
+      const url = `/userManage/meterRead/showReadMeterRecords/1${queryString}`;
       service
-        .get(`/userManage/meterRead/showReadMeterRecords/1?meterCode=${this.data.meterCode}&imei=${this.data.imei}&companyId=${this.data.companyId}`)
+        .get(url)
         .then((response) => {
           if (response.code === 200) {
             response.data.userInfoData.map((v, i) => {
@@ -357,13 +374,27 @@ export default {
           ElMessage.error(error);
         });
     },
+
     clear(isSearch) {
       this.chaobiaoData.time.type = "";
       this.chaobiaoData.time.accurateTime = "";
       if (typeof isSearch != 'number' || isNaN(isSearch)) {
         this.currentPage = 1;
+        const nonEmptyParams = this.filterNonEmptyParams(this.startData);
+        let queryString = "";
+        for (const key in nonEmptyParams) {
+          if (nonEmptyParams.hasOwnProperty(key)) {
+            const value = nonEmptyParams[key];
+            if (queryString) {
+              queryString += `&${key}=${encodeURIComponent(value)}`;
+            } else {
+              queryString += `?${key}=${encodeURIComponent(value)}`;
+            }
+          }
+        }
+        const url = `/userManage/meterRead/showReadMeterRecords/1${queryString}`;
         service
-          .get(`/userManage/meterRead/showReadMeterRecords/1?meterCode=${this.data.meterCode}&imei=${this.data.imei}&companyId=${this.data.companyId}`)
+          .get(url)
           .then((response) => {
             if (response.code === 200) {
               response.data.userInfoData.map((v, i) => {
@@ -387,6 +418,7 @@ export default {
           });
       }
     },
+
     // 过滤掉值为空的参数
     filterNonEmptyParams(params) {
       const filteredParams = {};

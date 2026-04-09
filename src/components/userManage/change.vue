@@ -206,7 +206,7 @@ export default {
       let formData = {
         userId: this.changeData.userId,
         userName: this.changeData.userName,
-        userPhone: this.changeData.userPhone,
+        // userPhone: this.changeData.userPhone,
         oldMeterCode: this.changeData.oldMeterCode,
         oldCount: this.changeData.oldCount,
         newMeterCode: this.changeData.newMeterCode,

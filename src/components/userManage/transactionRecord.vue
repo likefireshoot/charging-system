@@ -41,7 +41,7 @@ export default {
   },
   data() {
     return {
-      title: "历史交易记录",
+      title: "历史扣费记录",
       isShow: true, //两个的显示与否
     };
   },
@@ -53,9 +53,9 @@ export default {
     changeTye() {
       this.isShow = !this.isShow; // title在改变
       if (this.isShow) {
-        this.title = "历史交易记录";
-      } else {
         this.title = "历史扣费记录";
+      } else {
+        this.title = "历史交易记录";
       }
     },
   },
