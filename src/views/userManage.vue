@@ -271,6 +271,10 @@
       :command_dialogFormVisible="command_dialogFormVisible_old_xinchi" :commandType="commandType"
       :data="multipleSelection[0]" @close="closeCommandDialog"></commandOldXinchi>
 
+    <command4GXinchi v-if="command_dialogFormVisible_4g_xinchi"
+      :command_dialogFormVisible="command_dialogFormVisible_4g_xinchi" :commandType="commandType"
+      :data="multipleSelection[0]" @close="closeCommandDialog"></command4GXinchi>
+
     <!-- 命令下发弹出框-集万讯 -->
     <commandJiWanXun v-if="command_dialogFormVisible_jiwanxun"
       :command_dialogFormVisible="command_dialogFormVisible_jiwanxun" :commandType="commandType"
@@ -341,6 +345,7 @@ import commandZhuoZheng from "@/components/userManage/command_zhuozheng.vue";
 import commandJiWanXun from "@/components/userManage/command_jiwanxun.vue";
 import commandShengXin from "@/components/userManage/command_shengxin.vue";
 import commandOldXinchi from "@/components/userManage/command_old_xinchi.vue";
+import command4GXinchi from "@/components/userManage/command_4g_xinchi.vue";
 import commandOldShengXin from "@/components/userManage/command_oldshengxin.vue";
 import rechargeVue from "@/components/userManage/recharge.vue";
 import rechargeRecordVue from "@/components/userManage/rechargeRecord.vue";
@@ -383,6 +388,7 @@ export default {
     commandQianBaoTong,
     commandJiWanXun,
     commandOldXinchi,
+    command4GXinchi,
     commandOldShengXin,
   },
   data() {
@@ -458,6 +464,7 @@ export default {
       command_dialogFormVisible_jiwanxun: false,
       command_dialogFormVisible_shengxin: false,
       command_dialogFormVisible_old_xinchi: false,
+      command_dialogFormVisible_4g_xinchi: false,
       command_dialogFormVisible_old_shengxin: false,
       valve_dialogFormVisible: false,
       valveOpen_dialogFormVisible: false,
@@ -850,6 +857,9 @@ export default {
         case "旧信驰":
           this.command_dialogFormVisible_old_xinchi = true;
           break;
+        case "4G信驰":
+          this.command_dialogFormVisible_4g_xinchi = true;
+          break;
         case "卓正":
           this.command_dialogFormVisible_zhuozheng = true;
           break;
@@ -877,6 +887,7 @@ export default {
       this.command_dialogFormVisible_jiwanxun = false;
       this.command_dialogFormVisible_shengxin = false;
       this.command_dialogFormVisible_old_xinchi = false;
+      this.command_dialogFormVisible_4g_xinchi = false;
       this.command_dialogFormVisible_old_shengxin = false;
       this.multipleSelection = [];
       this.commandType = "";

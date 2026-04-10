@@ -678,8 +678,6 @@ export default {
         exportParams.regionName = this.region;
       }
       delete exportParams.company;
-      delete exportParams.pageNo;
-      delete exportParams.pageSize;
       const requestParams = Object.fromEntries(Object.entries(exportParams).filter(([_, value]) => value !== null && value !== undefined && value !== ""));
       axios({
         url: "/warning/exportWarningReport",
