@@ -66,7 +66,7 @@
             </el-select>
           </div>
           <div class="edit-input">
-            <span>开户审批人 1</span>
+            <span>开户审批人</span>
             <el-select v-model="form.approver_1" class="input-item big-font-el-select" placeholder="请选择">
               <el-option v-for="item in approverList" :key="item.id" :label="item.label" :value="item.label" />
             </el-select>

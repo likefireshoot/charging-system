@@ -13,7 +13,7 @@
 
       <chargeRecordItemVue  v-if="isShow" :data="data" @changeTye="changeTye"></chargeRecordItemVue>
 
-      <transactionRecordVue v-else :data="data" @changeTye="changeTye"></transactionRecordVue>>
+      <transactionRecordVue v-else :data="data" @changeTye="changeTye"></transactionRecordVue>
     </div>
   </div>
 </template>

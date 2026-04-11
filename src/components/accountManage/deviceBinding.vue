@@ -42,7 +42,7 @@
           </el-select>
         </div>
         <div class="edit-input" style="margin-right: 1%">
-          <span>开户审批人1</span>
+          <span>开户审批人</span>
           <el-select v-model="addData.approver_1" class="input-item big-font-el-select">
             <el-option v-for="item in approver_list" :key="item.id" :label="item.label" :value="item.label"></el-option>
           </el-select>
