@@ -27,6 +27,7 @@ import readingCountYearlyReport from "@/components/report/readingCountYearlyRepo
 import roleManage from "@/views/roleManage.vue";
 import { useWarningStore } from "@/store/warningStore.js";
 import accountsReport from "@/components/report/accountsReport.vue";
+import userRecordDetail from "@/components/userManage/userRecordDetail.vue";
 
 const routes = [
   {
@@ -59,6 +60,12 @@ const routes = [
         path: "/userManage",
         name: "userManage",
         component: userManage,
+      },
+
+      {
+        path: "/userRecordDetail",
+        name: "userRecordDetail",
+        component: userRecordDetail,
       },
       {
         path: "/priceManage",

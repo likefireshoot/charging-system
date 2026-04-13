@@ -42,6 +42,7 @@
           <span style="font-size: 20px; margin-left: 15%; color: #5a5a5a">清空</span>
         </div>
       </div>
+      <div class="detail-entry" @click="goToBillDetail">点击查看详情</div>
     </div>
     <div class="transaction-list">
       <div class="command-buttons">
@@ -61,6 +62,7 @@
         <div class="reflush" style="margin-right: 10px" @click="reflush">
           <img src="@/assets/yonghu/icon15.png" alt="" />
         </div>
+<!--        <div class="detail-entry" @click="goToBillDetail">点击查看详情</div>-->
       </div>
       <div class="transaction-table">
         <el-table
@@ -655,6 +657,21 @@ export default {
           ElMessage.error("导出失败: " + error.message);
         });
     },
+    goToBillDetail() {
+      this.$router.push({
+        name: "userRecordDetail",
+        query: {
+          //这里的主要是scope.raw中(父组件传入)的参数
+          userId: this.data.userId || "",
+          meterCode: this.data.meterCode || "",
+          companyId: this.data.companyId || "",
+          userName: this.data.userName || "",
+          userAddr: this.data.userAddr || "",
+          userPhone: this.data.phone || "",
+          userBalance:this.data.balance || "",
+        },
+      });
+    },
   },
 };
 </script>
@@ -729,11 +746,25 @@ export default {
   height: 100%;
   margin-left: 15%;
   align-items: center;
+  justify-content: space-between;
 }
 
 .buttons>* {
   width: 120px;
   margin-right: 30px;
+}
+.detail-entry {
+  font-size: 22px;
+  font-weight: bold;
+  color: #46b97e;
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+  margin-left: auto;
+  margin-right: 20px;
+}
+.detail-entry:hover {
+  text-decoration: underline;
 }
 
 .sercah-btn,
