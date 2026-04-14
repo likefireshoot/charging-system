@@ -10,13 +10,21 @@
 
     <div class="detail-content">
       <div class="info-side">
-        <div class="info-card">
+        <div class="info-card user-info-card">
           <div class="card-title">用户信息</div>
           <div class="balance-section">
             <div class="yellow-circle">¥</div>
             <div class="balance-text">
               <div class="num">{{ currentUser.balance || 0 }}</div>
               <div class="unit">可用余额 (元)</div>
+            </div>
+          </div>
+          <!-- 新增消费总额区域，仅在账单记录tab时显示 -->
+          <div v-if="activeTab === 'bill'" class="total-consume-section">
+            <div class="total-consume-circle">¥</div>
+            <div class="total-consume-text">
+              <div class="num">{{ totalMoney }}</div>
+              <div class="unit">消费总额 (元)</div>
             </div>
           </div>
           <div class="data-list">
@@ -29,7 +37,7 @@
           </div>
         </div>
 
-        <div class="info-card" style="margin-top: 20px">
+        <div class="info-card meter-info-card">
           <div class="card-title">表信息</div>
           <div class="data-list">
             <div class="data-item"><span>表号：</span>{{ currentUser.meterCode || '-' }}</div>
@@ -44,108 +52,23 @@
       <div class="table-side">
         <div class="tab-bar">
           <div
-            v-for="(tab, index) in tabs"
-            :key="index"
-            :class="['tab-item', { active: activeTab === index }]"
-            @click="switchTab(index)"
+            v-for="tab in tabs"
+            :key="tab.type"
+            :class="['tab-item', { active: activeTab === tab.type }]"
+            @click="switchTab(tab.type)"
           >
             {{ tab.name }}
           </div>
         </div>
 
         <div class="table-box">
-          <!-- 账单记录表格 -->
-          <el-table
-            v-if="activeTab === 0"
-            :data="billList"
-            border
-            v-loading="loading"            style="width: 100%"
-            :header-cell-style="{ background: '#46B97E', color: '#FFFFFF' }"
-            :row-style="{ height: '60px' }"
-            max-height="1010"
-          >
-            <el-table-column property="userId" label="用户号" min-width="130" align="center" />
-            <el-table-column property="userName" label="用户名称" min-width="160" align="center" />
-            <el-table-column property="meterCode" label="表号" min-width="180" align="center" />
-            <el-table-column property="chargeAmount" label="扣费金额" min-width="130" align="center">
-              <template #default="scope">{{ scope.row.chargeAmount }} 元</template>
-            </el-table-column>
-            <el-table-column property="oldBalance" label="原金额" min-width="130" align="center">
-              <template #default="scope">{{ scope.row.oldBalance }} 元</template>
-            </el-table-column>
-            <el-table-column property="newBalance" label="余额" min-width="130" align="center">
-              <template #default="scope">{{ scope.row.newBalance }} 元</template>
-            </el-table-column>
-            <el-table-column property="createTime" label="扣费时间" min-width="210" align="center" />
-            <el-table-column label="扣费类型" min-width="140" align="center">
-              <template #default="scope">
-                <span>{{ formatChargeType(scope.row.type) }}</span>
-              </template>
-            </el-table-column>
-          </el-table>
-
-          <!-- 交易记录表格 -->
-          <el-table
-            v-if="activeTab === 1"
-            :data="transactionList"
-            border
-            v-loading="loading"
-            style="width: 100%"
-            :header-cell-style="{ background: '#f5f7fa', color: '#606266' }"
-          >
-            <el-table-column property="tradeDate" label="交易日期" align="center" width="150" />
-            <el-table-column property="tradeType" label="交易类型" align="center" />
-            <el-table-column property="amount" label="交易金额" align="center">
-              <template #default="scope">{{ scope.row.amount }} 元</template>
-            </el-table-column>
-            <el-table-column property="balance" label="账户余额" align="center">
-              <template #default="scope">{{ scope.row.balance }} 元</template>
-            </el-table-column>
-            <el-table-column property="tradeTime" label="交易时间" align="center" width="180" />
-          </el-table>
-
-          <!-- 抄表记录表格 -->
-          <el-table
-            v-if="activeTab === 2"
-            :data="meterReadingList"
-            border
-            v-loading="loading"
-            style="width: 100%"
-            :header-cell-style="{ background: '#f5f7fa', color: '#606266' }"
-          >
-            <el-table-column property="readingDate" label="抄表日期" align="center" width="150" />
-            <el-table-column property="readingValue" label="表数" align="center" />
-            <el-table-column property="usage" label="使用量" align="center" />
-            <el-table-column property="operator" label="操作人员" align="center" />
-            <el-table-column property="remark" label="备注" align="center" />
-          </el-table>
-
-          <!-- 操作历史表格 -->
-          <el-table
-            v-if="activeTab === 3"
-            :data="operationList"
-            border
-            v-loading="loading"
-            style="width: 100%"
-            :header-cell-style="{ background: '#f5f7fa', color: '#606266' }"
-          >
-            <el-table-column property="operationDate" label="操作日期" align="center" width="150" />
-            <el-table-column property="operationType" label="操作类型" align="center" />
-            <el-table-column property="operator" label="操作人员" align="center" />
-            <el-table-column property="content" label="操作内容" align="center" />
-            <el-table-column property="ip" label="IP地址" align="center" width="140" />
-          </el-table>
-
-          <div class="pagination-container" v-if="activeTab === 0">
-            <el-pagination
-              v-model:current-page="currentPage"
-              v-model:page-size="pageSize"
-              :page-size="pageSize"
-              layout="total, prev, pager, next, jumper"
-              :total="total"
-              @current-change="handlePageChange"
+          <keep-alive>
+            <component
+              :is="currentTabComponent"
+              :user="currentUser"
+              @update-total-money="handleTotalMoneyUpdate"
             />
-          </div>
+          </keep-alive>
         </div>
       </div>
     </div>
@@ -154,45 +77,44 @@
 
 <script>
 import { ElMessage } from "element-plus";
-import service from "@/api/request";
+import BillTable from "./userRecordTabs/BillTable.vue";
+import TransactionTable from "./userRecordTabs/TransactionTable.vue";
+import MeterTable from "./userRecordTabs/MeterTable.vue";
+import OperationTable from "./userRecordTabs/OperationTable.vue";
 
 export default {
   name: "UserBillDetail",
+  components: {
+    BillTable,
+    TransactionTable: TransactionTable,
+    MeterTable,
+    OperationTable
+  },
   data() {
     return {
-      loading: false,
-      isLoading: false,
-      token: "",
       currentUser: {},
-      billList: [],
-      transactionList: [],
-      meterReadingList: [],
-      operationList: [],
-      total: 0,
-      currentPage: 1,
-      pageSize: 30,
-      activeTab: 0,
+      totalMoney: 0,
+      activeTab: "bill",
       tabs: [
         { name: "账单记录", type: "bill" },
-        // { name: "交易记录", type: "transaction" },
-        // { name: "抄表记录", type: "meter" },
-        // { name: "操作历史", type: "operation" }
+        { name: "交易记录", type: "transaction" },
+        { name: "抄表记录", type: "meter" },
+        { name: "操作历史", type: "operation" }
       ]
     };
   },
-  mounted() {
-    // 获取token
-    const userData = sessionStorage.getItem("userData");
-    if (userData) {
-      try {
-        const parsedData = JSON.parse(userData);
-        this.token = parsedData.token || "";
-      } catch (e) {
-        console.error("解析userData失败", e);
-      }
+  computed: {
+    currentTabComponent() {
+      const componentMap = {
+        bill: "BillTable",
+        transaction: "TransactionTable",
+        meter: "MeterTable",
+        operation: "OperationTable"
+      };
+      return componentMap[this.activeTab] || "BillTable";
     }
-
-    // 从路由参数中获取用户信息
+  },
+  mounted() {
     const userId = this.$route.query.userId;
     const meterCode = this.$route.query.meterCode;
     const companyId = this.$route.query.companyId;
@@ -205,206 +127,21 @@ export default {
         userAddr: this.$route.query.userAddr || "",
         phone: this.$route.query.userPhone || "",
         balance: this.$route.query.userBalance || ""
-
       };
-      this.initData(userId);
     } else {
       ElMessage.error("缺少用户参数");
     }
   },
   methods: {
-    // 初始化数据
-    async initData(userId) {
-      await this.fetchUserInfo(userId);
-      await this.fetchBillRecords();
-      await this.fetchTransactionRecords();
-      await this.fetchMeterReadingRecords();
-      await this.fetchOperationRecords();
+    switchTab(type) {
+      this.activeTab = type;
     },
-
-    // 获取用户信息
-    async fetchUserInfo(userId) {
-      try {
-        // 使用路由参数预填，避免覆盖传入的真实用户信息
-        if (!this.currentUser.userId) {
-          this.currentUser.userId = userId || "";
-        }
-      } catch (error) {
-        console.error("获取用户信息失败", error);
-        ElMessage.error("获取用户信息失败");
-      }
-    },
-
-    async fetchBillRecords() {
-      if (this.isLoading) return;
-      this.isLoading = true;
-      this.loading = true;
-
-      try {
-        const params = {
-          userId: this.currentUser.userId,
-          meterCode: this.currentUser.meterCode,
-          companyId: this.currentUser.companyId
-        };
-
-        const nonEmptyParams = this.filterNonEmptyParams(params);
-        let queryString = "";
-
-        for (const key in nonEmptyParams) {
-          if (nonEmptyParams.hasOwnProperty(key)) {
-            const value = nonEmptyParams[key];
-            if (queryString) {
-              queryString += `&${key}=${encodeURIComponent(value)}`;
-            } else {
-              queryString += `?${key}=${encodeURIComponent(value)}`;
-            }
-          }
-        }
-
-        const url = `/userManage/userCharge/showMeterChargeRecords/${this.currentPage}${queryString}`;
-
-        const response = await service.get(url);
-
-        if (response.code === 200) {
-          response.data.userSingleRechargeRecordData.map((v, i) => {
-            v.theId = this.pageSize * (response.data.currentPages - 1) + i + 1;
-          });
-
-          this.billList = response.data.userSingleRechargeRecordData;
-          this.billList.forEach((item) => {
-            if (item.createTime) {
-              item.createTime = item.createTime.replace("T", " ");
-            }
-          });
-
-          this.total = response.data.totalElements;
-        } else {
-          ElMessage.error(response.msg);
-        }
-      } catch (error) {
-        console.error("获取账单记录失败", error);
-        ElMessage.error("获取账单记录失败");
-      } finally {
-        this.loading = false;
-        this.isLoading = false;
-      }
-    },
-
-
-    // 获取交易记录
-    async fetchTransactionRecords() {
-      try {
-        // TODO: 替换为实际的API调用
-        // 模拟数据
-        this.transactionList = [
-          { tradeDate: '2026-04-01', tradeType: '充值', amount: '100', balance: '264', tradeTime: '2026-04-01 10:30:00' },
-          { tradeDate: '2026-03-15', tradeType: '消费', amount: '12', balance: '164', tradeTime: '2026-03-15 08:00:00' },
-          { tradeDate: '2026-03-01', tradeType: '充值', amount: '50', balance: '176', tradeTime: '2026-03-01 14:20:00' }
-        ];
-      } catch (error) {
-        console.error("获取交易记录失败", error);
-        ElMessage.error("获取交易记录失败");
-      }
-    },
-
-    // 获取抄表记录
-    async fetchMeterReadingRecords() {
-      try {
-        // TODO: 替换为实际的API调用
-        // 模拟数据
-        this.meterReadingList = [
-          { readingDate: '2026-03-31', readingValue: '1467', usage: '0', operator: '系统自动', remark: '保底消费' },
-          { readingDate: '2026-03-05', readingValue: '1466', usage: '1', operator: '远程抄表', remark: '正常' },
-          { readingDate: '2026-02-27', readingValue: '1465', usage: '1', operator: '远程抄表', remark: '正常' }
-        ];
-      } catch (error) {
-        console.error("获取抄表记录失败", error);
-        ElMessage.error("获取抄表记录失败");
-      }
-    },
-
-    // 获取操作记录
-    async fetchOperationRecords() {
-      try {
-        // TODO: 替换为实际的API调用
-        // 模拟数据
-        this.operationList = [
-          { operationDate: '2026-04-01', operationType: '充值', operator: 'admin', content: '用户充值100元', ip: '192.168.1.1' },
-          { operationDate: '2026-03-05', operationType: '账单生成', operator: '系统', content: '生成3月份账单', ip: '127.0.0.1' },
-          { operationDate: '2026-02-27', operationType: '抄表', operator: '系统', content: '远程抄表', ip: '127.0.0.1' }
-        ];
-      } catch (error) {
-        console.error("获取操作记录失败", error);
-        ElMessage.error("获取操作记录失败");
-      }
-    },
-
-    // 切换标签页
-    switchTab(index) {
-      this.activeTab = index;
-    },
-
-    // 分页切换
-    handlePageChange(page) {
-      this.currentPage = page;
-      this.fetchBillRecords();
-    },
-
-    // 返回上一页
     goBack() {
       this.$router.back();
     },
-    filterNonEmptyParams(params) {
-      const filteredParams = {};
-      for (const key in params) {
-        if (Object.prototype.hasOwnProperty.call(params, key)) {
-          const value = params[key];
-          if (value === "" || value === null || value === undefined) {
-            continue;
-          }
-          filteredParams[key] = value;
-        }
-      }
-      return filteredParams;
-    },
-    formatChargeType(type) {
-      if (type === 0 || type === "0") {
-        return "抄表扣费";
-      }
-      if (type === 1 || type === "1") {
-        return "保底扣费";
-      }
-      if (type === 2 || type === "2") {
-        return "补扣费用";
-      }
-      return "-";
-    },
-    // async getTotalUsedMoney() {
-    //   try {
-    //     const params = this.filterNonEmptyParams({
-    //       meterCode: this.currentUser.meterCode,
-    //       userId: this.currentUser.userId,
-    //       companyId: this.currentUser.companyId,
-    //     });
-    //     let queryString = "";
-    //     for (const key in params) {
-    //       if (Object.prototype.hasOwnProperty.call(params, key)) {
-    //         const value = params[key];
-    //         if (queryString) {
-    //           queryString += `&${key}=${encodeURIComponent(value)}`;
-    //         } else {
-    //           queryString += `?${key}=${encodeURIComponent(value)}`;
-    //         }
-    //       }
-    //     }
-    //     const response = await service.get(`/userManage/userCharge/getTotalChargeAmount${queryString}`);
-    //     if (response.code === 200) {
-    //       this.currentUser.balance = response.data;
-    //     }
-    //   } catch (error) {
-    //     console.error("获取扣费总额失败", error);
-    //   }
-    // }
+    handleTotalMoneyUpdate(value) {
+      this.totalMoney = value || 0;
+    }
   }
 };
 </script>
@@ -412,20 +149,23 @@ export default {
 <style scoped>
 .user-detail-container {
   background-color: #f4f7f9;
-  min-height: 100vh;
+  height: 100%;
   padding: 15px;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
-/* 顶部导航 */
 .detail-header {
   display: flex;
-  min-height: 60px;
   align-items: center;
   background: #fff;
   padding: 10px 20px;
   border-radius: 4px;
   box-shadow: 0 2px 10px rgba(0,0,0,0.05);
   margin-bottom: 15px;
+  flex-shrink: 0;
 }
 
 .back-item {
@@ -454,24 +194,41 @@ export default {
   color: #333;
 }
 
-/* 主体内容布局 */
 .detail-content {
   display: flex;
   gap: 15px;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
 }
 
-/* 左侧卡片 */
 .info-side {
   width: 420px;
   flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  min-height: 0;
 }
 
 .info-card {
-  height: 550px;
   background: #fff;
   border-radius: 4px;
   padding: 20px;
   box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.user-info-card {
+  flex: 1.2;
+  min-height: 0;
+}
+
+.meter-info-card {
+  flex: 1.2;
+  min-height: 0;
 }
 
 .card-title {
@@ -514,6 +271,40 @@ export default {
   color: #999;
 }
 
+/* 消费总额样式 - 与可用余额样式类似但稍有区别 */
+.total-consume-section {
+  display: flex;
+  align-items: center;
+  margin-bottom: 25px;
+  border-top: 1px solid #f0f0f0;
+  padding-top: 20px;
+}
+
+.total-consume-circle {
+  background: #46B97E;
+  color: #fff;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  font-weight: bold;
+  margin-right: 15px;
+}
+
+.total-consume-text .num {
+  font-size: 35px;
+  font-weight: bold;
+  color: #f56c6c;
+}
+
+.total-consume-text .unit {
+  font-size: 18px;
+  color: #999;
+}
+
 .data-item {
   font-size: 22px;
   margin-bottom: 12px;
@@ -528,18 +319,20 @@ export default {
 
 /* 右侧表格 */
 .table-side {
-  flex-grow: 1;
+  flex: 1;
   background: #fff;
   border-radius: 4px;
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  min-height: 0;
 }
 
 .tab-bar {
   display: flex;
   background: #eef1f6;
   border-bottom: 1px solid #dcdfe6;
+  flex-shrink: 0;
 }
 
 .tab-item {
@@ -562,33 +355,214 @@ export default {
 .table-box {
   padding: 20px;
   flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
 }
 
+/* 账单记录容器样式 */
+.bill-table-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+
+/* 搜索栏样式 - 美化后：白色背景，柔和边框和阴影 */
+.search-bar {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 15px;
+  flex-wrap: wrap;
+  background: #ffffff;
+  padding: 12px 20px;
+  border-radius: 8px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e9eef2;
+}
+
+.search-input-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.search-input-item > span {
+  font-size: 18px;
+  color: #606266;
+  white-space: nowrap;
+}
+
+.time-input {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.search-buttons {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-left: auto;
+}
+
+.search-btn, .clear-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.3s;
+  font-size: 18px;
+}
+
+.search-btn {
+  background-color: #46B97E;
+  color: #fff;
+}
+
+.search-btn img {
+  width: 18px;
+  height: 18px;
+}
+
+.clear-btn {
+  background-color: #fff;
+  border: 1px solid #dcdfe6;
+  color: #606266;
+}
+
+.clear-btn img {
+  width: 18px;
+  height: 18px;
+}
+
+.search-btn:hover {
+  background-color: #3aa06b;
+}
+
+.clear-btn:hover {
+  background-color: #f5f7fa;
+}
+
+/* 工具栏样式 */
+.tool-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 15px;
+}
+
+.export-btn, .refresh-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  background-color: #fff;
+  border: 1px solid #dcdfe6;
+  transition: all 0.3s;
+  font-size: 18px;
+  color: #606266;
+}
+
+.export-btn img, .refresh-btn img {
+  width: 18px;
+  height: 18px;
+}
+
+.export-btn:hover, .refresh-btn:hover {
+  background-color: #f5f7fa;
+  border-color: #46B97E;
+}
+
+/* 表格容器 */
+.table-wrapper {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* 汇总信息样式 - 保留以备不时之需，但已在用户信息区域展示 */
+.summary-box {
+  margin-top: 15px;
+  margin-bottom: 15px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.summary-item {
+  border: 1px solid #d9efe2;
+  background-color: #f7fbf8;
+  border-radius: 5px;
+  padding: 10px 20px;
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+.summary-label {
+  font-size: 18px;
+  color: #5a5a5a;
+}
+
+.summary-value {
+  font-size: 22px;
+  color: #f56c6c;
+  font-weight: bold;
+}
+
+/* 分页样式 */
 .pagination-container {
   margin-top: 20px;
   display: flex;
   justify-content: center;
+  flex-shrink: 0;
 }
 
 .pagination-container :deep(.el-pagination) {
+  font-size: 20px;
+}
+
+.pagination-container :deep(.el-pagination .btn-prev),
+.pagination-container :deep(.el-pagination .btn-next) {
+  min-width: 44px;
+  height: 44px;
+  line-height: 44px;
   font-size: 18px;
 }
 
 .pagination-container :deep(.el-pager li) {
-  min-width: 40px;
-  height: 40px;
-  line-height: 40px;
+  min-width: 44px;
+  height: 44px;
+  line-height: 44px;
   font-size: 18px;
+  margin: 0 4px;
 }
 
-.pagination-container :deep(.btn-prev),
-.pagination-container :deep(.btn-next) {
-  min-width: 40px;
-  height: 40px;
+.pagination-container :deep(.el-pagination__total) {
+  font-size: 18px;
+  line-height: 44px;
+  margin-right: 20px;
 }
 
-.data-list{
-  margin-top: 50px;
+.pagination-container :deep(.el-pagination__jump) {
+  font-size: 18px;
+  line-height: 44px;
+  margin-left: 20px;
+}
+
+.pagination-container :deep(.el-pagination__jump input) {
+  height: 36px;
+  line-height: 36px;
+}
+
+.data-list {
+  margin-top: 20px;
   margin-left: 30px;
 }
 </style>

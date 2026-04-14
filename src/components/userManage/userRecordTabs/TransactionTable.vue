@@ -1,0 +1,644 @@
+<template>
+  <div class="transaction-table-container">
+    <div class="search-bar">
+      <div class="search-input-item">
+        <span>时间</span>
+        <div class="time-input">
+          <el-select v-model="transactionData.timeType" placeholder="请选择" style="width: 100px; font-size: 18px;">
+            <el-option label="年" value="year" />
+            <el-option label="月" value="month" />
+            <el-option label="日" value="day" />
+          </el-select>
+          <el-date-picker
+            v-if="transactionData.timeType === 'year'"
+            v-model="transactionData.createTime"
+            type="year"
+            placeholder="选择年份"
+            value-format="YYYY"
+            style="width: 180px; font-size: 18px;"
+          />
+          <el-date-picker
+            v-else-if="transactionData.timeType === 'month'"
+            v-model="transactionData.createTime"
+            type="month"
+            placeholder="选择月份"
+            value-format="YYYY-MM"
+            style="width: 180px; font-size: 18px;"
+          />
+          <el-date-picker
+            v-else
+            v-model="transactionData.createTime"
+            type="date"
+            placeholder="选择日期"
+            format="YYYY-MM-DD"
+            value-format="YYYY-MM-DD"
+            style="width: 200px; font-size: 18px;"
+          />
+        </div>
+      </div>
+      <div class="search-buttons">
+        <div class="search-btn" @click="handleSearch">
+          <img src="@/assets/yonghu/icon16.png" alt="" />
+          <span>搜索</span>
+        </div>
+        <div class="clear-btn" @click="handleClear">
+          <img src="@/assets/yonghu/icon4.png" alt="" />
+          <span>清空</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="tool-bar">
+      <div class="tool-btn" :class="{ 'disabled-btn': multipleSelection.length !== 1 }" @click="multipleSelection.length === 1 && handleReceipt()">
+        <img src="@/assets/yonghu/icon26.png" alt="" />
+        <span>开收据</span>
+      </div>
+      <div class="tool-btn" @click="exportExcel">
+        <img src="@/assets/yonghu/icon2.png" alt="" />
+        <span>导出</span>
+      </div>
+      <div class="refresh-btn" @click="handleRefresh">
+        <img src="@/assets/yonghu/icon15.png" alt="" />
+      </div>
+    </div>
+
+    <div class="table-wrapper">
+      <el-table
+        ref="multipleTableRef"
+        :data="list"
+        border
+        v-loading="loading"
+        style="width: 100%"
+        :header-cell-style="{ background: '#46B97E', color: '#FFFFFF' }"
+        :row-style="{ height: '50px' }"
+        height="100%"
+        @selection-change="handleSelectionChange"
+      >
+        <el-table-column type="selection" width="50" align="center" fixed="left" />
+        <el-table-column property="userId" label="用户号" min-width="120" align="center" fixed="left" />
+        <el-table-column property="userName" label="用户名称" min-width="140" align="center" />
+        <el-table-column property="regionName" label="所属区域" min-width="120" align="center" />
+        <el-table-column property="userPhone" label="联系电话" min-width="130" align="center" />
+        <el-table-column property="meterCode" label="表号" min-width="160" align="center" />
+        <el-table-column property="meterType" label="水表类型" min-width="100" align="center" />
+<!--        <el-table-column property="payerPhone" label="缴费人手机号" min-width="140" align="center" />-->
+        <el-table-column property="rechargeType" label="交易方式" min-width="100" align="center" />
+        <el-table-column property="rechargeAmount" label="交易金额" min-width="110" align="center">
+          <template #default="scope">{{ scope.row.rechargeAmount }} 元</template>
+        </el-table-column>
+        <el-table-column property="oldBalance" label="充值前余额/元" min-width="120" align="center">
+          <template #default="scope">{{ scope.row.oldBalance }} 元</template>
+        </el-table-column>
+        <el-table-column property="newBalance" label="充值后余额/元" min-width="120" align="center">
+          <template #default="scope">{{ scope.row.newBalance }} 元</template>
+        </el-table-column>
+        <el-table-column property="createTime" label="交易时间" min-width="180" align="center" />
+        <el-table-column property="rechargeUser" label="收费人" min-width="100" align="center" />
+      </el-table>
+    </div>
+
+    <div class="pagination-container">
+      <el-pagination
+        v-model:current-page="currentPage"
+        layout="total, prev, pager, next, jumper"
+        :page-size="pageSize"
+        :total="total"
+        @current-change="handlePageChange"
+      />
+    </div>
+  </div>
+</template>
+
+<script>
+import { ElMessage } from "element-plus";
+import service from "@/api/request";
+import axios from "axios";
+
+export default {
+  name: "TransactionTable",
+  props: {
+    user: {
+      type: Object,
+      default: () => ({})
+    }
+  },
+  emits: ["close"],
+  data() {
+    return {
+      loading: false,
+      isLoading: false,
+      list: [],
+      multipleSelection: [],
+      total: 0,
+      currentPage: 1,
+      pageSize: 30,
+      transactionData: {
+        timeType: "",
+        createTime: "",
+        meterCode: "",
+        userId: "",
+        companyId: ""
+      },
+      startData: {
+        meterCode: "",
+        userId: "",
+        companyId: ""
+      }
+    };
+  },
+  mounted() {
+    this.initData();
+    this.fetchTransactionRecords();
+  },
+  methods: {
+    initData() {
+      this.transactionData.meterCode = this.user.meterCode;
+      this.transactionData.userId = this.user.userId;
+      this.transactionData.companyId = this.user.companyId;
+      this.startData.meterCode = this.user.meterCode;
+      this.startData.userId = this.user.userId;
+      this.startData.companyId = this.user.companyId;
+    },
+    buildQueryParams(useSearchData = false) {
+      const baseParams = useSearchData ? this.transactionData : this.startData;
+      const params = {
+        userId: baseParams.userId,
+        meterCode: baseParams.meterCode,
+        companyId: baseParams.companyId,
+        pageSizeV2: this.pageSize
+      };
+
+      if (baseParams.createTime && baseParams.timeType) {
+        let formattedTime = "";
+        let timeTypeValue = null;
+
+        switch (baseParams.timeType) {
+          case "year":
+            formattedTime = `${baseParams.createTime}-01-01 00:00:00`;
+            timeTypeValue = 1;
+            break;
+          case "month":
+            formattedTime = `${baseParams.createTime}-01 00:00:00`;
+            timeTypeValue = 2;
+            break;
+          case "day":
+            formattedTime = `${baseParams.createTime} 00:00:00`;
+            timeTypeValue = 3;
+            break;
+        }
+
+        if (timeTypeValue) {
+          params.timeType = timeTypeValue;
+          params.createTime = formattedTime;
+        }
+      }
+
+      return this.filterNonEmptyParams(params);
+    },
+    buildQueryString(params) {
+      let queryString = "";
+      for (const key in params) {
+        if (Object.prototype.hasOwnProperty.call(params, key)) {
+          const value = params[key];
+          if (queryString) {
+            queryString += `&${key}=${encodeURIComponent(value)}`;
+          } else {
+            queryString += `?${key}=${encodeURIComponent(value)}`;
+          }
+        }
+      }
+      return queryString;
+    },
+    async fetchTransactionRecords() {
+      if (this.isLoading) return;
+
+      this.isLoading = true;
+      this.loading = true;
+
+      try {
+        const params = this.buildQueryParams(false);
+        const queryString = this.buildQueryString(params);
+        const url = `/userManage/userCharge/showSingleRechargeMeterRecords/${this.currentPage}${queryString}`;
+
+        console.log('请求URL:', url);
+        const response = await service.get(url);
+
+        if (response.code === 200) {
+          const records = response.data.userSingleRechargeRecordData || [];
+          records.forEach((item, index) => {
+            item.theId = this.pageSize * (response.data.currentPages - 1) + index + 1;
+          });
+
+          this.list = records.map(item => ({
+            ...item,
+            createTime: item.createTime ? item.createTime.replace("T", " ") : ""
+          }));
+
+          this.total = response.data.totalElements || 0;
+          console.log('交易记录数据:', this.list, '总数:', this.total);
+        } else {
+          ElMessage.error(response.msg);
+        }
+      } catch (error) {
+        console.error("获取交易记录失败", error);
+        ElMessage.error("获取交易记录失败");
+      } finally {
+        this.loading = false;
+        this.isLoading = false;
+      }
+    },
+    async fetchWithSearch() {
+      if (this.isLoading) return;
+
+      this.isLoading = true;
+      this.loading = true;
+
+      try {
+        const params = this.buildQueryParams(true);
+
+        if (!this.transactionData.createTime && this.transactionData.timeType) {
+          ElMessage.warning("请选择时间");
+          this.isLoading = false;
+          this.loading = false;
+          return;
+        }
+
+        const queryString = this.buildQueryString(params);
+        const url = `/userManage/userCharge/showSingleRechargeMeterRecords/${this.currentPage}${queryString}`;
+
+        console.log('搜索URL:', url);
+        const response = await service.get(url);
+
+        if (response.code === 200) {
+          const records = response.data.userSingleRechargeRecordData || [];
+          records.forEach((item, index) => {
+            item.theId = this.pageSize * (response.data.currentPages - 1) + index + 1;
+          });
+
+          this.list = records.map(item => ({
+            ...item,
+            createTime: item.createTime ? item.createTime.replace("T", " ") : ""
+          }));
+
+          this.total = response.data.totalElements || 0;
+          console.log('搜索结果:', this.list, '总数:', this.total);
+        } else {
+          ElMessage.error(response.msg);
+        }
+      } catch (error) {
+        console.error("搜索交易记录失败", error);
+        ElMessage.error("搜索交易记录失败");
+      } finally {
+        this.loading = false;
+        this.isLoading = false;
+      }
+    },
+    handleSearch() {
+      if (!this.transactionData.createTime && this.transactionData.timeType) {
+        ElMessage.warning("请选择时间");
+        return;
+      }
+      this.currentPage = 1;
+      this.fetchWithSearch();
+    },
+    handleClear() {
+      this.transactionData.timeType = "";
+      this.transactionData.createTime = "";
+      this.currentPage = 1;
+      this.fetchTransactionRecords();
+    },
+    handleRefresh() {
+      this.handleClear();
+    },
+    handlePageChange(page) {
+      this.currentPage = page;
+      if (this.transactionData.createTime && this.transactionData.timeType) {
+        this.fetchWithSearch();
+      } else {
+        this.fetchTransactionRecords();
+      }
+    },
+    handleSelectionChange(val) {
+      this.multipleSelection = val;
+    },
+    filterNonEmptyParams(params) {
+      const filteredParams = {};
+      for (const key in params) {
+        if (Object.prototype.hasOwnProperty.call(params, key)) {
+          const value = params[key];
+          if (value === "" || value === null || value === undefined) {
+            continue;
+          }
+          filteredParams[key] = value;
+        }
+      }
+      return filteredParams;
+    },
+    async handleReceipt() {
+      if (this.multipleSelection.length === 0) {
+        ElMessage.warning("请至少选择一条记录");
+        return;
+      }
+
+      const selected = this.multipleSelection[0];
+      const params = {
+        rechargeRecordId: selected.recordId,
+        userId: selected.userId,
+        date: selected.createTime.replace("T", " "),
+        userName: selected.userName,
+        userAddress: this.user.userAddr,
+        operator: selected.rechargeUser || JSON.parse(sessionStorage.getItem("userData")).staffName,
+        beforeAmount: selected.oldBalance,
+        amount: selected.rechargeAmount,
+        afterAmount: selected.newBalance
+      };
+
+      try {
+        const response = await axios({
+          url: "/userManage/userCharge/receipt",
+          method: "POST",
+          responseType: "blob",
+          data: params
+        });
+
+        if (response.status !== 200) {
+          throw new Error("导出失败: " + response.statusText);
+        }
+
+        const blob = new Blob([response.data], { type: "application/pdf" });
+        if (blob.size === 0) {
+          ElMessage.warning("内容为空，无法下载");
+          return;
+        }
+
+        const link = document.createElement("a");
+        link.href = window.URL.createObjectURL(blob);
+        link.download = `${selected.userName}-收据.pdf`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(link.href);
+        ElMessage.success("收据下载成功");
+      } catch (error) {
+        console.error("下载收据失败:", error);
+        ElMessage.error("下载收据失败: " + error.message);
+      }
+    },
+    async exportExcel() {
+      try {
+        const params = this.buildQueryParams(true);
+        const response = await axios({
+          url: "/userManage/userCharge/exportRechargeRecord",
+          method: "GET",
+          responseType: "blob",
+          params: params
+        });
+
+        if (response.status !== 200) {
+          throw new Error("导出失败: " + response.statusText);
+        }
+
+        const blob = new Blob([response.data], {
+          type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        });
+
+        if (blob.size === 0) {
+          ElMessage.warning("内容为空，无法下载");
+          return;
+        }
+
+        const link = document.createElement("a");
+        link.href = window.URL.createObjectURL(blob);
+        link.download = `${this.user.userName || "用户"}_历史交易记录.xlsx`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(link.href);
+        ElMessage.success("导出成功");
+      } catch (error) {
+        console.error("导出失败:", error);
+        ElMessage.error("导出失败: " + error.message);
+      }
+    }
+  },
+  watch: {
+    "user.userId"(newVal, oldVal) {
+      if (newVal && newVal !== oldVal) {
+        this.initData();
+        this.currentPage = 1;
+        this.fetchTransactionRecords();
+      }
+    }
+  }
+};
+</script>
+
+<style scoped>
+.transaction-table-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+
+.search-bar {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 15px;
+  flex-wrap: wrap;
+  background: #ffffff;
+  padding: 12px 20px;
+  border-radius: 8px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e9eef2;
+}
+
+.search-input-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.search-input-item > span {
+  font-size: 18px;
+  color: #606266;
+  white-space: nowrap;
+}
+
+.time-input {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* 时间选择器字体调大 */
+.time-input :deep(.el-input__inner) {
+  font-size: 18px;
+  height: 40px;
+  line-height: 40px;
+}
+
+.time-input :deep(.el-date-editor .el-input__inner) {
+  font-size: 18px;
+}
+
+/* 下拉选项字体调大 */
+.time-input :deep(.el-select-dropdown__item) {
+  font-size: 18px;
+}
+
+.time-input :deep(.el-date-table td) {
+  font-size: 18px;
+}
+
+.time-input :deep(.el-date-table td span) {
+  font-size: 18px;
+}
+
+.time-input :deep(.el-month-table td .cell) {
+  font-size: 18px;
+}
+
+.time-input :deep(.el-year-table td .cell) {
+  font-size: 18px;
+}
+
+.search-buttons {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-left: auto;
+}
+
+.search-btn, .clear-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.3s;
+  font-size: 18px;
+}
+
+.search-btn {
+  background-color: #46B97E;
+  color: #fff;
+}
+
+.search-btn img {
+  width: 18px;
+  height: 18px;
+}
+
+.clear-btn {
+  background-color: #fff;
+  border: 1px solid #dcdfe6;
+  color: #606266;
+}
+
+.clear-btn img {
+  width: 18px;
+  height: 18px;
+}
+
+.search-btn:hover {
+  background-color: #3aa06b;
+}
+
+.clear-btn:hover {
+  background-color: #f5f7fa;
+}
+
+.tool-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 15px;
+}
+
+.tool-btn, .refresh-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  background-color: #fff;
+  border: 1px solid #dcdfe6;
+  transition: all 0.3s;
+  font-size: 18px;
+  color: #606266;
+}
+
+.tool-btn img, .refresh-btn img {
+  width: 18px;
+  height: 18px;
+}
+
+.tool-btn:hover, .refresh-btn:hover {
+  background-color: #f5f7fa;
+  border-color: #46B97E;
+}
+
+.disabled-btn {
+  opacity: 0.5;
+  cursor: not-allowed !important;
+  pointer-events: none;
+}
+
+.refresh-btn {
+  padding: 6px 12px;
+}
+
+.table-wrapper {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.pagination-container {
+  margin-top: 20px;
+  display: flex;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.pagination-container :deep(.el-pagination) {
+  font-size: 20px;
+}
+
+.pagination-container :deep(.el-pagination .btn-prev),
+.pagination-container :deep(.el-pagination .btn-next) {
+  min-width: 44px;
+  height: 44px;
+  line-height: 44px;
+  font-size: 18px;
+}
+
+.pagination-container :deep(.el-pager li) {
+  min-width: 44px;
+  height: 44px;
+  line-height: 44px;
+  font-size: 18px;
+  margin: 0 4px;
+}
+
+.pagination-container :deep(.el-pagination__total) {
+  font-size: 18px;
+  line-height: 44px;
+  margin-right: 20px;
+}
+
+.pagination-container :deep(.el-pagination__jump) {
+  font-size: 18px;
+  line-height: 44px;
+  margin-left: 20px;
+}
+
+.pagination-container :deep(.el-pagination__jump input) {
+  height: 36px;
+  line-height: 36px;
+}
+</style>
