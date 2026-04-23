@@ -73,9 +73,17 @@
             <el-option v-for="item in approver_list" :key="item.id" :label="item.label" :value="item.label"> </el-option>
           </el-select>
         </div>
-        <div class="user-info-input" style="width: 98%">
+        <div class="user-info-input" >
           <span>开户时间</span>
-          <el-date-picker v-model="userInfoData.createTime" type="date" placeholder="选择日期" style="flex-grow: 1; width: 24.5%; max-height: 35px" format="YYYY-MM-DD" value-format="YYYY-MM-DD" />
+          <el-date-picker v-model="userInfoData.createTime" type="date" placeholder="选择日期" style="width: 100%" format="YYYY-MM-DD" value-format="YYYY-MM-DD" />
+        </div>
+        <div class="user-info-input">
+          <span>结算关阀</span>
+          <el-select v-model="userInfoData.enableArrearsValve" class="big-font-el-select">
+            <el-option label="默认(跟随区域开关阀配置)" value="default"></el-option>
+            <el-option label="预付费(欠费自动关阀)" :value="0"></el-option>
+            <el-option label="后付费(欠费不关阀)" :value="1"></el-option>
+          </el-select>
         </div>
       </div>
       <div class="btn">
@@ -126,6 +134,7 @@ export default {
         company: null, // 新增水厂字段
         companyId: null,
         createTime: "",
+        enableArrearsValve: null,
       },
       flag: 0,
       companyId: JSON.parse(sessionStorage.getItem("userData")).companyId,
@@ -197,6 +206,7 @@ export default {
       this.userInfoData.company = this.data.companyName;
       this.userInfoData.companyId = this.data.companyId; // 关键：确保companyId先被赋值
       this.userInfoData.createTime = this.data.createTime;
+      this.userInfoData.enableArrearsValve = this.data.enableArrearsValve === null ? "default" : this.data.enableArrearsValve;
 
       console.log("初始化数据完成:", this.userInfoData);
 
@@ -328,10 +338,10 @@ export default {
           condition: this.userInfoData.regionName === null || this.userInfoData.regionName === "",
           message: "用户所属区域不能为空！",
         },
-        {
-          condition: !/^1[3-9]\d{9}$/.test(this.userInfoData.userPhone),
-          message: "用户联系电话格式不正确！",
-        },
+        // {
+        //   condition: !/^1[3-9]\d{9}$/.test(this.userInfoData.userPhone),
+        //   message: "用户联系电话格式不正确！",
+        // },
         {
           condition: this.userInfoData.priceId === null || this.userInfoData.priceId === "",
           message: "水表价格类型不能为空！",
@@ -344,14 +354,14 @@ export default {
           condition: this.userInfoData.approver_1 === null || this.userInfoData.approver_1 === "",
           message: "开户审批人1不能为空！",
         },
-        {
-          condition: this.userInfoData.approver_2 === null || this.userInfoData.approver_2 === "",
-          message: "开户审批人2不能为空！",
-        },
-        {
-          condition: this.userInfoData.approver_3 === null || this.userInfoData.approver_3 === "",
-          message: "开户审批人3不能为空！",
-        },
+        // {
+        //   condition: this.userInfoData.approver_2 === null || this.userInfoData.approver_2 === "",
+        //   message: "开户审批人2不能为空！",
+        // },
+        // {
+        //   condition: this.userInfoData.approver_3 === null || this.userInfoData.approver_3 === "",
+        //   message: "开户审批人3不能为空！",
+        // },
         {
           condition: this.userInfoData.createTime === null || this.userInfoData.createTime === "",
           message: "开户时间不能为空！",
@@ -386,21 +396,27 @@ export default {
           this.userInfoData[key] = this.userInfoData[key].trim();
         }
       });
+
+      const userPhone = !this.userInfoData.userPhone || this.userInfoData.userPhone.trim() === "" ? null : this.userInfoData.userPhone;
+      const approver_2 = !this.userInfoData.approver_2 || this.userInfoData.approver_2.trim() === "" ? null : this.userInfoData.approver_2;
+      const approver_3 = !this.userInfoData.approver_3 || this.userInfoData.approver_3.trim() === "" ? null : this.userInfoData.approver_3;
+
       let dataParams = {
         userId: this.data.userId,
         userName: this.userInfoData.userName,
         userAddr: this.userInfoData.userAddr,
         regionName: this.userInfoData.regionName,
-        userPhone: this.userInfoData.userPhone,
+        userPhone: userPhone,
         imei: this.data.imei,
         approver_1: this.userInfoData.approver_1,
-        approver_2: this.userInfoData.approver_2,
-        approver_3: this.userInfoData.approver_3,
+        approver_2: approver_2,
+        approver_3: approver_3,
         smsConfigId: this.userInfoData.smsConfigId,
         priceId: this.userInfoData.priceId,
         meterType: this.userInfoData.meterType,
         companyId: this.userInfoData.companyId,
         createTime: this.userInfoData.createTime,
+        enableArrearsValve: this.userInfoData.enableArrearsValve === "default" ? null : this.userInfoData.enableArrearsValve,
       };
 
       console.log(dataParams);
@@ -435,15 +451,15 @@ export default {
 }
 
 .user-info-dialog-content {
-  width: 70%;
-  height: 450px;
+  width: 75%;
+  height: 600px;
   border: 1px solid #fafafa;
   background-color: #fafafa;
   border-radius: 5px;
   position: absolute;
   left: 50%;
   top: 50%;
-  margin-top: -225px;
+  margin-top: -350px;
   transform: translateX(-50%);
   display: flex;
   flex-direction: column;
@@ -451,24 +467,25 @@ export default {
 }
 
 .user-info-content {
-  width: 94%;
+  width: 96%;
   background-color: #fff;
   border-radius: 5px;
   margin-top: 15px;
   margin-bottom: 5px;
   display: flex;
-  /* justify-content: flex-start; */
-  justify-content: space-evenly;
+  justify-content: flex-start;
   flex-wrap: wrap;
-  padding: 5px;
+  padding: 15px;
   overflow-y: auto;
+  row-gap: 15px;
+  column-gap: 30px;
 }
 
 .user-info-input {
   display: flex;
-  justify-content: center; /* 确保子元素在父容器中垂直居中 */
+  justify-content: center;
   flex-direction: column;
-  width: 24%;
+  width: 30%;
   height: 75px;
 }
 

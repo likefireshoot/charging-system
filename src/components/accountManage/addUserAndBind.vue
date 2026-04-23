@@ -79,10 +79,9 @@
             <span>首检日期</span>
             <el-date-picker v-model="form.firstInspectDate" type="date" placeholder="选择日期" style="flex-grow: 1; width: 100%; max-height: 35px" format="YYYY-MM-DD" value-format="YYYY-MM-DD" />
           </div>
-          <!-- 水表读数放在最后一行，占满整行 -->
-          <div class="edit-input full-width">
-            <span>水表读数（吨）</span>
-            <div class="reading-container">
+          <div class="edit-input has-checkbox">
+            <span style="margin-bottom: 10px;">水表读数（吨）</span>
+            <div class="reading-container" style="width: 100%;">
               <el-input
                 v-model="form.reading"
                 class="input-item"
@@ -98,6 +97,14 @@
             >
               <span style="font-size: 18px;">确认修改水表吨数</span>
             </el-checkbox>
+          </div>
+          <div class="edit-input">
+            <span>结算关阀类型</span>
+            <el-select v-model="form.enableArrearsValve" class="input-item big-font-el-select"  placeholder="请选择结算关阀类型">
+              <el-option label="默认(自动关阀,随区域设置变化)" value="default" />
+              <el-option label="预付费(自动关阀,不随区域设置变化)" :value="0" />
+              <el-option label="后付费(手动关阀,不随区域设置变化)" :value="1" />
+            </el-select>
           </div>
         </div>
       </div>
@@ -197,7 +204,8 @@ export default {
         factoryDate: null,
         firstInspectDate: null,
         reading: null,
-        meterId: null
+        meterId: null,
+        enableArrearsValve:  "default"
       },
       companyList: [],
       regionList: [],
@@ -469,7 +477,8 @@ export default {
           smsConfigId: this.form.smsConfigId,
           approver_1: this.form.approver_1,
           factoryDate: this.form.factoryDate,
-          firstInspectDate: this.form.firstInspectDate
+          firstInspectDate: this.form.firstInspectDate,
+          enableArrearsValve: this.form.enableArrearsValve === "default" ? null : this.form.enableArrearsValve
         },
       };
 
@@ -584,6 +593,12 @@ export default {
   color: #747374;
   margin-bottom: 5px;
 }
+
+.edit-input.has-checkbox {
+  height: auto;
+  min-height: 120px;
+}
+
 
 .input-item {
   height: 35px;
