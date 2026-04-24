@@ -59,12 +59,12 @@
         <div class="command-btn" style="margin-left: 5px; width: 120px" @click="valveOpen_dialogFormVisible = true"
           v-if="staffPermissionIds.includes(7)">
           <img src="@/assets/yonghu/icon18.png" alt="" style="margin-left: 8px; margin-top: 3px" />
-          <span style="font-size: 20px; margin-left: 8px; color: #5a5a5a">开阀控制</span>
+          <span style="font-size: 20px; margin-left: 8px; color: #5a5a5a">开阀设置</span>
         </div>
         <div class="command-btn" style="margin-left: 5px; width: 120px" @click="valve_dialogFormVisible = true"
           v-if="staffPermissionIds.includes(8)">
           <img src="@/assets/yonghu/icon17.png" alt="" style="margin-left: 8px; margin-top: 3px" />
-          <span style="font-size: 20px; margin-left: 8px; color: #5a5a5a">关阀控制</span>
+          <span style="font-size: 20px; margin-left: 8px; color: #5a5a5a">关阀设置</span>
         </div>
         <div class="recharge-btn" style="margin-left: 5px; width: 130px" :class="{ 'btn-single-only-disabled': multipleSelection.length !== 1 }" @click="multipleSelection.length === 1 && change_balance_btn_click()"
           v-if="staffPermissionIds.includes(9)">
