@@ -62,18 +62,14 @@
           </el-select>
         </div>
         <div class="user-info-input">
-          <span>开户审批人2</span>
-          <el-select v-model="userInfoData.approver_2" class="big-font-el-select">
-            <el-option v-for="item in approver_list" :key="item.id" :label="item.label" :value="item.label"> </el-option>
-          </el-select>
+          <span>出厂日期</span>
+          <el-date-picker v-model="userInfoData.factoryDate" type="date" placeholder="选择日期" style="width: 100%" format="YYYY-MM-DD" value-format="YYYY-MM-DD" />
         </div>
         <div class="user-info-input">
-          <span>开户审批人3</span>
-          <el-select v-model="userInfoData.approver_3" class="big-font-el-select">
-            <el-option v-for="item in approver_list" :key="item.id" :label="item.label" :value="item.label"> </el-option>
-          </el-select>
+          <span>首检日期</span>
+          <el-date-picker v-model="userInfoData.firstInspectDate" type="date" placeholder="选择日期" style="width: 100%" format="YYYY-MM-DD" value-format="YYYY-MM-DD" />
         </div>
-        <div class="user-info-input" >
+        <div class="user-info-input">
           <span>开户时间</span>
           <el-date-picker v-model="userInfoData.createTime" type="date" placeholder="选择日期" style="width: 100%" format="YYYY-MM-DD" value-format="YYYY-MM-DD" />
         </div>
@@ -129,8 +125,10 @@ export default {
         sms_config: null,
         smsConfigId: null,
         approver_1: "",
-        approver_2: "",
-        approver_3: "",
+        // approver_2: "",
+        // approver_3: "",
+        factoryDate: "",
+        firstInspectDate: "",
         company: null, // 新增水厂字段
         companyId: null,
         createTime: "",
@@ -201,8 +199,10 @@ export default {
       this.userInfoData.priceId = this.data.priceId;
       this.userInfoData.smsConfigId = this.data.smsConfigId;
       this.userInfoData.approver_1 = this.data.approver1;
-      this.userInfoData.approver_2 = this.data.approver2;
-      this.userInfoData.approver_3 = this.data.approver3;
+      this.userInfoData.factoryDate = this.data.factoryDate;
+      this.userInfoData.firstInspectDate = this.data.firstInspectDate;
+      // this.userInfoData.approver_2 = this.data.approver2;
+      // this.userInfoData.approver_3 = this.data.approver3;
       this.userInfoData.company = this.data.companyName;
       this.userInfoData.companyId = this.data.companyId; // 关键：确保companyId先被赋值
       this.userInfoData.createTime = this.data.createTime;
@@ -338,10 +338,10 @@ export default {
           condition: this.userInfoData.regionName === null || this.userInfoData.regionName === "",
           message: "用户所属区域不能为空！",
         },
-        // {
-        //   condition: !/^1[3-9]\d{9}$/.test(this.userInfoData.userPhone),
-        //   message: "用户联系电话格式不正确！",
-        // },
+        {
+          condition: this.userInfoData.userPhone && !/^1[3-9]\d{9}$/.test(this.userInfoData.userPhone.trim()),
+          message: "用户联系电话格式不正确！",
+        },
         {
           condition: this.userInfoData.priceId === null || this.userInfoData.priceId === "",
           message: "水表价格类型不能为空！",
@@ -394,6 +394,8 @@ export default {
         approver_1: this.userInfoData.approver_1,
         approver_2: approver_2,
         approver_3: approver_3,
+        factoryDate: this.userInfoData.factoryDate || null,
+        firstInspectDate: this.userInfoData.firstInspectDate || null,
         smsConfigId: this.userInfoData.smsConfigId,
         priceId: this.userInfoData.priceId,
         meterType: this.userInfoData.meterType,

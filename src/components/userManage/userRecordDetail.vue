@@ -98,8 +98,8 @@ export default {
       tabs: [
         { name: "账单记录", type: "bill" },
         { name: "交易记录", type: "transaction" },
-        { name: "抄表记录", type: "meter" },
-        { name: "操作历史", type: "operation" }
+        // { name: "抄表记录", type: "meter" },
+        // { name: "操作历史", type: "operation" }
       ]
     };
   },
