@@ -374,23 +374,6 @@ export default {
         }
       }
 
-      // console.log(this.price_list);
-      // // 遍历 price_list 查找匹配的 label
-      // for (let i = 0; i < this.price_list.length; i++) {
-      //   if (this.price_list[i].label === this.userInfoData.priceName) {
-      //     this.userInfoData.priceId = this.price_list[i].id;
-      //     break; // 找到匹配项后跳出循环
-      //   }
-      // }
-
-      // // 遍历 sms_config_list 查找匹配的 label
-      // for (let i = 0; i < this.sms_config_list.length; i++) {
-      //   if (this.sms_config_list[i].label === this.userInfoData.sms_config) {
-      //     this.userInfoData.smsConfigId = this.sms_config_list[i].id;
-      //     break; // 找到匹配项后跳出循环
-      //   }
-      // }
-
       Object.keys(this.userInfoData).forEach((key) => {
         if (typeof this.userInfoData[key] === "string") {
           this.userInfoData[key] = this.userInfoData[key].trim();

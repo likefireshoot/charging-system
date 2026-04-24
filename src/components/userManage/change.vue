@@ -1,5 +1,5 @@
 <template>
-  <div class="change-dialog" v-if="change_dialogFormVisible">
+  <div v-if="change_dialogFormVisible" class="change-dialog">
     <div class="change-dialog-content">
       <div class="title">
         <div style="margin-left: 10px; display: flex; align-items: center">
@@ -10,78 +10,46 @@
           <img src="@/assets/close.png" alt="" />
         </div>
       </div>
+
       <div class="change-content">
-        <div class="change-input" style="margin-right: 1%">
+        <div class="change-input input-31">
           <span>用户号</span>
           <el-input v-model="changeData.userId" disabled />
         </div>
-        <div class="change-input" style="margin-right: 1%">
+        <div class="change-input input-31">
           <span>用户名称</span>
           <el-input v-model="changeData.userName" disabled />
         </div>
-        <div class="change-input" style="margin-right: 1%">
+        <div class="change-input input-31">
           <span>联系电话</span>
           <el-input v-model="changeData.userPhone" disabled />
         </div>
-        <div class="change-input" style="margin-right: 1%; width: 23%">
+        <div class="change-input input-23">
           <span>旧表号</span>
           <el-input v-model="changeData.oldMeterCode" disabled />
         </div>
-        <!-- <div class="change-input" style="margin-right: 1%">
-          <span>旧IMEI号</span>
-          <el-input v-model="changeData.oldImei" disabled />
-        </div> -->
-        <!-- <div class="change-input" style="margin-right: 1%">
-          <span>旧表类型</span>
-          <el-input v-model="changeData.oldMeterType" disabled />
-        </div> -->
-        <div class="change-input" style="margin-right: 1%; width: 23%">
+        <div class="change-input input-23">
           <span>旧表读数</span>
           <el-input v-model="changeData.oldCount" disabled />
         </div>
-        <div class="change-input" style="margin-right: 1%; width: 23%">
+        <div class="change-input input-23">
+          <span>换表时表数</span>
+          <el-input v-model="changeData.changeCount" type="number" />
+        </div>
+        <div class="change-input input-23">
+          <span>补扣费用</span>
+          <el-input :model-value="previewCharge" disabled />
+        </div>
+        <div class="change-input input-23">
           <span>新表号</span>
           <el-input v-model="changeData.newMeterCode" />
         </div>
-        <!-- <div class="change-input" style="margin-right: 1%">
-          <span>新IMEI号</span>
-          <el-input v-model="changeData.newImei" />
-        </div> -->
-        <!-- <div class="change-input" style="margin-right: 1%">
-          <span>新表类型</span>
-          <el-select v-model="changeData.newMeterType">
-            <el-option v-for="item in shuibiao_list" :key="item.id" :label="item.label" :value="item.label"></el-option>
-          </el-select>
-        </div> -->
-        <div class="change-input" style="margin-right: 1%; width: 23%">
+        <div class="change-input input-23">
           <span>新表读数</span>
-          <el-input v-model="changeData.newCount" />
+          <el-input v-model="changeData.newMeterReading" type="number" />
         </div>
-        <!-- <div class="change-input" style="margin-right: 1%">
-          <span>新表厂商</span>
-          <el-select v-model="changeData.meterVendor">
-            <el-option v-for="item in changshang_list" :key="item.id" :label="item.label" :value="item.label"></el-option>
-          </el-select>
-        </div>
-        <div v-if="changeData.meterVendor === '信驰' || changeData.meterVendor === '集万讯'" class="change-input" style="margin-right: 1%">
-          <span>产品ID</span>
-          <el-form-item style="margin-bottom: 0">
-            <el-input v-model="changeData.productId" class="input-item"></el-input>
-          </el-form-item>
-        </div>
-        <div v-if="changeData.meterVendor === '信驰' || changeData.meterVendor === '集万讯'" class="change-input" style="margin-right: 1%">
-          <span>设备ID</span>
-          <el-form-item style="margin-bottom: 0">
-            <el-input v-model="changeData.deviceId" class="input-item"></el-input>
-          </el-form-item>
-        </div>
-        <div v-if="changeData.meterVendor === '信驰' || changeData.meterVendor === '集万讯'" class="change-input" style="margin-right: 1%">
-          <span>设备名称</span>
-          <el-form-item style="margin-bottom: 0">
-            <el-input v-model="changeData.meterName" class="input-item"></el-input>
-          </el-form-item>
-        </div> -->
       </div>
+
       <div class="btn">
         <div class="confirm-btn" @click="handleCommit">
           <el-icon style="margin-left: 15%"><Check /></el-icon>
@@ -117,155 +85,139 @@ export default {
         userId: "",
         userName: "",
         userPhone: "",
-        // oldMeterCode: "",
-        // oldImei: "",
+        oldMeterCode: "",
         oldCount: "",
-        oldMeterType: "",
         newMeterCode: "",
-        // newImei: "",
-        newCount: "",
-        // newMeterType: "",
-        // meterVendor: "",
-        // productId: "",
-        // deviceId: "",
-        // meterName: "",
+        newMeterReading: "",
+        changeCount: "",
       },
-      shuibiao_list: [
-        {
-          id: 1,
-          label: "NB-IoT表",
-        },
-        {
-          id: 2,
-          label: "普通水表",
-        },
-      ],
-      price_list: [],
-      changshang_list: [
-        { id: 1, label: "信驰", value: 1 },
-        { id: 2, label: "集万讯", value: 2 },
-        { id: 3, label: "太阳能", value: 3 },
-        // { id: 3, label: "卓正" },
-        // { id: 4, label: "千宝通" },
-      ],
+      previewCharge: "0.00",
     };
   },
-  mounted() {
-    this.assignmentData();
-    //this.getPriceList();
-    //this.getShuibiaoList();
+  watch: {
+    data: {
+      handler() {
+        this.assignmentData();
+      },
+      immediate: true,
+      deep: true,
+    },
+    "changeData.changeCount"() {
+      this.refreshChargePreview();
+    },
   },
   methods: {
     handleChangeCancel() {
       this.$emit("close");
     },
     assignmentData() {
-      console.log(this.data);
-      this.changeData.userId = this.data.userId;
-      this.changeData.userName = this.data.userName;
-      this.changeData.userPhone = this.data.phone;
-      this.changeData.oldMeterCode = this.data.meterCode;
-      // this.changeData.oldImei = this.data.imei;
-      this.changeData.oldMeterType = this.data.meterType;
-      this.changeData.userId = this.data.userId;
-      this.changeData.oldCount = this.data.newReading;
+      const oldReading = this.normalizeNumber(this.data?.newReading);
+      const oldReadingText = oldReading === null ? "" : String(oldReading);
+      this.changeData.userId = this.data?.userId ?? "";
+      this.changeData.userName = this.data?.userName ?? "";
+      this.changeData.userPhone = this.data?.phone ?? "";
+      this.changeData.oldMeterCode = this.data?.meterCode ?? "";
+      this.changeData.oldCount = oldReadingText;
+      this.changeData.newMeterCode = "";
+      this.changeData.newMeterReading = "";
+      this.changeData.changeCount = oldReadingText;
+      this.previewCharge = "0.00";
     },
-    getPriceList() {
+    normalizeNumber(value) {
+      if (value === "" || value === null || value === undefined) {
+        return null;
+      }
+      const num = Number(value);
+      return Number.isFinite(num) ? num : null;
+    },
+    formatAmount(value) {
+      const num = this.normalizeNumber(value);
+      return num === null ? "0.00" : num.toFixed(2);
+    },
+    refreshChargePreview() {
+      const oldCount = this.normalizeNumber(this.changeData.oldCount);
+      const changeCount = this.normalizeNumber(this.changeData.changeCount);
+      if (!this.changeData.oldMeterCode || oldCount === null || changeCount === null || changeCount <= oldCount) {
+        this.previewCharge = "0.00";
+        return;
+      }
+
       service
-        .get("/getAllPriceMg")
-        .then((res) => {
-          this.price_list = res.data.map((item) => ({
-            id: item.priceId,
-            label: item.priceName,
-          }));
+        .post("/userManage/meterRead/previewChangeMeterCharge", {
+          oldMeterCode: this.changeData.oldMeterCode,
+          changeReading: changeCount,
         })
-        .catch((err) => {
-          ElMessage.error("获取价格类型失败");
+        .then((res) => {
+          this.previewCharge = this.formatAmount(res.data?.chargeAmount);
+        })
+        .catch(() => {
+          this.previewCharge = "0.00";
         });
     },
-    // getShuibiaoList() {
-    //   service
-    //     .get("/userManage/meterRead/getAllMeterType")
-    //     .then((res) => {
-    //       this.shuibiao_list = res.data.map((item) => ({
-    //         id: item.id,
-    //         label: item.name,
-    //       }));
-    //     })
-    //     .catch((err) => {
-    //       ElMessage.error("获取水表类型失败");
-    //     });
-    // },
     handleCommit() {
-      let missingFields = [];
       Object.keys(this.changeData).forEach((key) => {
         if (typeof this.changeData[key] === "string") {
           this.changeData[key] = this.changeData[key].trim();
         }
       });
-      let formData = {
+
+      const formData = {
         userId: this.changeData.userId,
         userName: this.changeData.userName,
-        // userPhone: this.changeData.userPhone,
         oldMeterCode: this.changeData.oldMeterCode,
         oldCount: this.changeData.oldCount,
         newMeterCode: this.changeData.newMeterCode,
-        newCount: this.changeData.newCount,
+        newMeterReading: this.changeData.newMeterReading,
+        changeCount: this.changeData.changeCount,
       };
 
-      // 定义字段名映射，将属性名映射为友好的显示名称
       const fieldNameMap = {
         userId: "用户号",
         userName: "用户名称",
-        userPhone: "联系电话",
         oldMeterCode: "旧表号",
         oldCount: "旧表读数",
         newMeterCode: "新表号",
-        newCount: "新表读数",
+        newMeterReading: "新表读数",
+        changeCount: "换表时表数",
       };
 
-      // 递归遍历对象属性
-      function traverseObject(obj, parentKey = "") {
-        for (const key in obj) {
-          if (obj.hasOwnProperty(key)) {
-            const fullKey = parentKey ? `${parentKey}.${key}` : key;
-            const value = obj[key];
-
-            if (typeof value === "object" && value !== null) {
-              // 如果是对象，继续递归遍历
-              traverseObject(value, fullKey);
-            } else {
-              // 检查值是否为空，排除0的情况
-              if (value === undefined || value === null || value === "") {
-                missingFields.push(fullKey);
-              }
-            }
-          }
-        }
-      }
-
-      traverseObject(formData);
+      const requiredFields = ["userId", "userName", "oldMeterCode", "oldCount", "newMeterCode", "newMeterReading", "changeCount"];
+      const missingFields = requiredFields.filter((key) => {
+        const value = formData[key];
+        return value === undefined || value === null || value === "";
+      });
 
       if (missingFields.length > 0) {
-        const fieldNames = missingFields.map((field) => fieldNameMap[field] || field);
-        const message = fieldNames.join("、") + "不能为空";
-        ElMessage.error(message);
+        ElMessage.error(missingFields.map((field) => fieldNameMap[field] || field).join("、") + "不能为空");
         return;
       }
-      console.log(this.shuibiao_list);
-      console.log(this.price_list);
-      let params = {
-        oldMeterCode: formData.oldMeterCode,
-        newMeterCode: formData.newMeterCode,
-        newReading: formData.newCount,
-      };
+
+      const oldCount = this.normalizeNumber(formData.oldCount);
+      const newMeterReading = this.normalizeNumber(formData.newMeterReading);
+      const changeCount = this.normalizeNumber(formData.changeCount);
+      if (newMeterReading === null) {
+        ElMessage.error("新表读数格式不正确");
+        return;
+      }
+      if (changeCount === null) {
+        ElMessage.error("换表时表数格式不正确");
+        return;
+      }
+      if (oldCount !== null && changeCount <= oldCount) {
+        ElMessage.error("换表时表数必须大于旧表读数");
+        return;
+      }
 
       service
-        .put("/userManage/meterRead/changeMeter", params)
+        .put("/userManage/meterRead/changeMeter", {
+          oldMeterCode: formData.oldMeterCode,
+          newMeterCode: formData.newMeterCode,
+          newReading: newMeterReading,
+          changeReading: changeCount,
+        })
         .then((res) => {
           if (res.code === 200) {
             ElMessage.success("提交成功");
-            // 可以在这里添加提交成功后的其他逻辑，比如关闭对话框
             this.handleChangeCancel();
           } else {
             ElMessage.error("提交失败：" + res.msg);
@@ -313,18 +265,26 @@ export default {
   margin-top: 20px;
   margin-bottom: 10px;
   display: flex;
-  justify-content: space-around;
+  justify-content: flex-start;
   flex-wrap: wrap;
+  gap: 0 1%;
   padding: 5px;
   overflow-y: auto;
 }
 
 .change-input {
   display: flex;
-  justify-content: center; /* 确保子元素在父容器中垂直居中 */
+  justify-content: center;
   flex-direction: column;
-  width: 31%;
   height: 75px;
+}
+
+.input-31 {
+  width: 31%;
+}
+
+.input-23 {
+  width: 23%;
 }
 
 .change-input > span {
@@ -342,7 +302,7 @@ export default {
   width: 100%;
   background-color: #fff;
   border-radius: 5px 5px 0 0;
-  box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 0 5px rgb(0 0 0 / 10%);
   height: 45px;
   line-height: 45px;
   text-align: center;
