@@ -79,7 +79,16 @@
         <el-table-column property="userName" label="用户名称" min-width="140" align="center" />
         <el-table-column property="regionName" label="所属区域" min-width="120" align="center" />
         <el-table-column property="userPhone" label="联系电话" min-width="130" align="center" />
-        <el-table-column property="meterCode" label="表号" min-width="160" align="center" />
+        <el-table-column label="表号" min-width="190" align="center">
+          <template #default="scope">
+            <div class="meter-code-cell">
+              <span class="meter-code-text">{{ scope.row.meterCode || "-" }}</span>
+              <span :class="['meter-status', isCurrentMeter(scope.row) ? 'current' : 'history']">
+                {{ isCurrentMeter(scope.row) ? "当前表" : "历史表" }}
+              </span>
+            </div>
+          </template>
+        </el-table-column>
         <el-table-column property="meterType" label="水表类型" min-width="100" align="center" />
 <!--        <el-table-column property="payerPhone" label="缴费人手机号" min-width="140" align="center" />-->
         <el-table-column property="rechargeType" label="交易方式" min-width="100" align="center" />
@@ -135,12 +144,10 @@ export default {
       transactionData: {
         timeType: "",
         createTime: "",
-        meterCode: "",
         userId: "",
         companyId: ""
       },
       startData: {
-        meterCode: "",
         userId: "",
         companyId: ""
       }
@@ -152,10 +159,8 @@ export default {
   },
   methods: {
     initData() {
-      this.transactionData.meterCode = this.user.meterCode;
       this.transactionData.userId = this.user.userId;
       this.transactionData.companyId = this.user.companyId;
-      this.startData.meterCode = this.user.meterCode;
       this.startData.userId = this.user.userId;
       this.startData.companyId = this.user.companyId;
     },
@@ -163,9 +168,7 @@ export default {
       const baseParams = useSearchData ? this.transactionData : this.startData;
       const params = {
         userId: baseParams.userId,
-        meterCode: baseParams.meterCode,
-        companyId: baseParams.companyId,
-        pageSizeV2: this.pageSize
+        companyId: baseParams.companyId
       };
 
       if (baseParams.createTime && baseParams.timeType) {
@@ -194,6 +197,9 @@ export default {
       }
 
       return this.filterNonEmptyParams(params);
+    },
+    isCurrentMeter(row) {
+      return String(row?.meterCode ?? "") === String(this.user?.meterCode ?? "");
     },
     buildQueryString(params) {
       let queryString = "";
@@ -586,6 +592,42 @@ export default {
   opacity: 0.5;
   cursor: not-allowed !important;
   pointer-events: none;
+}
+
+.meter-code-cell {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  max-width: 100%;
+}
+
+.meter-code-text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.meter-status {
+  flex-shrink: 0;
+  padding: 1px 7px;
+  border-radius: 10px;
+  font-size: 14px;
+  line-height: 20px;
+  border: 1px solid transparent;
+  white-space: nowrap;
+}
+
+.meter-status.current {
+  color: #2f9e63;
+  background-color: #eef9f2;
+  border-color: #bfe8d1;
+}
+
+.meter-status.history {
+  color: #8a8f99;
+  background-color: #f3f4f6;
+  border-color: #dcdfe6;
 }
 
 .refresh-btn {

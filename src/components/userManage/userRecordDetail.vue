@@ -81,6 +81,7 @@ import BillTable from "./userRecordTabs/BillTable.vue";
 import TransactionTable from "./userRecordTabs/TransactionTable.vue";
 import MeterTable from "./userRecordTabs/MeterTable.vue";
 import OperationTable from "./userRecordTabs/OperationTable.vue";
+import CommandLogTable from "./userRecordTabs/CommandLogTable.vue";
 
 export default {
   name: "UserBillDetail",
@@ -88,7 +89,8 @@ export default {
     BillTable,
     TransactionTable: TransactionTable,
     MeterTable,
-    OperationTable
+    OperationTable,
+    CommandLogTable
   },
   data() {
     return {
@@ -98,6 +100,7 @@ export default {
       tabs: [
         { name: "账单记录", type: "bill" },
         { name: "交易记录", type: "transaction" },
+        { name: "指令通讯记录", type: "command" },
         // { name: "抄表记录", type: "meter" },
         // { name: "操作历史", type: "operation" }
       ]
@@ -108,6 +111,7 @@ export default {
       const componentMap = {
         bill: "BillTable",
         transaction: "TransactionTable",
+        command: "CommandLogTable",
         meter: "MeterTable",
         operation: "OperationTable"
       };

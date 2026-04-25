@@ -90,7 +90,16 @@
               <!-- <el-table-column property="theId" label="序号" width="100" align="center" fixed="left" /> -->
               <el-table-column property="userId" label="用户号" min-width="150" align="center" fixed="left" />
               <el-table-column property="userName" label="用户名称" min-width="120" align="center" />
-              <el-table-column property="meterCode" label="表号" min-width="160" align="center" />
+              <el-table-column label="表号" min-width="190" align="center">
+                <template #default="scope">
+                  <div class="meter-code-cell">
+                    <span class="meter-code-text">{{ scope.row.meterCode || "-" }}</span>
+                    <span :class="['meter-status', isCurrentMeter(scope.row) ? 'current' : 'history']">
+                      {{ isCurrentMeter(scope.row) ? "当前表" : "历史表" }}
+                    </span>
+                  </div>
+                </template>
+              </el-table-column>
               <el-table-column property="readingCount" label="水表读数/吨" min-width="160" align="center" />
               <el-table-column property="deltaWater" label="本次用水量/吨" min-width="160" align="center" />
               <el-table-column property="feeThisTime" label="本次扣费/元" min-width="160" align="center" />
@@ -147,8 +156,6 @@ export default {
           type: "",
           accurateTime: "",
         },
-        meterCode: "",
-        imei: "",
         companyId: null,
         userId: "",
       },
@@ -156,8 +163,6 @@ export default {
       staffPermissionIds: JSON.parse(sessionStorage.getItem("userData")).staffPermissionIds,
       // companyId: 2,
       startData: {
-        meterCode: "",
-        imei: "",
         companyId: null,
         userId: "",
       },
@@ -273,14 +278,13 @@ export default {
       this.$emit("close");
     },
     assignmentData() {
-      this.chaobiaoData.meterCode = this.data.meterCode;
-      this.chaobiaoData.imei = this.data.imei;
-      this.startData.meterCode = this.data.meterCode;
-      this.startData.imei = this.data.imei;
       this.chaobiaoData.companyId = this.data.companyId;
       this.startData.companyId = this.data.companyId;
       this.chaobiaoData.userId = this.data.userId;
       this.startData.userId = this.data.userId;
+    },
+    isCurrentMeter(row) {
+      return String(row?.meterCode ?? "") === String(this.data?.meterCode ?? "");
     },
     getChaboBiaoRecordData() {
       if (this.isLoading) return
@@ -813,6 +817,42 @@ export default {
   font-size: 18px;
   background-color: #fff;
   border: 2px solid #f2f2f2;
+}
+
+.meter-code-cell {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  max-width: 100%;
+}
+
+.meter-code-text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.meter-status {
+  flex-shrink: 0;
+  padding: 1px 7px;
+  border-radius: 10px;
+  font-size: 14px;
+  line-height: 20px;
+  border: 1px solid transparent;
+  white-space: nowrap;
+}
+
+.meter-status.current {
+  color: #2f9e63;
+  background-color: #eef9f2;
+  border-color: #bfe8d1;
+}
+
+.meter-status.history {
+  color: #8a8f99;
+  background-color: #f3f4f6;
+  border-color: #dcdfe6;
 }
 
 .chaobiao-table {

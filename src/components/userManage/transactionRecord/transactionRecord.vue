@@ -82,7 +82,16 @@
           <el-table-column property="regionName" label="所属区域" min-width="80" align="center" />
           <!-- <el-table-column property="companyName" label="所属水厂" width="240" align="center" /> -->
           <el-table-column property="userPhone" label="联系电话" min-width="70" align="center" />
-          <el-table-column property="meterCode" label="表号" min-width="100" align="center" />
+          <el-table-column label="表号" min-width="130" align="center">
+            <template #default="scope">
+              <div class="meter-code-cell">
+                <span class="meter-code-text">{{ scope.row.meterCode || "-" }}</span>
+                <span :class="['meter-status', isCurrentMeter(scope.row) ? 'current' : 'history']">
+                  {{ isCurrentMeter(scope.row) ? "当前表" : "历史表" }}
+                </span>
+              </div>
+            </template>
+          </el-table-column>
           <!-- <el-table-column property="imei" label="IMEI号" width="240" align="center" /> -->
           <el-table-column property="meterType" label="水表类型" min-width="70" align="center" />
           <el-table-column property="payerPhone" label="缴费人手机号" min-width="70" align="center" />
@@ -121,12 +130,10 @@ export default {
       transactionData: {
         timeType: "", // 用于选择时间类型
         createTime: "", // 用于存储选择的时间
-        meterCode: "",
         userId: "",
         companyId: "",
       },
       startData: {
-        meterCode: "",
         userId: "",
         companyId: "",
       },
@@ -187,13 +194,14 @@ export default {
       this.$emit("close");
     },
     assignmentData() {
-      this.transactionData.meterCode = this.data.meterCode;
       this.transactionData.userId = this.data.userId;
       this.transactionData.companyId = this.data.companyId;
-      this.startData.meterCode = this.data.meterCode;
       this.startData.userId = this.data.userId;
       this.startData.companyId = this.data.companyId;
       console.log(this.startData);
+    },
+    isCurrentMeter(row) {
+      return String(row?.meterCode ?? "") === String(this.data?.meterCode ?? "");
     },
     getTransactionRecordData() {
       if (this.isLoading) return
@@ -749,6 +757,42 @@ export default {
   opacity: 0.5;
   cursor: not-allowed !important;
   pointer-events: none;
+}
+
+.meter-code-cell {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  max-width: 100%;
+}
+
+.meter-code-text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.meter-status {
+  flex-shrink: 0;
+  padding: 1px 7px;
+  border-radius: 10px;
+  font-size: 14px;
+  line-height: 20px;
+  border: 1px solid transparent;
+  white-space: nowrap;
+}
+
+.meter-status.current {
+  color: #2f9e63;
+  background-color: #eef9f2;
+  border-color: #bfe8d1;
+}
+
+.meter-status.history {
+  color: #8a8f99;
+  background-color: #f3f4f6;
+  border-color: #dcdfe6;
 }
 
 .transaction-table {
