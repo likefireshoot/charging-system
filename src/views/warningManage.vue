@@ -118,6 +118,7 @@
               </template>
             </el-table-column>
             <el-table-column property="totalWater" label="水表读数/吨" :width="userNameWidth" align="center" />
+            <el-table-column v-if="showOweAmountColumn" property="valveStatus" label="阀门状态" :width="valveStatusWidth" align="center"/>
             <el-table-column v-if="showOweAmountColumn" property="qianfeiDays" label="欠费天数" :width="addressWidth" align="center" />
           </el-table>
         </div>
@@ -248,6 +249,7 @@ export default {
       idWidth: 0,
       userNameWidth: 0,
       addressWidth: 0,
+      valveStatusWidth: 0,
       quyuWidth: 0,
       phoneWidth: 0,
       biaohaoWidth: 0,
@@ -350,6 +352,7 @@ export default {
           warningTime: 12,
           warningType: 6,
           oweAmount: 8,
+          valveStatus: 11,
         };
       }
       return {
@@ -474,6 +477,7 @@ export default {
         this.warningTimeWidth = (this.columnPercentages.warningTime / 100) * parentWidth;
         this.warningTypeWidth = (this.columnPercentages.warningType / 100) * parentWidth;
         this.oweAmountWidth = this.showOweAmountColumn ? (this.columnPercentages.oweAmount / 100) * parentWidth : 0;
+        this.valveStatusWidth = this.showOweAmountColumn ? (this.columnPercentages.valveStatus / 100) * parentWidth : 0;
       }
     },
     formatOweAmount(val) {
