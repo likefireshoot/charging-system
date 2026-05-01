@@ -4,19 +4,32 @@
       <div class="info-side">
         <div class="info-card user-info-card">
           <div class="card-title">用户信息</div>
-          <div class="balance-section">
-            <div class="yellow-circle">¥</div>
-            <div class="balance-text">
-              <div class="num">{{ currentUser.balance || 0 }}</div>
-              <div class="unit">可用余额 (元)</div>
+          <!-- 账单记录 tab: 余额 + 消费总额 并列 -->
+          <div v-if="activeTab === 'bill'" class="stats-row">
+            <div class="stat-item">
+              <div class="stat-circle yellow-circle">¥</div>
+              <div class="stat-text">
+                <div class="num">{{ currentUser.balance || 0 }}</div>
+                <div class="unit">可用余额 (元)</div>
+              </div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-circle green-circle">¥</div>
+              <div class="stat-text">
+                <div class="num">{{ totalMoney }}</div>
+                <div class="unit">消费总额 (元)</div>
+              </div>
             </div>
           </div>
-          <!-- 新增消费总额区域，仅在账单记录tab时显示 -->
-          <div v-if="activeTab === 'bill'" class="total-consume-section">
-            <div class="total-consume-circle">¥</div>
-            <div class="total-consume-text">
-              <div class="num">{{ totalMoney }}</div>
-              <div class="unit">消费总额 (元)</div>
+
+          <!-- 其他 tab: 仅显示余额 -->
+          <div v-else class="stats-row">
+            <div class="stat-item">
+              <div class="stat-circle yellow-circle">¥</div>
+              <div class="stat-text">
+                <div class="num">{{ currentUser.balance || 0 }}</div>
+                <div class="unit">可用余额 (元)</div>
+              </div>
             </div>
           </div>
           <div class="data-list">
@@ -31,6 +44,36 @@
 
         <div class="info-card meter-info-card">
           <div class="card-title">表信息</div>
+
+          <!-- 抄表记录 tab: 当前吨数 + 总用水量 并列 -->
+          <div v-if="activeTab === 'meter'" class="stats-row">
+            <div class="stat-item">
+              <div class="stat-circle blue-circle">T</div>
+              <div class="stat-text">
+                <div class="num">{{ meterReading }}</div>
+                <div class="unit">当前吨数 (吨)</div>
+              </div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-circle teal-circle">Σ</div>
+              <div class="stat-text">
+                <div class="num">{{ meterTotalWater }}</div>
+                <div class="unit">总用水量 (吨)</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 其他 tab: 仅显示当前吨数 -->
+          <div v-else class="stats-row">
+            <div class="stat-item">
+              <div class="stat-circle blue-circle">T</div>
+              <div class="stat-text">
+                <div class="num">{{ meterReading }}</div>
+                <div class="unit">当前吨数 (吨)</div>
+              </div>
+            </div>
+          </div>
+
           <div class="data-list">
             <div class="data-item"><span>表号：</span>{{ currentUser.meterCode || '-' }}</div>
             <div class="data-item"><span>表具类型：</span>{{ currentUser.meterType || 'NB-IoT表' }}</div>
@@ -75,6 +118,7 @@
 
 <script>
 import { ElMessage } from "element-plus";
+import service from "@/api/request";
 import BillTable from "./userRecordTabs/BillTable.vue";
 import TransactionTable from "./userRecordTabs/TransactionTable.vue";
 import MeterTable from "./userRecordTabs/MeterTable.vue";
@@ -94,12 +138,14 @@ export default {
     return {
       currentUser: {},
       totalMoney: 0,
+      meterReading: 0,
+      meterTotalWater: 0,
       activeTab: "bill",
       tabs: [
         { name: "账单记录", type: "bill" },
         { name: "交易记录", type: "transaction" },
+        { name: "抄表记录", type: "meter" },
         { name: "指令通讯记录", type: "command" },
-        // { name: "抄表记录", type: "meter" },
         // { name: "操作历史", type: "operation" }
       ]
     };
@@ -116,7 +162,19 @@ export default {
       return componentMap[this.activeTab] || "BillTable";
     }
   },
+  watch: {
+    activeTab(newVal) {
+      if (newVal === 'meter') {
+        this.fetchCardTotalWater();
+      }
+    }
+  },
   mounted() {
+    // 支持从路由参数指定初始tab
+    if (this.$route.query.tab) {
+      this.activeTab = this.$route.query.tab;
+    }
+
     const userId = this.$route.query.userId;
     const meterCode = this.$route.query.meterCode;
     const companyId = this.$route.query.companyId;
@@ -130,6 +188,14 @@ export default {
         phone: this.$route.query.userPhone || "",
         balance: this.$route.query.userBalance || ""
       };
+
+      // 读取当前水表吨数（从抄表入口跳转时传递）
+      this.meterReading = this.$route.query.meterReading || 0;
+
+      // 若初始tab为抄表记录，预加载总用水量
+      if (this.activeTab === 'meter') {
+        this.fetchCardTotalWater();
+      }
     } else {
       ElMessage.error("缺少用户参数");
     }
@@ -137,6 +203,18 @@ export default {
   methods: {
     switchTab(type) {
       this.activeTab = type;
+    },
+    async fetchCardTotalWater() {
+      if (!this.currentUser.userId || !this.currentUser.meterCode) return;
+      try {
+        const query = `?userId=${encodeURIComponent(this.currentUser.userId)}&meterCode=${encodeURIComponent(this.currentUser.meterCode)}&companyId=${encodeURIComponent(this.currentUser.companyId || '')}`;
+        const response = await service.get(`/userManage/meterRead/getTotalWater${query}`);
+        if (response.code === 200) {
+          this.meterTotalWater = response.data || 0;
+        }
+      } catch (error) {
+        console.error("获取总用水量失败", error);
+      }
     },
     goBack() {
       // 尝试恢复之前保存的页面状态
@@ -231,68 +309,73 @@ export default {
   margin-bottom: 20px;
 }
 
-.balance-section {
+/* ========== 统计数值区域（按 tab 切换） ========== */
+.stats-row {
   display: flex;
   align-items: center;
-  margin-bottom: 25px;
+  justify-content: center;        /* 内容居中，更紧凑 */
+  gap: 0;
+  margin-bottom: 20px;
+  background: #f7f9fc;           /* 浅色背景提升层次 */
+  border: 1px solid #e2e8f0;     /* 浅色边框 */
+  border-radius: 10px;
+  padding: 12px 10px;            /* 减小内边距 */
 }
 
-.yellow-circle {
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 16px;
+}
+
+/* 两个 stat-item 之间自动添加分隔线 */
+.stat-item + .stat-item {
+  border-left: 1px solid #d5dce6;
+  padding-left: 24px;
+}
+
+.stat-circle {
+  width: 40px;                   /* 从50px缩小 */
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;               /* 从24px缩小 */
+  font-weight: bold;
+  flex-shrink: 0;
+}
+
+.stat-circle.yellow-circle {
   background: #fbc02d;
   color: #fff;
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 24px;
-  font-weight: bold;
-  margin-right: 15px;
 }
 
-.balance-text .num {
-  font-size: 35px;
-  font-weight: bold;
-  color: #f56c6c;
-}
-
-.balance-text .unit {
-  font-size: 18px;
-  color: #999;
-}
-
-/* 消费总额样式 - 与可用余额样式类似但稍有区别 */
-.total-consume-section {
-  display: flex;
-  align-items: center;
-  margin-bottom: 25px;
-  border-top: 1px solid #f0f0f0;
-  padding-top: 20px;
-}
-
-.total-consume-circle {
+.stat-circle.green-circle {
   background: #46B97E;
   color: #fff;
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 24px;
-  font-weight: bold;
-  margin-right: 15px;
 }
 
-.total-consume-text .num {
-  font-size: 35px;
+.stat-circle.blue-circle {
+  background: #409EFF;
+  color: #fff;
+}
+
+.stat-circle.teal-circle {
+  background: #20a0b9;
+  color: #fff;
+}
+
+.stat-text .num {
+  font-size: 24px;               /* 从35px缩小，更精致 */
   font-weight: bold;
   color: #f56c6c;
+  line-height: 1.2;
 }
 
-.total-consume-text .unit {
-  font-size: 18px;
+.stat-text .unit {
+  font-size: 16px;               /* 从18px缩小 */
   color: #999;
 }
 

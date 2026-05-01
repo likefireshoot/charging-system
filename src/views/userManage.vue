@@ -208,10 +208,6 @@
     <userInfoVue v-if="user_info_dialogFormVisible" :user_info_dialogFormVisible="user_info_dialogFormVisible"
       :quyu_data="quyu_data" :data="multipleSelection[0]" @close="closeUserInfoDialog"></userInfoVue>
 
-    <!-- 抄表记录弹出框 -->
-    <chabiaoRecord v-if="chaobiao_dialogFormVisible" :chaobiao_dialogFormVisible="chaobiao_dialogFormVisible"
-      :data="multipleSelection[0]" @close="chaobiao_dialogFormVisible = false"></chabiaoRecord>
-
     <!-- 交易记录弹出框 -->
     <transactionRecord v-if="transaction_dialogFormVisible"
       :transaction_dialogFormVisible="transaction_dialogFormVisible" :data="multipleSelection[0]"
@@ -356,7 +352,6 @@ import valveVue from "@/components/userManage/valve.vue";
 import valueOpenVue from "@/components/userManage/valveOpen.vue";
 import changeRecord from "@/components/userManage/changeRecord.vue";
 import userInfoVue from "@/components/userManage/userInfo.vue";
-import chabiaoRecord from "@/components/userManage/chaobiaoRecord.vue";
 import transactionRecord from "@/components/userManage/transactionRecord.vue";
 import changeBalanceVue from "@/components/userManage/changeBalance.vue";
 
@@ -376,7 +371,6 @@ export default {
     addVue,
     deleteVue,
     userInfoVue,
-    chabiaoRecord,
     transactionRecord,
     valveVue,
     valueOpenVue,
@@ -449,7 +443,6 @@ export default {
 
       //弹出框显示与否
       user_info_dialogFormVisible: false,
-      chaobiao_dialogFormVisible: false,
       transaction_dialogFormVisible: false,
       add_dialogFormVisible: false,
       delete_dialogFormVisible: false,
@@ -851,8 +844,32 @@ export default {
       }
     },
     handleChaoBiaoTime(row) {
-      this.chaobiao_dialogFormVisible = true;
-      this.multipleSelection[0] = row;
+      // 保存当前页面状态到 sessionStorage，方便返回后恢复
+      const pageState = {
+        currentPage: this.currentPage,
+        pageSize: this.pageSize,
+        param: this.param,
+        quyu_selected: this.quyu_selected,
+        sortField: this.sortField,
+        sortOrder: this.sortOrder
+      };
+      sessionStorage.setItem('userManagePageState', JSON.stringify(pageState));
+
+      // 跳转到 userRecordDetail 页面，并定位到抄表记录 tab
+      this.$router.push({
+        path: '/userRecordDetail',
+        query: {
+          tab: 'meter',
+          userId: row.userId,
+          meterCode: row.meterCode,
+          meterReading: row.newReading,
+          userName: row.userName,
+          userAddr: row.userAddr,
+          userPhone: row.phone,
+          userBalance: row.balance,
+          companyId: row.companyId
+        }
+      });
     },
     handleYue(row) {
       // 保存当前页面状态到 sessionStorage，方便返回后恢复
@@ -872,6 +889,7 @@ export default {
         query: {
           userId: row.userId,
           meterCode: row.meterCode,
+          meterReading: row.newReading,
           userName: row.userName,
           userAddr: row.userAddr,
           userPhone: row.phone,
