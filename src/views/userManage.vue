@@ -498,8 +498,64 @@ export default {
     this.$nextTick(() => {
       this.treeRef = this.$refs.treeRef;
     });
-    this.getUserInfo();
-    this.getRegionData();
+
+    // 检查是否需要恢复页面状态（从 userRecordDetail 返回时）
+    const restore = this.$route.query.restore;
+    if (restore === 'true') {
+      // 恢复页面状态
+      this.currentPage = parseInt(this.$route.query.currentPage) || 1;
+      this.pageSize = parseInt(this.$route.query.pageSize) || 30;
+      this.sortField = this.$route.query.sortField || 'time';
+      this.sortOrder = this.$route.query.sortOrder || 'desc';
+
+      // 恢复搜索参数
+      if (this.$route.query.param) {
+        try {
+          const param = JSON.parse(this.$route.query.param);
+          this.param = { ...this.param, ...param };
+        } catch (e) {
+          console.error('恢复搜索参数失败', e);
+        }
+      }
+
+      // 清除 sessionStorage 中的保存状态
+      sessionStorage.removeItem('userManagePageState');
+
+      // 先获取区域数据，再恢复区域选择
+      this.getRegionData();
+
+      // 等待区域数据加载完成后恢复区域选择
+      this.$nextTick(() => {
+        // 恢复区域选择
+        if (this.$route.query.quyu_selected) {
+          try {
+            const quyuSelected = JSON.parse(this.$route.query.quyu_selected);
+            this.quyu_selected = quyuSelected;
+            // 等待树组件渲染后选中并触发点击事件
+            setTimeout(() => {
+              if (this.treeRef && this.quyu_selected) {
+                this.treeRef.setCurrentKey(this.quyu_selected.id);
+                // 直接调用fetchUserList，不经过handleNodeClick的页码判断
+                this.fetchUserList(this.currentPage);
+              } else {
+                // 如果树组件未就绪或没有区域选择，直接获取用户列表
+                this.fetchUserList(this.currentPage);
+              }
+            }, 300);
+          } catch (e) {
+            console.error('恢复区域选择失败', e);
+            this.fetchUserList(this.currentPage);
+          }
+        } else {
+          // 如果没有区域选择，直接获取用户列表
+          this.fetchUserList(this.currentPage);
+        }
+      });
+    } else {
+      this.getUserInfo();
+      this.getRegionData();
+    }
+
     this.getCompanyList();
   },
   methods: {
@@ -799,8 +855,30 @@ export default {
       this.multipleSelection[0] = row;
     },
     handleYue(row) {
-      this.transaction_dialogFormVisible = true;
-      this.multipleSelection[0] = row;
+      // 保存当前页面状态到 sessionStorage，方便返回后恢复
+      const pageState = {
+        currentPage: this.currentPage,
+        pageSize: this.pageSize,
+        param: this.param,
+        quyu_selected: this.quyu_selected,
+        sortField: this.sortField,
+        sortOrder: this.sortOrder
+      };
+      sessionStorage.setItem('userManagePageState', JSON.stringify(pageState));
+
+      // 跳转到 userRecordDetail 页面
+      this.$router.push({
+        path: '/userRecordDetail',
+        query: {
+          userId: row.userId,
+          meterCode: row.meterCode,
+          userName: row.userName,
+          userAddr: row.userAddr,
+          userPhone: row.phone,
+          userBalance: row.balance,
+          companyId: row.companyId
+        }
+      });
     },
     delete_btn_click() {
       if (this.multipleSelection.length > 0) {

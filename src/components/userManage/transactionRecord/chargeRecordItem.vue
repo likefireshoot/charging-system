@@ -1,3 +1,6 @@
+<!--此页面已弃用 功能转到userRecordDetail-userRecordTabs-BillTable-->
+<!--此页面已弃用 功能转到userRecordDetail-userRecordTabs-BillTable-->
+<!--此页面已弃用 功能转到userRecordDetail-userRecordTabs-BillTable-->
 <template>
   <div class="transaction-record-content">
     <div class="serach-box">

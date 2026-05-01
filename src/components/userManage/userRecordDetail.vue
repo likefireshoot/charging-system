@@ -1,13 +1,5 @@
 <template>
   <div class="user-detail-container">
-    <div class="detail-header">
-      <div class="back-item" @click="goBack">
-        <img src="@/assets/yonghu/icon27.png" alt="back" class="back-icon" />
-        <span class="back-text">返回用户列表</span>
-      </div>
-      <div class="header-title">账单详情 - {{ currentUser.userName || '加载中...' }}</div>
-    </div>
-
     <div class="detail-content">
       <div class="info-side">
         <div class="info-card user-info-card">
@@ -58,6 +50,12 @@
             @click="switchTab(tab.type)"
           >
             {{ tab.name }}
+          </div>
+          <div class="back-button-wrapper">
+            <button class="back-btn" @click="goBack">
+              <img src="@/assets/yonghu/icon27.png" alt="back" />
+              <span>返回用户列表</span>
+            </button>
           </div>
         </div>
 
@@ -141,7 +139,32 @@ export default {
       this.activeTab = type;
     },
     goBack() {
-      this.$router.back();
+      // 尝试恢复之前保存的页面状态
+      const savedState = sessionStorage.getItem('userManagePageState');
+      if (savedState) {
+        try {
+          const pageState = JSON.parse(savedState);
+          // 将页面状态存储到 query 参数中，让 userManage 页面可以读取并恢复
+          this.$router.push({
+            path: '/userManage',
+            query: {
+              restore: 'true',
+              currentPage: pageState.currentPage,
+              pageSize: pageState.pageSize,
+              sortField: pageState.sortField,
+              sortOrder: pageState.sortOrder,
+              // 将搜索参数编码后传递
+              param: JSON.stringify(pageState.param),
+              quyu_selected: pageState.quyu_selected ? JSON.stringify(pageState.quyu_selected) : null
+            }
+          });
+        } catch (e) {
+          // 解析失败，直接返回
+          this.$router.back();
+        }
+      } else {
+        this.$router.back();
+      }
     },
     handleTotalMoneyUpdate(value) {
       this.totalMoney = value || 0;
@@ -161,42 +184,6 @@ export default {
   overflow: hidden;
 }
 
-.detail-header {
-  display: flex;
-  align-items: center;
-  background: #fff;
-  padding: 10px 20px;
-  border-radius: 4px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-  margin-bottom: 15px;
-  flex-shrink: 0;
-}
-
-.back-item {
-  display: flex;
-  align-items: center;
-  cursor: pointer;
-  padding-right: 20px;
-  border-right: 1px solid #eee;
-}
-
-.back-icon {
-  width: 30px;
-  height: 30px;
-}
-
-.back-text {
-  margin-left: 8px;
-  font-size: 22px;
-  color: #5a5a5a;
-}
-
-.header-title {
-  margin-left: 20px;
-  font-size: 22px;
-  font-weight: bold;
-  color: #333;
-}
 
 .detail-content {
   display: flex;
@@ -334,9 +321,11 @@ export default {
 
 .tab-bar {
   display: flex;
+  align-items: center;
   background: #eef1f6;
   border-bottom: 1px solid #dcdfe6;
   flex-shrink: 0;
+  padding: 0 15px;
 }
 
 .tab-item {
@@ -354,6 +343,43 @@ export default {
 .tab-item.active {
   background: #55bb8a;
   color: #fff;
+}
+
+.back-button-wrapper {
+  margin-left: auto;
+  padding: 8px 0;
+}
+
+.back-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: linear-gradient(135deg, #29aa00 0%, #29aa00 100%);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 20px;
+  font-weight: bold;
+  box-shadow: 0 3px 10px rgba(238, 90, 111, 0.3);
+  transition: all 0.3s;
+}
+
+.back-btn img {
+  width: 20px;
+  height: 20px;
+  filter: brightness(0) invert(1);
+}
+
+.back-btn:hover {
+  background: linear-gradient(135deg, #6FBF4C 0%, #6FBF4C 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(238, 90, 111, 0.4);
+}
+
+.back-btn:active {
+  transform: translateY(0);
 }
 
 .table-box {
