@@ -76,20 +76,20 @@
           <img src="@/assets/yonghu/icon6.png" alt="" style="margin-left: 8px" />
           <span style="font-size: 20px; margin-left: 8px; color: #5a5a5a">充值</span>
         </div>
-        <div class="recharge-record-btn" style="margin-left: 5px; width: 120px" @click="recharge_record_btn_click"
+        <div class="recharge-record-btn" style="margin-left: 5px; width: 160px" @click="recharge_record_btn_click"
           v-if="staffPermissionIds.includes(11)">
           <img src="@/assets/yonghu/icon7.png" alt="" style="margin-left: 8px" />
-          <span style="font-size: 20px; margin-left: 8px; color: #5a5a5a">充值记录</span>
+          <span style="font-size: 20px; margin-left: 8px; color: #5a5a5a">充值记录查询</span>
         </div>
         <div class="water-meter-btn" style="margin-left: 5px" :class="{ 'btn-single-only-disabled': multipleSelection.length !== 1 }" @click="multipleSelection.length === 1 && change_btn_click()"
           v-if="staffPermissionIds.includes(13)">
           <img src="@/assets/yonghu/icon8.png" alt="" style="margin-left: 8px" />
           <span style="font-size: 20px; margin-left: 8px; color: #5a5a5a">换表</span>
         </div>
-        <div class="water-meter-record-btn" style="margin-left: 5px; width: 120px" @click="change_record_btn_click"
+        <div class="water-meter-record-btn" style="margin-left: 5px; width: 160px" @click="change_record_btn_click"
           v-if="staffPermissionIds.includes(14)">
           <img src="@/assets/yonghu/icon9.png" alt="" style="margin-left: 8px" />
-          <span style="font-size: 20px; margin-left: 8px; color: #5a5a5a">换表记录</span>
+          <span style="font-size: 20px; margin-left: 8px; color: #5a5a5a">换表记录查询</span>
         </div>
         <!-- <div class="export-out-btn" style="margin-left: 5px; width: 110px" @click="download">
           <img src="@/assets/yonghu/icon1.png" alt="" style="margin-left: 7px" />
@@ -104,19 +104,19 @@
           <img src="@/assets/yonghu/icon2.png" alt="" style="margin-left: 7px" />
           <span style="font-size: 20px; margin-left: 10px; color: #5a5a5a">导出</span>
         </div>
-        <div class="export-out-btn" style="margin-left: 5px; width: 195px" @click="common_meter_template_click">
+        <div class="export-out-btn" style="margin-left: 5px; width: 220px" @click="common_meter_template_click">
           <img src="@/assets/yonghu/icon1.png" alt="" style="margin-left: 7px" />
-          <span style="font-size: 20px; margin-left: 10px; color: #5a5a5a">普表用水量模板</span>
+          <span style="font-size: 20px; margin-left: 10px; color: #5a5a5a">普表用水量模板下载</span>
         </div>
-        <div class="export-in-btn" style="margin-left: 5px; width: 175px" @click="triggerCommonMeterImport">
-          <img src="@/assets/yonghu/icon1.png" alt="" style="margin-left: 7px" />
-          <span style="font-size: 20px; margin-left: 5px; color: #5a5a5a">普表用水量导入</span>
+        <div class="export-in-btn" style="margin-left: 5px; width: 220px" @click="triggerCommonMeterImport">
+          <img src="@/assets/yonghu/icon2.png" alt="" style="margin-left: 7px" />
+          <span style="font-size: 20px; margin-left: 5px; color: #5a5a5a">普表用水量信息导入</span>
           <input ref="commonMeterInput" type="file" accept=".xls,.xlsx" style="display: none"
             @change="common_meter_click" />
         </div>
-        <div class="export-in-btn" style="margin-left: 5px; width: 170px" @click="multi_edit_meter_price">
+        <div class="export-in-btn" style="margin-left: 5px; width: 220px" @click="multi_edit_meter_price">
           <img src="@/assets/jiage/icon3.png" alt="" style="margin-left: 7px" />
-          <span style="font-size: 20px; margin-left: 5px; color: #5a5a5a">批量修改水价</span>
+          <span style="font-size: 20px; margin-left: 5px; color: #5a5a5a">批量修改水价类型</span>
         </div>
 
         <div class="reflush" style="margin-left: 5px" @click="reflush">

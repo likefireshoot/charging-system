@@ -18,11 +18,11 @@
           <span>时间</span>
           <div class="time-input">
             <el-date-picker v-model="params.startTime" type="date" placeholder="选择日期"
-              style="flex-grow: 0; width: 150px; flex-basis: auto; margin-right: 5px; height: 35px" format="YYYY-MM-DD"
+              style="flex-grow: 0; width: 180px; flex-basis: auto; margin-right: 5px; height: 35px" format="YYYY-MM-DD"
               value-format="YYYY-MM-DD" />
             <span>至</span>
             <el-date-picker v-model="params.endTime" type="date" placeholder="选择日期"
-              style="flex-grow: 0; width: 150px; flex-basis: auto; height: 35px" format="YYYY-MM-DD"
+              style="flex-grow: 0; width: 180px; flex-basis: auto; height: 35px" format="YYYY-MM-DD"
               value-format="YYYY-MM-DD" />
           </div>
         </div>

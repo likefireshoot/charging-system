@@ -48,17 +48,17 @@
           <img src="@/assets/yonghu/icon4.png" alt="" style="margin-left: 8px" />
           <span style="font-size: 20px; margin-left: 8px; color: #5a5a5a">删除</span>
         </div>
-        <div class="export-out-btn" style="margin-left: 5px; width: 210px" @click="downloadUserAndBindTemplate" v-if="staffPermissionIds.includes(5)">
+        <div class="export-out-btn" style="margin-left: 5px; width: 250px" @click="downloadUserAndBindTemplate" v-if="staffPermissionIds.includes(5)">
           <img src="@/assets/yonghu/icon1.png" alt="" style="margin-left: 7px" />
-          <span style="font-size: 20px; margin-left: 10px; color: #5a5a5a">开户绑定导入模板</span>
+          <span style="font-size: 20px; margin-left: 10px; color: #5a5a5a">开户绑定导入模板下载</span>
         </div>
-        <div class="export-in-btn" style="margin-left: 5px; width: 170px" @click="triggerUserAndBindImport" v-if="staffPermissionIds.includes(5)">
-          <img src="@/assets/yonghu/icon1.png" alt="" style="margin-left: 7px" />
-          <span style="font-size: 20px; margin-left: 5px; color: #5a5a5a">开户绑定导入</span>
+        <div class="export-in-btn" style="margin-left: 5px; width: 200px" @click="triggerUserAndBindImport" v-if="staffPermissionIds.includes(5)">
+          <img src="@/assets/yonghu/icon2.png" alt="" style="margin-left: 7px" />
+          <span style="font-size: 20px; margin-left: 5px; color: #5a5a5a">开户绑定信息导入</span>
           <input ref="userAndBindFileInput" type="file" accept=".xls,.xlsx" style="display: none" @change="importUserAndBind" />
         </div>
         <div class="export-out-btn" style="margin-left: 5px" @click="exportExcel">
-          <img src="@/assets/yonghu/icon2.png" alt="" style="margin-left: 7px" />
+          <img src="@/assets/yonghu/icon1.3.png" alt="" style="margin-left: 7px" />
           <span style="font-size: 20px; margin-left: 10px; color: #5a5a5a">导出</span>
         </div>
         <div class="reflush" style="margin-left: 5px" @click="reflush">

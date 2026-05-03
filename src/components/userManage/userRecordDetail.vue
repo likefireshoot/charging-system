@@ -97,7 +97,7 @@ export default {
       activeTab: "bill",
       tabs: [
         { name: "账单记录", type: "bill" },
-        { name: "交易记录", type: "transaction" },
+        { name: "充值记录", type: "transaction" },
         { name: "指令通讯记录", type: "command" },
         // { name: "抄表记录", type: "meter" },
         // { name: "操作历史", type: "operation" }

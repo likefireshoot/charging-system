@@ -251,7 +251,7 @@ export default {
   },
   computed: {
     tableMaxHeight() {
-      return "40vh";
+      return "auto";
     },
   },
   watch: {
@@ -732,7 +732,8 @@ export default {
 .recharge-record-dialog-content {
   width: 94%;
   max-width: 2100px;
-  max-height: 96vh;
+  //max-height: 96vh;
+  height: 98%;
   border: 1px solid #fafafa;
   background-color: #fafafa;
   border-radius: 5px;
@@ -747,8 +748,9 @@ export default {
 
 .recharge-record-content {
   width: 100%;
-  min-height: 72vh;
-  max-height: calc(88vh - 45px);
+  //min-height: 72vh;
+  //max-height: calc(88vh - 45px);
+  height: 100%;
   background-color: #fff;
   border-radius: 5px;
   margin-top: 0px;
@@ -822,7 +824,7 @@ export default {
 
 .recharge-record-table {
   width: 100%;
-  height: 40vh;
+  height: 90vh;
   margin-top: 5px;
   overflow-y: auto;
 }
