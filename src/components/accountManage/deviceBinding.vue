@@ -87,6 +87,14 @@
             <span style="font-size: 16px;">确认修改水表吨数</span>
           </el-checkbox>
         </div>
+        <div class="edit-input" style="margin-right: 1%">
+          <span>结算关阀类型</span>
+          <el-select v-model="addData.enableArrearsValve" class="input-item big-font-el-select" placeholder="请选择结算关阀类型">
+            <el-option label="默认(自动关阀,随区域设置变化)" value="default" />
+            <el-option label="预付费(自动关阀,不随区域设置变化)" :value="0" />
+            <el-option label="后付费(手动关阀,不随区域设置变化)" :value="1" />
+          </el-select>
+        </div>
       </div>
       <div class="btn">
         <div class="confirm-btn" @click="handleCommit">
@@ -170,12 +178,11 @@ export default {
         priceId: null,
         smsConfigId: null,
         approver_1: userData.staffName || "",
-        approver_2: userData.staffName || "",
-        approver_3: userData.staffName || "",
         factoryDate: null,
         firstInspectDate: null,
-        reading: null,        // 新增：水表读数
-        meterId: null         // 新增：水表ID
+        reading: null,
+        meterId: null,
+        enableArrearsValve: "default"
       },
       companyId: JSON.parse(sessionStorage.getItem("userData")).companyId,
       price_list: [],
@@ -388,10 +395,9 @@ export default {
         priceId: this.addData.priceId,
         smsConfigId: this.addData.smsConfigId,
         approver_1: this.addData.approver_1,
-        approver_2: this.addData.approver_2,
-        approver_3: this.addData.approver_3,
         factoryDate: this.addData.factoryDate,
-        firstInspectDate: this.addData.firstInspectDate
+        firstInspectDate: this.addData.firstInspectDate,
+        enableArrearsValve: this.addData.enableArrearsValve
       };
 
       // 定义字段名映射
@@ -401,11 +407,10 @@ export default {
         meterCode: "表号",
         priceId: "价格类型",
         smsConfigId: "短信配置",
-        approver_1: "开户审批人1",
-        approver_2: "开户审批人2",
-        approver_3: "开户审批人3",
+        approver_1: "开户审批人",
         factoryDate: "出厂日期",
-        firstInspectDate: "首检日期"
+        firstInspectDate: "首检日期",
+        enableArrearsValve: "结算关阀类型"
       };
 
       // 递归遍历对象属性
@@ -447,10 +452,9 @@ export default {
         priceId: this.addData.priceId,
         smsConfigId: this.addData.smsConfigId,
         approver_1: this.addData.approver_1,
-        approver_2: this.addData.approver_2,
-        approver_3: this.addData.approver_3,
         factoryDate: this.addData.factoryDate,
-        firstInspectDate: this.addData.firstInspectDate
+        firstInspectDate: this.addData.firstInspectDate,
+        enableArrearsValve: this.addData.enableArrearsValve === "default" ? null : this.addData.enableArrearsValve
       };
 
       this.submitting = true;
@@ -619,10 +623,10 @@ export default {
 
 .edit-input {
   display: flex;
-  justify-content: center; /* 确保子元素在父容器中垂直居中 */
+  justify-content: flex-start;
   flex-direction: column;
   width: 32.3%;
-  height: 73px;
+  min-height: 73px;
 }
 
 .edit-input > span {
