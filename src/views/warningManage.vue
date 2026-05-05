@@ -16,7 +16,7 @@
           <el-option label="水表大用量用户" value="水表大用量用户"></el-option>
           <el-option label="数据长时间未上报" value="数据长时间未上报"></el-option>
           <el-option label="设备异常" value="设备异常"></el-option>
-          <el-option label="关阀状态下仍扣费/水表吨数增加" value="关阀状态下仍扣费/水表吨数增加"></el-option>
+          <el-option label="关阀状态下水表吨数增加" value="关阀状态下水表吨数增加"></el-option>
         </el-select>
       </div>
       <div class="search-input">
