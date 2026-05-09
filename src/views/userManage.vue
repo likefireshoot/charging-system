@@ -76,20 +76,20 @@
           <img src="@/assets/yonghu/icon6.png" alt="" style="margin-left: 8px" />
           <span style="font-size: 20px; margin-left: 8px; color: #5a5a5a">充值</span>
         </div>
-        <div class="recharge-record-btn" style="margin-left: 5px; width: 120px" @click="recharge_record_btn_click"
+        <div class="recharge-record-btn" style="margin-left: 5px; width: 160px" @click="recharge_record_btn_click"
           v-if="staffPermissionIds.includes(11)">
           <img src="@/assets/yonghu/icon7.png" alt="" style="margin-left: 8px" />
-          <span style="font-size: 20px; margin-left: 8px; color: #5a5a5a">充值记录</span>
+          <span style="font-size: 20px; margin-left: 8px; color: #5a5a5a">充值记录查询</span>
         </div>
         <div class="water-meter-btn" style="margin-left: 5px" :class="{ 'btn-single-only-disabled': multipleSelection.length !== 1 }" @click="multipleSelection.length === 1 && change_btn_click()"
           v-if="staffPermissionIds.includes(13)">
           <img src="@/assets/yonghu/icon8.png" alt="" style="margin-left: 8px" />
           <span style="font-size: 20px; margin-left: 8px; color: #5a5a5a">换表</span>
         </div>
-        <div class="water-meter-record-btn" style="margin-left: 5px; width: 120px" @click="change_record_btn_click"
+        <div class="water-meter-record-btn" style="margin-left: 5px; width: 160px" @click="change_record_btn_click"
           v-if="staffPermissionIds.includes(14)">
           <img src="@/assets/yonghu/icon9.png" alt="" style="margin-left: 8px" />
-          <span style="font-size: 20px; margin-left: 8px; color: #5a5a5a">换表记录</span>
+          <span style="font-size: 20px; margin-left: 8px; color: #5a5a5a">换表记录查询</span>
         </div>
         <!-- <div class="export-out-btn" style="margin-left: 5px; width: 110px" @click="download">
           <img src="@/assets/yonghu/icon1.png" alt="" style="margin-left: 7px" />
@@ -104,19 +104,19 @@
           <img src="@/assets/yonghu/icon2.png" alt="" style="margin-left: 7px" />
           <span style="font-size: 20px; margin-left: 10px; color: #5a5a5a">导出</span>
         </div>
-        <div class="export-out-btn" style="margin-left: 5px; width: 195px" @click="common_meter_template_click">
+        <div class="export-out-btn" style="margin-left: 5px; width: 220px" @click="common_meter_template_click">
           <img src="@/assets/yonghu/icon1.png" alt="" style="margin-left: 7px" />
-          <span style="font-size: 20px; margin-left: 10px; color: #5a5a5a">普表用水量模板</span>
+          <span style="font-size: 20px; margin-left: 10px; color: #5a5a5a">普表用水量模板下载</span>
         </div>
-        <div class="export-in-btn" style="margin-left: 5px; width: 175px" @click="triggerCommonMeterImport">
-          <img src="@/assets/yonghu/icon1.png" alt="" style="margin-left: 7px" />
-          <span style="font-size: 20px; margin-left: 5px; color: #5a5a5a">普表用水量导入</span>
+        <div class="export-in-btn" style="margin-left: 5px; width: 220px" @click="triggerCommonMeterImport">
+          <img src="@/assets/yonghu/icon2.png" alt="" style="margin-left: 7px" />
+          <span style="font-size: 20px; margin-left: 5px; color: #5a5a5a">普表用水量信息导入</span>
           <input ref="commonMeterInput" type="file" accept=".xls,.xlsx" style="display: none"
             @change="common_meter_click" />
         </div>
-        <div class="export-in-btn" style="margin-left: 5px; width: 170px" @click="multi_edit_meter_price">
+        <div class="export-in-btn" style="margin-left: 5px; width: 220px" @click="multi_edit_meter_price">
           <img src="@/assets/jiage/icon3.png" alt="" style="margin-left: 7px" />
-          <span style="font-size: 20px; margin-left: 5px; color: #5a5a5a">批量修改水价</span>
+          <span style="font-size: 20px; margin-left: 5px; color: #5a5a5a">批量修改水价类型</span>
         </div>
 
         <div class="reflush" style="margin-left: 5px" @click="reflush">
@@ -207,10 +207,6 @@
     <!-- 点击用户名称弹出框 -->
     <userInfoVue v-if="user_info_dialogFormVisible" :user_info_dialogFormVisible="user_info_dialogFormVisible"
       :quyu_data="quyu_data" :data="multipleSelection[0]" @close="closeUserInfoDialog"></userInfoVue>
-
-    <!-- 抄表记录弹出框 -->
-    <chabiaoRecord v-if="chaobiao_dialogFormVisible" :chaobiao_dialogFormVisible="chaobiao_dialogFormVisible"
-      :data="multipleSelection[0]" @close="chaobiao_dialogFormVisible = false"></chabiaoRecord>
 
     <!-- 交易记录弹出框 -->
     <transactionRecord v-if="transaction_dialogFormVisible"
@@ -356,7 +352,6 @@ import valveVue from "@/components/userManage/valve.vue";
 import valueOpenVue from "@/components/userManage/valveOpen.vue";
 import changeRecord from "@/components/userManage/changeRecord.vue";
 import userInfoVue from "@/components/userManage/userInfo.vue";
-import chabiaoRecord from "@/components/userManage/chaobiaoRecord.vue";
 import transactionRecord from "@/components/userManage/transactionRecord.vue";
 import changeBalanceVue from "@/components/userManage/changeBalance.vue";
 
@@ -376,7 +371,6 @@ export default {
     addVue,
     deleteVue,
     userInfoVue,
-    chabiaoRecord,
     transactionRecord,
     valveVue,
     valueOpenVue,
@@ -449,7 +443,6 @@ export default {
 
       //弹出框显示与否
       user_info_dialogFormVisible: false,
-      chaobiao_dialogFormVisible: false,
       transaction_dialogFormVisible: false,
       add_dialogFormVisible: false,
       delete_dialogFormVisible: false,
@@ -851,8 +844,32 @@ export default {
       }
     },
     handleChaoBiaoTime(row) {
-      this.chaobiao_dialogFormVisible = true;
-      this.multipleSelection[0] = row;
+      // 保存当前页面状态到 sessionStorage，方便返回后恢复
+      const pageState = {
+        currentPage: this.currentPage,
+        pageSize: this.pageSize,
+        param: this.param,
+        quyu_selected: this.quyu_selected,
+        sortField: this.sortField,
+        sortOrder: this.sortOrder
+      };
+      sessionStorage.setItem('userManagePageState', JSON.stringify(pageState));
+
+      // 跳转到 userRecordDetail 页面，并定位到抄表记录 tab
+      this.$router.push({
+        path: '/userRecordDetail',
+        query: {
+          tab: 'meter',
+          userId: row.userId,
+          meterCode: row.meterCode,
+          meterReading: row.newReading,
+          userName: row.userName,
+          userAddr: row.userAddr,
+          userPhone: row.phone,
+          userBalance: row.balance,
+          companyId: row.companyId
+        }
+      });
     },
     handleYue(row) {
       // 保存当前页面状态到 sessionStorage，方便返回后恢复
@@ -872,6 +889,7 @@ export default {
         query: {
           userId: row.userId,
           meterCode: row.meterCode,
+          meterReading: row.newReading,
           userName: row.userName,
           userAddr: row.userAddr,
           userPhone: row.phone,

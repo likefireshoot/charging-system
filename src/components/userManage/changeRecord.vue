@@ -203,7 +203,7 @@ export default {
   },
   computed: {
     tableMaxHeight() {
-      return "40vh";
+      return "auto";
     },
   },
   watch: {
@@ -665,6 +665,7 @@ export default {
 
 .change-record-dialog-content {
   width: 85%;
+  height: 98%;
   border: 1px solid #fafafa;
   background-color: #fafafa;
   border-radius: 5px;
@@ -679,6 +680,7 @@ export default {
 
 .change-record-content {
   width: 100%;
+  height: 100%;
   min-height: 42vh;
   margin-top: 0px;
   margin-bottom: 5px;
@@ -789,7 +791,7 @@ export default {
 
 .change-record-table {
   width: 100%;
-  height: 40vh;
+  height: 100vh;
   margin-top: 5px;
   overflow-y: auto;
 }

@@ -29,6 +29,10 @@ import { useWarningStore } from "@/store/warningStore.js";
 import accountsReport from "@/components/report/accountsReport.vue";
 import userRecordDetail from "@/components/userManage/userRecordDetail.vue";
 
+// 命令日志 + 异常数据
+import commandLog from "../views/commandLog.vue";
+import errorReportRecord from "../views/errorReportRecord.vue";
+
 const routes = [
   {
     path: "/",
@@ -160,6 +164,16 @@ const routes = [
         path: "/logManage",
         name: "logManage",
         component: logManage,
+      },
+      {
+        path: "/commandLog",
+        name: "commandLog",
+        component: commandLog,
+      },
+      {
+        path: "/errorReportRecord",
+        name: "errorReportRecord",
+        component: errorReportRecord,
       },
       {
         path: "/warningManage",

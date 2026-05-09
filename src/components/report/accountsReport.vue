@@ -14,7 +14,7 @@
             <el-option v-for="item in quyu_data" :key="item.id" :label="item.label" :value="item.label"> </el-option>
           </el-select>
         </div>
-        <div class="search-input" style="margin-left: 20px">
+        <div class="search-input" style="margin-left: 20px; width: 320px">
           <span>时间范围</span>
           <el-date-picker
             v-model="params.dateRange"
