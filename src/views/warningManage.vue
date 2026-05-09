@@ -61,7 +61,7 @@
           <span style="font-size: 20px; margin-left: 10px; color: #5a5a5a">获取警告配置</span>
         </div>
         <div class="export-out-btn" style="margin-left: 10px" @click="exportExcel">
-          <img src="@/assets/fapiao/icon5.png" alt="" style="margin-left: 7px" />
+          <img src="@/assets/yonghu/icon1.3.png" alt="" style="margin-left: 7px" />
           <span style="font-size: 20px; margin-left: 10px; color: #5a5a5a">导出</span>
         </div>
         <div class="reflush" style="margin-left: 10px" @click="reflush">
@@ -554,6 +554,9 @@ export default {
               v.theId = this.params.pageSize * (response.data.current - 1) + i + 1;
             });
             this.jinggaoData = response.data.records;
+            this.jinggaoData.forEach((item) => {
+              if (item.qianfeiDays === -1) item.qianfeiDays = 0;
+            });
             this.total = response.data.total;
             this.params.pageNo = response.data.current;
           } else {
@@ -701,6 +704,9 @@ export default {
               v.theId = this.params.pageSize * (response.data.current - 1) + i + 1;
             });
             this.jinggaoData = response.data.records;
+            this.jinggaoData.forEach((item) => {
+              if (item.qianfeiDays === -1) item.qianfeiDays = 0;
+            });
             this.total = response.data.total;
             // 存入缓存
             this.warningDataCache[cacheKey] = {
@@ -730,6 +736,9 @@ export default {
         .then((response) => {
           if (response.code === 200) {
             this.jinggaoData = response.data.records;
+            this.jinggaoData.forEach((item) => {
+              if (item.qianfeiDays === -1) item.qianfeiDays = 0;
+            });
             this.total = response.data.total;
             this.params.pageNo = response.data.current;
           } else {
@@ -776,6 +785,9 @@ export default {
               v.theId = this.params.pageSize * (response.data.current - 1) + i + 1;
             });
             this.jinggaoData = response.data.records;
+            this.jinggaoData.forEach((item) => {
+              if (item.qianfeiDays === -1) item.qianfeiDays = 0;
+            });
             this.total = response.data.total;
             this.params.pageNo = response.data.current;
             this.quyu_selected = null;

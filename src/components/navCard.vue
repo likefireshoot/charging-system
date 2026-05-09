@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="navPage">
     <div class="inBox" v-if="slide">
       <div class="returnCard" @click.stop="slide = false">
@@ -222,26 +222,21 @@ let navLists = reactive([
 if (staffPermissionIds.value.includes(19)) {
   navLists.push({ id: 3, name: "价格管理", icon: require("@/assets/menu/icon5.png"), icon2: require("@/assets/menu/icon6.png"), path: "/priceManage" });
 }
-if (staffPermissionIds.value.includes(29)) {
-  navLists.push({ id: 8, name: "员工中心", icon: require("@/assets/add/icon-08.png"), icon2: require("@/assets/add/icon-09.png"), path: "/employeeManage" });
+if (staffPermissionIds.value.includes(29)) { navLists.push({ id: 10, name: "员工中心", icon: require("@/assets/add/icon-08.png"), icon2: require("@/assets/add/icon-09.png"), path: "/employeeManage" });
 }
 if (staffPermissionIds.value.includes(1)) {
   navLists.push({ id: 1, name: "开户管理", icon: require("@//assets/menu/icon24.png"), icon2: require("@/assets/menu/icon23.png"), path: "/accountManage" });
 }
-if (staffPermissionIds.value.includes(39)) {
-  navLists.push({ id: 10, name: "日志管理", icon: require("@/assets/add/icon-10.png"), icon2: require("@/assets/add/icon-11.png"), path: "/logManage" });
+if (staffPermissionIds.value.includes(39)) { navLists.push({ id: 8, name: "日志管理", icon: require("@/assets/add/icon-10.png"), icon2: require("@/assets/add/icon-11.png"), path: "/logManage" });
 }
-if (staffPermissionIds.value.includes(35)) {
-  navLists.push({ id: 9, name: "角色管理", icon: require("@/assets/menu/icon27.png"), icon2: require("@/assets/menu/icon28.png"), path: "/roleManage" });
+if (staffPermissionIds.value.includes(35)) { navLists.push({ id: 11, name: "角色管理", icon: require("@/assets/menu/icon27.png"), icon2: require("@/assets/menu/icon28.png"), path: "/roleManage" });
 }
-if (staffPermissionIds.value.includes(27)) {
-  navLists.push({ id: 7, name: "警告管理", icon: require("@/assets/menu/icon19.png"), icon2: require("@/assets/menu/icon20.png"), path: "/warningManage" });
+if (staffPermissionIds.value.includes(27)) { navLists.push({ id: 6, name: "警告管理", icon: require("@/assets/menu/icon19.png"), icon2: require("@/assets/menu/icon20.png"), path: "/warningManage" });
 }
 if (staffPermissionIds.value.includes(50)) {
-  navLists.push( { id: 6, name: "命令日志", icon: require("@/assets/menu/icon30.png"), icon2: require("@/assets/menu/icon31.png"), path: "/commandLog" });
+  navLists.push( { id: 9, name: "命令日志", icon: require("@/assets/menu/icon30.png"), icon2: require("@/assets/menu/icon31.png"), path: "/commandLog" });
 }
-if (staffPermissionIds.value.includes(51)) {
-  navLists.push({ id: 11, name: "异常数据", icon: require("@/assets/menu/icon30.png"), icon2: require("@/assets/menu/icon31.png"), path: "/errorReportRecord" });
+if (staffPermissionIds.value.includes(51)) { navLists.push({ id: 7, name: "异常数据", icon: require("@/assets/menu/icon30.png"), icon2: require("@/assets/menu/icon31.png"), path: "/errorReportRecord" });
 }
 
 const adminNavList = reactive([
@@ -285,11 +280,11 @@ const adminNavList = reactive([
     ],
   },
   { id: 6, name: "警告管理", icon: require("@/assets/menu/icon19.png"), icon2: require("@/assets/menu/icon20.png"), path: "/warningManage" },
-  { id: 7, name: "员工中心", icon: require("@/assets/add/icon-08.png"), icon2: require("@/assets/add/icon-09.png"), path: "/employeeManage" },
-  { id: 8, name: "角色管理", icon: require("@/assets/menu/icon27.png"), icon2: require("@/assets/menu/icon28.png"), path: "/roleManage" },
-  { id: 9, name: "日志管理", icon: require("@/assets/add/icon-10.png"), icon2: require("@/assets/add/icon-11.png"), path: "/logManage" },
-  { id: 10, name: "命令日志", icon: require("@/assets/menu/icon26.png"), icon2: require("@/assets/menu/icon25.png"), path: "/commandLog" },
-  { id: 11, name: "异常数据", icon: require("@/assets/menu/icon26.png"), icon2: require("@/assets/menu/icon25.png"), path: "/errorReportRecord" },
+  { id: 7, name: "异常数据", icon: require("@/assets/menu/icon30.png"), icon2: require("@/assets/menu/icon31.png"), path: "/errorReportRecord" },
+  { id: 8, name: "日志管理", icon: require("@/assets/add/icon-10.png"), icon2: require("@/assets/add/icon-11.png"), path: "/logManage" },
+  { id: 9, name: "命令日志", icon: require("@/assets/menu/icon30.png"), icon2: require("@/assets/menu/icon31.png"), path: "/commandLog" },
+  { id: 10, name: "员工中心", icon: require("@/assets/add/icon-08.png"), icon2: require("@/assets/add/icon-09.png"), path: "/employeeManage" },
+  { id: 11, name: "角色管理", icon: require("@/assets/menu/icon27.png"), icon2: require("@/assets/menu/icon28.png"), path: "/roleManage" },
 ]);
 // 定义非管理员的navList
 const nonAdminNavList = reactive([

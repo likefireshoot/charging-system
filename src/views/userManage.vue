@@ -43,83 +43,69 @@
     </div>
     <div class="user-info">
       <div class="command-box">
-        <!-- <div class="add-btn" style="margin-left: 10px" @click="add_dialogFormVisible = true">
-          <img src="@/assets/yonghu/icon13.png" alt="" style="margin-left: 8px" />
-          <span style="font-size: 16px; margin-left: 8px; color: #5a5a5a">新增</span>
-        </div> -->
-        <div class="delete-btn" style="margin-left: 5px" @click="delete_btn_click"
+        <div class="delete-btn"  @click="delete_btn_click"
           v-if="staffPermissionIds.includes(6)">
-          <img src="@/assets/yonghu/icon4.png" alt="" style="margin-left: 8px" />
-          <span style="font-size: 20px; margin-left: 8px; color: #5a5a5a">删除</span>
+          <img src="@/assets/yonghu/icon4.png" alt="" />
+          <span>删除</span>
         </div>
-        <div class="command-btn" style="margin-left: 10px; width: 130px" :class="{ 'btn-single-only-disabled': multipleSelection.length !== 1 }" @click="multipleSelection.length === 1 && handleCommand()">
-          <img src="@/assets/yonghu/icon5.png" alt="" style="margin-left: 8px" />
-          <span style="font-size: 20px; margin-left: 8px; color: #5a5a5a">命令下发</span>
+        <div class="command-btn" :class="{ 'btn-single-only-disabled': multipleSelection.length !== 1 }" @click="multipleSelection.length === 1 && handleCommand()">
+          <img src="@/assets/yonghu/icon5.png" alt="" />
+          <span>命令下发</span>
         </div>
-        <div class="command-btn" style="margin-left: 5px; width: 120px" @click="valveOpen_dialogFormVisible = true"
+        <div class="command-btn" @click="valveOpen_dialogFormVisible = true"
           v-if="staffPermissionIds.includes(7)">
-          <img src="@/assets/yonghu/icon18.png" alt="" style="margin-left: 8px; margin-top: 3px" />
-          <span style="font-size: 20px; margin-left: 8px; color: #5a5a5a">开阀设置</span>
+          <img src="@/assets/yonghu/icon18.png" alt="" />
+          <span>开阀设置</span>
         </div>
-        <div class="command-btn" style="margin-left: 5px; width: 120px" @click="valve_dialogFormVisible = true"
+        <div class="command-btn" @click="valve_dialogFormVisible = true"
           v-if="staffPermissionIds.includes(8)">
-          <img src="@/assets/yonghu/icon17.png" alt="" style="margin-left: 8px; margin-top: 3px" />
-          <span style="font-size: 20px; margin-left: 8px; color: #5a5a5a">关阀设置</span>
+          <img src="@/assets/yonghu/icon17.png" alt="" />
+          <span>关阀设置</span>
         </div>
-        <div class="recharge-btn" style="margin-left: 5px; width: 130px" :class="{ 'btn-single-only-disabled': multipleSelection.length !== 1 }" @click="multipleSelection.length === 1 && change_balance_btn_click()"
+        <div class="recharge-btn" :class="{ 'btn-single-only-disabled': multipleSelection.length !== 1 }" @click="multipleSelection.length === 1 && change_balance_btn_click()"
           v-if="staffPermissionIds.includes(9)">
-          <img src="@/assets/yonghu/icon20.png" alt="" style="margin-left: 8px" />
-          <span style="font-size: 20px; margin-left: 8px; color: #5a5a5a">余额调整</span>
+          <img src="@/assets/yonghu/icon20.png" alt="" />
+          <span>余额调整</span>
         </div>
-        <div class="recharge-btn" style="margin-left: 5px" :class="{ 'btn-single-only-disabled': multipleSelection.length !== 1 }" @click="multipleSelection.length === 1 && recharge_btn_click()"
+        <div class="recharge-btn" :class="{ 'btn-single-only-disabled': multipleSelection.length !== 1 }" @click="multipleSelection.length === 1 && recharge_btn_click()"
           v-if="staffPermissionIds.includes(10)">
-          <img src="@/assets/yonghu/icon6.png" alt="" style="margin-left: 8px" />
-          <span style="font-size: 20px; margin-left: 8px; color: #5a5a5a">充值</span>
+          <img src="@/assets/yonghu/icon6.png" alt="" />
+          <span>充值</span>
         </div>
-        <div class="recharge-record-btn" style="margin-left: 5px; width: 160px" @click="recharge_record_btn_click"
-          v-if="staffPermissionIds.includes(11)">
-          <img src="@/assets/yonghu/icon7.png" alt="" style="margin-left: 8px" />
-          <span style="font-size: 20px; margin-left: 8px; color: #5a5a5a">充值记录查询</span>
-        </div>
-        <div class="water-meter-btn" style="margin-left: 5px" :class="{ 'btn-single-only-disabled': multipleSelection.length !== 1 }" @click="multipleSelection.length === 1 && change_btn_click()"
+        <div class="water-meter-btn" :class="{ 'btn-single-only-disabled': multipleSelection.length !== 1 }" @click="multipleSelection.length === 1 && change_btn_click()"
           v-if="staffPermissionIds.includes(13)">
-          <img src="@/assets/yonghu/icon8.png" alt="" style="margin-left: 8px" />
-          <span style="font-size: 20px; margin-left: 8px; color: #5a5a5a">换表</span>
+          <img src="@/assets/yonghu/icon8.png" alt="" />
+          <span>换表</span>
         </div>
-        <div class="water-meter-record-btn" style="margin-left: 5px; width: 160px" @click="change_record_btn_click"
+        <div class="recharge-record-btn" @click="recharge_record_btn_click"
+          v-if="staffPermissionIds.includes(11)">
+          <img src="@/assets/yonghu/icon7.png" alt="" />
+          <span>充值记录查询</span>
+        </div>
+        <div class="water-meter-record-btn" @click="change_record_btn_click"
           v-if="staffPermissionIds.includes(14)">
-          <img src="@/assets/yonghu/icon9.png" alt="" style="margin-left: 8px" />
-          <span style="font-size: 20px; margin-left: 8px; color: #5a5a5a">换表记录查询</span>
+          <img src="@/assets/yonghu/icon9.png" alt="" />
+          <span>换表记录查询</span>
         </div>
-        <!-- <div class="export-out-btn" style="margin-left: 5px; width: 110px" @click="download">
-          <img src="@/assets/yonghu/icon1.png" alt="" style="margin-left: 7px" />
-          <span style="font-size: 16px; margin-left: 10px; color: #5a5a5a">模板下载</span>
+        <div class="export-out-btn" @click="exportExcel">
+          <img src="@/assets/yonghu/icon1.3.png" alt="" />
+          <span>导出</span>
         </div>
-        <div class="export-in-btn" style="margin-left: 5px" @click="triggerFileInput">
-          <img src="@/assets/yonghu/icon1.png" alt="" style="margin-left: 7px" />
-          <span style="font-size: 16px; margin-left: 5px; color: #5a5a5a">导入</span>
-          <input ref="fileInput" type="file" accept=".xls,.xlsx" style="display: none" @change="exportIn" />
-        </div> -->
-        <div class="export-out-btn" style="margin-left: 5px" @click="exportExcel">
-          <img src="@/assets/yonghu/icon2.png" alt="" style="margin-left: 7px" />
-          <span style="font-size: 20px; margin-left: 10px; color: #5a5a5a">导出</span>
+        <div class="export-out-btn" @click="common_meter_template_click">
+          <img src="@/assets/yonghu/icon1.png" alt="" />
+          <span>普表用水量模板下载</span>
         </div>
-        <div class="export-out-btn" style="margin-left: 5px; width: 220px" @click="common_meter_template_click">
-          <img src="@/assets/yonghu/icon1.png" alt="" style="margin-left: 7px" />
-          <span style="font-size: 20px; margin-left: 10px; color: #5a5a5a">普表用水量模板下载</span>
-        </div>
-        <div class="export-in-btn" style="margin-left: 5px; width: 220px" @click="triggerCommonMeterImport">
-          <img src="@/assets/yonghu/icon2.png" alt="" style="margin-left: 7px" />
-          <span style="font-size: 20px; margin-left: 5px; color: #5a5a5a">普表用水量信息导入</span>
+        <div class="export-in-btn" @click="triggerCommonMeterImport">
+          <img src="@/assets/yonghu/icon2.png" alt="" />
+          <span>普表用水量信息导入</span>
           <input ref="commonMeterInput" type="file" accept=".xls,.xlsx" style="display: none"
             @change="common_meter_click" />
         </div>
-        <div class="export-in-btn" style="margin-left: 5px; width: 220px" @click="multi_edit_meter_price">
-          <img src="@/assets/jiage/icon3.png" alt="" style="margin-left: 7px" />
-          <span style="font-size: 20px; margin-left: 5px; color: #5a5a5a">批量修改水价类型</span>
+        <div class="export-in-btn" @click="multi_edit_meter_price">
+          <img src="@/assets/jiage/icon3.png" alt="" />
+          <span>批量修改水价类型</span>
         </div>
-
-        <div class="reflush" style="margin-left: 5px" @click="reflush">
+        <div class="reflush" @click="reflush">
           <img src="@/assets/yonghu/icon15.png" alt="" />
         </div>
       </div>
@@ -1737,17 +1723,13 @@ export default {
   display: flex;
   align-items: center;
   width: 100%;
-  height: 80px;
-  /* margin-top: 20px; */
-  margin-bottom: 20px;
+  height: auto;
+  margin-bottom: 0px;
   position: absolute;
-  top: 20px;
+  top: 18px;
+  padding-left: 20px;
+  gap: 10px;
   flex-wrap: wrap;
-  /* 允许换行 */
-}
-
-.command-box>* {
-  margin-right: 15px;
 }
 
 .add-btn,
@@ -1761,17 +1743,44 @@ export default {
 .export-out-btn {
   display: flex;
   align-items: center;
-  width: 80px;
-  /* 设置按钮的宽度 */
-  height: 40px;
-  /* 设置按钮的高度 */
-  color: white;
+  justify-content: center;
+  width: auto;
+  min-width: 60px;
+  height: 38px;
+  padding: 0 12px;
+  color: #5a5a5a;
   border-radius: 5px;
   cursor: pointer;
   transition: all 0.3s;
   font-size: 18px;
   background-color: #fff;
   border: 2px solid #f2f2f2;
+}
+
+.add-btn img,
+.delete-btn img,
+.command-btn img,
+.recharge-btn img,
+.recharge-record-btn img,
+.water-meter-btn img,
+.water-meter-record-btn img,
+.export-in-btn img,
+.export-out-btn img {
+  margin-right: 6px;
+  flex-shrink: 0;
+}
+
+.add-btn span,
+.delete-btn span,
+.command-btn span,
+.recharge-btn span,
+.recharge-record-btn span,
+.water-meter-btn span,
+.water-meter-record-btn span,
+.export-in-btn span,
+.export-out-btn span {
+  color: #5a5a5a;
+  white-space: nowrap;
 }
 
 .reflush {
@@ -1779,23 +1788,20 @@ export default {
   align-items: center;
   justify-content: center;
   width: 35px;
-  /* 设置按钮的宽度 */
-  height: 32px;
-  /* 设置按钮的高度 */
-  color: white;
+  height: 35px;
   border-radius: 5px;
   cursor: pointer;
   transition: all 0.3s;
-  font-size: 18px;
   background-color: #fff;
   border: 2px solid #f2f2f2;
+  flex-shrink: 0;
 }
 
 .user-list {
   width: 100%;
-  height: calc(100% - 190px);
+  height: calc(100% - 150px);
   display: flex;
-  margin-top: 15px;
+  margin-top: 8px;
 }
 
 .quyu-box {

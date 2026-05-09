@@ -61,7 +61,7 @@
 
     <div class="tool-bar">
       <div class="export-btn" @click="exportExcel">
-        <img src="@/assets/yonghu/icon2.png" alt="" />
+        <img src="@/assets/yonghu/icon1.3.png" alt="" />
         <span>导出</span>
       </div>
       <div class="refresh-btn" @click="handleRefresh">
