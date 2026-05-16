@@ -4,7 +4,7 @@
       <div class="info-side">
         <div class="info-card user-info-card">
           <div class="card-title">用户信息</div>
-          <!-- 账单记录 tab: 余额 + 消费总额 并列 -->
+          <!-- 扣费记录 tab: 余额 + 消费总额 并列 -->
           <div v-if="activeTab === 'bill'" class="stats-row">
             <div class="stat-item">
               <div class="stat-circle yellow-circle">¥</div>
@@ -142,10 +142,10 @@ export default {
       meterTotalWater: 0,
       activeTab: "bill",
       tabs: [
-        { name: "账单记录", type: "bill" },
-        { name: "交易记录", type: "transaction" },
+        { name: "扣费记录", type: "bill" },
+        { name: "充值记录", type: "transaction" },
         { name: "抄表记录", type: "meter" },
-        { name: "指令通讯记录", type: "command" },
+        { name: "命令下发记录", type: "command" },
         // { name: "操作历史", type: "operation" }
       ]
     };
@@ -438,14 +438,14 @@ export default {
   align-items: center;
   gap: 8px;
   padding: 10px 20px;
-  background: linear-gradient(135deg, #29aa00 0%, #29aa00 100%);
+  background: linear-gradient(135deg, #66b1ff 0%, #409EFF 55%, #2589f5 100%);
   color: #fff;
   border: none;
   border-radius: 6px;
   cursor: pointer;
   font-size: 20px;
   font-weight: bold;
-  box-shadow: 0 3px 10px rgba(238, 90, 111, 0.3);
+  box-shadow: 0 6px 16px rgba(64, 158, 255, 0.28);
   transition: all 0.3s;
 }
 
@@ -456,9 +456,9 @@ export default {
 }
 
 .back-btn:hover {
-  background: linear-gradient(135deg, #6FBF4C 0%, #6FBF4C 100%);
+  background: linear-gradient(135deg, #79bbff 0%, #53a8ff 55%, #409EFF 100%);
   transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(238, 90, 111, 0.4);
+  box-shadow: 0 8px 20px rgba(64, 158, 255, 0.36);
 }
 
 .back-btn:active {
@@ -474,7 +474,7 @@ export default {
   overflow: hidden;
 }
 
-/* 账单记录容器样式 */
+/* 扣费记录容器样式 */
 .bill-table-container {
   display: flex;
   flex-direction: column;

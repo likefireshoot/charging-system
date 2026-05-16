@@ -76,12 +76,14 @@
         >
           <el-table-column type="selection" :selectable="selectable" :width="selectionWidth" align="center" />
           <el-table-column property="theId" label="序号" :width="indexWidth" align="center" />
+          <el-table-column property="displayUserId" label="用户号" :width="userIdWidth" align="center" />
           <el-table-column property="meterCode" label="表号" :width="biaohaoWidth" align="center" />
           <el-table-column property="commandType" label="通讯类别" :width="tongxunleibieWidth" align="center" />
           <el-table-column property="commandStatus" label="通讯状态" :width="tongxunzhaungtaiWidth" align="center" />
           <el-table-column property="createTime" label="通讯下发时间" :width="timeWidth" align="center" />
           <el-table-column property="finishTime" label="通讯完成时间" :width="timeWidth" align="center" />
           <el-table-column property="meterVendor" label="厂商" :width="changshangWidth" align="center" />
+          <el-table-column property="displayStaffName" label="下发员工" :width="staffNameWidth" align="center" />
           <el-table-column property="description" label="描述" :width="descriptionWidth" align="center" />
         </el-table>
       </div>
@@ -142,6 +144,8 @@ export default {
       selectionWidth: 0,
       indexWidth: 0,
       biaohaoWidth: 0,
+      userIdWidth: 0,
+      staffNameWidth: 0,
       tongxunleibieWidth: 0,
       tongxunzhaungtaiWidth: 0,
       timeWidth: 0,
@@ -170,12 +174,14 @@ export default {
       return {
         selection: 3,
         index: 5,
-        biao_hao: 10,
+        biao_hao: 9,
+        userId: 8,
+        staffName: 8,
         tongxunleibie: 7,
         tongxunzhaungtai: 8,
         time: 10,
         changshang: 7,
-        description: 40,
+        description: 25,
       };
     },
   },
@@ -213,6 +219,8 @@ export default {
         this.selectionWidth = (this.columnPercentages.selection / 100) * parentWidth;
         this.indexWidth = (this.columnPercentages.index / 100) * parentWidth;
         this.biaohaoWidth = (this.columnPercentages.biao_hao / 100) * parentWidth;
+        this.userIdWidth = (this.columnPercentages.userId / 100) * parentWidth;
+        this.staffNameWidth = (this.columnPercentages.staffName / 100) * parentWidth;
         this.tongxunleibieWidth = (this.columnPercentages.tongxunleibie / 100) * parentWidth;
         this.tongxunzhaungtaiWidth = (this.columnPercentages.tongxunzhaungtai / 100) * parentWidth;
         this.timeWidth = (this.columnPercentages.time / 100) * parentWidth;
@@ -238,6 +246,16 @@ export default {
           .catch((error) => {
             console.error(error);
           });
+    },
+    formatUserId(userId) {
+      if (userId === null || userId === undefined || userId === "") {
+        return "";
+      }
+      const numericUserId = Number(userId);
+      if (Number.isNaN(numericUserId)) {
+        return userId;
+      }
+      return numericUserId % 10000000;
     },
     getCommandLogsData() {
       let params = {
@@ -272,6 +290,8 @@ export default {
             if (response.code === 200) {
               response.data.records.map((v, i) => {
                 v.theId = this.params.pageSize * (response.data.current - 1) + i + 1;
+                v.displayUserId = this.formatUserId(v.userId);
+                v.displayStaffName = v.sendStaffName || "";
               });
               this.total = response.data.total;
               this.commandLogData = response.data.records;
@@ -306,6 +326,8 @@ export default {
             if (response.code === 200) {
               response.data.records.map((v, i) => {
                 v.theId = this.params.pageSize * (response.data.current - 1) + i + 1;
+                v.displayUserId = this.formatUserId(v.userId);
+                v.displayStaffName = v.sendStaffName || "";
               });
               this.total = response.data.total;
               this.params.pageNum = 1;
