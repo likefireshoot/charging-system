@@ -3,17 +3,21 @@
     <div class="search-box">
       <div class="search-content">
         <!-- 当companyId为1时，代表是荆州的水厂，所以能查询company -->
-        <!-- <div class="search-input" style="margin-left: 10px" v-if="companyId === 1">
+        <div class="search-input" style="margin-left: 10px" v-if="companyId === 1">
           <span>所属水厂</span>
           <el-select v-model="params.company" placeholder="请选择所属水厂">
             <el-option v-for="item in companyList" :key="item.id" :value="item.id" :label="item.name"></el-option>
           </el-select>
-        </div> -->
+        </div>
         <div class="search-input" style="margin-left: 10px">
           <span>所属厂商</span>
           <el-select v-model="params.meterVendor" placeholder="请选择">
             <el-option v-for="item in changshang_list" :key="item.id" :label="item.label" :value="item.label"></el-option>
           </el-select>
+        </div>
+        <div class="search-input" style="margin-left: 10px">
+          <span>用户号</span>
+          <el-input v-model="params.userId" placeholder="请输入..." />
         </div>
         <div class="search-input" style="margin-left: 10px">
           <span>表号</span>
@@ -112,6 +116,9 @@ export default {
         meterCode: null, // 表号
         time: null, // 通讯下发时间
         meterVendor: null, // 所属厂商
+        userId: null, // 用户号
+        company: null, // 所属水厂
+        companyId: null, // 所属水厂ID
       },
       companyId: JSON.parse(sessionStorage.getItem("userData")).companyId, // 所属水厂ID
       companyList: [],
@@ -197,7 +204,7 @@ export default {
       this.resizeObserver.observe(this.parentContainer);
     }
     this.getCommandLogsData();
-    // this.getCompanyList();
+    this.getCompanyList();
   },
   beforeUnmount() {
     // 组件卸载时取消监听
@@ -247,6 +254,12 @@ export default {
             console.error(error);
           });
     },
+    getEffectiveCompanyId() {
+      if (this.companyId === 1) {
+        return this.params.company || null;
+      }
+      return this.companyId;
+    },
     formatUserId(userId) {
       if (userId === null || userId === undefined || userId === "") {
         return "";
@@ -264,7 +277,9 @@ export default {
         commandStatus: this.params.commandStatus,
         commandType: this.params.commandType,
         meterCode: this.params.meterCode,
+        userId: this.params.userId,
         meterVendor: this.params.meterVendor,
+        companyId: this.getEffectiveCompanyId(),
         sendTimeStartAt: this.params.time ? this.params.time[0] : null,
         sendTimeEndAt: this.params.time ? this.params.time[1] : null,
       };
@@ -305,6 +320,10 @@ export default {
           });
     },
     search() {
+      if (this.params.pageNum !== 1) {
+        this.params.pageNum = 1;
+        return;
+      }
       this.getCommandLogsData();
     },
     clear() {
@@ -313,32 +332,17 @@ export default {
       this.params.commandType = null;
       this.params.time = null;
       this.params.meterVendor = null;
+      this.params.userId = null;
+      this.params.company = null;
+      this.params.companyId = null;
     },
     reflush() {
       this.clear();
-      let params = {
-        pageNum: 1,
-        pageSize: 50,
-      };
-      service
-          .post("/command/queryCommandRecord", params)
-          .then((response) => {
-            if (response.code === 200) {
-              response.data.records.map((v, i) => {
-                v.theId = this.params.pageSize * (response.data.current - 1) + i + 1;
-                v.displayUserId = this.formatUserId(v.userId);
-                v.displayStaffName = v.sendStaffName || "";
-              });
-              this.total = response.data.total;
-              this.params.pageNum = 1;
-              this.commandLogData = response.data.records;
-            } else {
-              ElMessage.error(response.msg);
-            }
-          })
-          .catch((error) => {
-            ElMessage.error(error);
-          });
+      if (this.params.pageNum !== 1) {
+        this.params.pageNum = 1;
+        return;
+      }
+      this.getCommandLogsData();
     },
   },
 };
