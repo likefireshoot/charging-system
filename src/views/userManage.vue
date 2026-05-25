@@ -451,6 +451,7 @@ export default {
 
       // ****** 请求锁，避免重复请求 ******
       isLoading: false,
+      listRequestSeq: 0,
     };
   },
   watch: {
@@ -568,8 +569,9 @@ export default {
       }
       return queryString;
     },
-    fetchUserList(page = this.currentPage || 1) {
-      if (this.isLoading) return;
+    fetchUserList(page = this.currentPage || 1, options = {}) {
+      if (this.isLoading && !options.force) return;
+      const requestSeq = ++this.listRequestSeq;
       this.isLoading = true;
       this.syncCompanyIdParam();
       const nonEmptyParams = this.filterNonEmptyParams(this.param);
@@ -585,6 +587,7 @@ export default {
           },
         })
         .then((response) => {
+          if (requestSeq !== this.listRequestSeq) return;
           if (response.code === 200) {
             this.yonghuData = response.data.userInfoData;
             this.yonghuData.forEach((item) => {
@@ -599,11 +602,14 @@ export default {
           }
         })
         .catch((error) => {
-          const errorMessage = error.response?.data?.msg || "璇锋眰鍙戠敓閿欒";
+          if (requestSeq !== this.listRequestSeq) return;
+          const errorMessage = error.response?.data?.msg || "请求发生错误!!";
           ElMessage.error(errorMessage);
         }).finally(() => {
           // ✅ finally 放在最后，无论成功/失败，都会执行
-          this.isLoading = false;
+          if (requestSeq === this.listRequestSeq) {
+            this.isLoading = false;
+          }
         });
     },
     multi_edit_meter_price() {
@@ -1478,11 +1484,8 @@ export default {
     handleNodeClick(data) {
       this.quyu_selected = data;
       console.log(this.quyu_selected);
-      if (this.currentPage !== 1) {
-        this.currentPage = 1;
-        return;
-      }
-      this.fetchUserList(1);
+      this.currentPage = 1;
+      this.fetchUserList(1, { force: true });
     },
     getUserInfo() {
       this.param.order = this.getOrderValue(this.sortField, this.sortOrder);
@@ -1514,19 +1517,13 @@ export default {
           this.$refs.treeRef.setCurrentKey(null);
         }
         this.quyu_selected = null;
-        if (this.currentPage !== 1) {
-          this.currentPage = 1;
-          return;
-        }
-        this.fetchUserList(1);
+        this.currentPage = 1;
+        this.fetchUserList(1, { force: true });
       }
     },
     search() {
-      if (this.currentPage !== 1) {
-        this.currentPage = 1;
-        return;
-      }
-      this.fetchUserList(1);
+      this.currentPage = 1;
+      this.fetchUserList(1, { force: true });
     },
   },
 };
