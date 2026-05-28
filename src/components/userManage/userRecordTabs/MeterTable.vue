@@ -86,9 +86,10 @@
           <template #default="scope">
             <div class="meter-code-cell">
               <span class="meter-code-text">{{ scope.row.meterCode || "-" }}</span>
-              <span :class="['meter-status', isCurrentMeter(scope.row) ? 'current' : 'history']">
+              <!-- 已改为按表号切换查询，不再需要区分当前表/历史表 -->
+              <!-- <span :class="['meter-status', isCurrentMeter(scope.row) ? 'current' : 'history']">
                 {{ isCurrentMeter(scope.row) ? "当前表" : "历史表" }}
-              </span>
+              </span> -->
             </div>
           </template>
         </el-table-column>
@@ -149,6 +150,12 @@ export default {
   },
   watch: {
     "user.userId"(newVal, oldVal) {
+      if (newVal && newVal !== oldVal) {
+        this.currentPage = 1;
+        this.fetchMeterRecords();
+      }
+    },
+    "user.meterCode"(newVal, oldVal) {
       if (newVal && newVal !== oldVal) {
         this.currentPage = 1;
         this.fetchMeterRecords();
