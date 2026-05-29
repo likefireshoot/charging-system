@@ -218,9 +218,8 @@ export default {
 }
 
 .valve-dialog-content {
-  width: 90%;
-  max-width: 1300px;
-  max-height: 85vh;
+  width: 60%;
+  height: 98%;
   border: 1px solid #fafafa;
   background-color: #fafafa;
   border-radius: 5px;
@@ -302,7 +301,9 @@ export default {
   border-radius: 6px;
   padding: 18px 20px;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  align-items: center; /* 垂直居中 */
+  justify-content: space-between; /* 文字靠左，选择框靠右 */
   gap: 12px;
 }
 
@@ -313,7 +314,8 @@ export default {
 }
 
 .method-select {
-  width: 100%;
+  width: 40%;
+  margin-left: 10px;
   height: 40px;
   font-size: 18px;
   padding: 0 10px;

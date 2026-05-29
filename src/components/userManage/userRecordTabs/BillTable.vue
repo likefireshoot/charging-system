@@ -60,6 +60,15 @@
     </div>
 
     <div class="tool-bar">
+      <div class="export-btn" @click="downloadTemplate" v-if="staffPermissionIds.includes(54)">
+        <img src="@/assets/yonghu/icon1.png" alt="" />
+        <span>历史数据导⼊模版下载</span>
+      </div>
+      <div class="export-btn" @click="triggerFileInput" v-if="staffPermissionIds.includes(54)">
+        <img src="@/assets/yonghu/icon2.png" alt="" />
+        <span>历史数据导⼊</span>
+        <input ref="fileInput" type="file" accept=".xls,.xlsx" style="display: none" @change="handleImport" />
+      </div>
       <div class="export-btn" @click="exportExcel">
         <img src="@/assets/yonghu/icon1.3.png" alt="" />
         <span>导出</span>
@@ -137,6 +146,8 @@ export default {
       total: 0,
       currentPage: 1,
       pageSize: 30,
+      staffPermissionIds: JSON.parse(sessionStorage.getItem("userData") || "{}").staffPermissionIds || [],
+      token: JSON.parse(sessionStorage.getItem("userData") || "{}").token || "",
       searchParams: {
         // chargeType: "", // 扣费类型 - 暂时注释
         timeType: "day",
@@ -156,6 +167,90 @@ export default {
     }
   },
   methods: {
+    // 导出模板
+    downloadTemplate() {
+      axios({
+        url: "/import/importChargeTemplate",
+        method: "GET",
+        responseType: "blob",
+        headers: {
+          Authorization: this.token
+        }
+      })
+        .then((response) => {
+          if (response.status !== 200) {
+            throw new Error("下载失败: " + response.statusText);
+          }
+
+          const blob = new Blob([response.data], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+          const link = document.createElement("a");
+          link.href = window.URL.createObjectURL(blob);
+          link.download = "历史扣费数据导⼊模版下载.xlsx";
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          window.URL.revokeObjectURL(link.href);
+        })
+        .catch((error) => {
+          console.error("下载失败:", error);
+          ElMessage.error("下载失败: " + error.message);
+        });
+    },
+
+    // 触发文件选择
+    triggerFileInput() {
+      this.$refs.fileInput.value = "";
+      this.$refs.fileInput.click();
+    },
+
+// 导入文件
+    async handleImport() {
+      const fileInput = this.$refs.fileInput;
+      const file = fileInput.files[0];
+
+      if (!file) {
+        ElMessage.warning("请选择要上传的文件");
+        return;
+      }
+
+      const allowedTypes = ["application/vnd.ms-excel", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"];
+      if (!allowedTypes.includes(file.type)) {
+        ElMessage.warning("仅支持上传 .xls 或 .xlsx 文件");
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("companyId", this.user.companyId);
+
+      try {
+        const response = await service.post("/import/importChargeRecord", formData, { responseType: "blob" });
+        const blob = new Blob([response.data], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+
+        if (blob.size === 0) {
+          ElMessage.success("导入成功");
+          fileInput.value = "";
+          this.handleRefresh();
+          return;
+        }
+
+        ElMessage.warning("部分数据导入失败，等待下载失败列表");
+        const link = document.createElement("a");
+        link.href = window.URL.createObjectURL(blob);
+        link.download = "扣费记录导入失败列表.xlsx";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(link.href);
+        fileInput.value = "";
+        this.handleRefresh();
+      } catch (error) {
+        const errorMessage = error.response?.data?.message || error.message || "未知错误";
+        ElMessage.error("导入失败: " + errorMessage);
+        console.error("上传失败:", error);
+      }
+    },
+
     buildQueryParams() {
       let params = {
         userId: this.user.userId,

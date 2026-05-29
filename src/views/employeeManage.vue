@@ -50,6 +50,10 @@
           <img src="@/assets/yuangong/icon6.png" alt="" style="margin-left: 8px" />
           <span style="font-size: 20px; margin-left: 10px; color: #5a5a5a">新增区域</span>
         </div>
+        <div class="add-btn" style="width: 130px; margin-left: 10px" @click="addStaff_dialogFormVisible = true" v-if="staffPermissionIds.includes(52)">
+          <img src="@/assets/yuangong/icon6.png" alt="" style="margin-left: 8px" />
+          <span style="font-size: 20px; margin-left: 10px; color: #5a5a5a">新增员工</span>
+        </div>
         <div class="add-btn" style="width: 130px; margin-left: 10px" @click="edit_company_block = true"
              v-if="staffPermissionIds.includes(40) && companyId == 1">
           <img src="@/assets/yuangong/icon6.png" alt="" style="margin-left: 8px" />
@@ -345,6 +349,78 @@
 
       </div>
     </div>
+
+    <!-- 新增员工弹窗 -->
+    <div class="add-employee-dialog" v-if="addStaff_dialogFormVisible">
+      <div class="add-employee-dialog-content">
+        <div class="title">
+          <div style="margin-left: 10px; display: flex; align-items: center">
+            <img src="@/assets/fapiao/icon8.png" alt="" style="margin-right: 10px" />
+            <span style="font-size: 20px">新增员工</span>
+          </div>
+          <div style="margin-right: 10px; cursor: pointer" @click="addStaff_dialogFormVisible = false">
+            <img src="@/assets/close.png" alt="" />
+          </div>
+        </div>
+        <div class="add-content" style="flex-wrap: wrap; align-items: flex-start; padding-top: 20px;">
+          <!-- 所属水厂（仅总水厂显示） -->
+          <div class="add-input" v-if="companyId === 1" style="margin-right: 7%; margin-bottom: 15px">
+            <span>所属水厂</span>
+            <el-select v-model="addStaffForm.companyId" placeholder="请选择所属水厂">
+              <el-option v-for="item in companyList" :key="item.id" :label="item.name" :value="item.id"></el-option>
+            </el-select>
+          </div>
+          <!-- 子水厂自动赋值本厂ID -->
+          <div class="add-input" v-else style="margin-right: 7%; margin-bottom: 15px">
+            <span>所属水厂</span>
+            <el-input :value="companyList.find(c => c.id === companyId)?.name" disabled />
+          </div>
+
+          <div class="add-input" style="margin-bottom: 15px">
+            <span>员工名称</span>
+            <el-input v-model="addStaffForm.staffName" placeholder="请输入员工名称" />
+          </div>
+          <div class="add-input" style="margin-right: 7%; margin-bottom: 15px">
+            <span>用户账号</span>
+            <el-input v-model="addStaffForm.account" placeholder="请输入用户账号" />
+          </div>
+          <div class="add-input"style="margin-bottom: 15px">
+            <span>用户密码</span>
+            <el-input v-model="addStaffForm.password" type="password" placeholder="请输入用户密码" />
+          </div>
+          <div class="add-input" style="margin-right: 7%; margin-bottom: 15px">
+            <span>手机号</span>
+            <el-input v-model="addStaffForm.staffPhone" placeholder="请输入手机号" />
+          </div>
+          <div class="add-input" style="margin-bottom: 15px">
+            <span>员工地址</span>
+            <el-input v-model="addStaffForm.staffAddr" placeholder="请输入员工地址" />
+          </div>
+          <div class="add-input" style="margin-right: 7%; margin-bottom: 15px">
+            <span>员工职位</span>
+            <el-select v-model="addStaffForm.staffPostsId" placeholder="请选择职位">
+              <el-option v-for="item in postsList" :key="item.id" :label="item.name" :value="item.value"></el-option>
+            </el-select>
+          </div>
+          <div class="add-input" style="margin-bottom: 15px">
+            <span>权限角色</span>
+            <el-select v-model="addStaffForm.staffCharacterId" placeholder="请选择权限角色">
+              <el-option v-for="item in rolesList" :key="item.id" :label="item.name" :value="item.id"></el-option>
+            </el-select>
+          </div>
+        </div>
+        <div class="btn">
+          <div class="confirm-btn" @click="addStaffConfirm">
+            <el-icon style="margin-left: 15%"><Check /></el-icon>
+            <span style="font-size: 20px; margin-left: 15%">确认</span>
+          </div>
+          <div class="cancel-btn" @click="addStaff_dialogFormVisible = false">
+            <el-icon style="margin-left: 15%; color: #45ba7e"><Close /></el-icon>
+            <span style="font-size: 20px; margin-left: 15%; color: #5a5a5a">取消</span>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -447,7 +523,21 @@ export default {
       flag: 0,
 
       // ****** 锁
-      isLoading: false
+      isLoading: false,
+
+      // 新增员工弹窗控制
+      addStaff_dialogFormVisible: false,
+      // 新增员工表单数据
+      addStaffForm: {
+        staffName: "",
+        account: "",
+        password: "",
+        staffPhone: "",
+        staffAddr: "",
+        staffPostsId: null, // 职位：1=经理, 0=员工
+        staffCharacterId: null, // 权限角色ID
+        companyId: null // 所属水厂ID
+      }
     };
   },
   watch: {
@@ -532,6 +622,73 @@ export default {
     }
   },
   methods: {
+    // 新增员工函数
+    async addStaffConfirm() {
+      const validations = [
+        { condition: !this.addStaffForm.companyId, message: "所属水厂不能为空" },
+        { condition: !this.addStaffForm.staffName?.trim(), message: "员工名称不能为空" },
+        { condition: !this.addStaffForm.account?.trim(), message: "用户账号不能为空" },
+        { condition: !this.addStaffForm.password?.trim(), message: "用户密码不能为空" },
+        { condition: !this.addStaffForm.staffPhone?.trim(), message: "手机号不能为空" },
+        { condition: !/^1[3-9]\d{9}$/.test(this.addStaffForm.staffPhone), message: "手机号格式不正确" },
+        { condition: !this.addStaffForm.staffAddr?.trim(), message: "员工地址不能为空" },
+        { condition: this.addStaffForm.staffPostsId === null, message: "请选择员工职位" },
+        { condition: this.addStaffForm.staffCharacterId === null, message: "请选择权限角色" }
+      ];
+
+      for (const v of validations) {
+        if (v.condition) {
+          ElMessage.error(v.message);
+          return;
+        }
+      }
+
+      // 2. 子水厂自动赋值本厂ID（防止前端篡改）
+      if (this.companyId !== 1) {
+        this.addStaffForm.companyId = this.companyId;
+      }
+
+      // 3. 提交请求（和你的staff表字段一一对应）
+      try {
+        const res = await service.post("/staff/addStaff", {
+          staffName: this.addStaffForm.staffName.trim(),
+          account: this.addStaffForm.account.trim(),
+          password: this.addStaffForm.password.trim(),
+          staffPhone: this.addStaffForm.staffPhone.trim(),
+          staffAddr: this.addStaffForm.staffAddr.trim(),
+          staffPostsId: this.addStaffForm.staffPostsId,
+          staffCharacterId: this.addStaffForm.staffCharacterId,
+          companyId: this.addStaffForm.companyId
+        });
+
+        if (res.code === 200) {
+          ElMessage.success("新增员工成功");
+          this.addStaff_dialogFormVisible = false;
+          // 4. 清空表单
+          this.resetAddStaffForm();
+          // 5. 刷新列表
+          this.reflush();
+        } else {
+          ElMessage.error(res.msg || "新增失败");
+        }
+      } catch (err) {
+        ElMessage.error("新增失败：" + (err.response?.data?.msg || err.message));
+      }
+    },
+// 重置表单
+    resetAddStaffForm() {
+      this.addStaffForm = {
+        staffName: "",
+        account: "",
+        password: "",
+        staffPhone: "",
+        staffAddr: "",
+        staffPostsId: null,
+        staffCharacterId: null,
+        companyId: this.companyId === 1 ? null : this.companyId
+      };
+    },
+
     // ****** 手动处理分页变化，避免 watch 循环 ******
     handlePageChange(page) {
       if (this.isLoading) return;
@@ -1309,7 +1466,8 @@ export default {
 /* 删除弹出框 */
 .add-dialog,
 .delete-dialog,
-.edit-dialog {
+.edit-dialog,
+.add-employee-dialog {
   position: fixed;
   top: 0;
   bottom: 0;
@@ -1322,7 +1480,8 @@ export default {
 
 .add-dialog-content,
 .delete-dialog-content,
-.edit-dialog-content-1 {
+.edit-dialog-content-1,
+.add-employee-dialog-content{
   width: 50%;
   background-color: #fafafa;
   border-radius: 5px;

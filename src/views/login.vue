@@ -34,7 +34,7 @@
           </li>
           <li>
             <div class="txt">
-              <a @click.stop="toggleRegister">注册</a>
+<!--              <a @click.stop="toggleRegister">注册</a>-->
               <a @click.stop="showForgetPassword" class="forget">忘记密码</a>
             </div>
           </li>
