@@ -53,13 +53,18 @@
           <img src="@/assets/fapiao/icon3.png" alt="" style="margin-left: 7px" />
           <span style="font-size: 16px; margin-left: 10px; color: #5a5a5a">导入</span>
         </div> -->
-        <div class="add-btn" style="margin-left: 10px; width: 130px" @click="add_dialogFormVisible = true" v-if="staffPermissionIds.includes(28)">
-          <img src="@/assets/yuangong/icon6.png" alt="" style="margin-left: 8px" />
-          <span style="font-size: 20px; margin-left: 10px; color: #5a5a5a">警告配置</span>
-        </div>
-        <div class="add-btn" style="margin-left: 10px; width: 170px" @click="get_dialogFormVisible = true">
-          <img src="@/assets/yuangong/icon5.png" alt="" style="margin-left: 8px" />
-          <span style="font-size: 20px; margin-left: 10px; color: #5a5a5a">获取警告配置</span>
+        <div class="config-display">
+          <div class="config-item" v-for="item in configItems" :key="item.key">
+            <span class="config-label">{{ item.label }}:</span>
+            <el-input
+              v-model="item.displayValue"
+              :disabled="!configEditMode"
+              :class="{ 'config-input-editable': configEditMode }"
+              class="config-input"
+            />
+          </div>
+          <el-checkbox v-model="configEditMode" class="config-checkbox">编辑</el-checkbox>
+          <div class="config-confirm-btn" v-if="configEditMode" @click="confirmEditConfig">确认</div>
         </div>
         <div class="export-out-btn" style="margin-left: 10px" @click="exportExcel">
           <img src="@/assets/yonghu/icon1.3.png" alt="" style="margin-left: 7px" />
@@ -119,7 +124,7 @@
               </template>
             </el-table-column>
 <!--            <el-table-column property="totalWater" label="读数" :width="totalWaterWidth" align="center" />-->
-            <el-table-column v-if="!showFrequentReportColumn" property="totalWater" label="读数" :width="totalWaterWidth" align="center" />
+            <el-table-column v-if="!showFrequentReportColumn && !showValveClosedIncreaseColumn" property="totalWater" label="读数" :width="totalWaterWidth" align="center" />
             <el-table-column v-if="showOweAmountColumn" property="valveStatus" label="阀门状态" :width="valveStatusWidth" align="center"/>
             <el-table-column v-if="showOweAmountColumn" property="qianfeiDays" label="欠费天数" :width="qianfeiDaysWidth" align="center" />
             <el-table-column v-if="showZeroUsageColumn" property="durationDays" label="0用量天数" :width="durationDaysWidth" align="center" />
@@ -132,6 +137,22 @@
             <!-- 水表频繁上报专用列 -->
             <el-table-column v-if="showFrequentReportColumn" property="dailyReportCount" label="当日上报次数" :width="reportCountWidth" align="center" />
             <el-table-column v-if="showFrequentReportColumn" property="meterVendor" label="厂商" :width="deviceVendorWidth" align="center" />
+            <!-- 关阀状态下水表吨数增加专用列 -->
+            <el-table-column v-if="showValveClosedIncreaseColumn" label="上次读数" :width="lastReadingWidth" align="center">
+              <template #default="{ row }">
+                {{ (row.tons != null && row.abnormalWaterDelta != null) ? (row.tons - row.abnormalWaterDelta).toFixed(2) : '' }}
+              </template>
+            </el-table-column>
+            <el-table-column v-if="showValveClosedIncreaseColumn" label="异常增加量" :width="abnormalIncreaseWidth" align="center">
+              <template #default="{ row }">
+                {{ row.abnormalWaterDelta != null ? row.abnormalWaterDelta : '' }}
+              </template>
+            </el-table-column>
+            <el-table-column v-if="showValveClosedIncreaseColumn" label="告警时读数" :width="alarmReadingWidth" align="center">
+              <template #default="{ row }">
+                {{ row.tons != null ? row.tons : '' }}
+              </template>
+            </el-table-column>
           </el-table>
         </div>
       </div>
@@ -143,74 +164,6 @@
       </div>
     </div>
 
-    <!-- 警告配置 -->
-    <div class="add-dialog" v-if="add_dialogFormVisible">
-      <div class="add-dialog-content">
-        <div class="title">
-          <div style="margin-left: 10px; display: flex; align-items: center">
-            <img src="@/assets/fapiao/icon8.png" alt="" style="margin-right: 10px" />
-            <span style="font-size: 20px">警告配置</span>
-          </div>
-          <div style="margin-right: 10px; cursor: pointer" @click="add_dialogFormVisible = false">
-            <img src="@/assets/close.png" alt="" />
-          </div>
-        </div>
-        <div class="add-content">
-          <div class="add-input">
-            <span>大用量额度（吨）</span>
-            <el-input v-model="warningProperty.amountQuota" placeholder="请输入..." />
-          </div>
-          <div class="add-input">
-            <span>数据持续未上报天数（天）</span>
-            <el-input v-model="warningProperty.delayDays" placeholder="请输入..." />
-          </div>
-        </div>
-        <div class="btn">
-          <div class="confirm-btn" @click="confirm">
-            <el-icon style="margin-left: 5%"><Check /></el-icon>
-            <span style="font-size: 20px; margin-left: 15%">确认</span>
-          </div>
-          <div class="cancel-btn" @click="add_dialogFormVisible = false">
-            <el-icon style="margin-left: 5%; color: #45ba7e"><Close /></el-icon>
-            <span style="font-size: 20px; margin-left: 15%; color: #5a5a5a">取消</span>
-          </div>
-        </div>
-      </div>
-    </div>
-    <!-- 获取警告配置 -->
-    <div class="add-dialog" v-if="get_dialogFormVisible">
-      <div class="add-dialog-content">
-        <div class="title">
-          <div style="margin-left: 10px; display: flex; align-items: center">
-            <img src="@/assets/fapiao/icon8.png" alt="" style="margin-right: 10px" />
-            <span style="font-size: 20px">警告配置</span>
-          </div>
-          <div style="margin-right: 10px; cursor: pointer" @click="get_dialogFormVisible = false">
-            <img src="@/assets/close.png" alt="" />
-          </div>
-        </div>
-        <div class="add-content">
-          <div class="add-input">
-            <span>大用量额度（吨）</span>
-            <el-input v-model="get_warningProperty.amountQuota" placeholder="请输入..." disabled />
-          </div>
-          <div class="add-input">
-            <span>数据持续未上报天数（天）</span>
-            <el-input v-model="get_warningProperty.delayDays" placeholder="请输入..." disabled />
-          </div>
-        </div>
-        <div class="btn">
-          <div class="confirm-btn" @click="get_dialogFormVisible = false">
-            <el-icon style="margin-left: 5%"><Check /></el-icon>
-            <span style="font-size: 20px; margin-left: 15%">确认</span>
-          </div>
-          <div class="cancel-btn" @click="get_dialogFormVisible = false">
-            <el-icon style="margin-left: 5%; color: #45ba7e"><Close /></el-icon>
-            <span style="font-size: 20px; margin-left: 15%; color: #5a5a5a">取消</span>
-          </div>
-        </div>
-      </div>
-    </div>
   </div>
 </template>
 
@@ -273,22 +226,23 @@ export default {
       deviceSignalWidth: 0,
       deviceVendorWidth: 0,
       reportCountWidth: 0,
+      lastReadingWidth: 0,
+      abnormalIncreaseWidth: 0,
+      alarmReadingWidth: 0,
       companyWidth: 0,
       // 父容器元素
       parentContainer: null,
       // ResizeObserver 实例
       resizeObserver: null,
 
-      add_dialogFormVisible: false,
-      get_dialogFormVisible: false,
-      warningProperty: {
-        amountQuota: null,
-        delayDays: null,
-      },
-      get_warningProperty: {
-        amountQuota: null,
-        delayDays: null,
-      },
+      // 警告配置参数展示
+      configItems: [
+        { label: '大用量额度（吨）', key: 'amountQuota', displayValue: '' },
+        { label: '最大持续未上报天数（天）', key: 'delayDays', displayValue: '' },
+        { label: '最大每日上报次数', key: 'maxDailyReportTimes', displayValue: '' },
+        { label: '最大零用量天数', key: 'maxDaysWithoutUsage', displayValue: '' },
+      ],
+      configEditMode: false,
 
       // ****** 锁
       isLoading: false,
@@ -320,23 +274,6 @@ export default {
         this.calculateColumnWidths();
       });
     },
-    get_dialogFormVisible() {
-      if (this.get_dialogFormVisible) {
-        service
-          .get("/warning/getWarningConfig")
-          .then((response) => {
-            if (response.code === 200) {
-              this.get_warningProperty.amountQuota = response.data.dailyWaterUsageLimit;
-              this.get_warningProperty.delayDays = response.data.maxDaysWithoutReport;
-            } else {
-              ElMessage.error(response.msg);
-            }
-          })
-          .catch((error) => {
-            ElMessage.error(error);
-          });
-      }
-    },
     "params.company"() {
       this.quyu_selected = null;
       this.region = "";
@@ -367,6 +304,9 @@ export default {
     },
     showFrequentReportColumn() {
       return (this.params.warningType || "").includes("水表频繁上报");
+    },
+    showValveClosedIncreaseColumn() {
+      return (this.params.warningType || "").includes("关阀");
     },
     warningTimeLabel() {
       if (this.showZeroUsageColumn) return "未用水起始时间";
@@ -472,6 +412,23 @@ export default {
           meterVendor: 8,
         };
       }
+      // 关阀状态下水表吨数增加
+      if (this.showValveClosedIncreaseColumn) {
+        return {
+          selection: 4,
+          id: 6,
+          userId: 7,
+          userName: 10,
+          address: 13,
+          phone: 9,
+          biaohao: 9,
+          warningTime: 12,
+          warningType: 9,
+          lastReading: 6,
+          abnormalIncrease: 7,
+          alarmReading: 8,
+        };
+      }
       return {
         selection: 4,
         id: 6,
@@ -547,6 +504,7 @@ export default {
     this.getCompanyList();
     this.getRegionData();
     this.getWaringData();
+    this.loadWarningConfig();
 
     // 恢复区域树节点选中状态（需等树渲染完成）
     if (this._restoring && this.quyu_selected) {
@@ -676,6 +634,9 @@ export default {
         this.deviceSignalWidth = p.deviceSignal ? (p.deviceSignal / 100) * w : 0;
         this.deviceVendorWidth = p.deviceVendor ? (p.deviceVendor / 100) * w : 0;
         this.reportCountWidth = p.reportCount ? (p.reportCount / 100) * w : 0;
+        this.lastReadingWidth = p.lastReading ? (p.lastReading / 100) * w : 0;
+        this.abnormalIncreaseWidth = p.abnormalIncrease ? (p.abnormalIncrease / 100) * w : 0;
+        this.alarmReadingWidth = p.alarmReading ? (p.alarmReading / 100) * w : 0;
       }
     },
     formatOweAmount(val) {
@@ -991,35 +952,48 @@ export default {
           ElMessage.error("导出失败: " + error.message);
         });
     },
-    confirm() {
-      const validations = [
-        {
-          condition: this.warningProperty.amountQuota === null,
-          message: "大用量额度不能为空",
-        },
-        {
-          condition: this.warningProperty.delayDays === null,
-          message: "数据持续未上报天数不能为空",
-        },
-        {
-          condition: isNaN(parseInt(this.warningProperty.delayDays)) || parseInt(this.warningProperty.delayDays) < 0,
-          message: "数据持续未上报天数必须为正整数",
-        },
-      ];
-
-      for (const validation of validations) {
-        if (validation.condition) {
-          ElMessage.error(validation.message);
+    loadWarningConfig() {
+      service
+        .get("/warning/getWarningConfig")
+        .then((response) => {
+          if (response.code === 200) {
+            this.configItems[0].displayValue = response.data.dailyWaterUsageLimit;
+            this.configItems[1].displayValue = response.data.maxDaysWithoutReport;
+            this.configItems[2].displayValue = response.data.maxDailyReportTimes;
+            this.configItems[3].displayValue = response.data.maxDaysWithoutUsage;
+          } else {
+            ElMessage.error(response.msg);
+          }
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+    },
+    confirmEditConfig() {
+      // 校验所有配置项均不为空
+      for (const item of this.configItems) {
+        if (item.displayValue === null || item.displayValue === '') {
+          ElMessage.error(item.label + '不能为空');
+          return;
+        }
+        const numVal = parseInt(item.displayValue);
+        if (isNaN(numVal) || numVal < 0) {
+          ElMessage.error(item.label + '必须为正整数');
           return;
         }
       }
+
+      const amountQuota = this.configItems[0].displayValue;
+      const delayDays = this.configItems[1].displayValue;
+      const maxDailyReportTimes = this.configItems[2].displayValue;
+      const maxDaysWithoutUsage = this.configItems[3].displayValue;
+
       service
-        .get(`/warning/setWarningConfig?amountQuota=${this.warningProperty.amountQuota}&delayDays=${this.warningProperty.delayDays}`)
+        .get(`/warning/setWarningConfig?amountQuota=${amountQuota}&delayDays=${delayDays}&maxDailyReportTimes=${maxDailyReportTimes}&maxDaysWithoutUsage=${maxDaysWithoutUsage}`)
         .then((response) => {
           if (response.code === 200) {
-            ElMessage.success("设置成功");
-            this.add_dialogFormVisible = false;
-            this.reflush();
+            ElMessage.success('设置成功');
+            this.configEditMode = false;
           } else {
             ElMessage.error(response.msg);
           }
@@ -1221,6 +1195,66 @@ export default {
 
 .command-box > * {
   margin-right: 20px;
+}
+
+.config-display {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+  padding-left: 30px;
+}
+
+.config-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.config-label {
+  font-size: 20px;
+  color: #575556;
+  white-space: nowrap;
+}
+
+.config-input {
+  width: 100px;
+  font-size: 20px;
+}
+
+.config-input-editable :deep(.el-input__inner) {
+  background-color: #ffffff !important;
+  border-color: #46b97e !important;
+  color: #333333 !important;
+  font-size: 20px !important;
+}
+
+.config-checkbox {
+  white-space: nowrap;
+  font-size: 20px;
+}
+
+:deep(.config-checkbox .el-checkbox__label) {
+  font-size: 20px;
+}
+
+.config-confirm-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 35px;
+  padding: 0 20px;
+  background-color: #45ba7e;
+  color: #fff;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 20px;
+  white-space: nowrap;
+  transition: all 0.3s;
+}
+
+.config-confirm-btn:hover {
+  background-color: #3aa86e;
 }
 
 .add-btn,

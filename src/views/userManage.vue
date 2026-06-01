@@ -25,8 +25,23 @@
       </div>
       <div class="search-input">
         <span>水表类型</span>
-        <el-select class="big-font-el-select" v-model="param.meterType" placeholder="请选择水表类型">
+        <el-select class="big-font-el-select" v-model="param.meterType" placeholder="请选择">
           <el-option v-for="item in shuibiao_list" :key="item.id" :value="item.label"></el-option>
+        </el-select>
+      </div>
+      <div class="search-input">
+        <span>电量</span>
+        <el-select class="big-font-el-select" v-model="param.battery" placeholder="请选择" clearable>
+          <el-option label="正常" value="正常"></el-option>
+          <el-option label="异常" value="异常"></el-option>
+        </el-select>
+      </div>
+      <div class="search-input">
+        <span>阀门状态</span>
+        <el-select class="big-font-el-select" v-model="param.valveStatus" placeholder="请选择" clearable>
+          <el-option label="开阀" value="开阀"></el-option>
+          <el-option label="关阀" value="关阀"></el-option>
+          <el-option label="故障" value="故障"></el-option>
         </el-select>
       </div>
 
@@ -175,7 +190,7 @@
             <el-table-column property="userAddr" label="用户地址" min-width="100" align="center" />
             <!-- <el-table-column property="companyName" label="所属水厂" width="280" align="center" /> -->
             <el-table-column property="regionName" label="区域" min-width="70" align="center" />
-            <el-table-column property="phone" label="联系电话" min-width="100" align="center" />
+            <el-table-column property="meterVendor" label="水表品牌" min-width="100" align="center" />
             <!-- <el-table-column property="approver1" label="开户审批人1" width="180" align="center" />
             <el-table-column property="approver2" label="开户审批人2" width="180" align="center" />
             <el-table-column property="approver3" label="开户审批人3" width="180" align="center" /> -->
@@ -379,6 +394,8 @@ export default {
         imei: "",
         meterCode: null,
         meterType: "", // 水表类型
+        battery: "", // 电量
+        valveStatus: "", // 阀门状态
         time: {
           type: "",
           accurateTime: "",
@@ -1501,6 +1518,8 @@ export default {
         imei: "",
         meterCode: null,
         meterType: "",
+        battery: "",
+        valveStatus: "",
         time: {
           type: "",
           accurateTime: "",
@@ -1651,9 +1670,9 @@ export default {
   justify-content: center;
   /* 确保子元素在父容器中垂直居中 */
   flex-direction: column;
-  width: 14%;
+  width: 11%;
   height: 100%;
-  margin-right: 20px;
+  margin-right: 10px;
 }
 
 .search-input>span {
