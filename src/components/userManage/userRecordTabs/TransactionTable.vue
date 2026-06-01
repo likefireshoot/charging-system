@@ -92,8 +92,9 @@
           <template #default="scope">
             <div class="meter-code-cell">
               <span class="meter-code-text">{{ scope.row.meterCode || "-" }}</span>
-              <span :class="['meter-status', isCurrentMeter(scope.row) ? 'current' : 'history']">
-                {{ isCurrentMeter(scope.row) ? "当前表" : "历史表" }}
+              <span v-if="meterStatusMap[scope.row.meterCode] !== undefined"
+                :class="['meter-status', meterStatusMap[scope.row.meterCode] === '0' ? 'current' : 'history']">
+                {{ meterStatusMap[scope.row.meterCode] === '0' ? '当前表' : '历史表' }}
               </span>
             </div>
           </template>
@@ -138,9 +139,22 @@ export default {
     user: {
       type: Object,
       default: () => ({})
+    },
+    userMeters: {
+      type: Array,
+      default: () => []
     }
   },
   emits: ["close"],
+  computed: {
+    meterStatusMap() {
+      const map = {};
+      (this.userMeters || []).forEach(m => {
+        map[m.meterCode] = m.status;
+      });
+      return map;
+    }
+  },
   data() {
     return {
       loading: false,
@@ -530,7 +544,7 @@ export default {
         this.currentPage = 1;
         this.fetchTransactionRecords();
       }
-    }
+    },
   }
 };
 </script>

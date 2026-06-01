@@ -45,6 +45,21 @@
         <div class="info-card meter-info-card">
           <div class="card-title">表信息</div>
 
+          <!-- 水表选择器 -->
+          <div v-if="userMeters.length > 0" class="meter-selector">
+            <div
+              v-for="meter in userMeters"
+              :key="meter.meterCode"
+              :class="['meter-chip', { active: selectedMeterCode === meter.meterCode }]"
+              @click="switchMeter(meter.meterCode)"
+            >
+              <span class="chip-code">{{ meter.meterCode }}</span>
+              <span :class="['chip-status', getStatusClass(meter.status)]">
+                {{ getStatusLabel(meter.status) }}
+              </span>
+            </div>
+          </div>
+
           <!-- 抄表记录 tab: 当前吨数 + 总用水量 并列 -->
           <div v-if="activeTab === 'meter'" class="stats-row">
             <div class="stat-item">
@@ -75,11 +90,13 @@
           </div>
 
           <div class="data-list">
-            <div class="data-item"><span>表号：</span>{{ currentUser.meterCode || '-' }}</div>
-            <div class="data-item"><span>表具类型：</span>{{ currentUser.meterType || 'NB-IoT表' }}</div>
-            <div class="data-item"><span>品牌类型：</span>{{ currentUser.meterVendor || '-' }}</div>
+            <div class="data-item"><span>表号：</span>{{ selectedMeter.meterCode || currentUser.meterCode || '-' }}</div>
+            <div class="data-item"><span>表具类型：</span>{{ selectedMeter.meterType || currentUser.meterType || 'NB-IoT表' }}</div>
+            <div class="data-item"><span>品牌类型：</span>{{ selectedMeter.meterVendor || currentUser.meterVendor || '-' }}</div>
             <div class="data-item"><span>结算日期：</span>{{ currentUser.settleDate || '20260305' }}</div>
-            <div class="data-item"><span>阀门状态：</span>{{ currentUser.valveStatus || '-' }}</div>
+            <div class="data-item"><span>阀门状态：</span>{{ selectedMeter.valveStatus || currentUser.valveStatus || '-' }}</div>
+            <!-- 解绑时间不再展示 -->
+            <!-- <div v-if="selectedMeter.removeDate" class="data-item"><span>解绑时间：</span>{{ selectedMeter.removeDate }}</div> -->
           </div>
         </div>
       </div>
@@ -97,7 +114,7 @@
           <div class="back-button-wrapper">
             <button class="back-btn" @click="goBack">
               <img src="@/assets/yonghu/icon27.png" alt="back" />
-              <span>返回用户列表</span>
+              <span>{{ source === 'warningManage' ? '返回警告管理' : '返回用户列表' }}</span>
             </button>
           </div>
         </div>
@@ -107,6 +124,7 @@
             <component
               :is="currentTabComponent"
               :user="currentUser"
+              :user-meters="userMeters"
               @update-total-money="handleTotalMoneyUpdate"
             />
           </keep-alive>
@@ -122,7 +140,6 @@ import service from "@/api/request";
 import BillTable from "./userRecordTabs/BillTable.vue";
 import TransactionTable from "./userRecordTabs/TransactionTable.vue";
 import MeterTable from "./userRecordTabs/MeterTable.vue";
-import OperationTable from "./userRecordTabs/OperationTable.vue";
 import CommandLogTable from "./userRecordTabs/CommandLogTable.vue";
 
 export default {
@@ -131,15 +148,17 @@ export default {
     BillTable,
     TransactionTable: TransactionTable,
     MeterTable,
-    OperationTable,
     CommandLogTable
   },
   data() {
     return {
       currentUser: {},
+      userMeters: [],
+      selectedMeterCode: '',
       totalMoney: 0,
       meterReading: 0,
       meterTotalWater: 0,
+      source: "",
       activeTab: "bill",
       tabs: [
         { name: "扣费记录", type: "bill" },
@@ -151,13 +170,15 @@ export default {
     };
   },
   computed: {
+    selectedMeter() {
+      return this.userMeters.find(m => m.meterCode === this.selectedMeterCode) || {};
+    },
     currentTabComponent() {
       const componentMap = {
         bill: "BillTable",
         transaction: "TransactionTable",
         command: "CommandLogTable",
         meter: "MeterTable",
-        operation: "OperationTable"
       };
       return componentMap[this.activeTab] || "BillTable";
     }
@@ -170,6 +191,9 @@ export default {
     }
   },
   mounted() {
+    // 标记来源页面（userManage / warningManage）
+    this.source = this.$route.query.source || "userManage";
+
     // 支持从路由参数指定初始tab
     if (this.$route.query.tab) {
       this.activeTab = this.$route.query.tab;
@@ -192,6 +216,9 @@ export default {
       // 读取当前水表吨数（从抄表入口跳转时传递）
       this.meterReading = this.$route.query.meterReading || 0;
 
+      // 获取用户所有水表列表（当前为Mock数据，后端接口就绪后替换）
+      this.fetchUserMeters();
+
       // 若初始tab为抄表记录，预加载总用水量
       if (this.activeTab === 'meter') {
         this.fetchCardTotalWater();
@@ -203,6 +230,42 @@ export default {
   methods: {
     switchTab(type) {
       this.activeTab = type;
+    },
+    async fetchUserMeters() {
+      try {
+        const params = `?userId=${encodeURIComponent(this.currentUser.userId)}&companyId=${encodeURIComponent(this.currentUser.companyId || '')}`;
+        const response = await service.get(`/userManage/meter/getUserMeters${params}`);
+        if (response.code === 200 && response.data) {
+          this.userMeters = response.data;
+          this.selectedMeterCode = this.$route.query.meterCode || (response.data[0]?.meterCode || '');
+          const meter = this.userMeters.find(m => m.meterCode === this.selectedMeterCode);
+          if (meter) {
+            this.meterReading = meter.newReading || 0;
+          }
+        }
+      } catch (error) {
+        console.error("获取用户水表列表失败", error);
+      }
+    },
+    switchMeter(meterCode) {
+      if (this.selectedMeterCode === meterCode) return;
+      this.selectedMeterCode = meterCode;
+      this.currentUser.meterCode = meterCode;
+      const meter = this.userMeters.find(m => m.meterCode === meterCode);
+      if (meter) {
+        this.meterReading = meter.newReading || 0;
+      }
+      if (this.activeTab === 'meter') {
+        this.fetchCardTotalWater();
+      }
+    },
+    getStatusLabel(status) {
+      const map = { '0': '当前表', '1': '历史表', '2': '历史表' };
+      return map[status] || '-';
+    },
+    getStatusClass(status) {
+      const map = { '0': 'status-current', '1': 'status-history', '2': 'status-history' };
+      return map[status] || '';
     },
     async fetchCardTotalWater() {
       if (!this.currentUser.userId || !this.currentUser.meterCode) return;
@@ -217,7 +280,32 @@ export default {
       }
     },
     goBack() {
-      // 尝试恢复之前保存的页面状态
+      // 从警告管理进入时，恢复保存的页面状态后返回
+      if (this.source === 'warningManage') {
+        const savedState = sessionStorage.getItem('warningManagePageState');
+        if (savedState) {
+          try {
+            const pageState = JSON.parse(savedState);
+            this.$router.push({
+              path: '/warningManage',
+              query: {
+                restore: 'true',
+                paramsState: JSON.stringify(pageState.params),
+                region: pageState.region || '',
+                quyu_selected: pageState.quyu_selected ? JSON.stringify(pageState.quyu_selected) : null,
+                filterText: pageState.filterText || '',
+              }
+            });
+          } catch (e) {
+            this.$router.push({ path: '/warningManage' });
+          }
+        } else {
+          this.$router.push({ path: '/warningManage' });
+        }
+        return;
+      }
+
+      // 尝试恢复之前保存的页面状态（userManage 入口）
       const savedState = sessionStorage.getItem('userManagePageState');
       if (savedState) {
         try {
@@ -677,5 +765,70 @@ export default {
 .data-list {
   margin-top: 20px;
   margin-left: 30px;
+}
+
+/* ========== 水表选择器 ========== */
+.meter-selector {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+  padding: 0 2px;
+}
+
+.meter-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 20px;
+  background: #f0f2f5;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: all 0.25s;
+  user-select: none;
+}
+
+.meter-chip:hover {
+  background: #e6f3ed;
+  border-color: #b3d9c5;
+}
+
+.meter-chip.active {
+  background: #eef9f2;
+  border-color: #46B97E;
+  box-shadow: 0 0 0 2px rgba(70, 185, 126, 0.15);
+}
+
+.chip-code {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+}
+
+.chip-status {
+  font-size: 14px;
+  padding: 1px 8px;
+  border-radius: 10px;
+  line-height: 20px;
+  white-space: nowrap;
+}
+
+.chip-status.status-current {
+  color: #2f9e63;
+  background-color: #d9f2e2;
+  border: 1px solid #a3d9b7;
+}
+
+.chip-status.status-history {
+  color: #8a8f99;
+  background-color: #e8e9eb;
+  border: 1px solid #ccd0d5;
+}
+
+.chip-status.status-replaced {
+  color: #d48920;
+  background-color: #fef3e4;
+  border: 1px solid #f5d499;
 }
 </style>

@@ -164,6 +164,12 @@ export default {
         this.currentPage = 1;
         this.fetchBillRecords();
       }
+    },
+    "user.meterCode"(newValue, oldValue) {
+      if (newValue && newValue !== oldValue) {
+        this.currentPage = 1;
+        this.fetchBillRecords();
+      }
     }
   },
   methods: {
