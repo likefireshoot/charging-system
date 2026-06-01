@@ -138,10 +138,6 @@
       </div>
     </div>
 
-    <transactionRecord v-if="transaction_dialogFormVisible"
-                       :transaction_dialogFormVisible="transaction_dialogFormVisible" :data="multipleSelection[0]"
-                       @close="closeTransaction"></transactionRecord>
-
     <!-- 警告配置 -->
     <div class="add-dialog" v-if="add_dialogFormVisible">
       <div class="add-dialog-content">
@@ -219,10 +215,8 @@ import { ElMessage } from "element-plus";
 import axios from "axios";
 import { useWarningStore } from "@/store/warningStore.js";
 import { mapState } from "pinia";
-import transactionRecord from "@/components/userManage/transactionRecord.vue";
-
 export default {
-  components: { transactionRecord },
+  components: {},
   data() {
     return {
       params: {
@@ -296,9 +290,6 @@ export default {
       // ****** 警告类型切换防抖 + 缓存
       warningTypeDebounceTimer: null,
       warningDataCache: {},
-
-      // ****** 收支明细弹出框
-      transaction_dialogFormVisible: false,
 
       //存储当前勾选的行的数据信息
       multipleSelection: [],
@@ -493,9 +484,54 @@ export default {
     if (this.params.warningType === "" || this.params.warningType === undefined){
       this.params.warningType = "欠费用户" //默认选项
     }
+
+    // 检查是否需要恢复页面状态（从 userRecordDetail 返回时）
+    this._restoring = this.$route.query.restore === 'true';
+    if (this._restoring) {
+      // 恢复搜索参数
+      if (this.$route.query.paramsState) {
+        try {
+          const savedParams = JSON.parse(this.$route.query.paramsState);
+          this.params = { ...this.params, ...savedParams };
+        } catch (e) {
+          console.error('恢复搜索参数失败', e);
+        }
+      }
+      // 恢复区域筛选
+      if (this.$route.query.region) {
+        this.region = this.$route.query.region;
+      }
+      // 恢复树过滤文本
+      if (this.$route.query.filterText) {
+        this.filterText = this.$route.query.filterText;
+      }
+      // 恢复区域树选中节点
+      if (this.$route.query.quyu_selected && this.$route.query.quyu_selected !== 'null') {
+        try {
+          const quyuSelected = JSON.parse(this.$route.query.quyu_selected);
+          this.quyu_selected = quyuSelected;
+        } catch (e) {
+          this.quyu_selected = null;
+        }
+      }
+      // 清除 sessionStorage 中的保存状态
+      sessionStorage.removeItem('warningManagePageState');
+    }
+
     this.getCompanyList();
     this.getRegionData();
     this.getWaringData();
+
+    // 恢复区域树节点选中状态（需等树渲染完成）
+    if (this._restoring && this.quyu_selected) {
+      this.$nextTick(() => {
+        setTimeout(() => {
+          if (this.$refs.treeRef && this.quyu_selected) {
+            this.$refs.treeRef.setCurrentKey(this.quyu_selected.id);
+          }
+        }, 350);
+      });
+    }
   },
   beforeUnmount() {
     // 组件卸载时取消监听
@@ -504,15 +540,30 @@ export default {
     }
   },
   methods: {
-    // ****** 欠费金额可点击
+    // ****** 欠费金额可点击 → 保存当前页面状态后跳转至用户详情页
     handleDetail(row) {
-      this.transaction_dialogFormVisible = true;
-      this.multipleSelection[0] = row;
-    },
-    closeTransaction() {
-      this.transaction_dialogFormVisible = false;
-      this.multipleSelection = [];
-      this.getWaringData();
+      // 保存当前页面状态到 sessionStorage，供返回时恢复
+      const pageState = {
+        params: { ...this.params },
+        region: this.region,
+        quyu_selected: this.quyu_selected,
+        filterText: this.filterText,
+      };
+      sessionStorage.setItem('warningManagePageState', JSON.stringify(pageState));
+
+      this.$router.push({
+        name: "userRecordDetail",
+        query: {
+          userId: row.userId || "",
+          meterCode: row.meterCode || "",
+          companyId: row.companyId || this.params.companyId || this.companyId || "",
+          userName: row.userName || "",
+          userAddr: row.userAddr || "",
+          userPhone: row.userPhone || "",
+          userBalance: row.balance || "",
+          source: "warningManage",
+        },
+      });
     },
 
     // ****** 警告类型切换（带防抖 + 缓存）
@@ -1342,16 +1393,6 @@ export default {
 /* 确保el-dialog弹出框本身不被覆盖 */
 .el-dialog__wrapper {
   background: transparent !important;
-}
-
-.transaction-record-dialog{
-  position: fixed;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  z-index: 199;
-  background-color: rgb(31 33 38 / 15%);
 }
 
 </style>

@@ -114,7 +114,7 @@
           <div class="back-button-wrapper">
             <button class="back-btn" @click="goBack">
               <img src="@/assets/yonghu/icon27.png" alt="back" />
-              <span>返回用户列表</span>
+              <span>{{ source === 'warningManage' ? '返回警告管理' : '返回用户列表' }}</span>
             </button>
           </div>
         </div>
@@ -158,6 +158,7 @@ export default {
       totalMoney: 0,
       meterReading: 0,
       meterTotalWater: 0,
+      source: "",
       activeTab: "bill",
       tabs: [
         { name: "扣费记录", type: "bill" },
@@ -190,6 +191,9 @@ export default {
     }
   },
   mounted() {
+    // 标记来源页面（userManage / warningManage）
+    this.source = this.$route.query.source || "userManage";
+
     // 支持从路由参数指定初始tab
     if (this.$route.query.tab) {
       this.activeTab = this.$route.query.tab;
@@ -276,7 +280,32 @@ export default {
       }
     },
     goBack() {
-      // 尝试恢复之前保存的页面状态
+      // 从警告管理进入时，恢复保存的页面状态后返回
+      if (this.source === 'warningManage') {
+        const savedState = sessionStorage.getItem('warningManagePageState');
+        if (savedState) {
+          try {
+            const pageState = JSON.parse(savedState);
+            this.$router.push({
+              path: '/warningManage',
+              query: {
+                restore: 'true',
+                paramsState: JSON.stringify(pageState.params),
+                region: pageState.region || '',
+                quyu_selected: pageState.quyu_selected ? JSON.stringify(pageState.quyu_selected) : null,
+                filterText: pageState.filterText || '',
+              }
+            });
+          } catch (e) {
+            this.$router.push({ path: '/warningManage' });
+          }
+        } else {
+          this.$router.push({ path: '/warningManage' });
+        }
+        return;
+      }
+
+      // 尝试恢复之前保存的页面状态（userManage 入口）
       const savedState = sessionStorage.getItem('userManagePageState');
       if (savedState) {
         try {
