@@ -68,11 +68,23 @@
         >
           <el-table-column type="selection" :selectable="selectable" :width="selectionWidth" align="center" />
           <el-table-column label="序号" :width="indexWidth" align="center" fixed="left" #default="scope">
-            {{ scope.$index + 1 + (params.pageNo - 1) * params.pageSize }}
+            <span class="table-bold-text">{{ scope.$index + 1 + (params.pageNo - 1) * params.pageSize }}</span>
           </el-table-column>
-          <el-table-column property="roleId" label="角色编号" :width="roleIdWidth" align="center" />
-          <el-table-column property="roleName" label="角色名称" :width="roleNameWidth" align="center" />
-          <el-table-column property="permissionContent" label="权限内容" :width="permissionsWidth" align="center" />
+          <el-table-column label="角色编号" :width="roleIdWidth" align="center" #default="scope">
+            <span class="table-bold-text">{{ scope.row.roleId }}</span>
+          </el-table-column>
+          <el-table-column label="角色名称" :width="roleNameWidth" align="center" #default="scope">
+            <span class="table-bold-text">{{ scope.row.roleName }}</span>
+          </el-table-column>
+          <el-table-column label="权限内容" :width="permissionsWidth" align="center" #default="scope">
+            <div class="table-permission-list">
+              <span
+                v-for="(item, index) in scope.row.permissionContentArray"
+                :key="index"
+                class="table-permission-tag"
+              >{{ item }}</span>
+            </div>
+          </el-table-column>
         </el-table>
       </div>
       <div class="page-box">
@@ -88,25 +100,35 @@
         <div class="title">
           <div style="margin-left: 10px; display: flex; align-items: center">
             <img src="@/assets/yuangong/icon6.png" alt="" style="margin-right: 10px" />
-            <span style="font-size: 20px">新增</span>
+            <span style="font-size: 22px">新增</span>
           </div>
           <div style="margin-right: 10px; cursor: pointer" @click="add_dialogFormVisible = false">
             <img src="@/assets/close.png" alt="" />
           </div>
         </div>
         <div class="add-role-content">
-          <div class="edit-input" style="width: 30%">
+          <div class="role-name-row">
             <span>角色名称</span>
-            <el-input v-model="addData.roleName" />
+            <el-input class="large-font-input" v-model="addData.roleName" placeholder="请输入角色名称" />
           </div>
-          <div class="edit-input" style="width: 50%; margin-right: 0">
-            <span>权限内容</span>
-            <el-select  class="big-font-el-select" v-model="addData.permissionList" multiple clearable collapse-tags placeholder="请选择权限内容" popper-class="custom-header" :max-collapse-tags="1">
-              <template #header>
-                <el-checkbox class="user-checkbox" v-model="checkAll" :indeterminate="indeterminate" @change="handleCheckAll"> 全选 </el-checkbox>
-              </template>
-              <el-option v-for="item in permissionList" :key="item.id" :label="item.label" :value="item.id" />
-            </el-select>
+          <div class="permission-section">
+            <div class="permission-header">
+              <span>权限内容</span>
+              <el-checkbox class="check-all-box" v-model="checkAll" :indeterminate="indeterminate" @change="handleCheckAll">
+                <span class="large-font">全选</span>
+              </el-checkbox>
+            </div>
+            <div class="permission-grid">
+              <el-checkbox
+                v-for="item in permissionList"
+                :key="item.id"
+                :label="item.id"
+                v-model="addData.permissionList"
+                class="permission-checkbox"
+              >
+                <span class="large-font">{{ item.label }}</span>
+              </el-checkbox>
+            </div>
           </div>
         </div>
         <div class="btn">
@@ -115,6 +137,46 @@
             <span style="font-size: 20px; margin-left: 15%">确认</span>
           </div>
           <div class="cancel-btn" @click="add_cancel">
+            <el-icon style="margin-left: 15%; color: #45ba7e"><Close /></el-icon>
+            <span style="font-size: 20px; margin-left: 15%; color: #5a5a5a">取消</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- 新增确认弹出框 -->
+    <div class="add-confirm-dialog" v-if="addConfirmDialogVisible">
+      <div class="add-confirm-dialog-content">
+        <div class="title">
+          <div style="margin-left: 10px; display: flex; align-items: center">
+            <img src="@/assets/yuangong/icon6.png" alt="" style="margin-right: 10px" />
+            <span style="font-size: 22px">确认新增</span>
+          </div>
+          <div style="margin-right: 10px; cursor: pointer" @click="addConfirmDialogVisible = false">
+            <img src="@/assets/close.png" alt="" />
+          </div>
+        </div>
+        <div class="confirm-content">
+          <div class="confirm-row">
+            <span class="confirm-label">角色名称：</span>
+            <span class="confirm-value">{{ addData.roleName }}</span>
+          </div>
+          <div class="confirm-permission-section">
+            <span class="confirm-label">权限列表：</span>
+            <div class="confirm-permission-list">
+              <span
+                v-for="(item, index) in selectedPermissionLabels"
+                :key="index"
+                class="confirm-permission-tag"
+              >{{ item }}</span>
+            </div>
+          </div>
+        </div>
+        <div class="btn">
+          <div class="confirm-btn" @click="confirmAddSubmit">
+            <el-icon style="margin-left: 15%"><Check /></el-icon>
+            <span style="font-size: 20px; margin-left: 15%">确认</span>
+          </div>
+          <div class="cancel-btn" @click="addConfirmDialogVisible = false">
             <el-icon style="margin-left: 15%; color: #45ba7e"><Close /></el-icon>
             <span style="font-size: 20px; margin-left: 15%; color: #5a5a5a">取消</span>
           </div>
@@ -151,29 +213,39 @@
     </div>
     <!-- 编辑按钮弹出框 -->
     <div class="edit-dialog" v-if="edit_dialogFormVisible">
-      <div class="edit-dialog-content-1 ">
+      <div class="edit-dialog-content-1">
         <div class="title">
           <div style="margin-left: 10px; display: flex; align-items: center">
             <img src="@/assets/yuangong/icon3.png" alt="" style="margin-right: 10px" />
-            <span style="font-size: 20px">编辑</span>
+            <span style="font-size: 22px">编辑</span>
           </div>
           <div style="margin-right: 10px; cursor: pointer" @click="edit_dialogFormVisible = false">
             <img src="@/assets/close.png" alt="" />
           </div>
         </div>
         <div class="add-role-content">
-          <div class="edit-input" style="width: 30%">
+          <div class="role-name-row">
             <span>角色名称</span>
-            <el-input v-model="editData.roleName" />
+            <el-input class="large-font-input" v-model="editData.roleName" placeholder="请输入角色名称" />
           </div>
-          <div class="edit-input" style="width: 50%; margin-right: 0">
-            <span>权限内容</span>
-            <el-select v-model="editData.permissionList" multiple clearable collapse-tags placeholder="请选择权限内容" popper-class="custom-header" :max-collapse-tags="1">
-              <template #header>
-                <el-checkbox class="user-checkbox" v-model="editCheckAll" :indeterminate="editIndeterminate" @change="handleEditCheckAll"> 全选 </el-checkbox>
-              </template>
-              <el-option v-for="item in permissionList" :key="item.id" :label="item.label" :value="item.id" />
-            </el-select>
+          <div class="permission-section">
+            <div class="permission-header">
+              <span>权限内容</span>
+              <el-checkbox class="check-all-box" v-model="editCheckAll" :indeterminate="editIndeterminate" @change="handleEditCheckAll">
+                <span class="large-font">全选</span>
+              </el-checkbox>
+            </div>
+            <div class="permission-grid">
+              <el-checkbox
+                v-for="item in permissionList"
+                :key="item.id"
+                :label="item.id"
+                v-model="editData.permissionList"
+                class="permission-checkbox"
+              >
+                <span class="large-font">{{ item.label }}</span>
+              </el-checkbox>
+            </div>
           </div>
         </div>
         <div class="btn">
@@ -182,6 +254,46 @@
             <span style="font-size: 20px; margin-left: 15%">确认</span>
           </div>
           <div class="cancel-btn" @click="edit_dialogFormVisible = false">
+            <el-icon style="margin-left: 15%; color: #45ba7e"><Close /></el-icon>
+            <span style="font-size: 20px; margin-left: 15%; color: #5a5a5a">取消</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- 编辑确认弹出框 -->
+    <div class="add-confirm-dialog" v-if="editConfirmDialogVisible">
+      <div class="add-confirm-dialog-content">
+        <div class="title">
+          <div style="margin-left: 10px; display: flex; align-items: center">
+            <img src="@/assets/yuangong/icon3.png" alt="" style="margin-right: 10px" />
+            <span style="font-size: 22px">确认编辑</span>
+          </div>
+          <div style="margin-right: 10px; cursor: pointer" @click="editConfirmDialogVisible = false">
+            <img src="@/assets/close.png" alt="" />
+          </div>
+        </div>
+        <div class="confirm-content">
+          <div class="confirm-row">
+            <span class="confirm-label">角色名称：</span>
+            <span class="confirm-value">{{ editData.roleName }}</span>
+          </div>
+          <div class="confirm-permission-section">
+            <span class="confirm-label">权限列表：</span>
+            <div class="confirm-permission-list">
+              <span
+                v-for="(item, index) in selectedEditPermissionLabels"
+                :key="index"
+                class="confirm-permission-tag"
+              >{{ item }}</span>
+            </div>
+          </div>
+        </div>
+        <div class="btn">
+          <div class="confirm-btn" @click="confirmEditSubmit">
+            <el-icon style="margin-left: 15%"><Check /></el-icon>
+            <span style="font-size: 20px; margin-left: 15%">确认</span>
+          </div>
+          <div class="cancel-btn" @click="editConfirmDialogVisible = false">
             <el-icon style="margin-left: 15%; color: #45ba7e"><Close /></el-icon>
             <span style="font-size: 20px; margin-left: 15%; color: #5a5a5a">取消</span>
           </div>
@@ -228,6 +340,7 @@ export default {
       editCheckAll: false,
       editIndeterminate: false,
       permissionList: [],
+      basePermissions: ["首页", "用户管理", "报表统计", "通知管理", "通知管理-短信记录"],
 
       total: null,
 
@@ -246,6 +359,8 @@ export default {
       //弹出框显示与否
       delete_dialogFormVisible: false,
       add_dialogFormVisible: false,
+      addConfirmDialogVisible: false,
+      editConfirmDialogVisible: false,
       edit_dialogFormVisible: false,
 
       //表格勾选行
@@ -293,14 +408,26 @@ export default {
     },
   },
   computed: {
+    selectedPermissionLabels() {
+      return this.addData.permissionList.map((id) => {
+        const perm = this.permissionList.find((p) => p.id === id);
+        return perm ? perm.label : "";
+      }).filter(Boolean);
+    },
+    selectedEditPermissionLabels() {
+      return this.editData.permissionList.map((id) => {
+        const perm = this.permissionList.find((p) => p.id === id);
+        return perm ? perm.label : "";
+      }).filter(Boolean);
+    },
     // 每列的百分比宽度
     columnPercentages() {
       return {
         selection: 5,
-        index: 9,
-        roleId: 11,
-        roleName: 11,
-        permissions: 62,
+        index: 5,
+        roleId: 7,
+        roleName: 7,
+        permissions: 74,
       };
     },
   },
@@ -432,14 +559,14 @@ export default {
             const list = Array.isArray(res.data?.list) ? res.data.list : [];
             this.roleData = list.map((role, idx) => {
               try {
-                const originalPermissionContent = role.permissions?.map((p) => p.permissionName).join("、") || "";
                 const permissionIds = role.permissions?.map((p) => p.permissionId) || [];
-                console.log(originalPermissionContent);
-                console.log(permissionIds);
 
                 return {
                   ...role,
-                  permissionContent: "首页、用户管理、报表统计、通知管理、通知管理-短信记录、" + originalPermissionContent,
+                  permissionContentArray: [
+                    ...this.basePermissions,
+                    ...(role.permissions?.map((p) => p.permissionName) || []),
+                  ],
                   permissionIds,
                 };
               } catch (e) {
@@ -483,10 +610,12 @@ export default {
             // 从返回结果里取 list，没拿到就兜底空数组
             const list = Array.isArray(res.data?.list) ? res.data.list : [];
             this.roleData = list.map((role) => {
-              const originalPermissionContent = role.permissions?.map((p) => p.permissionName).join("、") || "";
               return {
                 ...role,
-                permissionContent: "首页、用户管理、报表统计、通知管理、通知管理-短信记录、" + originalPermissionContent,
+                permissionContentArray: [
+                  ...this.basePermissions,
+                  ...(role.permissions?.map((p) => p.permissionName) || []),
+                ],
                 permissionIds: role.permissions?.map((p) => p.permissionId) || [],
               };
             });
@@ -512,6 +641,10 @@ export default {
           this.addData[key] = this.addData[key].trim();
         }
       });
+      // 显示确认弹窗
+      this.addConfirmDialogVisible = true;
+    },
+    confirmAddSubmit() {
       let params = {
         roleName: this.addData.roleName,
         permissionIds: this.addData.permissionList,
@@ -521,6 +654,7 @@ export default {
         .then((res) => {
           if (res.code == 200) {
             ElMessage.success("添加成功");
+            this.addConfirmDialogVisible = false;
             this.add_dialogFormVisible = false;
             this.add_cancel();
             this.getRoleData();
@@ -555,7 +689,10 @@ export default {
           return;
         }
       }
-      console.log(this.editData);
+      // 显示确认弹窗
+      this.editConfirmDialogVisible = true;
+    },
+    confirmEditSubmit() {
       let params = {
         roleId: this.editData.roleId,
         roleName: this.editData.roleName,
@@ -567,6 +704,7 @@ export default {
         .then((res) => {
           if (res.code === 200) {
             ElMessage.success("编辑成功");
+            this.editConfirmDialogVisible = false;
             this.edit_dialogFormVisible = false;
             this.getRoleData();
           }
@@ -926,9 +1064,9 @@ export default {
 
 /* 针对不同对话框设置具体的尺寸 */
 .add-role-dialog-content {
-  width: 60%;
-  min-height: 250px; /* 改用 min-height 防止内容多时溢出 */
-  /* 删掉 margin-top */
+  width: 65%;
+  height: 80vh;
+  min-height: 500px;
 }
 
 .delete-dialog-content {
@@ -936,10 +1074,10 @@ export default {
   height: 300px;
 }
 
-/* 编辑框根据你的图片，建议也给个保底高度 */
 .edit-dialog-content-1 {
-  width: 60%;
-  min-height: 280px;
+  width: 65%;
+  height: 80vh;
+  min-height: 500px;
 }
 
 .title {
@@ -966,15 +1104,219 @@ export default {
 }
 
 .add-role-content {
-  height: 100px;
+  width: 94%;
+  height: calc(80vh - 140px);
   background-color: #fff;
   border-radius: 5px;
   margin-top: 15px;
   display: flex;
-  flex-direction: row;
-  justify-content: space-between;
+  flex-direction: column;
+  padding: 2% 3%;
+  overflow-y: auto;
+}
+
+/* 角色名称输入行 */
+.role-name-row {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+.role-name-row > span {
+  font-size: 20px;
+  width: 100px;
+  flex-shrink: 0;
+}
+
+.role-name-row > .el-input {
+  flex: 1;
+  max-width: 500px;
+}
+
+.large-font-input :deep(.el-input__inner) {
+  font-size: 20px;
+  height: 40px;
+}
+
+/* 权限区域 */
+.permission-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.permission-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 15px;
+  gap: 15px;
+}
+
+.permission-header > span {
+  font-size: 20px;
+}
+
+.check-all-box {
+  margin-left: 10px;
+}
+
+/* 权限平铺网格 */
+.permission-grid {
+  display: flex;
   flex-wrap: wrap;
-  padding: 2%;
+  gap: 22px 38px;
+  align-content: flex-start;
+  overflow-y: auto;
+  padding: 8px 0;
+}
+
+.permission-checkbox {
+  margin-right: 0;
+}
+
+/* 大字体 */
+.large-font {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", "PingFang SC", "Hiragino Sans GB", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 22px;
+}
+
+/* 深层穿透: el-checkbox 内部文字 */
+:deep(.permission-checkbox .el-checkbox__label) {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", "PingFang SC", "Hiragino Sans GB", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 22px;
+}
+
+:deep(.check-all-box .el-checkbox__label) {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", "PingFang SC", "Hiragino Sans GB", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 22px;
+}
+
+:deep(.permission-checkbox .el-checkbox__inner) {
+  width: 22px;
+  height: 22px;
+}
+
+:deep(.check-all-box .el-checkbox__inner) {
+  width: 22px;
+  height: 22px;
+}
+
+:deep(.permission-checkbox .el-checkbox__inner::after) {
+  left: 8px;
+  top: 3px;
+}
+
+:deep(.check-all-box .el-checkbox__inner::after) {
+  left: 8px;
+  top: 3px;
+}
+
+/* 表格内权限标签网格 */
+.table-permission-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+  justify-content: center;
+  padding: 6px 4px;
+}
+
+/* 序号、角色编号、角色名称列加粗 */
+.table-bold-text {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", "PingFang SC", "Hiragino Sans GB", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 22px;
+  font-weight: 600;
+}
+
+.table-permission-tag {
+  display: inline-block;
+  padding: 6px 16px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", "PingFang SC", "Hiragino Sans GB", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 19px;
+  font-weight: 550;
+  background-color: #e8f5e9;
+  color: #1b5e20;
+  border: 2px solid #66bb6a;
+  border-radius: 6px;
+  line-height: 1.5;
+  white-space: nowrap;
+}
+
+/* 新增确认弹窗 */
+.add-confirm-dialog {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background-color: rgba(31, 33, 38, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.add-confirm-dialog-content {
+  width: 45%;
+  min-height: 320px;
+  border: 1px solid #fafafa;
+  background-color: #fafafa;
+  border-radius: 5px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.confirm-content {
+  width: 88%;
+  background-color: #fff;
+  border-radius: 5px;
+  margin-top: 25px;
+  padding: 25px 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.confirm-row {
+  display: flex;
+  align-items: center;
+}
+
+.confirm-label {
+  font-size: 22px;
+  font-weight: bold;
+  color: #333;
+  flex-shrink: 0;
+  margin-right: 10px;
+}
+
+.confirm-value {
+  font-size: 22px;
+  color: #45ba7e;
+  font-weight: bold;
+}
+
+.confirm-permission-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.confirm-permission-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 14px;
+  margin-left: 0;
+}
+
+.confirm-permission-tag {
+  display: inline-block;
+  padding: 6px 16px;
+  font-size: 20px;
+  background-color: #e8f5e9;
+  color: #2e7d32;
+  border: 1px solid #a5d6a7;
+  border-radius: 6px;
+  line-height: 1.4;
 }
 
 .delete-content {
