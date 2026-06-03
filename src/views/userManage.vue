@@ -183,14 +183,16 @@
               </template>
             </el-table-column>
             <!-- <el-table-column property="imei" label="IMEI号" width="280" align="center" /> -->
-            <el-table-column property="meterType" label="表类型" min-width="70" align="center" />
+<!--            <el-table-column property="meterType" label="表类型" min-width="70" align="center" />-->
+            <el-table-column property="meterVendor" label="厂商" min-width="70" align="center" />
             <el-table-column property="priceName" label="价格类型" min-width="100" align="center" />
             <el-table-column property="smsConfigName" label="短信" min-width="70" align="center"></el-table-column>
 
             <el-table-column property="userAddr" label="用户地址" min-width="100" align="center" />
             <!-- <el-table-column property="companyName" label="所属水厂" width="280" align="center" /> -->
             <el-table-column property="regionName" label="区域" min-width="70" align="center" />
-            <el-table-column property="meterVendor" label="水表品牌" min-width="100" align="center" />
+            <el-table-column property="phone" label="联系电话" min-width="100" align="center" />
+<!--            <el-table-column property="meterVendor" label="水表品牌" min-width="100" align="center" />-->
             <!-- <el-table-column property="approver1" label="开户审批人1" width="180" align="center" />
             <el-table-column property="approver2" label="开户审批人2" width="180" align="center" />
             <el-table-column property="approver3" label="开户审批人3" width="180" align="center" /> -->

@@ -1234,9 +1234,8 @@ export default {
   padding: 6px 16px;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", "PingFang SC", "Hiragino Sans GB", "Helvetica Neue", Helvetica, Arial, sans-serif;
   font-size: 19px;
-  font-weight: 550;
   background-color: #e8f5e9;
-  color: #1b5e20;
+  color: #000000;
   border: 2px solid #66bb6a;
   border-radius: 6px;
   line-height: 1.5;
