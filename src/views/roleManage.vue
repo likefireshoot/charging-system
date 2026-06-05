@@ -1226,7 +1226,7 @@ export default {
 .table-bold-text {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", "PingFang SC", "Hiragino Sans GB", "Helvetica Neue", Helvetica, Arial, sans-serif;
   font-size: 22px;
-  font-weight: 600;
+  /*font-weight: 600;*/
 }
 
 .table-permission-tag {

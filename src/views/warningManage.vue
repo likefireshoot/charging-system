@@ -36,6 +36,13 @@
         <span>表号</span>
         <el-input v-model="params.meterCode" placeholder="请输入..." />
       </div>
+      <div class="search-input">
+        <span>阀门</span>
+        <el-select class="big-font-el-select" v-model="params.valveStatus">
+          <el-option label="开阀" value="开阀"></el-option>
+          <el-option label="关阀" value="关阀"></el-option>
+        </el-select>
+      </div>
       <div class="buttons">
         <div class="sercah-btn" @click="getWaringData">
           <img src="@/assets/yonghu/icon16.png" alt="" style="margin-left: 12px" />
@@ -134,6 +141,8 @@
             <el-table-column v-if="showDeviceAbnormalColumn" property="signalValue" label="信号值" :width="deviceSignalWidth" align="center" />
             <el-table-column v-if="showDeviceAbnormalColumn" property="meterVendor" label="厂商" :width="deviceVendorWidth" align="center" />
             <el-table-column v-if="showLongTimeNoReportColumn" property="durationDays" label="未上报天数" :width="durationDaysWidth" align="center" />
+            <el-table-column v-if="showLongTimeNoReportColumn" property="battery" label="电量" :width="deviceBatteryWidth" align="center" />
+            <el-table-column v-if="showLongTimeNoReportColumn" property="valveStatus" label="阀门" :width="deviceValveWidth" align="center" />
             <!-- 水表频繁上报专用列 -->
             <el-table-column v-if="showFrequentReportColumn" property="dailyReportCount" label="当日上报次数" :width="reportCountWidth" align="center" />
             <el-table-column v-if="showFrequentReportColumn" property="meterVendor" label="厂商" :width="deviceVendorWidth" align="center" />
@@ -188,6 +197,7 @@ export default {
         meterCode: "",
         company: null,
         companyId: null,
+        valveStatus: "",
       },
       companyId: JSON.parse(sessionStorage.getItem("userData")).companyId,
       staffPermissionIds: JSON.parse(sessionStorage.getItem("userData")).staffPermissionIds,
@@ -386,14 +396,16 @@ export default {
           selection: 4,
           id: 5,
           userId: 7,
-          userName: 10,
-          address: 13,
+          userName: 9,
+          address: 11,
           phone: 11,
-          biaohao: 10,
-          warningTime: 13,
-          warningType: 9,
-          totalWater: 7,
-          durationDays: 11,
+          biaohao: 9,
+          warningTime: 10,
+          warningType: 8,
+          totalWater: 5,
+          durationDays: 9,
+          deviceValve: 6,
+          deviceBattery: 6,
         };
       }
       // 频繁上报
@@ -853,6 +865,7 @@ export default {
       this.params.userName = "";
       this.params.imei = "";
       this.params.meterCode = "";
+      this.params.valveStatus = "";
       this.params.regionName = "";
       this.params.userId = "";
       if (typeof isSearch != 'number' || isNaN(isSearch)) {
