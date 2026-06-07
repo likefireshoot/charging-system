@@ -51,7 +51,7 @@
             ref="multipleTableRef"
             :data="ErrorRecordData"
             row-key="staffId"
-            style="width: auto; height: 100%; table-layout: fixed; overflow-x: auto; overflow-y: auto"
+            style="width: 100%; height: 100%; table-layout: fixed; overflow-y: auto"
             border
             :header-cell-style="{ background: '#46B97E', color: '#FFFFFF' }"
             @selection-change="handleSelectionChange"
@@ -69,20 +69,25 @@
                         {{ scope.$index + 1 + (params.pageNo - 1) * params.pageSize }}
                     </el-table-column> -->
           <el-table-column property="userId" label="用户号" :width="workerNameWidth" align="center" />
+          <el-table-column property="userName" label="用户名" :width="workerNameWidth" align="center" />
           <el-table-column property="meterCode" label="表号" :width="accountWidth" align="center" />
-          <el-table-column property="readingCount" label="本次读数" :width="roleWidth" align="center" />
-          <el-table-column label="上一次读数" :width="roleWidth" align="center" #default="scope">
-            <div v-if="scope.row.meterReportRecord">{{ scope.row.meterReportRecord.readingCount }}<br /></div>
+          <el-table-column property="valveStatus" label="阀门" :width="phoneWidth" align="center" />
+          <el-table-column property="battery" label="电量" :width="companyWidth" align="center" />
+          <el-table-column label="上次读数" :width="roleWidth" align="center" #default="scope">
+            <div v-if="scope.row.prevReadingCount !== null && scope.row.prevReadingCount !== undefined">{{ scope.row.prevReadingCount }}<br /></div>
             <span v-else>无</span>
           </el-table-column>
-          <el-table-column property="valveStatus" label="阀门状态" :width="phoneWidth" align="center" />
-          <el-table-column property="battery" label="电量" :width="companyWidth" align="center" />
-          <el-table-column property="signalValue" label="信号" :width="postWidth" align="center" />
-          <!--          <el-table-column label="上报时间" :width="lastLoginTimeWidth" align="center" #default="scope">-->
-          <el-table-column label="上报时间" :width="lastLoginTimeWidth" align="center">
+          <el-table-column label="上次上报时间" :width="lastLoginTimeWidth" align="center" #default="scope">
+            <div v-if="scope.row.prevCreateTime">
+              {{ formatDateTime(scope.row.prevCreateTime) }}
+            </div>
+            <span v-else>无</span>
+          </el-table-column>
+          <el-table-column property="readingCount" label="本次读数" :width="roleWidth" align="center" />
+          <el-table-column label="本次上报时间" :width="lastLoginTimeWidth" align="center">
             <template #header>
               <div class="sortable-header" @click="toggleSort('time')">
-                <span>上报时间</span>
+                <span>本次上报时间</span>
                 <div class="sort-icons">
                   <div :class="['asc-icon', { active: isSortActive('time', 'asc') }]" />
                   <div :class="['desc-icon', { active: isSortActive('time', 'desc') }]" />
@@ -91,22 +96,13 @@
             </template>
             <template #default="scope">
               <div v-if="scope.row.createTime">
-                <!-- 读数：{{ scope.row.meterReportRecord.readingCount }}<br /> -->
                 {{ formatDateTime(scope.row.createTime) }}
               </div>
               <span v-else>无</span>
             </template>
 
           </el-table-column>
-          <el-table-column label="上一次上报时间" :width="lastLoginTimeWidth" align="center" #default="scope">
-            <div v-if="scope.row.meterReportRecord">
-              <!-- 读数：{{ scope.row.meterReportRecord.readingCount }}<br /> -->
-              {{ formatDateTime(scope.row.meterReportRecord.createTime) }}
-            </div>
-            <span v-else>无</span>
-          </el-table-column>
-
-          <el-table-column label="状态" :width="lastLoginTimeWidth" align="center" #default="scope">
+          <el-table-column label="操作" :width="lastLoginTimeWidth" align="center" #default="scope">
             <div v-if="scope.row.status === 0 || scope.row.status === null">
               <el-button type="danger" size="large" @click="edit(scope.row.id, 1)">忽略</el-button>
 
@@ -212,15 +208,15 @@ export default {
       return {
         selection: 5,
         index: 7,
-        account: 8,
-        worker_name: 7,
-        company: 12,
+        account: 13,
+        worker_name: 12,
+        company: 6,
         address: 14,
-        phone: 12,
+        phone: 6,
         post: 7,
         role: 8,
         //password: 10,
-        last_login_time: 12,
+        last_login_time: 11,
       };
     },
   },
@@ -431,6 +427,7 @@ export default {
         companyId: null, // 所属水厂ID
         pageNo: 1,
         pageSize: 50,
+        order: 1, // 默认时间降序
       };
     },
     reflush() {
@@ -592,6 +589,7 @@ export default {
   height: 100%;
   align-items: center;
   margin-left: 100px;
+  padding-right: 30px;
 }
 
 .buttons > * {
