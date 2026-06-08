@@ -131,7 +131,12 @@
               </template>
             </el-table-column>
 <!--            <el-table-column property="totalWater" label="读数" :width="totalWaterWidth" align="center" />-->
-            <el-table-column v-if="!showFrequentReportColumn && !showValveClosedIncreaseColumn" property="totalWater" label="读数" :width="totalWaterWidth" align="center" />
+            <el-table-column v-if="!showFrequentReportColumn && !showValveClosedIncreaseColumn" label="读数" :width="totalWaterWidth" align="center">
+              <template #default="scope">
+                <span @click="handleWarningMeterJump(scope.row)"
+                      style="color: #46b97e; cursor: pointer; display: block; width: 100%; text-align: center">{{ scope.row.totalWater }}</span>
+              </template>
+            </el-table-column>
             <el-table-column v-if="showOweAmountColumn" property="valveStatus" label="阀门状态" :width="valveStatusWidth" align="center"/>
             <el-table-column v-if="showOweAmountColumn" property="qianfeiDays" label="欠费天数" :width="qianfeiDaysWidth" align="center" />
             <el-table-column v-if="showZeroUsageColumn" property="durationDays" label="0用量天数" :width="durationDaysWidth" align="center" />
@@ -144,7 +149,12 @@
             <el-table-column v-if="showLongTimeNoReportColumn" property="battery" label="电量" :width="deviceBatteryWidth" align="center" />
             <el-table-column v-if="showLongTimeNoReportColumn" property="valveStatus" label="阀门" :width="deviceValveWidth" align="center" />
             <!-- 水表频繁上报专用列 -->
-            <el-table-column v-if="showFrequentReportColumn" property="dailyReportCount" label="当日上报次数" :width="reportCountWidth" align="center" />
+            <el-table-column v-if="showFrequentReportColumn" label="当日上报次数" :width="reportCountWidth" align="center">
+              <template #default="scope">
+                <span @click="handleWarningMeterJump(scope.row)"
+                      style="color: #46b97e; cursor: pointer; display: block; width: 100%; text-align: center">{{ scope.row.dailyReportCount }}</span>
+              </template>
+            </el-table-column>
             <el-table-column v-if="showFrequentReportColumn" property="meterVendor" label="厂商" :width="deviceVendorWidth" align="center" />
             <!-- 关阀状态下水表吨数增加专用列 -->
             <el-table-column v-if="showValveClosedIncreaseColumn" label="上次读数" :width="lastReadingWidth" align="center">
@@ -158,8 +168,9 @@
               </template>
             </el-table-column>
             <el-table-column v-if="showValveClosedIncreaseColumn" label="告警时读数" :width="alarmReadingWidth" align="center">
-              <template #default="{ row }">
-                {{ row.tons != null ? row.tons : '' }}
+              <template #default="scope">
+                <span @click="handleWarningMeterJump(scope.row)"
+                      style="color: #46b97e; cursor: pointer; display: block; width: 100%; text-align: center">{{ scope.row.tons != null ? scope.row.tons : '' }}</span>
               </template>
             </el-table-column>
           </el-table>
@@ -182,8 +193,13 @@ import { ElMessage } from "element-plus";
 import axios from "axios";
 import { useWarningStore } from "@/store/warningStore.js";
 import { mapState } from "pinia";
+import { useDetailNavigation } from "@/composables/useDetailNavigation";
 export default {
   components: {},
+  setup() {
+    const { navigateToDetail } = useDetailNavigation();
+    return { navigateToDetail };
+  },
   data() {
     return {
       params: {
@@ -325,7 +341,11 @@ export default {
       return "警告时间";
     },
     // 定义每列的百分比宽度
+    // ⚠️ 注意：每种警告类型的列宽百分比总和必须恰好等于 100%
+    // 否则表格宽度不满容器，会与左侧 el-tree 的间距不一致
+    // 修改列宽后请核对各 block 末尾注释中的总和
     columnPercentages() {
+      // 欠费用户 — sum: 4+5+6+9+11+9+9+11+7+6+8+7+8 = 100
       if (this.showOweAmountColumn) {
         return {
           selection: 4,
@@ -343,6 +363,7 @@ export default {
           qianfeiDays: 8,
         };
       }
+      // 水表0用量用户 — sum: 4+5+7+10+13+11+10+13+9+7+11 = 100
       if (this.showZeroUsageColumn) {
         return {
           selection: 4,
@@ -358,6 +379,7 @@ export default {
           durationDays: 11,
         };
       }
+      // 设备异常 — sum: 4+5+6+9+11+9+8+10+7+6+6+6+6+7 = 100
       if (this.showDeviceAbnormalColumn) {
         return {
           selection: 4,
@@ -376,6 +398,7 @@ export default {
           deviceVendor: 7,
         };
       }
+      // 水表大用量用户 — sum: 4+5+7+10+13+11+10+13+9+7+11 = 100
       if (this.showLargeUsageColumn) {
         return {
           selection: 4,
@@ -391,6 +414,7 @@ export default {
           largeUsageAmount: 11,
         };
       }
+      // 数据长时间未上报 — sum: 4+5+7+9+11+11+9+10+8+5+9+6+6 = 100
       if (this.showLongTimeNoReportColumn) {
         return {
           selection: 4,
@@ -408,23 +432,23 @@ export default {
           deviceBattery: 6,
         };
       }
-      // 频繁上报
+      // 水表频繁上报 — sum: 4+5+7+11+13+11+10+13+10+8+8 = 100
       if (this.showFrequentReportColumn) {
         return {
           selection: 4,
           id: 5,
           userId: 7,
-          userName: 10,
-          address: 12,
-          phone: 10,
+          userName: 11,
+          address: 13,
+          phone: 11,
           biaohao: 10,
-          warningTime: 12,
+          warningTime: 13,
           warningType: 10,
           reportCount: 8,
-          meterVendor: 8,
+          deviceVendor: 8,
         };
       }
-      // 关阀状态下水表吨数增加
+      // 关阀状态下水表吨数增加 — sum: 4+6+7+10+13+9+9+12+9+6+7+8 = 100
       if (this.showValveClosedIncreaseColumn) {
         return {
           selection: 4,
@@ -441,6 +465,7 @@ export default {
           alarmReading: 8,
         };
       }
+      // 默认（fallback）— sum: 4+6+8+12+14+11+11+15+10+9 = 100
       return {
         selection: 4,
         id: 6,
@@ -536,28 +561,29 @@ export default {
     }
   },
   methods: {
-    // ****** 欠费金额可点击 → 保存当前页面状态后跳转至用户详情页
+    // ****** 欠费金额点击 → 跳转至用户详情页（默认 tab：扣费记录）
     handleDetail(row) {
-      // 保存当前页面状态到 sessionStorage，供返回时恢复
-      const pageState = {
-        params: { ...this.params },
-        region: this.region,
-        quyu_selected: this.quyu_selected,
-        filterText: this.filterText,
-      };
-      sessionStorage.setItem('warningManagePageState', JSON.stringify(pageState));
+      this.navigateToDetail(row, {
+        source: 'warningManage',
+        pageState: {
+          params: { ...this.params },
+          region: this.region,
+          quyu_selected: this.quyu_selected,
+          filterText: this.filterText,
+        },
+      });
+    },
 
-      this.$router.push({
-        name: "userRecordDetail",
-        query: {
-          userId: row.userId || "",
-          meterCode: row.meterCode || "",
-          companyId: row.companyId || this.params.companyId || this.companyId || "",
-          userName: row.userName || "",
-          userAddr: row.userAddr || "",
-          userPhone: row.userPhone || "",
-          userBalance: row.balance || "",
-          source: "warningManage",
+    // ****** 告警读数/次数点击 → 跳转至用户详情页（抄表记录 tab）
+    handleWarningMeterJump(row) {
+      this.navigateToDetail(row, {
+        source: 'warningManage',
+        tab: 'meter',
+        pageState: {
+          params: { ...this.params },
+          region: this.region,
+          quyu_selected: this.quyu_selected,
+          filterText: this.filterText,
         },
       });
     },
@@ -622,6 +648,8 @@ export default {
       this.multipleSelection = val;
     },
     // 计算列宽的函数
+    // 根据 columnPercentages 的百分比分配计算各列实际像素宽度
+    // 百分比总和 = 100，确保表格填满容器，与左侧 el-tree 间距一致
     calculateColumnWidths() {
       if (this.parentContainer) {
         const p = this.columnPercentages;

@@ -362,6 +362,7 @@ import service from "@/api/request";
 import { ElMessage } from "element-plus";
 import { Check, Close } from "@element-plus/icons-vue";
 import axios from "axios";
+import { useDetailNavigation } from "@/composables/useDetailNavigation";
 
 export default {
   components: {
@@ -387,6 +388,10 @@ export default {
     commandOldXinchi,
     command4GXinchi,
     commandOldShengXin,
+  },
+  setup() {
+    const { navigateToDetail } = useDetailNavigation();
+    return { navigateToDetail };
   },
   data() {
     return {
@@ -855,58 +860,30 @@ export default {
       }
     },
     handleChaoBiaoTime(row) {
-      // 保存当前页面状态到 sessionStorage，方便返回后恢复
-      const pageState = {
-        currentPage: this.currentPage,
-        pageSize: this.pageSize,
-        param: this.param,
-        quyu_selected: this.quyu_selected,
-        sortField: this.sortField,
-        sortOrder: this.sortOrder
-      };
-      sessionStorage.setItem('userManagePageState', JSON.stringify(pageState));
-
-      // 跳转到 userRecordDetail 页面，并定位到抄表记录 tab
-      this.$router.push({
-        path: '/userRecordDetail',
-        query: {
-          tab: 'meter',
-          userId: row.userId,
-          meterCode: row.meterCode,
-          meterReading: row.newReading,
-          userName: row.userName,
-          userAddr: row.userAddr,
-          userPhone: row.phone,
-          userBalance: row.balance,
-          companyId: row.companyId
-        }
+      this.navigateToDetail(row, {
+        source: 'userManage',
+        tab: 'meter',
+        pageState: {
+          currentPage: this.currentPage,
+          pageSize: this.pageSize,
+          param: this.param,
+          quyu_selected: this.quyu_selected,
+          sortField: this.sortField,
+          sortOrder: this.sortOrder,
+        },
       });
     },
     handleYue(row) {
-      // 保存当前页面状态到 sessionStorage，方便返回后恢复
-      const pageState = {
-        currentPage: this.currentPage,
-        pageSize: this.pageSize,
-        param: this.param,
-        quyu_selected: this.quyu_selected,
-        sortField: this.sortField,
-        sortOrder: this.sortOrder
-      };
-      sessionStorage.setItem('userManagePageState', JSON.stringify(pageState));
-
-      // 跳转到 userRecordDetail 页面
-      this.$router.push({
-        path: '/userRecordDetail',
-        query: {
-          userId: row.userId,
-          meterCode: row.meterCode,
-          meterReading: row.newReading,
-          userName: row.userName,
-          userAddr: row.userAddr,
-          userPhone: row.phone,
-          userBalance: row.balance,
-          companyId: row.companyId
-        }
+      this.navigateToDetail(row, {
+        source: 'userManage',
+        pageState: {
+          currentPage: this.currentPage,
+          pageSize: this.pageSize,
+          param: this.param,
+          quyu_selected: this.quyu_selected,
+          sortField: this.sortField,
+          sortOrder: this.sortOrder,
+        },
       });
     },
     delete_btn_click() {

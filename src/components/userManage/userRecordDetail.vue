@@ -141,6 +141,7 @@ import BillTable from "./userRecordTabs/BillTable.vue";
 import TransactionTable from "./userRecordTabs/TransactionTable.vue";
 import MeterTable from "./userRecordTabs/MeterTable.vue";
 import CommandLogTable from "./userRecordTabs/CommandLogTable.vue";
+import { useDetailNavigation } from "@/composables/useDetailNavigation";
 
 export default {
   name: "UserBillDetail",
@@ -149,6 +150,11 @@ export default {
     TransactionTable: TransactionTable,
     MeterTable,
     CommandLogTable
+  },
+  //小范围内optionApi中混入compositionApi,为了优化可以忍受
+  setup() {
+    const { navigateBack } = useDetailNavigation();
+    return { navigateBack };
   },
   data() {
     return {
@@ -280,57 +286,7 @@ export default {
       }
     },
     goBack() {
-      // 从警告管理进入时，恢复保存的页面状态后返回
-      if (this.source === 'warningManage') {
-        const savedState = sessionStorage.getItem('warningManagePageState');
-        if (savedState) {
-          try {
-            const pageState = JSON.parse(savedState);
-            this.$router.push({
-              path: '/warningManage',
-              query: {
-                restore: 'true',
-                paramsState: JSON.stringify(pageState.params),
-                region: pageState.region || '',
-                quyu_selected: pageState.quyu_selected ? JSON.stringify(pageState.quyu_selected) : null,
-                filterText: pageState.filterText || '',
-              }
-            });
-          } catch (e) {
-            this.$router.push({ path: '/warningManage' });
-          }
-        } else {
-          this.$router.push({ path: '/warningManage' });
-        }
-        return;
-      }
-
-      // 尝试恢复之前保存的页面状态（userManage 入口）
-      const savedState = sessionStorage.getItem('userManagePageState');
-      if (savedState) {
-        try {
-          const pageState = JSON.parse(savedState);
-          // 将页面状态存储到 query 参数中，让 userManage 页面可以读取并恢复
-          this.$router.push({
-            path: '/userManage',
-            query: {
-              restore: 'true',
-              currentPage: pageState.currentPage,
-              pageSize: pageState.pageSize,
-              sortField: pageState.sortField,
-              sortOrder: pageState.sortOrder,
-              // 将搜索参数编码后传递
-              param: JSON.stringify(pageState.param),
-              quyu_selected: pageState.quyu_selected ? JSON.stringify(pageState.quyu_selected) : null
-            }
-          });
-        } catch (e) {
-          // 解析失败，直接返回
-          this.$router.back();
-        }
-      } else {
-        this.$router.back();
-      }
+      this.navigateBack(this.source);
     },
     handleTotalMoneyUpdate(value) {
       this.totalMoney = value || 0;
