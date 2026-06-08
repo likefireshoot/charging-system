@@ -19,6 +19,7 @@
             <el-option label="年" value="year" />
             <el-option label="月" value="month" />
             <el-option label="日" value="day" />
+            <el-option label="自定义" value="custom" />
           </el-select>
           <el-date-picker
             v-if="searchParams.timeType === 'year'"
@@ -37,7 +38,7 @@
             style="width: 180px; font-size: 18px;"
           />
           <el-date-picker
-            v-else
+            v-else-if="searchParams.timeType === 'day'"
             v-model="searchParams.createTime"
             type="date"
             placeholder="选择日期"
@@ -45,7 +46,22 @@
             value-format="YYYY-MM-DD"
             style="width: 200px; font-size: 18px;"
           />
+          <el-date-picker
+            v-else-if="searchParams.timeType === 'custom'"
+            v-model="searchParams.dateRange"
+            type="daterange"
+            range-separator="至"
+            start-placeholder="开始日期"
+            end-placeholder="结束日期"
+            format="YYYY-MM-DD"
+            value-format="YYYY-MM-DD"
+            style="width: 300px; font-size: 18px;"
+          />
         </div>
+      </div>
+      <div class="total-summary">
+        <span class="summary-label">消费额汇总</span>
+        <span class="summary-value">{{ totalMoney }} 元</span>
       </div>
       <div class="search-buttons">
         <div class="search-btn" @click="handleSearch">
@@ -148,10 +164,12 @@ export default {
       pageSize: 30,
       staffPermissionIds: JSON.parse(sessionStorage.getItem("userData") || "{}").staffPermissionIds || [],
       token: JSON.parse(sessionStorage.getItem("userData") || "{}").token || "",
+      totalMoney: 0,
       searchParams: {
         // chargeType: "", // 扣费类型 - 暂时注释
         timeType: "day",
-        createTime: ""
+        createTime: "",
+        dateRange: null
       }
     };
   },
@@ -170,6 +188,10 @@ export default {
         this.currentPage = 1;
         this.fetchBillRecords();
       }
+    },
+    "searchParams.timeType"() {
+      this.searchParams.createTime = "";
+      this.searchParams.dateRange = null;
     }
   },
   methods: {
@@ -270,7 +292,12 @@ export default {
       //   params.type = this.searchParams.chargeType;
       // }
 
-      if (this.searchParams.createTime && this.searchParams.timeType) {
+      if (this.searchParams.timeType === "custom") {
+        if (this.searchParams.dateRange && this.searchParams.dateRange.length === 2) {
+          params.createTime = `${this.searchParams.dateRange[0]} 00:00:00`;
+          params.endTime = `${this.searchParams.dateRange[1]} 23:59:59`;
+        }
+      } else if (this.searchParams.createTime && this.searchParams.timeType) {
         let formattedTime = "";
         let timeTypeValue = null;
 
@@ -362,6 +389,7 @@ export default {
         const url = `/userManage/userCharge/getTotalChargeAmount${queryString}`;
         const response = await service.get(url);
         if (response.code === 200) {
+          this.totalMoney = response.data || 0;
           this.$emit("update-total-money", response.data || 0);
         }
       } catch (error) {
@@ -369,7 +397,12 @@ export default {
       }
     },
     handleSearch() {
-      if (!this.searchParams.createTime && this.searchParams.timeType !== "") {
+      if (this.searchParams.timeType === "custom") {
+        if (!this.searchParams.dateRange || this.searchParams.dateRange.length !== 2) {
+          ElMessage.warning("请选择时间范围");
+          return;
+        }
+      } else if (!this.searchParams.createTime && this.searchParams.timeType !== "") {
         ElMessage.warning("请选择时间");
         return;
       }
@@ -380,7 +413,8 @@ export default {
       this.searchParams = {
         // chargeType: "", // 扣费类型 - 暂时注释
         timeType: "day",
-        createTime: ""
+        createTime: "",
+        dateRange: null
       };
       this.currentPage = 1;
       this.fetchBillRecords();
@@ -523,11 +557,34 @@ export default {
   font-size: 20px;
 }
 
+.total-summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 16px;
+  background: #f7fbf8;
+  border: 1px solid #d9efe2;
+  border-radius: 6px;
+  margin-left: auto;
+  margin-right: 12px;
+}
+
+.total-summary .summary-label {
+  font-size: 20px;
+  letter-spacing: 2px;  /* 调大字间距 */
+  color: #5a5a5a;
+}
+
+.total-summary .summary-value {
+  font-size: 22px;
+  color: #f56c6c;
+  font-weight: bold;
+}
+
 .search-buttons {
   display: flex;
   align-items: center;
   gap: 12px;
-  margin-left: auto;
 }
 
 .search-btn, .clear-btn {

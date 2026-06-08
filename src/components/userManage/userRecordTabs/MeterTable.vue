@@ -2,12 +2,13 @@
   <div class="meter-table-container">
     <div class="search-bar">
       <div class="search-input-item">
-        <span>时间</span>
+        <span style="margin-right: 20px">时间</span>
         <div class="time-input">
-          <el-select v-model="meterData.timeType" placeholder="请选择" style="width: 100px; font-size: 18px;">
+          <el-select v-model="meterData.timeType" placeholder="请选择" style="width: 100px; font-size: 20px;">
             <el-option label="年" value="year" />
             <el-option label="月" value="month" />
             <el-option label="日" value="day" />
+            <el-option label="自定义" value="custom" />
           </el-select>
           <el-date-picker
             v-if="meterData.timeType === 'year'"
@@ -15,7 +16,7 @@
             type="year"
             placeholder="选择年份"
             value-format="YYYY"
-            style="width: 180px; font-size: 18px;"
+            style="width: 180px; font-size: 20px;"
           />
           <el-date-picker
             v-else-if="meterData.timeType === 'month'"
@@ -23,18 +24,33 @@
             type="month"
             placeholder="选择月份"
             value-format="YYYY-MM"
-            style="width: 180px; font-size: 18px;"
+            style="width: 180px; font-size: 20px;"
           />
           <el-date-picker
-            v-else
+            v-else-if="meterData.timeType === 'day'"
             v-model="meterData.accurateTime"
             type="date"
             placeholder="选择日期"
             format="YYYY-MM-DD"
             value-format="YYYY-MM-DD"
-            style="width: 200px; font-size: 18px;"
+            style="width: 200px; font-size: 20px;"
+          />
+          <el-date-picker
+            v-else-if="meterData.timeType === 'custom'"
+            v-model="meterData.dateRange"
+            type="daterange"
+            range-separator="至"
+            start-placeholder="开始日期"
+            end-placeholder="结束日期"
+            format="YYYY-MM-DD"
+            value-format="YYYY-MM-DD"
+            style="width: 300px; font-size: 20px;"
           />
         </div>
+      </div>
+      <div class="total-summary">
+        <span class="summary-label">用水量汇总</span>
+        <span class="summary-value">{{ totalWater }} 吨</span>
       </div>
       <div class="search-buttons">
         <div class="search-btn" @click="handleSearch">
@@ -137,11 +153,13 @@ export default {
       total: 0,
       currentPage: 1,
       pageSize: 30,
+      totalWater: 0,
       staffPermissionIds: JSON.parse(sessionStorage.getItem("userData") || "{}").staffPermissionIds || [],
       token: JSON.parse(sessionStorage.getItem("userData") || "{}").token || "",
       meterData: {
-        timeType: "",
-        accurateTime: ""
+        timeType: "day",
+        accurateTime: "",
+        dateRange: null
       }
     };
   },
@@ -160,6 +178,10 @@ export default {
         this.currentPage = 1;
         this.fetchMeterRecords();
       }
+    },
+    "meterData.timeType"() {
+      this.meterData.accurateTime = "";
+      this.meterData.dateRange = null;
     }
   },
   methods: {
@@ -176,7 +198,12 @@ export default {
     buildSearchParams() {
       const params = { ...this.buildBaseParams() };
 
-      if (this.meterData.accurateTime && this.meterData.timeType) {
+      if (this.meterData.timeType === "custom") {
+        if (this.meterData.dateRange && this.meterData.dateRange.length === 2) {
+          params.createTime = `${this.meterData.dateRange[0]} 00:00:00`;
+          params.endTime = `${this.meterData.dateRange[1]} 23:59:59`;
+        }
+      } else if (this.meterData.accurateTime && this.meterData.timeType) {
         let formattedTime = "";
         let timeTypeValue = null;
 
@@ -241,6 +268,7 @@ export default {
           }));
 
           this.total = response.data.totalElements || 0;
+          await this.fetchTotalWater();
         } else {
           ElMessage.error(response.msg);
         }
@@ -276,6 +304,7 @@ export default {
           }));
 
           this.total = response.data.totalElements || 0;
+          await this.fetchTotalWater();
         } else {
           ElMessage.error(response.msg);
         }
@@ -288,7 +317,12 @@ export default {
       }
     },
     handleSearch() {
-      if (!this.meterData.accurateTime && this.meterData.timeType) {
+      if (this.meterData.timeType === "custom") {
+        if (!this.meterData.dateRange || this.meterData.dateRange.length !== 2) {
+          ElMessage.warning("请选择时间范围");
+          return;
+        }
+      } else if (!this.meterData.accurateTime && this.meterData.timeType) {
         ElMessage.warning("请选择时间");
         return;
       }
@@ -296,8 +330,9 @@ export default {
       this.fetchWithSearch();
     },
     handleClear() {
-      this.meterData.timeType = "";
+      this.meterData.timeType = "day";
       this.meterData.accurateTime = "";
+      this.meterData.dateRange = null;
       this.currentPage = 1;
       this.fetchMeterRecords();
     },
@@ -306,7 +341,13 @@ export default {
     },
     handlePageChange(page) {
       this.currentPage = page;
-      if (this.meterData.accurateTime && this.meterData.timeType) {
+      if (this.meterData.timeType === "custom") {
+        if (this.meterData.dateRange && this.meterData.dateRange.length === 2) {
+          this.fetchWithSearch();
+        } else {
+          this.fetchMeterRecords();
+        }
+      } else if (this.meterData.accurateTime && this.meterData.timeType) {
         this.fetchWithSearch();
       } else {
         this.fetchMeterRecords();
@@ -314,6 +355,18 @@ export default {
     },
     handleSelectionChange(val) {
       this.multipleSelection = val;
+    },
+    async fetchTotalWater() {
+      try {
+        const params = this.buildSearchParams();
+        const queryString = this.buildQueryString(params);
+        const response = await service.get(`/userManage/meterRead/getTotalWater${queryString}`);
+        if (response.code === 200) {
+          this.totalWater = response.data || 0;
+        }
+      } catch (error) {
+        console.error("获取总用水量失败", error);
+      }
     },
     filterNonEmptyParams(params) {
       const filteredParams = {};
@@ -472,7 +525,7 @@ export default {
 }
 
 .search-input-item > span {
-  font-size: 18px;
+  font-size: 20px;
   color: #606266;
   white-space: nowrap;
 }
@@ -484,40 +537,63 @@ export default {
 }
 
 .time-input :deep(.el-input__inner) {
-  font-size: 18px;
+  font-size: 20px;
   height: 40px;
   line-height: 40px;
 }
 
 .time-input :deep(.el-date-editor .el-input__inner) {
-  font-size: 18px;
+  font-size: 20px;
 }
 
 .time-input :deep(.el-select-dropdown__item) {
-  font-size: 18px;
+  font-size: 20px;
 }
 
 .time-input :deep(.el-date-table td) {
-  font-size: 18px;
+  font-size: 20px;
 }
 
 .time-input :deep(.el-date-table td span) {
-  font-size: 18px;
+  font-size: 20px;
 }
 
 .time-input :deep(.el-month-table td .cell) {
-  font-size: 18px;
+  font-size: 20px;
 }
 
 .time-input :deep(.el-year-table td .cell) {
-  font-size: 18px;
+  font-size: 20px;
+}
+
+.total-summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 16px;
+  background: #f7fbf8;
+  border: 1px solid #d9efe2;
+  border-radius: 6px;
+  margin-left: auto;
+  margin-right: 12px;
+}
+
+.total-summary .summary-label {
+  font-size: 20px;
+  letter-spacing: 2px;
+  color: #5a5a5a;
+}
+
+.total-summary .summary-value {
+  font-size: 22px;
+  color: #f56c6c;
+  font-weight: bold;
 }
 
 .search-buttons {
   display: flex;
   align-items: center;
   gap: 12px;
-  margin-left: auto;
 }
 
 .search-btn, .clear-btn {
@@ -528,7 +604,7 @@ export default {
   border-radius: 4px;
   cursor: pointer;
   transition: all 0.3s;
-  font-size: 18px;
+  font-size: 20px;
 }
 
 .search-btn {
@@ -577,7 +653,7 @@ export default {
   background-color: #fff;
   border: 1px solid #dcdfe6;
   transition: all 0.3s;
-  font-size: 18px;
+  font-size: 20px;
   color: #606266;
 }
 

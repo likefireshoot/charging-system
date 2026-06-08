@@ -4,10 +4,11 @@
       <div class="search-input-item">
         <span>时间</span>
         <div class="time-input">
-          <el-select v-model="transactionData.timeType" placeholder="请选择" style="width: 100px; font-size: 18px;">
+          <el-select v-model="transactionData.timeType" placeholder="请选择" style="width: 100px; font-size: 18px;" @change="handleTimeTypeChange">
             <el-option label="年" value="year" />
             <el-option label="月" value="month" />
             <el-option label="日" value="day" />
+            <el-option label="自定义" value="custom" />
           </el-select>
           <el-date-picker
             v-if="transactionData.timeType === 'year'"
@@ -26,13 +27,24 @@
             style="width: 180px; font-size: 18px;"
           />
           <el-date-picker
-            v-else
+            v-else-if="transactionData.timeType === 'day'"
             v-model="transactionData.createTime"
             type="date"
             placeholder="选择日期"
             format="YYYY-MM-DD"
             value-format="YYYY-MM-DD"
             style="width: 200px; font-size: 18px;"
+          />
+          <el-date-picker
+            v-else-if="transactionData.timeType === 'custom'"
+            v-model="transactionData.dateRange"
+            type="daterange"
+            range-separator="至"
+            start-placeholder="开始日期"
+            end-placeholder="结束日期"
+            format="YYYY-MM-DD"
+            value-format="YYYY-MM-DD"
+            style="width: 300px; font-size: 18px;"
           />
         </div>
       </div>
@@ -167,8 +179,9 @@ export default {
       staffPermissionIds: JSON.parse(sessionStorage.getItem("userData") || "{}").staffPermissionIds || [],
       token: JSON.parse(sessionStorage.getItem("userData") || "{}").token || "",
       transactionData: {
-        timeType: "",
+        timeType: "day",
         createTime: "",
+        dateRange: null,
         userId: "",
         companyId: ""
       },
@@ -270,8 +283,16 @@ export default {
     initData() {
       this.transactionData.userId = this.user.userId;
       this.transactionData.companyId = this.user.companyId;
+      this.transactionData.timeType = "day";
+      this.transactionData.createTime = "";
+      this.transactionData.dateRange = null;
       this.startData.userId = this.user.userId;
       this.startData.companyId = this.user.companyId;
+    },
+
+    handleTimeTypeChange() {
+      this.transactionData.createTime = "";
+      this.transactionData.dateRange = null;
     },
 
     buildQueryParams(useSearchData = false) {
@@ -281,7 +302,12 @@ export default {
         companyId: baseParams.companyId
       };
 
-      if (baseParams.createTime && baseParams.timeType) {
+      if (baseParams.timeType === "custom") {
+        if (baseParams.dateRange && baseParams.dateRange.length === 2) {
+          params.createTime = `${baseParams.dateRange[0]} 00:00:00`;
+          params.endTime = `${baseParams.dateRange[1]} 23:59:59`;
+        }
+      } else if (baseParams.createTime && baseParams.timeType) {
         let formattedTime = "";
         let timeTypeValue = null;
 
@@ -372,7 +398,14 @@ export default {
       try {
         const params = this.buildQueryParams(true);
 
-        if (!this.transactionData.createTime && this.transactionData.timeType) {
+        if (this.transactionData.timeType === "custom") {
+          if (!this.transactionData.dateRange || this.transactionData.dateRange.length !== 2) {
+            ElMessage.warning("请选择时间范围");
+            this.isLoading = false;
+            this.loading = false;
+            return;
+          }
+        } else if (!this.transactionData.createTime && this.transactionData.timeType) {
           ElMessage.warning("请选择时间");
           this.isLoading = false;
           this.loading = false;
@@ -410,7 +443,12 @@ export default {
       }
     },
     handleSearch() {
-      if (!this.transactionData.createTime && this.transactionData.timeType) {
+      if (this.transactionData.timeType === "custom") {
+        if (!this.transactionData.dateRange || this.transactionData.dateRange.length !== 2) {
+          ElMessage.warning("请选择时间范围");
+          return;
+        }
+      } else if (!this.transactionData.createTime && this.transactionData.timeType) {
         ElMessage.warning("请选择时间");
         return;
       }
@@ -418,8 +456,9 @@ export default {
       this.fetchWithSearch();
     },
     handleClear() {
-      this.transactionData.timeType = "";
+      this.transactionData.timeType = "day";
       this.transactionData.createTime = "";
+      this.transactionData.dateRange = null;
       this.currentPage = 1;
       this.fetchTransactionRecords();
     },
@@ -428,7 +467,13 @@ export default {
     },
     handlePageChange(page) {
       this.currentPage = page;
-      if (this.transactionData.createTime && this.transactionData.timeType) {
+      if (this.transactionData.timeType === "custom") {
+        if (this.transactionData.dateRange && this.transactionData.dateRange.length === 2) {
+          this.fetchWithSearch();
+        } else {
+          this.fetchTransactionRecords();
+        }
+      } else if (this.transactionData.createTime && this.transactionData.timeType) {
         this.fetchWithSearch();
       } else {
         this.fetchTransactionRecords();
@@ -500,9 +545,48 @@ export default {
         ElMessage.error("下载收据失败: " + error.message);
       }
     },
+    buildExportParams() {
+      const params = {
+        userId: this.transactionData.userId,
+        companyId: this.transactionData.companyId
+      };
+
+      if (this.transactionData.timeType === "custom") {
+        if (this.transactionData.dateRange && this.transactionData.dateRange.length === 2) {
+          params.startDate = this.transactionData.dateRange[0];
+          params.endDate = this.transactionData.dateRange[1];
+        }
+      } else if (this.transactionData.createTime && this.transactionData.timeType) {
+        let formattedTime = "";
+        let timeTypeValue = null;
+
+        switch (this.transactionData.timeType) {
+          case "year":
+            formattedTime = `${this.transactionData.createTime}-01-01 00:00:00`;
+            timeTypeValue = 1;
+            break;
+          case "month":
+            formattedTime = `${this.transactionData.createTime}-01 00:00:00`;
+            timeTypeValue = 2;
+            break;
+          case "day":
+            formattedTime = `${this.transactionData.createTime} 00:00:00`;
+            timeTypeValue = 3;
+            break;
+        }
+
+        if (timeTypeValue) {
+          params.timeType = timeTypeValue;
+          params.createTime = formattedTime;
+        }
+      }
+
+      return this.filterNonEmptyParams(params);
+    },
+
     async exportExcel() {
       try {
-        const params = this.buildQueryParams(true);
+        const params = this.buildExportParams();
         const response = await axios({
           url: "/userManage/userCharge/exportRechargeRecord",
           method: "GET",

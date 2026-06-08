@@ -4,26 +4,7 @@
       <div class="info-side">
         <div class="info-card user-info-card">
           <div class="card-title">用户信息</div>
-          <!-- 扣费记录 tab: 余额 + 消费总额 并列 -->
-          <div v-if="activeTab === 'bill'" class="stats-row">
-            <div class="stat-item">
-              <div class="stat-circle yellow-circle">¥</div>
-              <div class="stat-text">
-                <div class="num">{{ currentUser.balance || 0 }}</div>
-                <div class="unit">可用余额 (元)</div>
-              </div>
-            </div>
-            <div class="stat-item">
-              <div class="stat-circle green-circle">¥</div>
-              <div class="stat-text">
-                <div class="num">{{ totalMoney }}</div>
-                <div class="unit">消费总额 (元)</div>
-              </div>
-            </div>
-          </div>
-
-          <!-- 其他 tab: 仅显示余额 -->
-          <div v-else class="stats-row">
+          <div class="stats-row">
             <div class="stat-item">
               <div class="stat-circle yellow-circle">¥</div>
               <div class="stat-text">
@@ -60,26 +41,7 @@
             </div>
           </div>
 
-          <!-- 抄表记录 tab: 当前吨数 + 总用水量 并列 -->
-          <div v-if="activeTab === 'meter'" class="stats-row">
-            <div class="stat-item">
-              <div class="stat-circle blue-circle">T</div>
-              <div class="stat-text">
-                <div class="num">{{ meterReading }}</div>
-                <div class="unit">当前吨数 (吨)</div>
-              </div>
-            </div>
-            <div class="stat-item">
-              <div class="stat-circle teal-circle">Σ</div>
-              <div class="stat-text">
-                <div class="num">{{ meterTotalWater }}</div>
-                <div class="unit">总用水量 (吨)</div>
-              </div>
-            </div>
-          </div>
-
-          <!-- 其他 tab: 仅显示当前吨数 -->
-          <div v-else class="stats-row">
+          <div class="stats-row">
             <div class="stat-item">
               <div class="stat-circle blue-circle">T</div>
               <div class="stat-text">
