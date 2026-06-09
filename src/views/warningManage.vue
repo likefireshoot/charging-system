@@ -112,14 +112,18 @@
             <el-table-column property="theId" label="序号" :width="idWidth" align="center" fixed="left"> </el-table-column>
             <el-table-column property="userId" label="用户号" :width="userIdWidth" align="center" />
             <el-table-column property="userName" label="用户名称" :width="userNameWidth" align="center" />
+            <el-table-column property="meterCode" label="表号" :width="biaohaoWidth" align="center" />
             <el-table-column property="userAddr" label="用户地址" :width="addressWidth" align="center" />
 <!--            <el-table-column property="regionName" label="所属区域" :width="quyuWidth" align="center" />-->
 <!--            <el-table-column property="companyName" label="所属水厂" :width="companyWidth" align="center" />-->
             <el-table-column property="userPhone" label="联系电话" :width="phoneWidth" align="center" />
-            <el-table-column property="meterCode" label="表号" :width="biaohaoWidth" align="center" />
+            <el-table-column v-if="showLongTimeNoReportColumn" property="meterVendor" label="厂商" :width="deviceVendorWidth" align="center" />
+<!--            <el-table-column property="meterCode" label="表号" :width="biaohaoWidth" align="center" />-->
             <!-- <el-table-column property="imei" label="IMEI号" :width="imeihaoWidth" align="center" /> -->
-            <el-table-column property="createTime" :label="warningTimeLabel" :width="warningTimeWidth" align="center" :formatter="formatDateByType"/>
-            <el-table-column property="warningType" label="警告类型" :width="warningTypeWidth" align="center" />
+            <el-table-column v-if="showLongTimeNoReportColumn" property="battery" label="电量" :width="deviceBatteryWidth" align="center" />
+            <el-table-column v-if="showLongTimeNoReportColumn" property="valveStatus" label="阀门" :width="deviceValveWidth" align="center" />
+<!--            <el-table-column property="createTime" :label="warningTimeLabel" :width="warningTimeWidth" align="center" :formatter="formatDateByType"/>-->
+<!--            <el-table-column property="warningType" label="警告类型" :width="warningTypeWidth" align="center" />-->
             <el-table-column v-if="showOweAmountColumn" property="oweAmount" label="欠费金额" :width="oweAmountWidth" align="center">
 <!--              <template #default="{ row }">-->
 <!--                {{ formatOweAmount(row.oweAmount) }}-->
@@ -137,6 +141,8 @@
                       style="color: #46b97e; cursor: pointer; display: block; width: 100%; text-align: center">{{ scope.row.totalWater }}</span>
               </template>
             </el-table-column>
+            <el-table-column property="warningType" label="警告类型" :width="warningTypeWidth" align="center" />
+            <el-table-column property="createTime" :label="warningTimeLabel" :width="warningTimeWidth" align="center" :formatter="formatDateByType" />
             <el-table-column v-if="showOweAmountColumn" property="valveStatus" label="阀门状态" :width="valveStatusWidth" align="center"/>
             <el-table-column v-if="showOweAmountColumn" property="qianfeiDays" label="欠费天数" :width="qianfeiDaysWidth" align="center" />
             <el-table-column v-if="showZeroUsageColumn" property="durationDays" label="0用量天数" :width="durationDaysWidth" align="center" />
@@ -146,8 +152,7 @@
             <el-table-column v-if="showDeviceAbnormalColumn" property="signalValue" label="信号值" :width="deviceSignalWidth" align="center" />
             <el-table-column v-if="showDeviceAbnormalColumn" property="meterVendor" label="厂商" :width="deviceVendorWidth" align="center" />
             <el-table-column v-if="showLongTimeNoReportColumn" property="durationDays" label="未上报天数" :width="durationDaysWidth" align="center" />
-            <el-table-column v-if="showLongTimeNoReportColumn" property="battery" label="电量" :width="deviceBatteryWidth" align="center" />
-            <el-table-column v-if="showLongTimeNoReportColumn" property="valveStatus" label="阀门" :width="deviceValveWidth" align="center" />
+
             <!-- 水表频繁上报专用列 -->
             <el-table-column v-if="showFrequentReportColumn" label="当日上报次数" :width="reportCountWidth" align="center">
               <template #default="scope">
@@ -279,6 +284,7 @@ export default {
 
       //存储当前勾选的行的数据信息
       multipleSelection: [],
+
     };
   },
   watch: {
@@ -420,9 +426,9 @@ export default {
           selection: 4,
           id: 5,
           userId: 7,
-          userName: 9,
-          address: 11,
-          phone: 11,
+          userName: 8,
+          address: 8,
+          phone: 8,
           biaohao: 9,
           warningTime: 10,
           warningType: 8,
@@ -430,6 +436,7 @@ export default {
           durationDays: 9,
           deviceValve: 6,
           deviceBattery: 6,
+          deviceVendor: 7,
         };
       }
       // 水表频繁上报 — sum: 4+5+7+11+13+11+10+13+10+8+8 = 100
@@ -1502,6 +1509,40 @@ export default {
 /* 确保el-dialog弹出框本身不被覆盖 */
 .el-dialog__wrapper {
   background: transparent !important;
+}
+
+/* 排序样式 */
+.sortable-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  user-select: none;
+}
+.sort-icons {
+  display: flex;
+  flex-direction: column;
+  margin-left: 10px;
+}
+.asc-icon {
+  background-image: url("@/assets/yonghu/icon25.png");
+  background-repeat: no-repeat;
+  background-size: contain;
+  width: 12px; height: 12px;
+}
+.asc-icon.active,
+.asc-icon:hover {
+  background-image: url("@/assets/yonghu/icon24.png");
+}
+.desc-icon {
+  background-image: url("@/assets/yonghu/icon23.png");
+  background-repeat: no-repeat;
+  background-size: contain;
+  width: 12px; height: 12px;
+}
+.desc-icon.active,
+.desc-icon:hover {
+  background-image: url("@/assets/yonghu/icon22.png");
 }
 
 </style>

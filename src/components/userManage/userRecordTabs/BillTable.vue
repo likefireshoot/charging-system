@@ -566,7 +566,7 @@ export default {
   border: 1px solid #d9efe2;
   border-radius: 6px;
   margin-left: auto;
-  margin-right: 12px;
+  margin-right: auto;
 }
 
 .total-summary .summary-label {
