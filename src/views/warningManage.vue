@@ -1511,40 +1511,6 @@ export default {
   background: transparent !important;
 }
 
-/* 排序样式 */
-.sortable-header {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  user-select: none;
-}
-.sort-icons {
-  display: flex;
-  flex-direction: column;
-  margin-left: 10px;
-}
-.asc-icon {
-  background-image: url("@/assets/yonghu/icon25.png");
-  background-repeat: no-repeat;
-  background-size: contain;
-  width: 12px; height: 12px;
-}
-.asc-icon.active,
-.asc-icon:hover {
-  background-image: url("@/assets/yonghu/icon24.png");
-}
-.desc-icon {
-  background-image: url("@/assets/yonghu/icon23.png");
-  background-repeat: no-repeat;
-  background-size: contain;
-  width: 12px; height: 12px;
-}
-.desc-icon.active,
-.desc-icon:hover {
-  background-image: url("@/assets/yonghu/icon22.png");
-}
-
 </style>
 
 <style lang="scss" scoped>
