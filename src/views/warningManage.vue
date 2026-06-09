@@ -16,7 +16,7 @@
           <el-option label="水表大用量用户" value="水表大用量用户"></el-option>
           <el-option label="数据长时间未上报" value="数据长时间未上报"></el-option>
           <el-option label="设备异常" value="设备异常"></el-option>
-          <el-option label="关阀状态下水表吨数增加" value="关阀状态下水表吨数增加"></el-option>
+          <el-option label="关阀状态读数增加" value="关阀状态读数增加"></el-option>
           <el-option label="水表频繁上报" value="水表频繁上报"></el-option>
         </el-select>
       </div>
@@ -156,7 +156,7 @@
               </template>
             </el-table-column>
             <el-table-column v-if="showFrequentReportColumn" property="meterVendor" label="厂商" :width="deviceVendorWidth" align="center" />
-            <!-- 关阀状态下水表吨数增加专用列 -->
+            <!-- 关阀状态读数增加专用列 -->
             <el-table-column v-if="showValveClosedIncreaseColumn" label="上次读数" :width="lastReadingWidth" align="center">
               <template #default="{ row }">
                 {{ (row.tons != null && row.abnormalWaterDelta != null) ? (row.tons - row.abnormalWaterDelta).toFixed(2) : '' }}
@@ -448,7 +448,7 @@ export default {
           deviceVendor: 8,
         };
       }
-      // 关阀状态下水表吨数增加 — sum: 4+6+7+10+13+9+9+12+9+6+7+8 = 100
+      // 关阀状态读数增加 — sum: 4+6+7+10+13+9+9+12+9+6+7+8 = 100
       if (this.showValveClosedIncreaseColumn) {
         return {
           selection: 4,

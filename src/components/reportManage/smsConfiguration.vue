@@ -773,6 +773,16 @@ export default {
           this.addData[key] = this.addData[key].trim();
         }
       });
+      // 将数字字段从字符串转为数字类型
+      if (this.addData.smsSendTime !== null && this.addData.smsSendTime !== "") {
+        this.addData.smsSendTime = parseInt(this.addData.smsSendTime, 10);
+      }
+      if (this.addData.minimumBalanceThreshold !== null && this.addData.minimumBalanceThreshold !== "") {
+        this.addData.minimumBalanceThreshold = parseFloat(this.addData.minimumBalanceThreshold);
+      }
+      if (this.addData.balanceWarningDays !== null && this.addData.balanceWarningDays !== "") {
+        this.addData.balanceWarningDays = parseInt(this.addData.balanceWarningDays, 10);
+      }
       //this.addData.companyId = JSON.parse(sessionStorage.getItem("userData")).companyId;
       const filteredParams = Object.fromEntries(Object.entries(this.addData).filter(([_, value]) => value !== null && value !== ""));
       service
@@ -886,9 +896,9 @@ export default {
         smsConfigId: this.editData.smsConfigId,
         smsConfigName: this.editData.smsConfigName,
         smsSendType: this.editData.smsSendType,
-        smsSendTime: this.editData.smsSendTime,
-        minimumBalanceThreshold: this.editData.minimumBalanceThreshold,
-        balanceWarningDays: this.editData.balanceWarningDays,
+        smsSendTime: this.editData.smsSendTime !== null && this.editData.smsSendTime !== "" ? parseInt(this.editData.smsSendTime, 10) : null,
+        minimumBalanceThreshold: this.editData.minimumBalanceThreshold !== null && this.editData.minimumBalanceThreshold !== "" ? parseFloat(this.editData.minimumBalanceThreshold) : null,
+        balanceWarningDays: this.editData.balanceWarningDays !== null && this.editData.balanceWarningDays !== "" ? parseInt(this.editData.balanceWarningDays, 10) : null,
         companyId: null,
       };
       for (let item of this.companyList) {
