@@ -5,37 +5,37 @@
         <!-- 当companyId为1时，代表是荆州的水厂，所以能查询company -->
         <div class="search-input" style="margin-left: 10px" v-if="companyId === 1">
           <span>所属水厂</span>
-          <el-select v-model="params.company" placeholder="请选择所属水厂">
+          <el-select class="big-font-el-select" v-model="params.company" placeholder="请选择所属水厂">
             <el-option v-for="item in companyList" :key="item.id" :value="item.id" :label="item.name"></el-option>
           </el-select>
         </div>
-        <div class="search-input" style="margin-left: 10px">
+        <div class="search-input" style="margin-left: 10px; width: 16%">
           <span>所属厂商</span>
-          <el-select v-model="params.meterVendor" placeholder="请选择">
+          <el-select class="big-font-el-select" v-model="params.meterVendor" placeholder="请选择">
             <el-option v-for="item in changshang_list" :key="item.id" :label="item.label" :value="item.label"></el-option>
           </el-select>
         </div>
-        <div class="search-input" style="margin-left: 10px">
+        <div class="search-input" style="margin-left: 10px; width: 16%">
           <span>用户号</span>
           <el-input v-model="params.userId" placeholder="请输入..." />
         </div>
-        <div class="search-input" style="margin-left: 10px">
+        <div class="search-input" style="margin-left: 10px; width: 16%">
           <span>表号</span>
           <el-input v-model="params.meterCode" placeholder="请输入..." />
         </div>
-        <div class="search-input" style="margin-left: 10px">
+        <div class="search-input" style="margin-left: 10px; width: 16%">
           <span>通讯类别</span>
-          <el-select v-model="params.commandType" placeholder="请选择">
+          <el-select v-model="params.commandType" class="big-font-el-select" placeholder="请选择">
             <el-option v-for="item in commandTypeList" :key="item.value" :label="item.label" :value="item.label"></el-option>
           </el-select>
         </div>
-        <div class="search-input" style="margin-left: 10px">
+        <div class="search-input" style="margin-left: 10px; width: 16%">
           <span>通讯状态</span>
-          <el-select v-model="params.commandStatus" placeholder="请选择">
+          <el-select v-model="params.commandStatus" class="big-font-el-select" placeholder="请选择">
             <el-option v-for="item in commandStatusList" :key="item.value" :label="item.label" :value="item.label"></el-option>
           </el-select>
         </div>
-        <div class="search-input" style="margin-left: 10px">
+        <div class="search-input" style="margin-left: 10px; width: 30%">
           <span>通讯下发时间</span>
           <el-date-picker
               v-model="params.time"
@@ -53,11 +53,11 @@
       <div class="buttons">
         <div class="sercah-btn" @click="search">
           <img src="@/assets/yonghu/icon16.png" alt="" style="margin-left: 8px" />
-          <span style="font-size: 20px; margin-left: 15%">搜索</span>
+          <span style="font-size: 20px; margin-left: 5%">搜索</span>
         </div>
         <div class="clear-btn" @click="clear">
           <img src="@/assets/rizhi/icon4.png" alt="" style="margin-left: 10px" />
-          <span style="font-size: 20px; margin-left: 15%; color: #5a5a5a">清空</span>
+          <span style="font-size: 20px; margin-left: 5%; color: #5a5a5a">清空</span>
         </div>
       </div>
     </div>
@@ -81,6 +81,7 @@
           <el-table-column type="selection" :selectable="selectable" :width="selectionWidth" align="center" />
           <el-table-column property="theId" label="序号" :width="indexWidth" align="center" />
           <el-table-column property="displayUserId" label="用户号" :width="userIdWidth" align="center" />
+          <el-table-column property="userName" label="用户名" :width="userNameWidth" align="center" />
           <el-table-column property="meterCode" label="表号" :width="biaohaoWidth" align="center" />
           <el-table-column property="commandType" label="通讯类别" :width="tongxunleibieWidth" align="center" />
           <el-table-column property="commandStatus" label="通讯状态" :width="tongxunzhaungtaiWidth" align="center" />
@@ -157,6 +158,7 @@ export default {
       tongxunzhaungtaiWidth: 0,
       timeWidth: 0,
       changshangWidth: 0,
+      userNameWidth: 0,
       descriptionWidth: 0,
 
       // 父容器元素
@@ -180,14 +182,15 @@ export default {
     columnPercentages() {
       return {
         selection: 3,
-        index: 5,
+        index: 4,
         biao_hao: 9,
-        userId: 8,
+        userId: 6,
         staffName: 8,
         tongxunleibie: 7,
-        tongxunzhaungtai: 8,
+        tongxunzhaungtai: 5.6,
         time: 10,
-        changshang: 7,
+        changshang: 5,
+        userName: 7,
         description: 25,
       };
     },
@@ -232,6 +235,7 @@ export default {
         this.tongxunzhaungtaiWidth = (this.columnPercentages.tongxunzhaungtai / 100) * parentWidth;
         this.timeWidth = (this.columnPercentages.time / 100) * parentWidth;
         this.changshangWidth = (this.columnPercentages.changshang / 100) * parentWidth;
+        this.userNameWidth = (this.columnPercentages.userName / 100) * parentWidth;
         this.descriptionWidth = (this.columnPercentages.description / 100) * parentWidth;
       }
     },
@@ -522,7 +526,7 @@ export default {
 .clear-btn {
   background-color: #fff;
   border: 2px solid #f2f2f2;
-  margin-right: 10px;
+  margin-right: 40px;
 }
 
 .log-info {
