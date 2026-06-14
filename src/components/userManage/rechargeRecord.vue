@@ -110,18 +110,25 @@
             >
               <el-table-column type="selection" :selectable="selectable" min-width="40" align="center" fixed="left" />
               <el-table-column property="userId" label="用户号" min-width="50" align="center" fixed="left" />
-              <el-table-column property="userName" label="用户名称" min-width="70" align="center" />
-              <el-table-column property="userAddr" label="用户地址" min-width="100" align="center" />
-              <el-table-column property="regionName" label="所属区域" min-width="100" align="center" />
-              <el-table-column property="userPhone" label="联系电话" min-width="100" align="center" />
-              <el-table-column property="meterCode" label="表号" min-width="100" align="center" />
-              <el-table-column property="payerPhone" label="缴费人手机号" min-width="100" align="center" />
-              <el-table-column property="rechargeUser" label="收费人" min-width="80" align="center" />
-              <el-table-column property="rechargeType" label="交易方式" min-width="100" align="center" />
-              <el-table-column property="rechargeAmount" label="充值金额/元" min-width="100" align="center" />
-              <el-table-column property="oldBalance" label="充值前余额/元" min-width="100" align="center" />
-              <el-table-column property="newBalance" label="充值后余额/元" min-width="100" align="center" />
-              <el-table-column property="createTime" label="充值时间" min-width="100" align="center" />
+              <el-table-column property="userName" label="用户名称" min-width="65" align="center" />
+              <el-table-column property="userAddr" label="用户地址" min-width="75" align="center" />
+              <el-table-column property="regionName" label="所属区域" min-width="75" align="center" />
+              <el-table-column property="userPhone" label="联系电话" min-width="80" align="center" />
+              <el-table-column property="meterCode" label="表号" min-width="80" align="center" />
+              <el-table-column property="payerPhone" label="缴费人手机号" min-width="85" align="center" />
+              <el-table-column property="rechargeUser" label="收费人" min-width="65" align="center" />
+              <el-table-column property="rechargeType" label="交易方式" min-width="75" align="center" />
+              <el-table-column property="rechargeAmount" label="充值金额/元" min-width="85" align="center" />
+              <el-table-column property="oldBalance" label="充值前余额/元" min-width="85" align="center" />
+              <el-table-column property="newBalance" label="充值后余额/元" min-width="85" align="center" />
+              <el-table-column property="createTime" label="充值时间" min-width="85" align="center" />
+              <el-table-column property="hasShouju" label="是否开收据" min-width="75" align="center">
+                <template #default="{ row }">
+                  <span class="receipt-badge" :class="row.hasShouju ? 'receipt-yes' : 'receipt-no'">
+                    {{ row.hasShouju ? '已开收据' : '未开收据' }}
+                  </span>
+                </template>
+              </el-table-column>
             </el-table>
           </div>
           <div class="summary-box">
@@ -982,6 +989,31 @@ export default {
 .auto-download-checkbox {
   width: 100%;
   text-align: center;
+}
+
+/* 是否开收据 徽章样式 */
+.receipt-badge {
+  display: inline-block;
+  padding: 4px 14px;
+  border-radius: 14px;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.receipt-yes {
+  color: #1b7a4a;
+  background: #d4f0de;
+  border: 2px solid #46b97e;
+}
+
+.receipt-no {
+  color: #b0b3bb;
+  background: #fafafa;
+  border: 1px solid #e0e0e0;
+  font-weight: 400;
+  font-size: 12px;
+  padding: 2px 10px;
 }
 </style>
 

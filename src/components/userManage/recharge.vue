@@ -136,7 +136,7 @@ export default {
       printDialogVisible: false,
       receiptPDFBlob: null,
       receiptData: null,
-      autoDownload: true,
+      autoDownload: false,
       moneyError: "", // 添加金额错误提示
       isCharging: false, // 添加充值中状态
     };
