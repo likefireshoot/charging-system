@@ -56,11 +56,6 @@ export function useDetailNavigation() {
       userId: row.userId || '',
       meterCode: row.meterCode || '',
       companyId: row.companyId || '',
-      userName: row.userName || '',
-      userAddr: row.userAddr || '',
-      userPhone: row.userPhone || row.phone || '',
-      userBalance: row.balance || '',
-      meterReading: row.newReading ?? row.tons ?? 0,
       source,
       ...(tab ? { tab } : {}),
     }

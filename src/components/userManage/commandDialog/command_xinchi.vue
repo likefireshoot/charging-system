@@ -12,15 +12,16 @@
         </div>
       </div>
       <div class="command-content">
-        <div class="command-select">
-          <el-input v-model="commandFilterText" placeholder="请输入命令名称..."
-                    style="height: 40px; margin-bottom: 10px; margin-top: 10px"></el-input>
-          <el-tree ref="commandTreeRef" style="width: 230px; height: 460px; overflow-y: auto"
-                   :data="command_xinchi_data" :props="commandProps" default-expand-all
-                   :filter-node-method="command_filterNode" @node-click="handleNodeClick"></el-tree>
-        </div>
-        <div class="command-params">
-          <div class="set-params">
+        <div class="command-body">
+          <div class="command-select">
+            <el-input v-model="commandFilterText" placeholder="请输入命令名称..."
+                      style="height: 40px; margin-bottom: 10px; margin-top: 10px"></el-input>
+            <el-tree ref="commandTreeRef" style="width: 100%; flex: 1; overflow-y: auto"
+                     :data="command_xinchi_data" :props="commandProps" default-expand-all
+                     :filter-node-method="command_filterNode" @node-click="handleNodeClick"></el-tree>
+          </div>
+          <div class="command-params">
+            <div class="set-params">
             <span style="font-size: 25px; margin-top: 10px; margin-bottom: 5px">设置参数</span>
             <div class="flex-container">
               <div style="width: 4px; height: 4px; background-color: #46b87d; margin-right: 5px"></div>
@@ -114,9 +115,9 @@
                 <el-form :model="params_set_tai.zhouqishangbao" :rules="cycleReportRules" ref="cycleReportForm"
                   class="set-content-container" v-if="node.label === '设置周期上报参数'">
                   <div class="set-input">
-                    <span>周期频率</span>
+                    <span>周期单位</span>
                     <el-form-item prop="way" style="margin: 0;">
-                      <el-select v-model="params_set_tai.zhouqishangbao.way">
+                      <el-select v-model="params_set_tai.zhouqishangbao.way" class="big-font-el-select">
                         <el-option label="每小时" value="5"></el-option>
                         <el-option label="每天" value="6"></el-option>
                         <el-option label="每周" value="7"></el-option>
@@ -125,39 +126,37 @@
                     </el-form-item>
                   </div>
                   <div class="set-input">
-                    <span>星期</span>
-                    <el-form-item prop="week" style="margin: 0;">
-                      <el-input v-model="params_set_tai.zhouqishangbao.week" placeholder="有效值为0~7"></el-input>
+                    <span>间隔数量</span>
+                    <el-form-item prop="interval" style="margin: 0;">
+                      <el-input v-model="params_set_tai.zhouqishangbao.interval" placeholder="请输入间隔数量"></el-input>
                     </el-form-item>
                   </div>
-                  <div class="set-input">
-                    <span>周期间隔</span>
-                    <el-form-item prop="interval" style="margin: 0;">
-                      <el-input v-model="params_set_tai.zhouqishangbao.interval"></el-input>
+                  <div class="set-input" v-if="params_set_tai.zhouqishangbao.way == '7'">
+                    <span>周几上报</span>
+                    <el-form-item prop="week" style="margin: 0;">
+                      <el-select v-model="params_set_tai.zhouqishangbao.week" class="big-font-el-select">
+                        <el-option label="星期一" :value="1"></el-option>
+                        <el-option label="星期二" :value="2"></el-option>
+                        <el-option label="星期三" :value="3"></el-option>
+                        <el-option label="星期四" :value="4"></el-option>
+                        <el-option label="星期五" :value="5"></el-option>
+                        <el-option label="星期六" :value="6"></el-option>
+                        <el-option label="星期日" :value="7"></el-option>
+                      </el-select>
                     </el-form-item>
                   </div>
                   <div class="set-input" style="width: 100%">
-                    <span>开始时间</span>
-                    <div style="width: 100%; display: flex; justify-content: space-between">
-                      <el-form-item prop="year" style="margin: 0; flex: 1; margin-right: 10px;">
-                        <el-input v-model="params_set_tai.zhouqishangbao.year" placeholder="年"></el-input>
-                      </el-form-item>
-                      <el-form-item prop="month" style="margin: 0; flex: 1; margin-right: 10px;">
-                        <el-input v-model="params_set_tai.zhouqishangbao.month" placeholder="月"></el-input>
-                      </el-form-item>
-                      <el-form-item prop="day" style="margin: 0; flex: 1; margin-right: 10px;">
-                        <el-input v-model="params_set_tai.zhouqishangbao.day" placeholder="日"></el-input>
-                      </el-form-item>
-                      <el-form-item prop="hour" style="margin: 0; flex: 1; margin-right: 10px;">
-                        <el-input v-model="params_set_tai.zhouqishangbao.hour" placeholder="时"></el-input>
-                      </el-form-item>
-                      <el-form-item prop="minute" style="margin: 0; flex: 1; margin-right: 10px;">
-                        <el-input v-model="params_set_tai.zhouqishangbao.minute" placeholder="分"></el-input>
-                      </el-form-item>
-                      <el-form-item prop="second" style="margin: 0; flex: 1; margin-right: 10px;">
-                        <el-input v-model="params_set_tai.zhouqishangbao.second" placeholder="秒"></el-input>
-                      </el-form-item>
-                    </div>
+                    <span>周期起始时间</span>
+                    <el-form-item prop="year" style="margin: 0;">
+                      <el-date-picker
+                        v-model="cycleReportDateTimeStr"
+                        type="datetime"
+                        placeholder="选择周期起始时间"
+                        format="YYYY-MM-DD HH:mm:ss"
+                        value-format="YYYY-MM-DD HH:mm:ss"
+                        style="width: 100%"
+                      />
+                    </el-form-item>
                   </div>
                 </el-form>
 
@@ -167,7 +166,7 @@
                   <div class="set-input">
                     <span>阀门状态</span>
                     <el-form-item prop="famenstate" style="margin: 0;">
-                      <el-select v-model="params_set_tai.famenstate">
+                      <el-select v-model="params_set_tai.famenstate" class="big-font-el-select">
                         <el-option label="开阀" value="1"></el-option>
                         <el-option label="关阀" value="0"></el-option>
                       </el-select>
@@ -195,6 +194,21 @@
                     <el-input v-model="params_set_tai.shilianjiance.allowShilianDays"></el-input>
                   </div>
                 </div> -->
+                <!-- 周期上报预览卡片（始终显示，填空式） -->
+                <div class="cycle-preview-card" v-if="node.label === '设置周期上报参数'">
+                  <div class="preview-text">
+                    <span class="preview-label">将上报设置为从 </span>
+                    <span v-if="cycleReportDateTimeStr" class="preview-filled">{{ cycleReportDateTimeStr }}</span>
+                    <span v-else class="preview-placeholder">选择时间</span>
+                    <span class="preview-label"> 开始，每 </span>
+                    <span v-if="params_set_tai.zhouqishangbao.interval" class="preview-filled">{{ params_set_tai.zhouqishangbao.interval }}</span>
+                    <span v-else class="preview-placeholder">间隔</span>
+                    <span class="preview-label"> </span>
+                    <span v-if="cycleReportUnit" class="preview-filled">{{ cycleReportUnit }}</span>
+                    <span v-else class="preview-placeholder">单位</span>
+                    <span class="preview-label"> 上报一次</span>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -400,24 +414,25 @@
               </div> -->
             </div>
           </div>
-          <div class="btns">
-            <div class="confirm-btn" @click="commit_xinchi">
-              <el-icon style="margin-left: -3%">
-                <Check />
-              </el-icon>
-              <span style="font-size: 20px; margin-left: 5%">确认</span>
-            </div>
-            <div class="cancel-btn" @click="closeCommandDialog">
-              <el-icon style="margin-left: -3%; color: #45ba7e">
-                <Close />
-              </el-icon>
-              <span style="font-size: 20px; margin-left: 5%; color: #5a5a5a">取消</span>
-            </div>
-          </div>
+        </div>
+      </div>
+      <div class="btns">
+        <div class="confirm-btn" @click="commit_xinchi">
+          <el-icon style="margin-left: -3%">
+            <Check />
+          </el-icon>
+          <span style="font-size: 20px; margin-left: 5%">确认</span>
+        </div>
+        <div class="cancel-btn" @click="closeCommandDialog">
+          <el-icon style="margin-left: -3%; color: #45ba7e">
+            <Close />
+          </el-icon>
+          <span style="font-size: 20px; margin-left: 5%; color: #5a5a5a">取消</span>
         </div>
       </div>
     </div>
   </div>
+</div>
 </template>
 
 <script>
@@ -442,25 +457,28 @@ export default {
   data() {
     const validateWay = (rule, value, callback) => {
       if (!value) {
-        callback(new Error('周期频率不能为空'));
+        callback(new Error('周期单位不能为空'));
       } else {
         callback();
       }
     };
     const validateWeek = (rule, value, callback) => {
+      // 星期映射规则：周几对应数值几（周一=1, 周二=2, ..., 周日=7），非周模式统一填 0
       if (value === '' || value === undefined || value === null) {
-        callback(new Error('星期不能为空'));
-      } else if (!/^\d+$/.test(value) || Number(value) < 0 || Number(value) > 7) {
-        callback(new Error('星期有效值为0~7的整数'));
+        callback(new Error('请选择周几上报'));
+      } else if (!/^\d+$/.test(String(value)) || Number(value) < 0 || Number(value) > 7) {
+        callback(new Error('请选择有效的星期（星期一~星期日）'));
+      } else if (this.params_set_tai.zhouqishangbao.way === '7' && Number(value) === 0) {
+        callback(new Error('每周模式下请选择具体星期（星期一~星期日）'));
       } else {
         callback();
       }
     };
     const validateInterval = (rule, value, callback) => {
       if (value === '' || value === undefined || value === null) {
-        callback(new Error('周期间隔不能为空'));
+        callback(new Error('间隔数量不能为空'));
       } else if (!/^\d+$/.test(value) || Number(value) <= 0) {
-        callback(new Error('周期间隔必须为正整数'));
+        callback(new Error('间隔数量必须为正整数'));
       } else {
         callback();
       }
@@ -541,6 +559,8 @@ export default {
     };
     return {
       commandFilterText: "",
+      // 周期起始时间选择器绑定值（YYYY-MM-DD HH:mm:ss 格式字符串）
+      cycleReportDateTimeStr: "",
       //当前所选择到的子节点的信息
       node: {
         label: "",
@@ -692,7 +712,7 @@ export default {
         },
         zhouqishangbao: {
           way: "",
-          week: null,
+          week: 0,
           interval: null,
           year: "",
           month: "",
@@ -705,7 +725,7 @@ export default {
       },
       cycleReportRules: {
         way: [{ validator: validateWay, trigger: 'change' }],
-        week: [{ validator: validateWeek, trigger: 'blur' }],
+        week: [{ validator: validateWeek, trigger: 'change' }],
         interval: [{ validator: validateInterval, trigger: 'blur' }],
         year: [{ validator: validateYear, trigger: 'blur' }],
         month: [{ validator: validateMonth, trigger: 'blur' }],
@@ -797,9 +817,52 @@ export default {
     };
   },
 
+  computed: {
+    /**
+     * 周期单位中文映射
+     */
+    cycleReportUnit() {
+      const unitMap = { '5': '小时', '6': '天', '7': '周', '8': '月' };
+      return unitMap[this.params_set_tai.zhouqishangbao.way] || '';
+    },
+  },
+
   watch: {
     commandFilterText(val) {
       this.$refs.commandTreeRef.filter(val);
+    },
+    /**
+     * 监听日期选择器值变化，分解为独立的年/月/日/时/分/秒字段
+     * 保持原有数据结构和请求逻辑不变
+     */
+    cycleReportDateTimeStr(val) {
+      if (val) {
+        const parts = val.match(/^(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2})$/);
+        if (parts) {
+          this.params_set_tai.zhouqishangbao.year = parts[1];
+          this.params_set_tai.zhouqishangbao.month = parts[2];
+          this.params_set_tai.zhouqishangbao.day = parts[3];
+          this.params_set_tai.zhouqishangbao.hour = parts[4];
+          this.params_set_tai.zhouqishangbao.minute = parts[5];
+          this.params_set_tai.zhouqishangbao.second = parts[6];
+        }
+      } else {
+        this.params_set_tai.zhouqishangbao.year = '';
+        this.params_set_tai.zhouqishangbao.month = '';
+        this.params_set_tai.zhouqishangbao.day = '';
+        this.params_set_tai.zhouqishangbao.hour = '';
+        this.params_set_tai.zhouqishangbao.minute = '';
+        this.params_set_tai.zhouqishangbao.second = '';
+      }
+    },
+    /**
+     * 监听周期单位变化：非"每周"模式时，week 自动设为 0
+     * 星期映射规则：周几对应数值几（周一=1, ..., 周日=7），非周模式统一填 0
+     */
+    'params_set_tai.zhouqishangbao.way'(newVal) {
+      if (newVal !== '7') {
+        this.params_set_tai.zhouqishangbao.week = 0;
+      }
     },
   },
 
@@ -935,7 +998,7 @@ export default {
 
 .command-dialog-content {
   width: 60%;
-  height: 600px;
+  height: 700px;
   border: 1px solid #fafafa;
   background-color: #fafafa;
   border-radius: 5px;
@@ -946,26 +1009,40 @@ export default {
   display: flex;
   flex-direction: column;
   align-items: center;
+  overflow: hidden;
 }
 
 .command-content {
   width: 96%;
-  height: 540px;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
   background-color: #fff;
   border-radius: 5px;
   margin-top: 10px;
   margin-bottom: 10px;
-  overflow-y: auto;
   padding: 0 10px;
   background: none;
   display: flex;
+  flex-direction: column;
   flex-wrap: nowrap;
-  justify-content: space-between;
+}
+
+.command-body {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  display: flex;
+  flex-wrap: nowrap;
 }
 
 .command-select {
   height: 100%;
-  width: 210px;
+  width: 260px;
+  min-width: 260px;
+  flex-shrink: 0;
+  min-height: 0;
+  overflow: hidden;
   background-color: #fff;
   border-radius: 5px;
   padding: 0 10px;
@@ -975,7 +1052,8 @@ export default {
 }
 
 .command-params {
-  flex-grow: 1;
+  flex: 1;
+  min-height: 0;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
@@ -992,6 +1070,7 @@ export default {
   padding-left: 10px;
   display: flex;
   flex-direction: column;
+  flex-shrink: 0;
 }
 
 .set-content,
@@ -1021,6 +1100,56 @@ export default {
   margin-bottom: 5px;
 }
 
+.cycle-summary {
+  border-top: 1px dashed #e9e9e9;
+  padding-top: 10px;
+  margin-top: 5px;
+}
+
+/* 周期上报预览卡片 - 始终显示的填空式预览 */
+.cycle-preview-card {
+  width: 96%;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  padding: 14px 16px;
+  margin-top: 12px;
+  margin-bottom: 4px;
+}
+
+.cycle-preview-card .preview-text {
+  font-size: 22px;
+  color: #333;
+  line-height: 1.8;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+}
+
+.cycle-preview-card .preview-label {
+  font-weight: normal;
+  color: #555;
+  font-size: 22px;
+}
+
+.cycle-preview-card .preview-filled {
+  color: #45ba7e;
+  font-weight: bold;
+  font-size: 24px;
+}
+
+.cycle-preview-card .preview-placeholder {
+  display: inline-block;
+  min-width: 70px;
+  padding: 2px 10px;
+  background: #fff;
+  border: 1px dashed #c0c4cc;
+  border-radius: 4px;
+  color: #b0b3b8;
+  font-size: 20px;
+  text-align: center;
+}
+
 .set-input>.el-input {
   height: 35px;
   width: 100%;
@@ -1043,15 +1172,18 @@ export default {
   text-align: center;
   display: flex;
   justify-content: space-between;
+  flex-shrink: 0;
 }
 
 .btns {
   width: 100%;
   height: 40px;
+  flex-shrink: 0;
   display: flex;
   justify-content: flex-end;
   align-items: center;
-  margin-top: 0px;
+  margin-top: 8px;
+  padding-right: 10px;
 }
 
 .confirm-btn,

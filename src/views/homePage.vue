@@ -96,7 +96,7 @@
            <div class="shebei-warning-item">
             <img src="@/assets/shouye/icon8.png" @click="toWarnPath('关阀状态读数增加')" alt="" />
             <div class="shebei-warning-item-text">
-              <span style="font-size: 22px">关阀状态下读数增加</span>
+              <span style="font-size: 22px">关阀状态读数增加</span>
               <span style="font-size: 22px; font-family: 'Microsoft YaHei'; font-weight: bold; margin-top: 5px">{{ shebeiWarning.abnormalWaterCount }}</span>
               <span style="font-size: 17px; color: #999;">(漏水用户数，非告警数)</span>
             </div>

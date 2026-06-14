@@ -337,15 +337,15 @@
 <script>
 import { queryPriceMg } from "@/api/price/price";
 import { multiEditUserBindMeterInfo } from "@/api/userMeterBind/userMeterBind";
-import commandTaiYangNengVue from "@/components/userManage/command_taiyangneng.vue";
-import commandXinchiVue from "@/components/userManage/command_xinchi.vue";
-import commandQianBaoTong from "@/components/userManage/command_qianbaotong.vue";
-import commandZhuoZheng from "@/components/userManage/command_zhuozheng.vue";
-import commandJiWanXun from "@/components/userManage/command_jiwanxun.vue";
-import commandShengXin from "@/components/userManage/command_shengxin.vue";
-import commandOldXinchi from "@/components/userManage/command_old_xinchi.vue";
-import command4GXinchi from "@/components/userManage/command_4g_xinchi.vue";
-import commandOldShengXin from "@/components/userManage/command_oldshengxin.vue";
+import commandTaiYangNengVue from "@/components/userManage/commandDialog/command_taiyangneng.vue";
+import commandXinchiVue from "@/components/userManage/commandDialog/command_xinchi.vue";
+import commandQianBaoTong from "@/components/userManage/commandDialog/command_qianbaotong.vue";
+import commandZhuoZheng from "@/components/userManage/commandDialog/command_zhuozheng.vue";
+import commandJiWanXun from "@/components/userManage/commandDialog/command_jiwanxun.vue";
+import commandShengXin from "@/components/userManage/commandDialog/command_shengxin.vue";
+import commandOldXinchi from "@/components/userManage/commandDialog/command_old_xinchi.vue";
+import command4GXinchi from "@/components/userManage/commandDialog/command_4g_xinchi.vue";
+import commandOldShengXin from "@/components/userManage/commandDialog/command_oldshengxin.vue";
 import rechargeVue from "@/components/userManage/recharge.vue";
 import rechargeRecordVue from "@/components/userManage/rechargeRecord.vue";
 import changeVue from "@/components/userManage/change.vue";
