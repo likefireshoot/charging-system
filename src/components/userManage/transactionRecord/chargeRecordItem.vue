@@ -135,8 +135,7 @@ export default {
         createTime: "", // 用于存储选择的时间
         meterCode: "",
         userId: "",
-        companyId: "",
-        pageSizeV2: 30
+        companyId: ""
       },
       startData: {
         meterCode: "",

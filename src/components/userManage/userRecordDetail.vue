@@ -127,7 +127,6 @@ export default {
       selectedMeterCode: '',
       totalMoney: 0,
       meterReading: 0,
-      meterTotalWater: 0,
       source: "",
       activeTab: "bill",
       tabs: [
@@ -155,46 +154,17 @@ export default {
       return componentMap[this.activeTab] || "BillTable";
     }
   },
-  watch: {
-    activeTab(newVal) {
-      if (newVal === 'meter') {
-        this.fetchCardTotalWater();
-      }
-    }
-  },
   mounted() {
-    // 标记来源页面（userManage / warningManage）
     this.source = this.$route.query.source || "userManage";
 
-    // 支持从路由参数指定初始tab
     if (this.$route.query.tab) {
       this.activeTab = this.$route.query.tab;
     }
 
     const userId = this.$route.query.userId;
     const meterCode = this.$route.query.meterCode;
-    const companyId = this.$route.query.companyId;
     if (userId && meterCode) {
-      this.currentUser = {
-        userId,
-        meterCode,
-        companyId: companyId || "",
-        userName: this.$route.query.userName || "",
-        userAddr: this.$route.query.userAddr || "",
-        phone: this.$route.query.userPhone || "",
-        balance: this.$route.query.userBalance || ""
-      };
-
-      // 读取当前水表吨数（从抄表入口跳转时传递）
-      this.meterReading = this.$route.query.meterReading || 0;
-
-      // 获取用户所有水表列表（当前为Mock数据，后端接口就绪后替换）
-      this.fetchUserMeters();
-
-      // 若初始tab为抄表记录，预加载总用水量
-      if (this.activeTab === 'meter') {
-        this.fetchCardTotalWater();
-      }
+      Promise.all([this.fetchUserInfo(), this.fetchUserMeters()]);
     } else {
       ElMessage.error("缺少用户参数");
     }
@@ -203,9 +173,46 @@ export default {
     switchTab(type) {
       this.activeTab = type;
     },
+    async fetchUserInfo() {
+      try {
+        const response = await service.post("/userManage/userCharge/showUsers", {
+          page: 1,
+          pageSize: 1,
+          userId: this.$route.query.userId,
+          companyId: this.$route.query.companyId || "",
+        });
+        if (response.code !== 200) {
+          ElMessage.error(response.msg || "获取用户信息失败");
+          return;
+        }
+        const list = response.data?.list;
+        if (!list || list.length !== 1) {
+          ElMessage.error(`用户信息查询异常：期望1条记录，实际${list?.length ?? 0}条`);
+          return;
+        }
+        const r = list[0];
+        this.currentUser = {
+          userId: r.userId || "",
+          meterCode: this.$route.query.meterCode || r.meterCode || "",
+          companyId: r.companyId || this.$route.query.companyId || "",
+          userName: r.userName || "",
+          userAddr: r.userAddr || "",
+          phone: r.userPhone || "",
+          userType: r.priceName || "",
+          createTime: r.createTime || "",
+          meterType: r.meterType || "",
+          balance: r.balance ?? 0,
+        };
+      } catch (error) {
+        console.error("获取用户信息失败", error);
+        ElMessage.error("获取用户信息失败");
+      }
+    },
     async fetchUserMeters() {
       try {
-        const params = `?userId=${encodeURIComponent(this.currentUser.userId)}&companyId=${encodeURIComponent(this.currentUser.companyId || '')}`;
+        const userId = this.currentUser.userId || this.$route.query.userId;
+        const companyId = this.currentUser.companyId || this.$route.query.companyId || "";
+        const params = `?userId=${encodeURIComponent(userId)}&companyId=${encodeURIComponent(companyId)}`;
         const response = await service.get(`/userManage/meter/getUserMeters${params}`);
         if (response.code === 200 && response.data) {
           this.userMeters = response.data;
@@ -227,9 +234,6 @@ export default {
       if (meter) {
         this.meterReading = meter.newReading || 0;
       }
-      if (this.activeTab === 'meter') {
-        this.fetchCardTotalWater();
-      }
     },
     getStatusLabel(status) {
       const map = { '0': '当前表', '1': '历史表', '2': '历史表' };
@@ -238,18 +242,6 @@ export default {
     getStatusClass(status) {
       const map = { '0': 'status-current', '1': 'status-history', '2': 'status-history' };
       return map[status] || '';
-    },
-    async fetchCardTotalWater() {
-      if (!this.currentUser.userId || !this.currentUser.meterCode) return;
-      try {
-        const query = `?userId=${encodeURIComponent(this.currentUser.userId)}&meterCode=${encodeURIComponent(this.currentUser.meterCode)}&companyId=${encodeURIComponent(this.currentUser.companyId || '')}`;
-        const response = await service.get(`/userManage/meterRead/getTotalWater${query}`);
-        if (response.code === 200) {
-          this.meterTotalWater = response.data || 0;
-        }
-      } catch (error) {
-        console.error("获取总用水量失败", error);
-      }
     },
     goBack() {
       this.navigateBack(this.source);

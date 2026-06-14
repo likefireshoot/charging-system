@@ -283,8 +283,7 @@ export default {
       let params = {
         userId: this.user.userId,
         meterCode: this.user.meterCode,
-        companyId: this.user.companyId,
-        pageSizeV2: this.pageSize
+        companyId: this.user.companyId
       };
 
       // 扣费类型筛选 - 暂时注释

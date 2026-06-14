@@ -17,7 +17,6 @@
 </template>
 
 <script>
-import service from "@/api/request";
 import { getCommandComponent, apiPrefixMap } from "./commandTab/index.js";
 
 export default {
@@ -36,7 +35,6 @@ export default {
     return {
       brandComponent: null,
       vendorName: "",
-      meterInfo: {}, // 从后端获取的水表简略信息（含 imei）
     };
   },
   computed: {
@@ -48,8 +46,6 @@ export default {
     },
     meterData() {
       return {
-        //meterInfo中垃圾信息最多,放在最前面,优先被覆盖
-        ...this.meterInfo,
         ...this.selectedMeter,
         meterCode: this.user.meterCode || this.selectedMeter.meterCode || "",
         userId: this.user.userId || "",
@@ -81,31 +77,6 @@ export default {
           this.brandComponent = result;
         }
       },
-    },
-    /** 表号切换时重新请求水表简略信息 */
-    "user.meterCode": {
-      immediate: true,
-      handler(val) {
-        if (!val) { this.meterInfo = {}; return; }
-        this.fetchSimpleMeter(val);
-      },
-    },
-  },
-  methods: {
-    async fetchSimpleMeter(meterCode) {
-      try {
-        const res = await service.get(
-          `/userManage/meter/getSimpleMeterByCode?meterCode=${encodeURIComponent(meterCode)}`
-        );
-        if (res.code === 200 && res.data) {
-          this.meterInfo = res.data;
-        } else {
-          this.meterInfo = {};
-        }
-      } catch (e) {
-        console.error("获取水表简略信息失败", e);
-        this.meterInfo = {};
-      }
     },
   },
 };
