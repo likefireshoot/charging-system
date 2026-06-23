@@ -44,6 +44,10 @@
           <el-option label="故障" value="故障"></el-option>
         </el-select>
       </div>
+      <div class="search-input">
+        <span>厂商</span>
+        <el-input v-model="param.meterVendor" placeholder="请输入..." />
+      </div>
 
       <div class="buttons">
         <div class="sercah-btn" @click="search">
@@ -185,8 +189,28 @@
             <!-- <el-table-column property="imei" label="IMEI号" width="280" align="center" /> -->
 <!--            <el-table-column property="meterType" label="表类型" min-width="70" align="center" />-->
             <el-table-column property="meterVendor" label="厂商" min-width="70" align="center" />
-            <el-table-column property="priceName" label="价格类型" min-width="100" align="center" />
-            <el-table-column property="smsConfigName" label="短信" min-width="70" align="center"></el-table-column>
+            <el-table-column property="priceName" label="价格类型" min-width="100" align="center">
+              <template #default="scope">
+    <span
+      v-if="scope.row.priceId"
+      @click="showPriceDetail(scope.row)"
+      style="color: #46b97e; cursor: pointer;display: inline-block;">
+      {{ scope.row.priceName }}
+    </span>
+                <span v-else>{{ scope.row.priceName }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column property="smsConfigName" label="短信" min-width="70" align="center">
+              <template #default="scope">
+    <span
+      v-if="scope.row.smsConfigId"
+      @click="showSmsDetail(scope.row)"
+      style="color: #46b97e; cursor: pointer;display: inline-block;">
+      {{ scope.row.smsConfigName }}
+    </span>
+                <span v-else>{{ scope.row.smsConfigName }}</span>
+              </template>
+            </el-table-column>
 
             <el-table-column property="userAddr" label="用户地址" min-width="100" align="center" />
             <!-- <el-table-column property="companyName" label="所属水厂" width="280" align="center" /> -->
@@ -332,10 +356,139 @@
       </div>
     </div>
   </div>
+  <!-- 价格详情弹窗 -->
+  <div class="test-dialog" v-if="view_dialogFormVisible">
+    <div class="test-dialog-content" style="min-height: 500px">
+      <div class="title">
+        <div style="margin-left: 10px; display: flex; align-items: center">
+          <img src="@/assets/jiage/icon5.png" alt="" style="margin-right: 10px" />
+          <span style="font-size: 20px">价格详情</span>
+        </div>
+        <div style="margin-right: 10px; cursor: pointer" @click="view_dialogFormVisible = false">
+          <img src="@/assets/close.png" alt="" />
+        </div>
+      </div>
+      <div class="test-content" style="min-height: 500px">
+        <div class="test-item">
+          <div class="test-input" style="margin-right: 1%">
+            <span>价格名称</span>
+            <el-input v-model="viewData.priceName" disabled />
+          </div>
+          <div class="test-input" style="margin-right: 1%">
+            <span>保底数值/吨</span>
+            <el-input v-model="viewData.amountZeroEnd" disabled />
+          </div>
+          <div class="test-input">
+            <span>保底价格/元</span>
+            <el-input v-model="viewData.priceZero" disabled />
+          </div>
+          <div class="test-input" style="margin-right: 1%">
+            <span>阶梯数</span>
+            <el-input v-model="viewData.stepNumber" disabled />
+          </div>
+          <div class="test-input" style="margin-right: 1%">
+            <span>附加费用/元</span>
+            <el-input v-model="viewData.additionPrice" disabled />
+          </div>
+        </div>
+        <div class="test-item-jieti" v-if="viewData.stepNumber >= 1">
+          <span style="font-size: 16px; color: #47b97e; margin-bottom: 10px">第一阶梯</span>
+          <div class="jieti-content">
+            <div class="jieti-item" style="width: 60%">
+              <span>水量范围</span>
+              <div class="jieti-range">
+                <el-input v-model="viewData.amountFirstStart" disabled />
+                <span style="font-size: 20px; margin-bottom: 5px; align-self: center; margin: 0 5px">至</span>
+                <el-input v-model="viewData.amountFirstEnd" disabled />
+              </div>
+            </div>
+            <div class="jieti-item" style="width: 35%">
+              <span>价格（元/吨）</span>
+              <el-input v-model="viewData.priceFirst" disabled />
+            </div>
+          </div>
+        </div>
+        <div class="test-item-jieti" v-if="viewData.stepNumber >= 2">
+          <span style="font-size: 16px; color: #47b97e; margin-bottom: 10px">第二阶梯</span>
+          <div class="jieti-content">
+            <div class="jieti-item" style="width: 60%">
+              <span>水量范围</span>
+              <div class="jieti-range">
+                <el-input v-model="viewData.amountSecondStart" disabled />
+                <span style="font-size: 20px; margin-bottom: 5px; align-self: center; margin: 0 5px">至</span>
+                <el-input v-model="viewData.amountSecondEnd" disabled />
+              </div>
+            </div>
+            <div class="jieti-item" style="width: 35%">
+              <span>价格（元/吨）</span>
+              <el-input v-model="viewData.priceSecond" disabled />
+            </div>
+          </div>
+        </div>
+        <div class="test-item-jieti" v-if="viewData.stepNumber >= 3">
+          <span style="font-size: 16px; color: #47b97e; margin-bottom: 10px">第三阶梯</span>
+          <div class="jieti-content">
+            <div class="jieti-item" style="width: 60%">
+              <span>水量范围</span>
+              <div class="jieti-range">
+                <el-input v-model="viewData.amountThirdStart" disabled />
+                <span style="font-size: 20px; margin-bottom: 5px; align-self: center; margin: 0 5px">至</span>
+                <el-input v-model="viewData.amountThirdEnd" disabled />
+              </div>
+            </div>
+            <div class="jieti-item" style="width: 35%">
+              <span>价格（元/吨）</span>
+              <el-input v-model="viewData.priceThird" disabled />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 短信配置详情弹窗 -->
+  <div class="test-dialog" v-if="smsView_dialogFormVisible">
+    <div class="test-dialog-content" style="min-height: 400px">
+      <div class="title">
+        <div style="margin-left: 10px; display: flex; align-items: center">
+          <img src="@/assets/jiage/icon5.png" alt="" style="margin-right: 10px" />
+          <span style="font-size: 20px">短信配置详情</span>
+        </div>
+        <div style="margin-right: 10px; cursor: pointer" @click="smsView_dialogFormVisible = false">
+          <img src="@/assets/close.png" alt="" />
+        </div>
+      </div>
+      <div class="test-content" style="min-height: 400px">
+        <div class="test-item">
+          <div class="test-input" style="margin-right: 1%; width: 100%">
+            <span>短信配置名称</span>
+            <el-input v-model="smsViewData.smsConfigName" disabled />
+          </div>
+          <div class="test-input" style="margin-right: 1%; width: 100%">
+            <span>发送方式</span>
+            <el-input :value="smsViewData.smsSendType || ''" disabled />
+          </div>
+          <div class="test-input" style="margin-right: 1%; width: 100%" v-if="smsViewData.smsSendType === '定时发送' && smsViewData.smsSendTime != null">
+            <span>短信定时发送时间</span>
+            <el-input :value="smsViewData.smsSendTime + ':00'" disabled />
+          </div>
+          <div class="test-input" style="margin-right: 1%; width: 100%">
+            <span>余额不足发送预警值（元）</span>
+            <el-input :value="smsViewData.minimumBalanceThreshold !== null && smsViewData.minimumBalanceThreshold !== undefined ? smsViewData.minimumBalanceThreshold : ''" disabled />
+          </div>
+          <div class="test-input" style="margin-right: 1%; width: 100%">
+            <span>所属水厂</span>
+            <el-input :value="smsViewData.companyName || ''" disabled />
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script>
-import { queryPriceMg } from "@/api/price/price";
+import { queryPriceMg, getPriceDetail } from "@/api/price/price";
+import { getSmsConfigDetail } from "@/api/sms/sms";
 import { multiEditUserBindMeterInfo } from "@/api/userMeterBind/userMeterBind";
 import commandTaiYangNengVue from "@/components/userManage/commandDialog/command_taiyangneng.vue";
 import commandXinchiVue from "@/components/userManage/commandDialog/command_xinchi.vue";
@@ -401,6 +554,7 @@ export default {
         imei: "",
         meterCode: null,
         meterType: "", // 水表类型
+        meterVendor: "", // 厂商
         battery: "", // 电量
         valveStatus: "", // 阀门状态
         time: {
@@ -451,6 +605,8 @@ export default {
       sortField: "time",
       sortOrder: "desc",
 
+      // 标记是否需要自动点击抄表时间（从异常数据页面跳转时使用）
+      autoClickNextTime: false,
       //弹出框显示与否
       user_info_dialogFormVisible: false,
       transaction_dialogFormVisible: false,
@@ -473,6 +629,36 @@ export default {
       valveOpen_dialogFormVisible: false,
       changeBalance_dialogFormVisible: false,
 
+      // 价格详情弹窗
+      view_dialogFormVisible: false,
+      viewData: {
+        priceName: null,
+        amountZeroEnd: null,
+        priceZero: null,
+        stepNumber: null,
+        additionPrice: null,
+        amountFirstStart: null,
+        amountFirstEnd: null,
+        priceFirst: null,
+        amountSecondStart: null,
+        amountSecondEnd: null,
+        priceSecond: null,
+        amountThirdStart: null,
+        amountThirdEnd: null,
+        priceThird: null,
+      },
+
+      // 短信配置详情弹窗
+      smsView_dialogFormVisible: false,
+      smsViewData: {
+        smsConfigName: null,
+        smsSendType: null,
+        smsSendTime: null,
+        minimumBalanceThreshold: null,
+        balanceWarningDays: null,
+        companyId: null,
+        companyName: null,
+      },
       // ****** 请求锁，避免重复请求 ******
       isLoading: false,
       listRequestSeq: 0,
@@ -497,6 +683,24 @@ export default {
       this.$refs.treeRef.setCurrentKey(null);
       this.getRegionData();
     },
+    // 监听 yonghuData 变化，处理从异常页面跳转后的自动点击抄表时间
+    yonghuData: {
+      handler(newData) {
+        if (this.autoClickNextTime && newData && newData.length > 0) {
+          // 清除标记，避免重复点击
+          this.autoClickNextTime = false;
+          // 等待 DOM 更新
+          this.$nextTick(() => {
+            // 再次等待表格渲染完成
+            setTimeout(() => {
+              this.handleChaoBiaoTime(newData[0]);
+            }, 300);
+          });
+        }
+      },
+      immediate: false,
+      deep: false,
+    },
   },
   mounted() {
     this.$nextTick(() => {
@@ -505,7 +709,48 @@ export default {
 
     // 检查是否需要恢复页面状态（从 userRecordDetail 返回时）
     const restore = this.$route.query.restore;
-    if (restore === 'true') {
+
+    // 检查是否从异常数据页面跳转过来，需要自动搜索特定用户和表号
+    const searchUserAndMeter = this.$route.query.searchUserAndMeter === 'true';
+    const userIdFromQuery = this.$route.query.userId;
+    const meterCodeFromQuery = this.$route.query.meterCode;
+
+    // 标记是否需要自动点击抄表时间
+    this.autoClickNextTime = false;
+    if (searchUserAndMeter && (userIdFromQuery || meterCodeFromQuery)) {
+      // 设置搜索参数
+      if (userIdFromQuery) {
+        this.param.userId = userIdFromQuery;
+      }
+      if (meterCodeFromQuery) {
+        this.param.meterCode = meterCodeFromQuery;
+      }
+      // 设置标记，等待数据加载完成后自动点击
+      this.autoClickNextTime = true;
+      // 获取区域数据后执行搜索
+      this.getRegionData();
+      this.$nextTick(() => {
+        this.fetchUserList(1, { force: true });
+        // 搜索完成后，查找第一行数据并自动点击抄表时间
+        this.$nextTick(() => {
+          if (this.yonghuData && this.yonghuData.length > 0) {
+            const firstRow = this.yonghuData[0];
+            // 自动调用抄表时间点击事件
+            this.handleChaoBiaoTime(firstRow);
+          }
+        });
+      });
+    }
+    // 检查是否从异常数据页面跳转过来，需要自动搜索特定用户
+    else if (searchUserName && userNameFromQuery) {
+      // 设置搜索参数中的 userName
+      this.param.userName = userNameFromQuery;
+      // 获取区域数据后执行搜索
+      this.getRegionData();
+      this.$nextTick(() => {
+        this.fetchUserList(1, { force: true });
+      });
+    } else if (restore === 'true') {
       // 恢复页面状态
       this.currentPage = parseInt(this.$route.query.currentPage) || 1;
       this.pageSize = parseInt(this.$route.query.pageSize) || 30;
@@ -1497,6 +1742,7 @@ export default {
         imei: "",
         meterCode: null,
         meterType: "",
+        meterVendor: "",
         battery: "",
         valveStatus: "",
         time: {
@@ -1522,6 +1768,57 @@ export default {
     search() {
       this.currentPage = 1;
       this.fetchUserList(1, { force: true });
+    },
+    // 显示价格详情
+    showPriceDetail(row) {
+      if (!row.priceId) {
+        return ElMessage.warning("该用户未设置价格类型");
+      }
+
+      getPriceDetail(row.priceId)
+        .then((res) => {
+          if (res.code === 200) {
+            this.viewData = res.data;
+            this.view_dialogFormVisible = true;
+          } else {
+            ElMessage.error(res.msg || "获取价格详情失败");
+          }
+        })
+        .catch((error) => {
+          console.error("获取价格详情失败:", error);
+          ElMessage.error("获取价格详情失败");
+        });
+    },
+
+
+    // 显示短信配置详情
+    showSmsDetail(row) {
+      if (!row.smsConfigId) {
+        return ElMessage.warning("该用户未设置短信配置");
+      }
+
+      console.log('查询短信配置ID:', row.smsConfigId);
+
+      getSmsConfigDetail(row.smsConfigId)
+        .then((res) => {
+          console.log('API完整响应:', res);
+          console.log('响应data:', res.data);
+
+          if (res.code === 200) {
+            this.smsViewData = res.data;
+            console.log('smsViewData赋值后:', this.smsViewData);
+            console.log('minimumBalanceThreshold值:', this.smsViewData.minimumBalanceThreshold);
+            console.log('smsSendTime值:', this.smsViewData.smsSendTime);
+
+            this.smsView_dialogFormVisible = true;
+          } else {
+            ElMessage.error(res.msg || "获取短信配置详情失败");
+          }
+        })
+        .catch((error) => {
+          console.error("获取短信配置详情失败:", error);
+          ElMessage.error("获取短信配置详情失败");
+        });
     },
   },
 };
@@ -1967,7 +2264,144 @@ export default {
   z-index: 199;
   background-color: rgb(31 33 38 / 15%);
 }
+
+/* 价格详情和短信配置详情弹窗样式 */
+.test-dialog {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 1999;
+  background-color: rgb(31 33 38 / 15%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.test-dialog-content {
+  width: 500px;
+  border: 1px solid #fafafa;
+  background-color: #fafafa;
+  border-radius: 5px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-bottom: 20px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.test-dialog-content .test-content {
+  border: 1px solid #fff;
+  background-color: #fff;
+  border-radius: 5px;
+  width: 90%;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  margin-top: 20px;
+  padding: 15px 3%;
+  flex-wrap: wrap;
+  min-height: 200px;
+}
+
+.test-item {
+  display: flex;
+  flex-wrap: wrap;
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+.test-item-jieti {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+.jieti-content {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.jieti-item {
+  display: flex;
+  width: 100%;
+  gap: 10px;
+}
+
+.jieti-range {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+}
+
+.test-input {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.test-input > span {
+  font-size: 18px;
+  margin-bottom: 5px;
+  color: #575556;
+}
+
+.test-input .el-input {
+  width: 100%;
+}
+
+.title {
+  width: 100%;
+  background-color: #fff;
+  border-radius: 5px 5px 0 0;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+  height: 45px;
+  line-height: 45px;
+  text-align: center;
+  display: flex;
+  justify-content: space-between;
+}
+
+.btn {
+  width: 100%;
+  height: 40px;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  margin-top: 15px;
+}
+
+.confirm-btn,
+.cancel-btn {
+  height: 35px;
+  width: 90px;
+  cursor: pointer;
+  border: 1px solid #f2f2f2;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+}
+
+.confirm-btn {
+  background-color: #45ba7e;
+  margin-right: 15px;
+  color: #fff;
+}
+
+.cancel-btn {
+  background-color: #fff;
+  margin-right: 5%;
+}
 </style>
+
+// ... existing code ...
+
 
 <style lang="scss" scoped>
 :deep(.el-tree) {
