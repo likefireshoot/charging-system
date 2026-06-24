@@ -55,7 +55,7 @@
             <div class="data-item"><span>表号：</span>{{ selectedMeter.meterCode || currentUser.meterCode || '-' }}</div>
             <div class="data-item"><span>表具类型：</span>{{ selectedMeter.meterType || currentUser.meterType || 'NB-IoT表' }}</div>
             <div class="data-item"><span>品牌类型：</span>{{ selectedMeter.meterVendor || currentUser.meterVendor || '-' }}</div>
-            <div class="data-item"><span>结算日期：</span>{{ currentUser.settleDate || '20260305' }}</div>
+            <div class="data-item"><span>结算日期：</span>{{ formatDate(selectedMeter.updateTime) || '-' }}</div>
             <div class="data-item"><span>阀门状态：</span>{{ selectedMeter.valveStatus || currentUser.valveStatus || '-' }}</div>
             <!-- 解绑时间不再展示 -->
             <!-- <div v-if="selectedMeter.removeDate" class="data-item"><span>解绑时间：</span>{{ selectedMeter.removeDate }}</div> -->
@@ -245,6 +245,10 @@ export default {
     },
     goBack() {
       this.navigateBack(this.source);
+    },
+    formatDate(datetime) {
+      if (!datetime) return '';
+      return datetime.substring(0, 10);
     },
     handleTotalMoneyUpdate(value) {
       this.totalMoney = value || 0;

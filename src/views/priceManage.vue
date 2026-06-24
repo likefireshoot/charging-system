@@ -729,25 +729,8 @@ export default {
       }
     },
     viewDetail(row) {
-      let params = {};
-      params.priceId = row.priceId;
-      params.priceName = row.priceName;
-      params.pageNo = this.params.pageNo;
-      params.pageSize = this.params.pageSize;
-      params.companyId = this.params.companyId;
-      service
-        .post("/price/queryPriceMg", params)
-        .then((response) => {
-          if (response.code === 200) {
-            this.viewData = response.data.records[0];
-            this.view_dialogFormVisible = true;
-          } else {
-            ElMessage.error(response.msg);
-          }
-        })
-        .catch((error) => {
-          ElMessage.error(error);
-        });
+      this.viewData = row;
+      this.view_dialogFormVisible = true;
     },
     add_cancel() {
       this.add_dialogFormVisible = false;
