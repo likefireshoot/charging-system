@@ -706,8 +706,12 @@ export default {
     },
     edit_click() {
       if (this.multipleSelection.length > 0) {
+        const row = this.multipleSelection[0];
+        this.editData = {
+          ...row,
+          stepNumber: String(row.stepNumber ?? ''),
+        };
         this.edit_dialogFormVisible = true;
-        this.editData = this.multipleSelection[0];
       } else {
         ElMessage.warning("请选择需要编辑的数据");
       }
@@ -1232,7 +1236,7 @@ export default {
       }
 
       // 阶梯数：非空 + 只能是1/2/3
-      if (!stepNumber || !["1", "2", "3"].includes(stepNumber)) {
+      if (!stepNumber || !["1", "2", "3"].includes(String(stepNumber))) {
         ElMessage.error("阶梯数不能为空且只能选择1、2、3");
         return false;
       }
@@ -1440,7 +1444,7 @@ export default {
         return false;
       }
 
-      if (!stepNumber || !["1", "2", "3"].includes(stepNumber)) {
+      if (!stepNumber || !["1", "2", "3"].includes(String(stepNumber))) {
         ElMessage.error("阶梯数不能为空且只能选择1、2、3");
         return false;
       }
