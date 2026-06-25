@@ -1,7 +1,22 @@
 <template>
   <div class="yuangong-container">
+    <receive-exception-record
+        v-if="recordType !== 'report'"
+        :exception-type="recordType"
+        @change-exception-type="recordType = $event"
+    />
+    <template v-else>
     <div class="search-box">
       <div class="search-content">
+        <div class="search-input" style="margin-left: 10px">
+          <span>异常类型</span>
+          <el-select v-model="recordType" placeholder="请选择异常类型">
+            <el-option label="读数异常" value="report" />
+            <el-option label="报文解析失败" value="报文解析失败" />
+            <el-option label="表号不存在" value="表号不存在" />
+            <el-option label="绑定不存在" value="绑定不存在" />
+          </el-select>
+        </div>
         <div class="search-input" style="margin-left: 10px" v-if="companyId === 1">
           <span>所属水厂</span>
           <el-select v-model="params.company" placeholder="请选择所属水厂">
@@ -122,6 +137,7 @@
         </div>
       </div>
     </div>
+    </template>
   </div>
 </template>
 
@@ -130,7 +146,11 @@ import service from "@/api/request";
 import { ElMessage } from "element-plus";
 import formatDateTime from "@/api/common/dateConvert.js";
 import axios from "axios";
+import ReceiveExceptionRecord from "@/components/reportManage/ReceiveExceptionRecord.vue";
 export default {
+  components: {
+    ReceiveExceptionRecord,
+  },
   data() {
     return {
       params: {
@@ -143,6 +163,7 @@ export default {
         pageSize: 50,
         order: 1
       },
+      recordType: "report",
       companyId: JSON.parse(sessionStorage.getItem("userData")).companyId, // 所属水厂ID
       staffPermissionIds: JSON.parse(sessionStorage.getItem("userData")).staffPermissionIds,
       companyList: [],
@@ -416,6 +437,7 @@ export default {
       });
     },
     search() {
+      this.params.pageNo = 1;
       this.getErrorReportRecordData();
     },
     clear() {
@@ -531,7 +553,7 @@ export default {
   display: flex;
   flex-direction: column;
   align-content: center;
-  justify-content: center;
+  justify-content: flex-start;
   width: 100%;
   height: 98%;
   padding: 0px 20px;
