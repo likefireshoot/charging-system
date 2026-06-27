@@ -710,10 +710,12 @@ export default {
     // 检查是否需要恢复页面状态（从 userRecordDetail 返回时）
     const restore = this.$route.query.restore;
 
-    // 检查是否从异常数据页面跳转过来，需要自动搜索特定用户和表号
     const searchUserAndMeter = this.$route.query.searchUserAndMeter === 'true';
     const userIdFromQuery = this.$route.query.userId;
     const meterCodeFromQuery = this.$route.query.meterCode;
+    const searchUserName = this.$route.query.searchUserName === 'true';
+    const userNameFromQuery = this.$route.query.userName;
+
 
     // 标记是否需要自动点击抄表时间
     this.autoClickNextTime = false;
