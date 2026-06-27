@@ -117,6 +117,10 @@
               <el-input v-model="addData.priceZero" />
             </div>
             <div class="test-input" style="margin-right: 1%">
+              <span>首月免扣起始日</span>
+              <el-input v-model="addData.firstMonthNoBaseFeeDay" placeholder="请输入1-31" />
+            </div>
+            <div class="test-input" style="margin-right: 1%">
               <span>阶梯数</span>
               <el-select v-model="addData.stepNumber">
                 <el-option label="1" value="1"></el-option>
@@ -124,7 +128,7 @@
                 <el-option label="3" value="3"></el-option>
               </el-select>
             </div>
-            <div class="test-input" style="margin-right: 1%">
+            <div class="test-input">
               <span>附加费用/元</span>
               <el-input v-model="addData.additionPrice" />
             </div>
@@ -228,6 +232,10 @@
               <el-input v-model="editData.priceZero" />
             </div>
             <div class="test-input" style="margin-right: 1%">
+              <span>首月免扣起始日</span>
+              <el-input v-model="editData.firstMonthNoBaseFeeDay" placeholder="请输入1-31" />
+            </div>
+            <div class="test-input" style="margin-right: 1%">
               <span>阶梯数</span>
               <el-select v-model="editData.stepNumber">
                 <el-option label="1" value="1"></el-option>
@@ -235,7 +243,7 @@
                 <el-option label="3" value="3"></el-option>
               </el-select>
             </div>
-            <div class="test-input" style="margin-right: 1%">
+            <div class="test-input">
               <span>附加费用/元</span>
               <el-input v-model="editData.additionPrice" />
             </div>
@@ -378,10 +386,14 @@
               <el-input v-model="viewData.priceZero" disabled />
             </div>
             <div class="test-input" style="margin-right: 1%">
+              <span>首月免扣起始日</span>
+              <el-input v-model="viewData.firstMonthNoBaseFeeDay" disabled />
+            </div>
+            <div class="test-input" style="margin-right: 1%">
               <span>阶梯数</span>
               <el-input v-model="viewData.stepNumber" disabled />
             </div>
-            <div class="test-input" style="margin-right: 1%">
+            <div class="test-input">
               <span>附加费用/元</span>
               <el-input v-model="viewData.additionPrice" disabled />
             </div>
@@ -472,6 +484,7 @@ export default {
         additionPrice: null,
         amountZeroStart: 0,
         amountZeroEnd: null,
+        firstMonthNoBaseFeeDay: 25,
         priceZero: null,
         amountFirstStart: null,
         amountFirstEnd: null,
@@ -490,6 +503,7 @@ export default {
         additionPrice: null,
         amountZeroStart: 0,
         amountZeroEnd: null,
+        firstMonthNoBaseFeeDay: 25,
         priceZero: null,
         amountFirstStart: null,
         amountFirstEnd: null,
@@ -684,6 +698,7 @@ export default {
         additionPrice: null,
         amountZeroStart: 0,
         amountZeroEnd: null,
+        firstMonthNoBaseFeeDay: 25,
         priceZero: null,
         amountFirstStart: null,
         amountFirstEnd: null,
@@ -709,6 +724,7 @@ export default {
         const row = this.multipleSelection[0];
         this.editData = {
           ...row,
+          firstMonthNoBaseFeeDay: row.firstMonthNoBaseFeeDay ?? 25,
           stepNumber: String(row.stepNumber ?? ''),
         };
         this.edit_dialogFormVisible = true;
@@ -733,7 +749,10 @@ export default {
       }
     },
     viewDetail(row) {
-      this.viewData = row;
+      this.viewData = {
+        ...row,
+        firstMonthNoBaseFeeDay: row.firstMonthNoBaseFeeDay ?? 25,
+      };
       this.view_dialogFormVisible = true;
     },
     add_cancel() {
@@ -744,6 +763,7 @@ export default {
         additionPrice: null,
         amountZeroStart: 0,
         amountZeroEnd: null,
+        firstMonthNoBaseFeeDay: 25,
         priceZero: null,
         amountFirstStart: null,
         amountFirstEnd: null,
@@ -808,7 +828,7 @@ export default {
           }
         })
         .catch((error) => {
-          ElMessage.error(error);
+          ElMessage.error(error?.response?.data?.msg || error?.message || "操作失败");
         });
     },
     editPrice() {
@@ -833,7 +853,7 @@ export default {
           }
         })
         .catch((error) => {
-          ElMessage.error(error);
+          ElMessage.error(error?.response?.data?.msg || error?.message || "操作失败");
         });
     },
     deletePrice() {
@@ -1178,6 +1198,15 @@ export default {
 
     //   return true;
     // },
+    validateFirstMonthNoBaseFeeDay(day) {
+      const dayVal = Number(day);
+      if (!Number.isInteger(dayVal) || dayVal < 1 || dayVal > 31) {
+        ElMessage.error("首月免扣起始日必须是1-31之间的整数");
+        return false;
+      }
+      return true;
+    },
+
     // ========== 1. 新增价格配置 - 增强参数校验 ==========
     validateAddData() {
       // 先统一去除所有字符串参数的首尾空格
@@ -1188,7 +1217,7 @@ export default {
       });
 
       const {
-        priceName, amountZeroEnd, priceZero, stepNumber, additionPrice,
+        priceName, amountZeroEnd, priceZero, stepNumber, additionPrice, firstMonthNoBaseFeeDay,
         amountFirstStart, amountFirstEnd, priceFirst,
         amountSecondStart, amountSecondEnd, priceSecond,
         amountThirdStart, amountThirdEnd, priceThird
@@ -1254,6 +1283,10 @@ export default {
       }
       if (additionPriceVal.toString().split(".")[1]?.length > 2) {
         ElMessage.error("附加费用最多保留2位小数");
+        return false;
+      }
+
+      if (!this.validateFirstMonthNoBaseFeeDay(firstMonthNoBaseFeeDay)) {
         return false;
       }
 
@@ -1400,7 +1433,7 @@ export default {
       });
 
       const {
-        priceName, amountZeroEnd, priceZero, stepNumber, additionPrice,
+        priceName, amountZeroEnd, priceZero, stepNumber, additionPrice, firstMonthNoBaseFeeDay,
         amountFirstStart, amountFirstEnd, priceFirst,
         amountSecondStart, amountSecondEnd, priceSecond,
         amountThirdStart, amountThirdEnd, priceThird
@@ -1461,6 +1494,10 @@ export default {
       }
       if (additionPriceVal.toString().split(".")[1]?.length > 2) {
         ElMessage.error("附加费用最多保留2位小数");
+        return false;
+      }
+
+      if (!this.validateFirstMonthNoBaseFeeDay(firstMonthNoBaseFeeDay)) {
         return false;
       }
 
