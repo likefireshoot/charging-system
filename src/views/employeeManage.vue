@@ -624,6 +624,10 @@ export default {
   methods: {
     // 新增员工函数
     async addStaffConfirm() {
+      if (this.companyId !== 1) {
+        this.addStaffForm.companyId = this.companyId;
+      }
+      
       const validations = [
         { condition: !this.addStaffForm.companyId, message: "所属水厂不能为空" },
         { condition: !this.addStaffForm.staffName?.trim(), message: "员工名称不能为空" },
@@ -643,10 +647,10 @@ export default {
         }
       }
 
-      // 2. 子水厂自动赋值本厂ID（防止前端篡改）
-      if (this.companyId !== 1) {
-        this.addStaffForm.companyId = this.companyId;
-      }
+      // // 2. 子水厂自动赋值本厂ID（防止前端篡改）
+      // if (this.companyId !== 1) {
+      //   this.addStaffForm.companyId = this.companyId;
+      // }
 
       // 3. 提交请求（和你的staff表字段一一对应）
       try {

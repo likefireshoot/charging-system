@@ -32,6 +32,7 @@ import userRecordDetail from "@/components/userManage/userRecordDetail.vue";
 // 命令日志 + 异常数据
 import commandLog from "../views/commandLog.vue";
 import errorReportRecord from "../views/errorReportRecord.vue";
+import historyDataManage from "@/views/historyDataManage.vue";
 
 const routes = [
   {
@@ -179,6 +180,11 @@ const routes = [
         path: "/warningManage",
         name: "warningManage",
         component: warningManage,
+      },
+      {
+        path: "/historyDataManage",
+        name: "historyDataManage",
+        component: historyDataManage,
       },
       {
         path: "/field3",
