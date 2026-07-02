@@ -117,10 +117,6 @@
               <el-input v-model="addData.priceZero" />
             </div>
             <div class="test-input" style="margin-right: 1%">
-              <span>首月免扣起始日</span>
-              <el-input v-model="addData.firstMonthNoBaseFeeDay" placeholder="请输入1-31" />
-            </div>
-            <div class="test-input" style="margin-right: 1%">
               <span>阶梯数</span>
               <el-select v-model="addData.stepNumber">
                 <el-option label="1" value="1"></el-option>
@@ -128,9 +124,13 @@
                 <el-option label="3" value="3"></el-option>
               </el-select>
             </div>
-            <div class="test-input">
+            <div class="test-input" style="margin-right: 1%">
               <span>附加费用/元</span>
               <el-input v-model="addData.additionPrice" />
+            </div>
+            <div class="test-input">
+              <span>此日期后开户，开户当月不收保底费</span>
+              <el-input v-model="addData.firstMonthNoBaseFeeDay" placeholder="请输入1-31" />
             </div>
           </div>
           <div class="test-item-jieti">
@@ -232,10 +232,6 @@
               <el-input v-model="editData.priceZero" />
             </div>
             <div class="test-input" style="margin-right: 1%">
-              <span>首月免扣起始日</span>
-              <el-input v-model="editData.firstMonthNoBaseFeeDay" placeholder="请输入1-31" />
-            </div>
-            <div class="test-input" style="margin-right: 1%">
               <span>阶梯数</span>
               <el-select v-model="editData.stepNumber">
                 <el-option label="1" value="1"></el-option>
@@ -243,9 +239,13 @@
                 <el-option label="3" value="3"></el-option>
               </el-select>
             </div>
-            <div class="test-input">
+            <div class="test-input" style="margin-right: 1%">
               <span>附加费用/元</span>
               <el-input v-model="editData.additionPrice" />
+            </div>
+            <div class="test-input">
+              <span>此日期后开户，开户当月不收保底费</span>
+              <el-input v-model="editData.firstMonthNoBaseFeeDay" placeholder="请输入1-31" />
             </div>
             <!-- <div class="test-input" style="margin-right: 0">
               <span>所属水厂</span>
@@ -386,16 +386,16 @@
               <el-input v-model="viewData.priceZero" disabled />
             </div>
             <div class="test-input" style="margin-right: 1%">
-              <span>首月免扣起始日</span>
-              <el-input v-model="viewData.firstMonthNoBaseFeeDay" disabled />
-            </div>
-            <div class="test-input" style="margin-right: 1%">
               <span>阶梯数</span>
               <el-input v-model="viewData.stepNumber" disabled />
             </div>
-            <div class="test-input">
+            <div class="test-input" style="margin-right: 1%">
               <span>附加费用/元</span>
               <el-input v-model="viewData.additionPrice" disabled />
+            </div>
+            <div class="test-input">
+              <span>此日期后开户，开户当月不收保底费</span>
+              <el-input v-model="viewData.firstMonthNoBaseFeeDay" disabled />
             </div>
             <!-- <div class="test-input" style="margin-right: 0">
               <span>所属水厂</span>
@@ -1201,7 +1201,7 @@ export default {
     validateFirstMonthNoBaseFeeDay(day) {
       const dayVal = Number(day);
       if (!Number.isInteger(dayVal) || dayVal < 1 || dayVal > 31) {
-        ElMessage.error("首月免扣起始日必须是1-31之间的整数");
+        ElMessage.error("此日期后开户，开户当月不收保底费必须是1-31之间的整数");
         return false;
       }
       return true;
