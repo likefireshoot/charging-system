@@ -317,6 +317,7 @@ export default {
       return data.label.includes(value);
     },
     handleNodeClick(data) {
+      this.isLoading = true;
       this.quyu_selected = data;
       console.log(this.quyu_selected);
       let regionId = data.id;
@@ -355,6 +356,9 @@ export default {
           // 提取错误信息
           const errorMessage = error.response?.data?.msg || "请求发生错误";
           ElMessage.error(errorMessage);
+        })
+        .finally(() => {
+          this.isLoading = false;
         });
     },
     selectable() {
@@ -416,6 +420,7 @@ export default {
         });
     },
     getUserInfo() {
+      this.isLoading = true;
       let param = {
         page: 1,
         pageSize: 50,
@@ -436,9 +441,6 @@ export default {
               v.theId = this.pageSize * (response.data.currentPages - 1) + i + 1;
             });
             this.yonghuData = response.data.list;
-            // this.yonghuData.forEach((item) => {
-            //   item.updateTime = item.updateTime.replace("T", " ");
-            // });
             this.total = response.data.total;
             this.currentPage = response.data.currentPages;
             console.log(this.yonghuData);
@@ -448,9 +450,13 @@ export default {
         })
         .catch((error) => {
           ElMessage.error(error);
+        })
+        .finally(() => {
+          this.isLoading = false;
         });
     },
     reflush() {
+      this.isLoading = true;
       this.clear(1);
       this.filterText = "";
       this.$refs.treeRef.setCurrentKey(null);
@@ -475,15 +481,15 @@ export default {
               v.theId = this.pageSize * (response.data.currentPages - 1) + i + 1;
             });
             this.yonghuData = response.data.list;
-            // this.yonghuData.forEach((item) => {
-            //   item.updateTime = item.updateTime.replace("T", " ");
-            // });
             this.total = response.data.total;
             this.currentPage = 1;
           }
         })
         .catch((error) => {
           ElMessage.error("获取用户数据失败");
+        })
+        .finally(() => {
+          this.isLoading = false;
         });
     },
     getRegionData() {
