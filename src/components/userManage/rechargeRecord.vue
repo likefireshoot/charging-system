@@ -47,7 +47,7 @@
             <el-select v-model="rechargeRecordeData.rechargeType" placeholder="请选择收费类型">
               <el-option label="现金" value="现金"></el-option>
               <el-option label="微信支付" value="微信支付"></el-option>
-              <el-option label="支付宝支付" value="支付宝支付"></el-option>
+              <el-option label="免费赠送" value="免费赠送"></el-option>
             </el-select>
           </div>
           <div class="search-input" style="width: 25%; margin-right: 10px">
@@ -137,8 +137,8 @@
               <span class="summary-value">{{ rechargeSummary.weChatTotalAmount }}</span>
             </div>
             <div class="summary-item">
-              <span class="summary-label">支付宝总金额</span>
-              <span class="summary-value">{{ rechargeSummary.alipayTotalAmount }}</span>
+              <span class="summary-label">免费赠送总金额</span>
+              <span class="summary-value">{{ rechargeSummary.freeGiftTotalAmount }}</span>
             </div>
             <div class="summary-item">
               <span class="summary-label">现金总金额</span>
@@ -244,7 +244,8 @@ export default {
       staffNameOptions: [],
       rechargeSummary: {
         weChatTotalAmount: "0",
-        alipayTotalAmount: "0",
+        // alipayTotalAmount: "0",
+        freeGiftTotalAmount: "0",
         cashTotalAmount: "0",
         totalAmount: "0",
       },
@@ -390,7 +391,8 @@ export default {
       this.total = response.data.totalElements;
       this.rechargeSummary = {
         weChatTotalAmount: response.data.weChatTotalAmount ?? "0",
-        alipayTotalAmount: response.data.alipayTotalAmount ?? "0",
+        // alipayTotalAmount: response.data.alipayTotalAmount ?? "0",
+        freeGiftTotalAmount: response.data.freeGiftTotalAmount ?? "0",
         cashTotalAmount: response.data.cashTotalAmount ?? "0",
         totalAmount: response.data.totalAmount ?? "0",
       };
@@ -440,7 +442,7 @@ export default {
       this.rechargeRecordeData.rechargeType = "";
       this.rechargeSummary = {
         weChatTotalAmount: "0",
-        alipayTotalAmount: "0",
+        freeGiftTotalAmount: "0",
         cashTotalAmount: "0",
         totalAmount: "0",
       };
