@@ -2,6 +2,15 @@
   <div class="transaction-table-container">
     <div class="search-bar">
       <div class="search-input-item">
+        <span>充值类型</span>
+        <el-select v-model="transactionData.rechargeType" placeholder="全部" style="width: 130px; font-size: 18px;" @change="handleTimeTypeChange">
+          <el-option label="全部" value="" />
+          <el-option label="现金" value="现金" />
+          <el-option label="微信支付" value="微信支付" />
+          <el-option label="免费赠送" value="免费赠送" />
+        </el-select>
+      </div>
+      <div class="search-input-item">
         <span>时间</span>
         <div class="time-input">
           <el-select v-model="transactionData.timeType" placeholder="请选择" style="width: 100px; font-size: 18px;" @change="handleTimeTypeChange">
@@ -183,11 +192,13 @@ export default {
         createTime: "",
         dateRange: null,
         userId: "",
-        companyId: ""
+        companyId: "",
+        rechargeType: "" // 新增充值类型筛选
       },
       startData: {
         userId: "",
-        companyId: ""
+        companyId: "",
+        rechargeType: "" // 基础默认查询也带上
       }
     };
   },
@@ -288,6 +299,7 @@ export default {
       this.transactionData.dateRange = null;
       this.startData.userId = this.user.userId;
       this.startData.companyId = this.user.companyId;
+      this.startData.rechargeType = "";
     },
 
     handleTimeTypeChange() {
@@ -301,6 +313,11 @@ export default {
         userId: baseParams.userId,
         companyId: baseParams.companyId
       };
+
+      // 新增：充值类型参数
+      if (baseParams.rechargeType) {
+        params.rechargeType = baseParams.rechargeType;
+      }
 
       if (baseParams.timeType === "custom") {
         if (baseParams.dateRange && baseParams.dateRange.length === 2) {
@@ -443,22 +460,49 @@ export default {
       }
     },
     handleSearch() {
+      let hasValidTime = true;
+
+      // 判断是否选中了充值类型（包含“全部”）
+      const hasRechargeFilter = this.transactionData.rechargeType !== null && this.transactionData.rechargeType !== undefined;
+
       if (this.transactionData.timeType === "custom") {
         if (!this.transactionData.dateRange || this.transactionData.dateRange.length !== 2) {
-          ElMessage.warning("请选择时间范围");
-          return;
+          // ElMessage.warning("请选择时间范围");
+          // return;
+          hasValidTime = false
         }
       } else if (!this.transactionData.createTime && this.transactionData.timeType) {
-        ElMessage.warning("请选择时间");
+        // ElMessage.warning("请选择时间");
+        // return;
+        hasValidTime = false
+      }
+
+      // 只有：既没有有效时间，也没有选择任何充值筛选（连全部都没选）才拦截
+      if (!hasValidTime && !hasRechargeFilter) {
+        ElMessage.warning("请选择充值类型或选择时间条件进行搜索");
         return;
       }
+
       this.currentPage = 1;
-      this.fetchWithSearch();
+      // this.fetchWithSearch();
+
+      if (hasValidTime) {
+        // 时间合法：时间+充值类型一起查
+        this.fetchWithSearch();
+      } else {
+        // 时间不满足校验：只使用充值类型查询
+        const oldRechargeType = this.startData.rechargeType;
+        this.startData.rechargeType = this.transactionData.rechargeType;
+        this.fetchTransactionRecords();
+        // 还原，不影响刷新/清空逻辑
+        this.startData.rechargeType = oldRechargeType;
+      }
     },
     handleClear() {
       this.transactionData.timeType = "day";
       this.transactionData.createTime = "";
       this.transactionData.dateRange = null;
+      this.transactionData.rechargeType = ""; // 重置充值类型
       this.currentPage = 1;
       this.fetchTransactionRecords();
     },
@@ -550,6 +594,11 @@ export default {
         userId: this.transactionData.userId,
         companyId: this.transactionData.companyId
       };
+
+      // 导出同步带上充值类型筛选
+      if (this.transactionData.rechargeType) {
+        params.rechargeType = this.transactionData.rechargeType;
+      }
 
       if (this.transactionData.timeType === "custom") {
         if (this.transactionData.dateRange && this.transactionData.dateRange.length === 2) {
