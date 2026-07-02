@@ -36,6 +36,33 @@
             <el-option label="有效" :value="2" />
           </el-select>
         </div>
+        <div class="search-input" style="margin-left: 10px">
+          <span>厂商</span>
+          <el-select v-model="params.meterVendor" placeholder="请选择厂商" clearable>
+            <el-option label="信驰" value="信驰" />
+            <el-option label="圣鑫" value="圣鑫" />
+            <el-option label="旧信驰" value="旧信驰" />
+            <el-option label="旧圣鑫" value="旧圣鑫" />
+            <el-option label="集万讯" value="集万讯" />
+            <el-option label="太阳能" value="太阳能" />
+          </el-select>
+        </div>
+        <div class="search-input" style="margin-left: 10px">
+          <span>电量</span>
+          <el-select v-model="params.battery" placeholder="请选择电量状态" clearable>
+            <el-option label="正常" value="正常" />
+            <el-option label="低电" value="低电" />
+            <el-option label="无" value="无" />
+          </el-select>
+        </div>
+        <div class="search-input" style="margin-left: 10px">
+          <span>阀门</span>
+          <el-select v-model="params.valveStatus" placeholder="请选择阀门状态" clearable>
+            <el-option label="开阀" value="开阀" />
+            <el-option label="关阀" value="关阀" />
+            <el-option label="故障" value="故障" />
+          </el-select>
+        </div>
       </div>
       <div class="buttons">
         <div class="sercah-btn" @click="search">
@@ -81,13 +108,33 @@
                         {{ scope.$index + 1 + (params.pageNo - 1) * params.pageSize }}
                     </el-table-column> -->
           <el-table-column property="userId" label="用户号" :width="workerNameWidth" align="center" />
-          <el-table-column property="userName" label="用户名" :width="workerNameWidth" align="center" />
+          <el-table-column label="用户名" :width="workerNameWidth" align="center">
+            <template #default="scope">
+              <span @click="handleUserInfo(scope.row)"
+                style="color: #46b97e; display: block; width: 100%; text-align: center; cursor: pointer">
+                {{ scope.row.userName }}
+              </span>
+            </template>
+          </el-table-column>
           <el-table-column property="meterCode" label="表号" :width="accountWidth" align="center" />
+          <el-table-column property="meterVendor" label="厂商" :width="companyWidth" align="center" />
           <el-table-column property="valveStatus" label="阀门" :width="phoneWidth" align="center" />
           <el-table-column property="battery" label="电量" :width="companyWidth" align="center" />
-          <el-table-column label="上次读数" :width="roleWidth" align="center" #default="scope">
-            <div v-if="scope.row.prevReadingCount !== null && scope.row.prevReadingCount !== undefined">{{ scope.row.prevReadingCount }}<br /></div>
-            <span v-else>无</span>
+          <el-table-column label="最近换表时间" :width="lastLoginTimeWidth" align="center">
+            <template #default="scope">
+              <div v-if="scope.row.factoryDate">
+                {{ formatDateTime(scope.row.factoryDate) }}
+              </div>
+              <span v-else>无</span>
+            </template>
+          </el-table-column>
+          <el-table-column label="上次读数" :width="roleWidth" align="center">
+            <template #default="scope">
+              <span v-if="scope.row.prevReadingCount !== null && scope.row.prevReadingCount !== undefined" @click="handlePrevReadingClick(scope.row)" style="color: #46b97e; cursor: pointer; display: block; width: 100%; text-align: center;">
+                {{ scope.row.prevReadingCount }}
+              </span>
+              <span v-else>无</span>
+            </template>
           </el-table-column>
           <el-table-column label="上次上报时间" :width="lastLoginTimeWidth" align="center" #default="scope">
             <div v-if="scope.row.prevCreateTime">
@@ -144,9 +191,14 @@ import { ElMessage } from "element-plus";
 import formatDateTime from "@/api/common/dateConvert.js";
 import axios from "axios";
 import ReceiveExceptionRecord from "@/components/reportManage/ReceiveExceptionRecord.vue";
+import { useDetailNavigation } from "@/composables/useDetailNavigation";
 export default {
   components: {
     ReceiveExceptionRecord,
+  },
+  setup() {
+    const { navigateToDetail } = useDetailNavigation();
+    return { navigateToDetail };
   },
   data() {
     return {
@@ -158,7 +210,10 @@ export default {
         companyId: null, // 所属水厂ID
         pageNo: 1,
         pageSize: 50,
-        order: 1
+        order: 1,
+        meterVendor: null,
+        battery: null,
+        valveStatus: null
       },
       recordType: "report",
       companyId: JSON.parse(sessionStorage.getItem("userData")).companyId, // 所属水厂ID
@@ -185,6 +240,8 @@ export default {
       //passwordWidth: 0,
       lastLoginTimeWidth: 0,
       companyWidth: 0,
+      vendorWidth: 0,
+      factoryDateWidth: 0,
       // 父容器元素
       parentContainer: null,
       // ResizeObserver 实例
@@ -235,6 +292,8 @@ export default {
         role: 8,
         //password: 10,
         last_login_time: 11,
+        vendor: 8,
+        factory_date: 10,
       };
     },
   },
@@ -317,6 +376,26 @@ export default {
             ElMessage.error(error);
           });
     },
+    handleUserInfo(row) {
+      // 跳转到用户详情页面，传递 userName 参数并自动搜索
+      this.$router.push({
+        path: '/userManage',
+        query: {
+          userName: row.userName,
+          searchUserName: 'true'  // 添加标记，告诉用户管理页面需要执行搜索
+        }
+      });
+    },
+    handlePrevReadingClick(row) {
+      this.$router.push({
+        path: '/userManage',
+        query: {
+          userId: row.userId,
+          meterCode: row.meterCode,
+          searchUserAndMeter: 'true'
+        }
+      });
+    },
     formatDateTime,
     selectable() {
       return true; // 目前允许所有行选择，你可以加上你的业务逻辑
@@ -347,6 +426,8 @@ export default {
         this.roleWidth = (this.columnPercentages.role / 100) * parentWidth;
         //this.passwordWidth = (this.columnPercentages.password / 100) * parentWidth;
         this.lastLoginTimeWidth = (this.columnPercentages.last_login_time / 100) * parentWidth;
+        this.vendorWidth = (this.columnPercentages.vendor / 100) * parentWidth;
+        this.factoryDateWidth = (this.columnPercentages.factory_date / 100) * parentWidth;
       }
     },
     getRegionData() {
@@ -447,6 +528,9 @@ export default {
         pageNo: 1,
         pageSize: 50,
         order: 1, // 默认时间降序
+        meterVendor: null,
+        battery: null,
+        valveStatus: null
       };
     },
     reflush() {
@@ -888,71 +972,4 @@ export default {
   background-color: #fff;
   margin-right: 5%;
 }
-
-</style>
-
-<style lang="scss" scoped>
-:deep(.el-tree) {
-  .is-current {
-    > .el-tree-node__content {
-      background-color: var(--el-tree-node-hover-bg-color);
-      color: white;
-    }
-  }
-}
-
-.sortable-header {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  user-select: none;
-}
-
-.sort-icons {
-  display: flex;
-  flex-direction: column;
-  margin-left: 10px;
-}
-
-.asc-icon {
-  background-image: url("@/assets/yonghu/icon25.png");
-  background-repeat: no-repeat;
-  background-size: contain;
-  width: 12px;
-  height: 12px;
-}
-
-.asc-icon:hover {
-  background-image: url("@/assets/yonghu/icon24.png");
-  background-repeat: no-repeat;
-  background-size: contain;
-}
-
-.asc-icon.active {
-  background-image: url("@/assets/yonghu/icon24.png");
-  background-repeat: no-repeat;
-  background-size: contain;
-}
-
-.desc-icon {
-  background-image: url("@/assets/yonghu/icon23.png");
-  background-repeat: no-repeat;
-  background-size: contain;
-  width: 12px;
-  height: 12px;
-}
-
-.desc-icon:hover {
-  background-image: url("@/assets/yonghu/icon22.png");
-  background-repeat: no-repeat;
-  background-size: contain;
-}
-
-.desc-icon.active {
-  background-image: url("@/assets/yonghu/icon22.png");
-  background-repeat: no-repeat;
-  background-size: contain;
-}
-
 </style>

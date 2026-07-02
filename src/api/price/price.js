@@ -8,3 +8,11 @@ export function queryPriceMg(params) {
     data: params
   });
 }
+
+// 获取价格详情
+export function getPriceDetail(priceId) {
+  return service({
+    url: `/price/getPriceDetail/${priceId}`,
+    method: "get"
+  });
+}
