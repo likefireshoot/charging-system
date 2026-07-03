@@ -166,8 +166,13 @@ export default {
           console.error("解析userData失败", e);
         }
       }
+      // 拼接查询参数，追加companyId
+      const reqParams = {
+        ...this.params,
+        companyId: this.companyId
+      };
       service
-          .post("/historyData/listMissingMeter", this.params, {
+          .post("/historyData/listMissingMeter", reqParams, {
             headers: {
               Authorization: token,
               token: token,
@@ -209,8 +214,12 @@ export default {
           console.error("解析userData失败", e);
         }
       }
+      const reqParams = {
+        ...this.params,
+        companyId: this.companyId
+      };
       service
-          .post("/historyData/listMissingMeter", this.params, {
+          .post("/historyData/listMissingMeter", reqParams, {
             headers: {
               Authorization: token,
               token: token,
