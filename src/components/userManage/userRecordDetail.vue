@@ -104,6 +104,7 @@ import TransactionTable from "./userRecordTabs/TransactionTable.vue";
 import MeterTable from "./userRecordTabs/MeterTable.vue";
 import CommandLogTable from "./userRecordTabs/CommandLogTable.vue";
 import CommandTab from "./userRecordTabs/CommandTab.vue";
+import BillDetailTable from "@/components/userManage/userRecordTabs/BillDetailTable.vue";
 import { useDetailNavigation } from "@/composables/useDetailNavigation";
 
 export default {
@@ -113,7 +114,8 @@ export default {
     TransactionTable: TransactionTable,
     MeterTable,
     CommandLogTable,
-    CommandTab
+    CommandTab,
+    BillDetailTable,
   },
   //小范围内optionApi中混入compositionApi,为了优化可以忍受
   setup() {
@@ -135,6 +137,7 @@ export default {
         { name: "抄表记录", type: "meter" },
         { name: "命令下发记录", type: "command" },
         { name: "命令下发", type: "commandDispatch" },
+        { name: "扣费明细表", type: "billDetail"},
         // { name: "操作历史", type: "operation" }
       ]
     };
@@ -150,6 +153,7 @@ export default {
         command: "CommandLogTable",
         meter: "MeterTable",
         commandDispatch: "CommandTab",
+        billDetail: "BillDetailTable",
       };
       return componentMap[this.activeTab] || "BillTable";
     }
