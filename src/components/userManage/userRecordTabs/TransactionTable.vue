@@ -74,6 +74,10 @@
         <img src="@/assets/yonghu/icon26.png" alt="" />
         <span>开收据</span>
       </div>
+      <div class="tool-btn" style="margin-right: 10px; width: 130px" :class="{ 'disabled-btn': multipleSelection.length !== 1 }" @click="multipleSelection.length === 1 && handleCancelRecharge()">
+        <img src="@/assets/yonghu/icon27.png" alt="" style="margin-left: 7px" />
+        <span style="font-size: 20px; margin-left: 10px; color: #5a5a5a">撤销充值</span>
+      </div>
       <div class="tool-btn" @click="downloadTemplate" v-if="staffPermissionIds.includes(53)">
         <img src="@/assets/yonghu/icon1.png" alt="" />
         <span>历史数据导⼊模版下载</span>
@@ -207,6 +211,30 @@ export default {
     this.fetchTransactionRecords();
   },
   methods: {
+    // 撤销充值
+    handleCancelRecharge() {
+      if (this.multipleSelection.length === 0) {
+        ElMessage.warning("请至少选择一条记录");
+        return;
+      }
+      let id = this.multipleSelection[0].recordId;
+      let url = `/userManage/userCharge/cancelRecharge/${id}`;
+      axios
+          .post(`${url}`)
+          .then((response) => {
+            if (response.data.code === 200) {
+              ElMessage.success("撤销成功");
+              this.handleRefresh();
+            } else {
+              ElMessage.error(response.data.msg);
+            }
+          })
+          .catch((error) => {
+            console.error("撤销失败:", error);
+            ElMessage.error("撤销失败: " + error.message);
+          });
+    },
+
     // 导出模板
     downloadTemplate() {
       axios({
