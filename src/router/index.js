@@ -33,6 +33,7 @@ import userRecordDetail from "@/components/userManage/userRecordDetail.vue";
 import commandLog from "../views/commandLog.vue";
 import errorReportRecord from "../views/errorReportRecord.vue";
 import historyDataManage from "@/views/historyDataManage.vue";
+import billDetailReport from "@/components/report/billDetailReport.vue";
 
 const routes = [
   {
@@ -131,6 +132,11 @@ const routes = [
             path: "readingCountYearlyReport",
             name: "readingCountYearlyReport",
             component: readingCountYearlyReport,
+          },
+          {
+            path: "billDetailReport",
+            name: "billDetailReport",
+            component: billDetailReport,
           },
         ],
       },
