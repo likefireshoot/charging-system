@@ -62,7 +62,11 @@
             :row-style="{ height: '50px' }"
             :cell-style="{ fontSize: '23px', textAlign: 'center' }"
         >
-          <el-table-column type="index" label="序号" width="120" align="center" />
+          <el-table-column label="序号" width="120" align="center" >
+            <template #default="scope">
+              {{ (params.pageNum - 1) * params.pageSize + scope.$index + 1 }}
+            </template>
+          </el-table-column>>
           <el-table-column property="regionName" label="区域名称" align="center" />
           <el-table-column property="priceName" label="价格类型" align="center" />
           <el-table-column label="费用构成明细" align="center">
