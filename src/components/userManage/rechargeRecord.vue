@@ -86,7 +86,7 @@
               <img src="@/assets/yonghu/icon27.png" alt="" style="margin-left: 7px" />
               <span style="font-size: 20px; margin-left: 10px; color: #5a5a5a">撤销充值</span>
             </div>
-            <div class="export-out-btn" style="margin-right: 10px; width: 110px" :class="{ 'btn-disabled': !canWechatRefund }" @click="canWechatRefund && handleWechatRefund()">
+            <div class="export-out-btn" style="margin-right: 10px; width: 130px" :class="{ 'btn-disabled': !canWechatRefund }" @click="canWechatRefund && handleWechatRefund()">
               <img src="@/assets/yonghu/icon1.3.png" alt="" style="margin-left: 7px" />
               <span style="font-size: 20px; margin-left: 10px; color: #5a5a5a">微信退款</span>
             </div>
@@ -836,7 +836,6 @@ export default {
 .recharge-record-dialog-content {
   width: 94%;
   max-width: 2100px;
-  //max-height: 96vh;
   height: 98%;
   border: 1px solid #fafafa;
   background-color: #fafafa;
@@ -852,8 +851,6 @@ export default {
 
 .recharge-record-content {
   width: 100%;
-  //min-height: 72vh;
-  //max-height: calc(88vh - 45px);
   height: 100%;
   background-color: #fff;
   border-radius: 5px;
