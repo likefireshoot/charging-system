@@ -150,6 +150,27 @@
         @current-change="handlePageChange"
       />
     </div>
+
+    <!-- 撤销充值确认对话框 -->
+    <el-dialog
+      v-model="cancelRechargeDialogVisible"
+      title="撤销充值确认"
+      width="500px"
+      :close-on-click-modal="false"
+      :close-on-press-escape="false"
+      :lock-scroll="false"
+    >
+      <div style="font-size: 22px; color: #333; line-height: 1.8; text-align: center; padding: 10px 0;">
+        确定要撤销该笔充值记录吗？<br />
+        <span style="color: #e6a23c; font-size: 18px;">此操作不可恢复，请谨慎操作。</span>
+      </div>
+      <template #footer>
+        <div style="display: flex; justify-content: center; gap: 20px;">
+          <el-button type="success" @click="confirmCancelRecharge" style="width: 120px; font-size: 16px;">确认撤销</el-button>
+          <el-button @click="cancelRechargeDialogVisible = false" style="width: 120px; font-size: 16px;">取消</el-button>
+        </div>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -203,7 +224,9 @@ export default {
         userId: "",
         companyId: "",
         rechargeType: "" // 基础默认查询也带上
-      }
+      },
+      cancelRechargeDialogVisible: false,
+      pendingCancelRechargeId: null
     };
   },
   mounted() {
@@ -217,8 +240,12 @@ export default {
         ElMessage.warning("请至少选择一条记录");
         return;
       }
-      let id = this.multipleSelection[0].recordId;
-      let url = `/userManage/userCharge/cancelRecharge/${id}`;
+      this.pendingCancelRechargeId = this.multipleSelection[0].recordId;
+      this.cancelRechargeDialogVisible = true;
+    },
+    confirmCancelRecharge() {
+      this.cancelRechargeDialogVisible = false;
+      let url = `/userManage/userCharge/cancelRecharge/${this.pendingCancelRechargeId}`;
       axios
           .post(`${url}`)
           .then((response) => {
