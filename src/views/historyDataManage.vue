@@ -153,10 +153,9 @@ export default {
         this.chaobiaoRecordWidth = (this.columnPercentages.chaobiaoRecord / 100) * parentWidth;
       }
     },
-    getHistoryData() {
+    async getHistoryData() {
       if (this.isLoading) return
       this.isLoading = true
-
       let token = "";
       const userData = sessionStorage.getItem("userData");
       if (userData) {
@@ -166,30 +165,54 @@ export default {
           console.error("解析userData失败", e);
         }
       }
-      // 拼接查询参数，追加companyId
       const reqParams = {
         ...this.params,
         companyId: this.companyId
       };
-      service
-          .post("/historyData/listMissingMeter", reqParams, {
-            headers: {
-              Authorization: token,
-              token: token,
-            },
-          })
-          .then((response) => {
-            if (response.code === 200) {
-              this.total = response.data.total;
-              this.historyData = response.data.records || [];
-            } else {
-              ElMessage.error(response.msg);
-            }
-          })
-          .catch((error) => {
-            ElMessage.error(error);
-          }).finally(()=>{
-        this.isLoading = false
+      const headers = {
+        Authorization: token,
+        token: token,
+      };
+
+      // 分别定义两个独立请求Promise
+      const listPromise = service.post("/historyData/listMissingMeter", reqParams, { headers });
+      const countPromise = axios.post("/historyData/countMissingMeter", reqParams, { headers });
+
+      // 列表接口先返回 → 立刻渲染表格，不等总数
+      listPromise.then(listRes => {
+        if (listRes.code === 200) {
+          this.historyData = listRes.data.records || [];
+        } else {
+          ElMessage.error(listRes.msg || "列表查询失败");
+        }
+      }).catch(err => {
+        ElMessage.error("列表数据请求异常");
+        console.error("列表接口报错：", err);
+      });
+
+      // 总数接口先返回 → 立刻更新分页total，不等列表
+      countPromise.then(countRes => {
+        console.log("统计接口返回:",countRes)
+
+        if(countRes.data.code===200){
+
+          this.total = Number(countRes.data.data);
+
+        // }
+        // if (countRes?.code === 200 || typeof countRes === "number") {
+        //   this.total = typeof countRes === "number" ? countRes : countRes.data;
+        //   console.log(this.total)
+        } else {
+          ElMessage.error(countRes.msg || "总数查询失败");
+        }
+      }).catch(err => {
+        ElMessage.error("总数请求异常");
+        console.error("总数接口报错：", err);
+      });
+
+      // 等待两个接口全部结束，统一关闭loading
+      Promise.allSettled([listPromise, countPromise]).finally(() => {
+        this.isLoading = false;
       });
     },
     search() {

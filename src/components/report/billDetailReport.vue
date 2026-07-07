@@ -52,12 +52,14 @@
         <h2>用户用水扣费明细统计报表（{{ params.dateRange[0] }} - {{ params.dateRange[1] }}）</h2>
       </div>
       <div class="total-table-wrapper" style="width: 95%; margin: 0 auto;display: flex; flex-direction: column">
+        <div class="table-scroll">
         <el-table
+            class="detail-table"
             :data="detailTableData"
             border
             v-loading="loading"
             style="width:100%"
-            max-height="800px"
+            height="100%"
             :header-cell-style="{ height: '66px',background: '#46B97E', color: '#FFFFFF', fontWeight: 'bold', fontSize: '23px' }"
             :row-style="{ height: '50px' }"
             :cell-style="{ fontSize: '23px', textAlign: 'center' }"
@@ -76,6 +78,7 @@
           </el-table-column>
           <el-table-column property="totalCharge" label="总扣费金额（元）" align="center" />
         </el-table>
+        </div>
         <!-- 底部单独汇总行表格，无表头，固定在下方 -->
         <el-table
             :data="totalTable"
@@ -146,7 +149,7 @@ export default {
         company: null,
         priceId: null,
         pageNum: 1,
-        pageSize: 30,
+        pageSize: 15,
       },
       companyId: JSON.parse(sessionStorage.getItem("userData")).companyId,
       // 下拉数据源
@@ -440,14 +443,17 @@ export default {
 }
 
 .main-content {
-  width: 100%;
-  height: 100%; /* 固定最小高度，防止空白塌陷 */
+  width: 96%;
+  flex: 1;
+  min-height: 0;
+  background-color: #fff;
+  border-radius: 5px;
   display: flex;
   flex-direction: column;
-  background-color: #fff;
-  border: 1px solid #e9e9e9;
-  border-radius: 5px;
-  padding: 30px 20px;
+  align-items: center;
+  margin-top: 10px;
+  padding: 0 10px;
+  margin-bottom: 10px;
 }
 
 .report-title {
@@ -464,8 +470,28 @@ export default {
 }
 
 .total-table-wrapper {
+  width: 95%;
+  flex:1;
+  min-height:0;
+
+  display:flex;
+  flex-direction:column;
+
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
+
+  overflow: hidden;
+}
+
+.table-scroll {
+
+  width:100%;
+
+  flex:1;
+  min-height:0;
+
+  overflow:hidden;
+
 }
 
 :deep(.summary-row) {
@@ -491,12 +517,13 @@ export default {
   background-color: #fbf2cb !important;
 }
 .page-box {
+  flex-shrink: 0;
   width: 100%;
   height: 65px;
   display: flex;
   justify-content: center;
   align-items: center;
+  position: static;
   margin-top: 5px;
-  margin-bottom: 28px;
 }
 </style>

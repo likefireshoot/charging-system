@@ -74,7 +74,7 @@
         <img src="@/assets/yonghu/icon26.png" alt="" />
         <span>开收据</span>
       </div>
-      <div class="tool-btn" style="margin-right: 10px; width: 130px" :class="{ 'disabled-btn': multipleSelection.length !== 1 }" @click="multipleSelection.length === 1 && handleCancelRecharge()">
+      <div class="tool-btn" style="margin-right: 10px; width: 130px" :class="{ 'disabled-btn': multipleSelection.length !== 1 }" @click="multipleSelection.length === 1 && openCancelDialog()">
         <img src="@/assets/yonghu/icon27.png" alt="" style="margin-left: 7px" />
         <span style="font-size: 20px; margin-left: 10px; color: #5a5a5a">撤销充值</span>
       </div>
@@ -151,6 +151,26 @@
       />
     </div>
   </div>
+
+  <!-- 撤销充值确认弹窗（和充值确认弹窗样式统一） -->
+  <el-dialog
+    v-model="cancelDialogVisible"
+    title="撤销充值确认"
+    width="480px"
+    :close-on-click-modal="false"
+    custom-class="print-confirm-dialog"
+    :lock-scroll="false"
+  >
+    <div class="confirm-text" style="font-size: 20px; text-align: center; padding: 20px 0; line-height: 2;">
+      {{ cancelTipText }}
+    </div>
+    <template #footer>
+      <div style="display: flex; justify-content: center; gap: 20px;">
+        <el-button type="success" @click="handleCancelRecharge" size="large">确认撤销</el-button>
+        <el-button @click="cancelDialogVisible = false" size="large">取消</el-button>
+      </div>
+    </template>
+  </el-dialog>
 </template>
 
 <script>
@@ -203,7 +223,11 @@ export default {
         userId: "",
         companyId: "",
         rechargeType: "" // 基础默认查询也带上
-      }
+      },
+      // 新增撤销弹窗相关
+      cancelDialogVisible: false,
+      cancelTipText: "",
+      cancelRowInfo: {} // 存储当前要撤销的单行数据
     };
   },
   mounted() {
@@ -211,6 +235,17 @@ export default {
     this.fetchTransactionRecords();
   },
   methods: {
+    // 撤销充值 - 打开确认弹窗
+    openCancelDialog() {
+      if (this.multipleSelection.length === 0) {
+        ElMessage.warning("请至少选择一条记录");
+        return;
+      }
+      const row = this.multipleSelection[0];
+      this.cancelRowInfo = row;
+      this.cancelTipText = `确认撤销用户【${row.userName}】${row.createTime}充值的 ${row.rechargeAmount} 元记录吗？`;
+      this.cancelDialogVisible = true;
+    },
     // 撤销充值
     handleCancelRecharge() {
       if (this.multipleSelection.length === 0) {
@@ -218,12 +253,19 @@ export default {
         return;
       }
       let id = this.multipleSelection[0].recordId;
-      let url = `/userManage/userCharge/cancelRecharge/${id}`;
+      const userInfo = JSON.parse(sessionStorage.getItem("userData") || "{}");
+      const cancelStaffId = userInfo.staffId;
+      if (!cancelStaffId) {
+        ElMessage.error("获取当前操作员信息失败，请重新登录");
+        return;
+      }
+      let url = `/userManage/userCharge/cancelRecharge/${id}?cancelStaffId=${cancelStaffId}`;
       axios
           .post(`${url}`)
           .then((response) => {
             if (response.data.code === 200) {
               ElMessage.success("撤销成功");
+              this.cancelDialogVisible = false;
               this.handleRefresh();
             } else {
               ElMessage.error(response.data.msg);

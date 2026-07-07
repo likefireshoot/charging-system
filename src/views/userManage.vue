@@ -101,6 +101,11 @@
           <img src="@/assets/yonghu/icon7.png" alt="" />
           <span>充值记录查询</span>
         </div>
+        <div class="recharge-record-btn" @click="recharge_cancel_record_btn_click"
+             v-if="staffPermissionIds.includes(11)">
+          <img src="@/assets/yonghu/icon7.png" alt="" />
+          <span>充值撤销记录查询</span>
+        </div>
         <div class="water-meter-record-btn" @click="change_record_btn_click"
           v-if="staffPermissionIds.includes(14)">
           <img src="@/assets/yonghu/icon9.png" alt="" />
@@ -278,6 +283,11 @@
     <rechargeRecordVue v-if="recharge_record_dialogFormVisible"
       :recharge_record_dialogFormVisible="recharge_record_dialogFormVisible" :quyu_data="quyu_data"
       :data="multipleSelection[0]" @close="closeRechargeRecordDialog"></rechargeRecordVue>
+
+    <!-- 充值撤销记录弹窗 -->
+    <rechargeCancelRecordVue v-if="recharge_cancel_record_dialogFormVisible"
+                             :recharge_cancel_record_dialogFormVisible="recharge_cancel_record_dialogFormVisible" :quyu_data="quyu_data"
+                             :data="multipleSelection[0]" @close="closeRechargeCancelRecordDialog"></rechargeCancelRecordVue>
 
     <!-- 命令下发弹出框-太阳能 -->
     <commandTaiYangNengVue v-if="command_dialogFormVisible_taiyangneng"
@@ -510,6 +520,7 @@ import changeRecord from "@/components/userManage/changeRecord.vue";
 import userInfoVue from "@/components/userManage/userInfo.vue";
 import transactionRecord from "@/components/userManage/transactionRecord.vue";
 import changeBalanceVue from "@/components/userManage/changeBalance.vue";
+import rechargeCancelRecordVue from "@/components/userManage/RechargeCancelRecord.vue";
 
 import service from "@/api/request";
 import { ElMessage } from "element-plus";
@@ -541,6 +552,8 @@ export default {
     commandOldXinchi,
     command4GXinchi,
     commandOldShengXin,
+    // 充值撤销记录
+    rechargeCancelRecordVue,
   },
   setup() {
     const { navigateToDetail } = useDetailNavigation();
@@ -628,6 +641,8 @@ export default {
       valve_dialogFormVisible: false,
       valveOpen_dialogFormVisible: false,
       changeBalance_dialogFormVisible: false,
+      // 充值撤销记录
+      recharge_cancel_record_dialogFormVisible: false,
 
       // 价格详情弹窗
       view_dialogFormVisible: false,
@@ -1157,6 +1172,10 @@ export default {
     recharge_record_btn_click() {
       this.recharge_record_dialogFormVisible = true;
     },
+    // 充值撤销记录
+    recharge_cancel_record_btn_click() {
+      this.recharge_cancel_record_dialogFormVisible = true;
+    },
     change_btn_click() {
       if (this.multipleSelection.length > 0) {
         this.change_dialogFormVisible = true;
@@ -1271,6 +1290,11 @@ export default {
     },
     closeRechargeRecordDialog() {
       this.recharge_record_dialogFormVisible = false;
+      this.multipleSelection = [];
+      this.reflush();
+    },
+    closeRechargeCancelRecordDialog() {
+      this.recharge_cancel_record_dialogFormVisible = false;
       this.multipleSelection = [];
       this.reflush();
     },
