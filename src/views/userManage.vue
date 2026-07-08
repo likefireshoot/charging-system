@@ -296,7 +296,7 @@
       :command_dialogFormVisible="command_dialogFormVisible_xinchi" :commandType="commandType"
       :data="multipleSelection[0]" @close="closeCommandDialog"></commandXinchiVue>
 
-    <!-- 命令下发弹出框-旧信驰 -->
+    <!-- 命令下发弹出框-旧信驰/旧信驰KF01 -->
     <commandOldXinchi v-if="command_dialogFormVisible_old_xinchi"
       :command_dialogFormVisible="command_dialogFormVisible_old_xinchi" :commandType="commandType"
       :data="multipleSelection[0]" @close="closeCommandDialog"></commandOldXinchi>
@@ -1254,6 +1254,7 @@ export default {
           this.command_dialogFormVisible_xinchi = true;
           break;
         case "旧信驰":
+        case "旧信驰KF01":
           this.command_dialogFormVisible_old_xinchi = true;
           break;
         case "4G信驰":
