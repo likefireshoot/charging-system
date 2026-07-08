@@ -159,7 +159,7 @@ export default {
       },
       detailVisible: false,
       activeRecord: {},
-      vendorOptions: ["信驰", "集万讯", "太阳能", "旧信驰", "圣鑫", "4G信驰", "旧圣鑫"],
+      vendorOptions: ["信驰", "集万讯", "太阳能", "旧信驰", "旧信驰KF01", "圣鑫", "4G信驰", "旧圣鑫"],
     };
   },
   watch: {

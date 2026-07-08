@@ -1,7 +1,7 @@
 <template>
-  <!-- 命令下发弹出框-旧信驰 -->
+  <!-- 命令下发弹出框-旧信驰/旧信驰KF01 -->
   <div class="command-dialog" v-if="command_dialogFormVisible">
-    <div class="command-dialog-content" v-if="commandType === '旧信驰'">
+    <div class="command-dialog-content" v-if="commandType === '旧信驰' || commandType === '旧信驰KF01'">
       <div class="title">
         <div style="margin-left: 10px; display: flex; align-items: center">
           <img src="@/assets/yonghu/icon5.png" alt="" style="margin-right: 8px" />

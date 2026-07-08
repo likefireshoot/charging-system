@@ -6,6 +6,7 @@ const commandComponentMap = {
   '信驰':   () => import('./CommandXinchiBase.vue'),
   '4G信驰': () => import('./CommandXinchiBase.vue'),
   '旧信驰': () => import('./CommandXinchiBase.vue'),
+  '旧信驰KF01': () => import('./CommandXinchiBase.vue'),
   '圣鑫':   () => import('./CommandShengxinBase.vue'),
   '旧圣鑫': () => import('./CommandShengxinBase.vue'),
   '太阳能':   () => import('./CommandTaiyangneng.vue'),
@@ -18,6 +19,7 @@ export const apiPrefixMap = {
   '信驰':   'xinChi',
   '4G信驰': 'directXinChi',
   '旧信驰': 'oldXinChi',
+  '旧信驰KF01': 'oldXinChi',
   '圣鑫':   'shengXin',
   '旧圣鑫': 'oldShengXin',
 };

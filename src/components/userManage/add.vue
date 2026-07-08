@@ -207,6 +207,10 @@ export default {
         { id: 2, label: "集万讯", value: 2 },
         { id: 3, label: "太阳能", value: 3 },
         { id: 4, label: "圣鑫", value: 4 },
+        { id: 5, label: "旧信驰", value: 5 },
+        { id: 6, label: "4G信驰", value: 6 },
+        { id: 7, label: "旧圣鑫", value: 7 },
+        { id: 8, label: "旧信驰KF01", value: 8 },
       ],
       companyList: [],
       rules: {
