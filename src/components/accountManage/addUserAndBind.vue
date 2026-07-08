@@ -72,12 +72,12 @@
             </el-select>
           </div>
           <div class="edit-input">
-            <span>出厂日期</span>
-            <el-date-picker v-model="form.factoryDate" type="date" placeholder="选择日期" style="flex-grow: 1; width: 100%; max-height: 35px" format="YYYY-MM-DD" value-format="YYYY-MM-DD" />
+            <span>出厂日期（选填，不填默认为当前日期）</span>
+            <el-date-picker v-model="form.factoryDate" type="date" placeholder="不填默认为当前日期" style="flex-grow: 1; width: 100%; max-height: 35px" format="YYYY-MM-DD" value-format="YYYY-MM-DD" />
           </div>
           <div class="edit-input">
-            <span>首检日期</span>
-            <el-date-picker v-model="form.firstInspectDate" type="date" placeholder="选择日期" style="flex-grow: 1; width: 100%; max-height: 35px" format="YYYY-MM-DD" value-format="YYYY-MM-DD" />
+            <span>首检日期（选填，不填默认为当前日期）</span>
+            <el-date-picker v-model="form.firstInspectDate" type="date" placeholder="不填默认为当前日期" style="flex-grow: 1; width: 100%; max-height: 35px" format="YYYY-MM-DD" value-format="YYYY-MM-DD" />
           </div>
           <div class="edit-input has-checkbox">
             <span style="margin-bottom: 10px;">水表读数（吨）</span>
@@ -89,6 +89,7 @@
                 placeholder="请输入表号后自动查询"
               />
               <span v-if="meterQueryError" class="error-tip">{{ meterQueryError }}</span>
+              <span v-if="meterNotFound && !meterQueryError" class="hint-tip">该表将自动注册，请手动输入计费起始吨数</span>
             </div>
             <el-checkbox
               v-model="allowEditReading"
@@ -160,6 +161,7 @@
 </template>
 
 <script>
+import axios from "axios";
 import service from "@/api/request";
 import debounce from "lodash/debounce";
 import { ElMessage } from "element-plus";
@@ -215,6 +217,7 @@ export default {
       currentStaffId: userData.staffId || null,
       allowEditReading: false,
       meterQueryError: "",
+      meterNotFound: false,
       showConfirmDialog: false,
       pendingSubmit: false,
       originalReading: null
@@ -326,8 +329,9 @@ export default {
       if (!this.form.meterCode || this.form.meterCode.trim() === "") {
         this.form.reading = null;
         this.form.meterId = null;
-        this.originalReading = null;  // 清空原始读数
+        this.originalReading = null;
         this.meterQueryError = "";
+        this.meterNotFound = false;
         this.allowEditReading = false;
         return;
       }
@@ -336,29 +340,46 @@ export default {
     },
     async queryMeterReading() {
       try {
-        const response = await service.get(`/external/externalSimpleMeterQuery?meterCode=${this.form.meterCode}`);
+        const httpResponse = await axios.get(`/external/externalSimpleMeterQuery?meterCode=${this.form.meterCode}`);
+        const response = httpResponse.data;
 
         if (response.code === 200 && response.data) {
-          this.originalReading = response.data.reading;  // 保存原始读数
+          this.originalReading = response.data.reading;
           this.form.reading = response.data.reading;
           this.form.meterId = response.data.meterId;
           this.meterQueryError = "";
+          this.meterNotFound = false;
+          this.allowEditReading = false;
+        } else if (response.code === 400) {
+          ElMessage.info("该表为新表");
+          this.form.reading = null;
+          this.form.meterId = null;
+          this.originalReading = null;
+          this.meterQueryError = "";
+          this.meterNotFound = true;
+          this.allowEditReading = true;
         } else {
           this.form.reading = null;
           this.form.meterId = null;
           this.originalReading = null;
-          this.meterQueryError = "该表资料未录入系统";
+          this.meterQueryError = "";
+          this.meterNotFound = true;
+          this.allowEditReading = true;
         }
       } catch (error) {
         this.form.reading = null;
         this.form.meterId = null;
         this.originalReading = null;
-        this.meterQueryError = "该表资料未录入系统";
+        this.meterQueryError = "";
+        this.meterNotFound = true;
+        this.allowEditReading = true;
       }
     },
     handleAllowEditChange(value) {
-      // 勾选时，将 reading 设置为可编辑状态（已经是可编辑）
-      // 取消勾选时，恢复为原始读数
+      if (this.meterNotFound && !value) {
+        this.allowEditReading = true;
+        return;
+      }
       if (!value && this.originalReading !== null && this.originalReading !== undefined) {
         this.form.reading = this.originalReading;
       }
@@ -414,9 +435,14 @@ export default {
         return false;
       }
 
-      const phoneRegex = /^1[3-9]\d{9}$/;
+      const phoneRegex = /^\d+$/;
       if (this.form.userPhone && this.form.userPhone !== "无" && !phoneRegex.test(this.form.userPhone)) {
-        ElMessage.error("请输入正确格式的联系电话！");
+        ElMessage.error("联系电话必须为数字！");
+        return false;
+      }
+
+      if (this.meterNotFound && (this.form.reading === null || this.form.reading === undefined || this.form.reading === "")) {
+        ElMessage.error("该表将自动注册，请手动输入计费起始吨数！");
         return false;
       }
 
@@ -476,16 +502,16 @@ export default {
           priceId: this.form.priceId,
           smsConfigId: this.form.smsConfigId,
           approver_1: this.form.approver_1,
-          factoryDate: this.form.factoryDate,
-          firstInspectDate: this.form.firstInspectDate,
-          enableArrearsValve: this.form.enableArrearsValve === "default" ? null : this.form.enableArrearsValve
+          factoryDate: this.form.factoryDate || new Date().toISOString().split("T")[0],
+          firstInspectDate: this.form.firstInspectDate || new Date().toISOString().split("T")[0],
+          enableArrearsValve: this.form.enableArrearsValve === "default" ? null : this.form.enableArrearsValve,
+          newMeterReading: this.meterNotFound ? this.form.reading : undefined
         },
       };
 
       this.submitting = true;
       try {
-        // 只有勾选了允许编辑且读数有变化时，才更新水表读数
-        if (this.allowEditReading && this.form.reading !== this.originalReading) {
+        if (!this.meterNotFound && this.allowEditReading && this.form.reading !== this.originalReading) {
           const updateSuccess = await this.updateMeterReading();
           if (!updateSuccess) {
             this.submitting = false;
@@ -621,6 +647,13 @@ export default {
   font-size: 18px;
   white-space: nowrap;
   font-weight: bold;
+}
+
+.hint-tip {
+  color: #45ba7e;
+  font-size: 17px;
+  white-space: nowrap;
+  font-weight: 600;
 }
 
 .edit-checkbox {

@@ -74,7 +74,15 @@
         <img src="@/assets/yonghu/icon26.png" alt="" />
         <span>开收据</span>
       </div>
+<<<<<<< HEAD
       <div class="tool-btn" style="margin-right: 10px; width: 130px" :class="{ 'disabled-btn': multipleSelection.length !== 1 }" @click="multipleSelection.length === 1 && openCancelDialog()">
+=======
+      <div class="export-out-btn" style="margin-right: 10px; width: 130px" :class="{ 'btn-disabled': !canWechatRefund }" @click="canWechatRefund && handleWechatRefund()">
+        <img src="@/assets/yonghu/icon1.3.png" alt="" style="margin-left: 7px" />
+        <span style="font-size: 20px; margin-left: 10px; color: #5a5a5a">微信退款</span>
+      </div>
+      <div class="tool-btn" style="margin-right: 10px; width: 130px" :class="{ 'disabled-btn': multipleSelection.length !== 1 }" @click="multipleSelection.length === 1 && handleCancelRecharge()">
+>>>>>>> origin/master
         <img src="@/assets/yonghu/icon27.png" alt="" style="margin-left: 7px" />
         <span style="font-size: 20px; margin-left: 10px; color: #5a5a5a">撤销充值</span>
       </div>
@@ -127,6 +135,21 @@
         <el-table-column property="meterType" label="水表类型" min-width="100" align="center" />
 <!--        <el-table-column property="payerPhone" label="缴费人手机号" min-width="140" align="center" />-->
         <el-table-column property="rechargeType" label="交易方式" min-width="100" align="center" />
+        <el-table-column property="status" label="微信是否已退费" min-width="100" align="center">
+          <template #default="{ row }">
+            <span v-if="row.rechargeType === '微信支付'" class="refund-status-badge" :class="row.status === 2 ? 'refunded' : 'not-refunded'">
+              {{ row.status === 2 ? '是' : '否' }}
+            </span>
+            <span v-else style="color: #b0b3bb;">-</span>
+          </template>
+        </el-table-column>
+        <el-table-column property="hasShouju" label="是否开收据" min-width="90" align="center">
+          <template #default="{ row }">
+            <span class="receipt-badge" :class="row.hasShouju ? 'receipt-yes' : 'receipt-no'">
+              {{ row.hasShouju ? '是' : '否' }}
+            </span>
+          </template>
+        </el-table-column>
         <el-table-column property="rechargeAmount" label="交易金额" min-width="110" align="center">
           <template #default="scope">{{ scope.row.rechargeAmount }} 元</template>
         </el-table-column>
@@ -150,6 +173,27 @@
         @current-change="handlePageChange"
       />
     </div>
+
+    <!-- 撤销充值确认对话框 -->
+    <el-dialog
+      v-model="cancelRechargeDialogVisible"
+      title="撤销充值确认"
+      width="500px"
+      :close-on-click-modal="false"
+      :close-on-press-escape="false"
+      :lock-scroll="false"
+    >
+      <div style="font-size: 22px; color: #333; line-height: 1.8; text-align: center; padding: 10px 0;">
+        确定要撤销该笔充值记录吗？<br />
+        <span style="color: #e6a23c; font-size: 18px;">此操作不可恢复，请谨慎操作。</span>
+      </div>
+      <template #footer>
+        <div style="display: flex; justify-content: center; gap: 20px;">
+          <el-button type="success" @click="confirmCancelRecharge" style="width: 120px; font-size: 16px;">确认撤销</el-button>
+          <el-button @click="cancelRechargeDialogVisible = false" style="width: 120px; font-size: 16px;">取消</el-button>
+        </div>
+      </template>
+    </el-dialog>
   </div>
 
   <!-- 撤销充值确认弹窗（和充值确认弹窗样式统一） -->
@@ -171,6 +215,7 @@
       </div>
     </template>
   </el-dialog>
+  </div>
 </template>
 
 <script>
@@ -198,6 +243,17 @@ export default {
         map[m.meterCode] = m.status;
       });
       return map;
+    },
+    canWechatRefund() {
+      const selected = this.multipleSelection;
+      if (!selected || selected.length === 0) {
+        return false;
+      }
+      return selected.every(row =>
+        row.rechargeType === '微信支付' &&
+        !row.hasShouju &&
+        row.status == 1
+      );
     }
   },
   data() {
@@ -227,7 +283,9 @@ export default {
       // 新增撤销弹窗相关
       cancelDialogVisible: false,
       cancelTipText: "",
-      cancelRowInfo: {} // 存储当前要撤销的单行数据
+      cancelRowInfo: {}, // 存储当前要撤销的单行数据
+      cancelRechargeDialogVisible: false,
+      pendingCancelRechargeId: null
     };
   },
   mounted() {
@@ -465,6 +523,22 @@ export default {
 
           this.total = response.data.totalElements || 0;
           console.log('交易记录数据:', this.list, '总数:', this.total);
+
+          if (this.list.length > 0) {
+            console.log('========== 调试信息 ==========');
+            console.log('第一条记录的完整字段:', Object.keys(this.list[0]));
+            console.log('hasShouju 字段值:', this.list[0].hasShouju);
+            console.log('status 字段值:', this.list[0].status);
+            console.log('rechargeType 字段值:', this.list[0].rechargeType);
+            console.log('recordId 字段值:', this.list[0].recordId);
+
+            const firstRow = this.list[0];
+            const canRefund = firstRow.rechargeType === '微信支付' &&
+                             !firstRow.hasShouju &&
+                             firstRow.status == 1;
+            console.log('第一条记录是否可退款:', canRefund);
+            console.log('==============================');
+          }
         } else {
           ElMessage.error(response.msg);
         }
@@ -738,6 +812,80 @@ export default {
         console.error("导出失败:", error);
         ElMessage.error("导出失败: " + error.message);
       }
+    },
+    handleWechatRefund() {
+      const selectedRows = this.multipleSelection;
+
+      if (!selectedRows || selectedRows.length === 0) {
+        ElMessage.warning('请选择要退款的充值记录');
+        return;
+      }
+
+      const refundableRecords = selectedRows.filter(row => {
+        if (row.rechargeType !== '微信支付') {
+          ElMessage.warning(`记录${row.recordId}不是微信支付，已跳过`);
+          return false;
+        }
+        if (row.hasShouju) {
+          ElMessage.warning(`记录${row.recordId}已开具收据，已跳过`);
+          return false;
+        }
+        return true;
+      });
+
+      if (refundableRecords.length === 0) {
+        ElMessage.warning('所选记录均不符合退款条件');
+        return;
+      }
+
+      const recordIds = refundableRecords.map(row => row.recordId);
+
+      this.$confirm(`确定要撤销这${recordIds.length}笔充值吗？将全额退款到原支付账户。`, '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        axios.post('/userManage/userCharge/batchRefundWeChatRecharge', recordIds)
+          .then(res => {
+            if (res.data.code === 200) {
+              this.$message.success(res.data.msg || '退款申请已成功提交，等待微信处理');
+
+              const resultData = res.data.data;
+              let successCount = 0;
+              let failCount = 0;
+              let failMessages = [];
+
+              for (const [id, status] of Object.entries(resultData)) {
+                if (status === 'SUCCESS') {
+                  successCount++;
+                } else {
+                  failCount++;
+                  failMessages.push(`${id}: ${status.replace('FAILED: ', '')}`);
+                }
+              }
+
+              if (failCount > 0) {
+                this.$alert(
+                  `成功: ${successCount}条\n失败: ${failCount}条\n\n失败详情:\n${failMessages.join('\n')}`,
+                  '批量退款结果',
+                  {
+                    confirmButtonText: '确定',
+                    type: failCount === recordIds.length ? 'error' : 'warning'
+                  }
+                );
+              }
+
+              this.handleRefresh();
+            } else {
+              this.$message.error(res.data.msg || '退款失败');
+            }
+          })
+          .catch(error => {
+            console.error('批量退款异常:', error);
+            this.$message.error('系统异常: ' + (error.message || '请稍后重试'));
+          });
+      }).catch(() => {
+      });
     }
   },
   watch: {
@@ -943,8 +1091,56 @@ export default {
   border-color: #dcdfe6;
 }
 
+.refund-status-badge {
+  display: inline-block;
+  padding: 4px 14px;
+  border-radius: 14px;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.refunded {
+  color: #1b7a4a;
+  background: #d4f0de;
+  border: 2px solid #46b97e;
+}
+
+.not-refunded {
+  color: #b0b3bb;
+  background: #fafafa;
+  border: 1px solid #e0e0e0;
+  font-weight: 400;
+  font-size: 12px;
+  padding: 2px 10px;
+}
+
+.receipt-badge {
+  display: inline-block;
+  padding: 4px 14px;
+  border-radius: 14px;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.receipt-yes {
+  color: #1b7a4a;
+  background: #d4f0de;
+  border: 2px solid #46b97e;
+}
+
+.receipt-no {
+  color: #b0b3bb;
+  background: #fafafa;
+  border: 1px solid #e0e0e0;
+  font-weight: 400;
+  font-size: 12px;
+  padding: 2px 10px;
+}
+
 .refresh-btn {
-  padding: 6px 12px;
+
 }
 
 .table-wrapper {

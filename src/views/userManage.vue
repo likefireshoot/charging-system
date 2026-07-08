@@ -1,53 +1,60 @@
 <template>
   <div class="user-container">
     <div class="serach-box">
-      <div class="search-input" v-if="companyId === 1">
-        <span>所属水厂</span>
-        <el-select  class="big-font-el-select" v-model="param.company" placeholder="请选择所属水厂">
-          <el-option v-for="item in companyList" :key="item.id" :label="item.name" :value="item.id"></el-option>
-        </el-select>
-      </div>
-      <!-- <div class="search-input">
-        <span>IMEI号</span>
-        <el-input v-model="param.imei" placeholder="请输入..." />
-      </div> -->
-      <div class="search-input" style="margin-left: 10px">
-        <span>用户号</span>
-        <el-input v-model="param.userId" placeholder="请输入..." />
-      </div>
-      <div class="search-input" style="margin-left: 10px">
-        <span>用户名称</span>
-        <el-input v-model="param.userName" placeholder="请输入..." />
-      </div>
-      <div class="search-input">
-        <span>表号</span>
-        <el-input v-model="param.meterCode" type="number" placeholder="请输入..." />
-      </div>
-      <div class="search-input">
-        <span>水表类型</span>
-        <el-select class="big-font-el-select" v-model="param.meterType" placeholder="请选择">
-          <el-option v-for="item in shuibiao_list" :key="item.id" :value="item.label"></el-option>
-        </el-select>
-      </div>
-      <div class="search-input">
-        <span>电量</span>
-        <el-select class="big-font-el-select" v-model="param.battery" placeholder="请选择" clearable>
-          <el-option label="正常" value="正常"></el-option>
-          <el-option label="异常" value="异常"></el-option>
-        </el-select>
-      </div>
-      <div class="search-input">
-        <span>阀门状态</span>
-        <el-select class="big-font-el-select" v-model="param.valveStatus" placeholder="请选择" clearable>
-          <el-option label="开阀" value="开阀"></el-option>
-          <el-option label="关阀" value="关阀"></el-option>
-          <el-option label="故障" value="故障"></el-option>
-        </el-select>
-      </div>
-      <div class="search-input">
-        <span>厂商</span>
-        <el-input v-model="param.meterVendor" placeholder="请输入..." />
-      </div>
+      <template v-for="field in displayedFilterFields" :key="field.key">
+        <div class="search-input">
+          <span>{{ field.label }}</span>
+          <el-select
+            v-if="field.type === 'select'"
+            class="big-font-el-select"
+            v-model="param[field.key]"
+            :placeholder="field.placeholder || '请选择'"
+            :clearable="field.clearable || false"
+          >
+            <el-option
+              v-for="item in getFilterOptions(field.key)"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
+          <el-input
+            v-else
+            v-model="param[field.key]"
+            :type="field.inputType || 'text'"
+            :placeholder="field.placeholder || '请输入...'"
+          />
+        </div>
+      </template>
+
+      <el-popover
+        placement="bottom"
+        :width="220"
+        trigger="click"
+        v-model:visible="moreFiltersVisible"
+        popper-class="filter-popover"
+      >
+        <template #reference>
+          <div class="more-filter-btn">
+            <span>&nbsp;</span>
+            <el-button class="more-filter-trigger">
+              更多筛选
+              <el-icon style="margin-left: 4px"><ArrowDown /></el-icon>
+            </el-button>
+          </div>
+        </template>
+        <div class="filter-popover-content">
+          <el-checkbox
+            v-for="field in availableFilterFields"
+            :key="field.key"
+            :model-value="visibleFilterKeys.includes(field.key)"
+            @change="(val) => toggleFilterField(field.key, val)"
+            :disabled="visibleFilterKeys.length >= maxVisibleFilters && !visibleFilterKeys.includes(field.key)"
+          >
+            {{ field.label }}
+          </el-checkbox>
+        </div>
+      </el-popover>
 
       <div class="buttons">
         <div class="sercah-btn" @click="search">
@@ -576,6 +583,7 @@ export default {
         },
         company: null, // 新增所属水厂参数
         companyId: null, // 所属水厂ID
+        userPhone: "", // 联系电话
         order: 0,   // ****** 默认按照时间顺序倒叙排列表格 ******
       },
       price_list: [],
@@ -677,6 +685,22 @@ export default {
       // ****** 请求锁，避免重复请求 ******
       isLoading: false,
       listRequestSeq: 0,
+
+      // ****** 筛选栏配置 ******
+      filterFieldConfigs: [
+        { key: "company", label: "所属水厂", type: "select", placeholder: "请选择所属水厂", optionsKey: "companyList" },
+        { key: "userId", label: "用户号", type: "input" },
+        { key: "userName", label: "用户名称", type: "input" },
+        { key: "meterCode", label: "表号", type: "input", inputType: "number" },
+        { key: "userPhone", label: "联系电话", type: "input" },
+        { key: "meterVendor", label: "厂商", type: "input" },
+        { key: "meterType", label: "水表类型", type: "select", optionsKey: "shuibiao_list", defaultVisible: false },
+        { key: "battery", label: "电量", type: "select", clearable: true, options: [{ label: "正常", value: "正常" }, { label: "异常", value: "异常" }] },
+        { key: "valveStatus", label: "阀门状态", type: "select", clearable: true, options: [{ label: "开阀", value: "开阀" }, { label: "关阀", value: "关阀" }, { label: "故障", value: "故障" }] },
+      ],
+      visibleFilterKeys: [],
+      maxVisibleFilters: 7,
+      moreFiltersVisible: false,
     };
   },
   watch: {
@@ -716,6 +740,27 @@ export default {
       immediate: false,
       deep: false,
     },
+  },
+  computed: {
+    availableFilterFields() {
+      return this.filterFieldConfigs.filter((f) => {
+        if (f.key === "company") return this.companyId === 1;
+        return true;
+      });
+    },
+    displayedFilterFields() {
+      return this.availableFilterFields
+        .filter((f) => this.visibleFilterKeys.includes(f.key))
+        .slice(0, this.maxVisibleFilters);
+    },
+  },
+  created() {
+    const allKeys = this.filterFieldConfigs
+      .filter((f) => f.key !== "company" || this.companyId === 1)
+      .filter((f) => f.defaultVisible !== false)
+      .filter((f) => !(this.companyId === 1 && f.key === "battery"))
+      .map((f) => f.key);
+    this.visibleFilterKeys = [...allKeys];
   },
   mounted() {
     this.$nextTick(() => {
@@ -825,6 +870,29 @@ export default {
     this.getCompanyList();
   },
   methods: {
+    getFilterOptions(key) {
+      const field = this.filterFieldConfigs.find((f) => f.key === key);
+      if (!field) return [];
+      if (field.options) return field.options;
+      if (field.optionsKey === "companyList") {
+        return (this.companyList || []).map((item) => ({ label: item.name, value: item.id }));
+      }
+      if (field.optionsKey === "shuibiao_list") {
+        return (this.shuibiao_list || []).map((item) => ({ label: item.label, value: item.label }));
+      }
+      return [];
+    },
+    toggleFilterField(key, checked) {
+      if (checked) {
+        if (this.visibleFilterKeys.length >= this.maxVisibleFilters) return;
+        const configKeys = this.availableFilterFields.map((f) => f.key);
+        const newKeys = [...this.visibleFilterKeys, key];
+        newKeys.sort((a, b) => configKeys.indexOf(a) - configKeys.indexOf(b));
+        this.visibleFilterKeys = newKeys;
+      } else {
+        this.visibleFilterKeys = this.visibleFilterKeys.filter((k) => k !== key);
+      }
+    },
     // ****** 手动处理分页变化，避免 watch 循环 ******
     handlePageChange(page) {
       // 防抖：如果当前正在请求，直接返回，避免重复点击
@@ -1777,6 +1845,7 @@ export default {
         },
         company: null,
         companyId: null,
+        userPhone: "",
         order: 0,
       };
       this.sortField = "time";
@@ -2004,6 +2073,32 @@ export default {
 .buttons>* {
   width: 120px;
   margin-right: 30px;
+}
+
+.more-filter-btn {
+  display: flex;
+  justify-content: flex-start;
+  justify-content: center;
+  flex-direction: column;
+  margin-right: 10px;
+  flex-shrink: 0;
+}
+
+.more-filter-btn > span {
+  font-size: 18px;
+  margin-bottom: 5px;
+}
+
+.more-filter-trigger {
+  font-size: 18px !important;
+  font-weight: 550 !important;
+  padding: 10px 20px !important;
+  height: auto !important;
+}
+
+.filter-popover-content .el-checkbox {
+  display: flex;
+  margin: 6px 0;
 }
 
 .sercah-btn,

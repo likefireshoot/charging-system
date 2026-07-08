@@ -86,7 +86,7 @@
               <img src="@/assets/yonghu/icon27.png" alt="" style="margin-left: 7px" />
               <span style="font-size: 20px; margin-left: 10px; color: #5a5a5a">撤销充值</span>
             </div>
-            <div class="export-out-btn" style="margin-right: 10px; width: 110px" :class="{ 'btn-disabled': !canWechatRefund }" @click="canWechatRefund && handleWechatRefund()">
+            <div class="export-out-btn" style="margin-right: 10px; width: 130px" :class="{ 'btn-disabled': !canWechatRefund }" @click="canWechatRefund && handleWechatRefund()">
               <img src="@/assets/yonghu/icon1.3.png" alt="" style="margin-left: 7px" />
               <span style="font-size: 20px; margin-left: 10px; color: #5a5a5a">微信退款</span>
             </div>
@@ -209,6 +209,27 @@
     </template>
   </el-dialog>
 
+  <!-- 撤销充值确认对话框 -->
+  <el-dialog
+    v-model="cancelRechargeDialogVisible"
+    title="撤销充值确认"
+    width="500px"
+    :close-on-click-modal="false"
+    :close-on-press-escape="false"
+    :lock-scroll="false"
+  >
+    <div style="font-size: 22px; color: #333; line-height: 1.8; text-align: center; padding: 10px 0;">
+      确定要撤销该笔充值记录吗？<br />
+      <span style="color: #e6a23c; font-size: 18px;">此操作不可恢复，请谨慎操作。</span>
+    </div>
+    <template #footer>
+      <div style="display: flex; justify-content: center; gap: 20px;">
+        <el-button type="success" @click="confirmCancelRecharge" style="width: 120px; font-size: 16px;">确认撤销</el-button>
+        <el-button @click="cancelRechargeDialogVisible = false" style="width: 120px; font-size: 16px;">取消</el-button>
+      </div>
+    </template>
+  </el-dialog>
+
   <!-- 隐藏的 PDF 容器，用于打印 -->
   <div id="print-container" style="position: absolute; left: -9999px; top: 0;"></div>
 
@@ -292,7 +313,9 @@ export default {
       // 新增撤销弹窗相关
       cancelDialogVisible: false,
       cancelTipText: "",
-      cancelRowInfo: {} // 存储当前要撤销的单行数据
+      cancelRowInfo: {}, // 存储当前要撤销的单行数据
+      cancelRechargeDialogVisible: false,
+      pendingCancelRechargeId: null,
     };
   },
   computed: {
@@ -882,7 +905,6 @@ export default {
 .recharge-record-dialog-content {
   width: 94%;
   max-width: 2100px;
-  //max-height: 96vh;
   height: 98%;
   border: 1px solid #fafafa;
   background-color: #fafafa;
@@ -898,8 +920,6 @@ export default {
 
 .recharge-record-content {
   width: 100%;
-  //min-height: 72vh;
-  //max-height: calc(88vh - 45px);
   height: 100%;
   background-color: #fff;
   border-radius: 5px;
