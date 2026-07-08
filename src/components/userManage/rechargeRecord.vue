@@ -122,6 +122,10 @@
               <el-table-column property="payerPhone" label="缴费人手机号" min-width="85" align="center" />
               <el-table-column property="rechargeUser" label="收费人" min-width="65" align="center" />
               <el-table-column property="rechargeType" label="交易方式" min-width="75" align="center" />
+              <el-table-column property="rechargeAmount" label="充值金额/元" min-width="85" align="center" />
+              <el-table-column property="oldBalance" label="充值前余额/元" min-width="85" align="center" />
+              <el-table-column property="newBalance" label="充值后余额/元" min-width="85" align="center" />
+              <el-table-column property="createTime" label="充值时间" min-width="85" align="center" />
               <el-table-column property="status" label="微信是否已退费" min-width="100" align="center">
                 <template #default="{ row }">
                   <span v-if="row.rechargeType === '微信支付'" class="refund-status-badge" :class="row.status === 2 ? 'refunded' : 'not-refunded'">
@@ -130,10 +134,6 @@
                   <span v-else style="color: #b0b3bb;">-</span>
                 </template>
               </el-table-column>
-              <el-table-column property="rechargeAmount" label="充值金额/元" min-width="85" align="center" />
-              <el-table-column property="oldBalance" label="充值前余额/元" min-width="85" align="center" />
-              <el-table-column property="newBalance" label="充值后余额/元" min-width="85" align="center" />
-              <el-table-column property="createTime" label="充值时间" min-width="85" align="center" />
               <el-table-column property="hasShouju" label="是否开收据" min-width="75" align="center">
                 <template #default="{ row }">
                   <span class="receipt-badge" :class="row.hasShouju ? 'receipt-yes' : 'receipt-no'">

@@ -91,7 +91,7 @@
         <el-table-column property="userId" label="用户号" min-width="120" align="center" fixed="left" />
         <el-table-column property="userName" label="用户名称" min-width="140" align="center" />
         <el-table-column property="regionName" label="所属区域" min-width="120" align="center" />
-        <el-table-column property="userPhone" label="联系电话" min-width="130" align="center" />
+<!--        <el-table-column property="userPhone" label="联系电话" min-width="130" align="center" />-->
         <el-table-column label="表号" min-width="180" align="center">
           <template #default="scope">
             <div class="meter-code-cell">
@@ -123,7 +123,7 @@
         <el-table-column property="cancelNewBalance" label="撤销后余额/元" min-width="130" align="center">
           <template #default="scope">{{ scope.row.cancelNewBalance ?? "-" }} 元</template>
         </el-table-column>
-        <el-table-column property="meterType" label="水表类型" min-width="100" align="center" />
+<!--        <el-table-column property="meterType" label="水表类型" min-width="100" align="center" />-->
       </el-table>
     </div>
 
