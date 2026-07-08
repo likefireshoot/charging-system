@@ -70,72 +70,111 @@
     <div class="user-info">
       <div class="command-box">
         <div class="delete-btn"  @click="delete_btn_click"
-          v-if="staffPermissionIds.includes(6)">
+          v-if="staffPermissionIds.includes(6)"
+          v-show="isFeatureVisible('delete')">
           <img src="@/assets/yonghu/icon4.png" alt="" />
           <span>删除</span>
         </div>
-        <div class="command-btn" :class="{ 'btn-single-only-disabled': multipleSelection.length !== 1 }" @click="multipleSelection.length === 1 && handleCommand()">
+        <div class="command-btn" :class="{ 'btn-single-only-disabled': multipleSelection.length !== 1 }" @click="multipleSelection.length === 1 && handleCommand()"
+          v-show="isFeatureVisible('command')">
           <img src="@/assets/yonghu/icon5.png" alt="" />
           <span>命令下发</span>
         </div>
         <div class="command-btn" @click="valveOpen_dialogFormVisible = true"
-          v-if="staffPermissionIds.includes(7)">
+          v-if="staffPermissionIds.includes(7)"
+          v-show="isFeatureVisible('valveOpen')">
           <img src="@/assets/yonghu/icon18.png" alt="" />
           <span>开阀设置</span>
         </div>
         <div class="command-btn" @click="valve_dialogFormVisible = true"
-          v-if="staffPermissionIds.includes(8)">
+          v-if="staffPermissionIds.includes(8)"
+          v-show="isFeatureVisible('valveClose')">
           <img src="@/assets/yonghu/icon17.png" alt="" />
           <span>关阀设置</span>
         </div>
         <div class="recharge-btn" :class="{ 'btn-single-only-disabled': multipleSelection.length !== 1 }" @click="multipleSelection.length === 1 && change_balance_btn_click()"
-          v-if="staffPermissionIds.includes(9)">
+          v-if="staffPermissionIds.includes(9)"
+          v-show="isFeatureVisible('balance')">
           <img src="@/assets/yonghu/icon20.png" alt="" />
           <span>余额调整</span>
         </div>
         <div class="recharge-btn" :class="{ 'btn-single-only-disabled': multipleSelection.length !== 1 }" @click="multipleSelection.length === 1 && recharge_btn_click()"
-          v-if="staffPermissionIds.includes(10)">
+          v-if="staffPermissionIds.includes(10)"
+          v-show="isFeatureVisible('recharge')">
           <img src="@/assets/yonghu/icon6.png" alt="" />
           <span>充值</span>
         </div>
         <div class="water-meter-btn" :class="{ 'btn-single-only-disabled': multipleSelection.length !== 1 }" @click="multipleSelection.length === 1 && change_btn_click()"
-          v-if="staffPermissionIds.includes(13)">
+          v-if="staffPermissionIds.includes(13)"
+          v-show="isFeatureVisible('changeMeter')">
           <img src="@/assets/yonghu/icon8.png" alt="" />
           <span>换表</span>
         </div>
         <div class="recharge-record-btn" @click="recharge_record_btn_click"
-          v-if="staffPermissionIds.includes(11)">
+          v-if="staffPermissionIds.includes(11)"
+          v-show="isFeatureVisible('rechargeRecord')">
           <img src="@/assets/yonghu/icon7.png" alt="" />
           <span>充值记录查询</span>
         </div>
         <div class="recharge-record-btn" @click="recharge_cancel_record_btn_click"
-             v-if="staffPermissionIds.includes(11)">
+             v-if="staffPermissionIds.includes(11)"
+             v-show="isFeatureVisible('rechargeCancelRecord')">
           <img src="@/assets/yonghu/icon7.png" alt="" />
           <span>充值撤销记录查询</span>
         </div>
         <div class="water-meter-record-btn" @click="change_record_btn_click"
-          v-if="staffPermissionIds.includes(14)">
+          v-if="staffPermissionIds.includes(14)"
+          v-show="isFeatureVisible('changeRecord')">
           <img src="@/assets/yonghu/icon9.png" alt="" />
           <span>换表记录查询</span>
         </div>
-        <div class="export-out-btn" @click="exportExcel">
+        <div class="export-in-btn" @click="multi_edit_meter_price" v-show="isFeatureVisible('batchPrice')">
+          <img src="@/assets/jiage/icon3.png" alt="" />
+          <span>批量修改水价类型</span>
+        </div>
+        <div class="export-out-btn" @click="exportExcel" v-show="isFeatureVisible('export')">
           <img src="@/assets/yonghu/icon1.3.png" alt="" />
           <span>导出</span>
         </div>
-        <div class="export-out-btn" @click="common_meter_template_click">
+        <div class="export-out-btn" @click="common_meter_template_click" v-show="isFeatureVisible('commonMeterTemplate')">
           <img src="@/assets/yonghu/icon1.png" alt="" />
           <span>普表用水量模板下载</span>
         </div>
-        <div class="export-in-btn" @click="triggerCommonMeterImport">
+        <div class="export-in-btn" @click="triggerCommonMeterImport" v-show="isFeatureVisible('commonMeterImport')">
           <img src="@/assets/yonghu/icon2.png" alt="" />
           <span>普表用水量信息导入</span>
           <input ref="commonMeterInput" type="file" accept=".xls,.xlsx" style="display: none"
             @change="common_meter_click" />
         </div>
-        <div class="export-in-btn" @click="multi_edit_meter_price">
-          <img src="@/assets/jiage/icon3.png" alt="" />
-          <span>批量修改水价类型</span>
-        </div>
+
+        <el-popover
+          placement="bottom"
+          :width="220"
+          trigger="click"
+          v-model:visible="moreFeaturesVisible"
+          popper-class="feature-popover"
+        >
+          <template #reference>
+            <div class="more-feature-btn">
+              <el-button class="more-feature-trigger">
+                更多功能
+                <el-icon style="margin-left: 4px"><ArrowDown /></el-icon>
+              </el-button>
+            </div>
+          </template>
+          <div class="feature-popover-content">
+            <el-checkbox
+              v-for="btn in availableFeatureButtons"
+              :key="btn.key"
+              :model-value="visibleFeatureKeys.includes(btn.key)"
+              @change="(val) => toggleFeatureButton(btn.key, val)"
+              :disabled="visibleFeatureKeys.length >= maxVisibleFeatures && !visibleFeatureKeys.includes(btn.key)"
+            >
+              {{ btn.label }}
+            </el-checkbox>
+          </div>
+        </el-popover>
+
         <div class="reflush" @click="reflush">
           <img src="@/assets/yonghu/icon15.png" alt="" />
         </div>
@@ -686,6 +725,27 @@ export default {
       isLoading: false,
       listRequestSeq: 0,
 
+      // ****** 功能按钮配置 ******
+      featureButtonConfigs: [
+        { key: 'delete', label: '删除', permission: 6 },
+        { key: 'command', label: '命令下发', permission: null },
+        { key: 'valveOpen', label: '开阀设置', permission: 7 },
+        { key: 'valveClose', label: '关阀设置', permission: 8 },
+        { key: 'balance', label: '余额调整', permission: 9 },
+        { key: 'recharge', label: '充值', permission: 10 },
+        { key: 'changeMeter', label: '换表', permission: 13 },
+        { key: 'rechargeRecord', label: '充值记录查询', permission: 11 },
+        { key: 'rechargeCancelRecord', label: '充值撤销记录查询', permission: 11 },
+        { key: 'changeRecord', label: '换表记录查询', permission: 14 },
+        { key: 'batchPrice', label: '批量修改水价类型', permission: null },
+        { key: 'export', label: '导出', permission: null },
+        { key: 'commonMeterTemplate', label: '普表用水量模板下载', permission: null, defaultVisible: false },
+        { key: 'commonMeterImport', label: '普表用水量信息导入', permission: null, defaultVisible: false },
+      ],
+      visibleFeatureKeys: [],
+      maxVisibleFeatures: 12,
+      moreFeaturesVisible: false,
+
       // ****** 筛选栏配置 ******
       filterFieldConfigs: [
         { key: "company", label: "所属水厂", type: "select", placeholder: "请选择所属水厂", optionsKey: "companyList" },
@@ -742,6 +802,12 @@ export default {
     },
   },
   computed: {
+    availableFeatureButtons() {
+      return this.featureButtonConfigs.filter((btn) => {
+        if (btn.permission === null) return true;
+        return this.staffPermissionIds.includes(btn.permission);
+      });
+    },
     availableFilterFields() {
       return this.filterFieldConfigs.filter((f) => {
         if (f.key === "company") return this.companyId === 1;
@@ -761,6 +827,14 @@ export default {
       .filter((f) => !(this.companyId === 1 && f.key === "battery"))
       .map((f) => f.key);
     this.visibleFilterKeys = [...allKeys];
+
+    this.visibleFeatureKeys = this.featureButtonConfigs
+      .filter((btn) => btn.defaultVisible !== false)
+      .filter((btn) => {
+        if (btn.permission === null) return true;
+        return this.staffPermissionIds.includes(btn.permission);
+      })
+      .map((btn) => btn.key);
   },
   mounted() {
     this.$nextTick(() => {
@@ -891,6 +965,20 @@ export default {
         this.visibleFilterKeys = newKeys;
       } else {
         this.visibleFilterKeys = this.visibleFilterKeys.filter((k) => k !== key);
+      }
+    },
+    isFeatureVisible(key) {
+      return this.visibleFeatureKeys.includes(key);
+    },
+    toggleFeatureButton(key, checked) {
+      if (checked) {
+        if (this.visibleFeatureKeys.length >= this.maxVisibleFeatures) return;
+        const configKeys = this.availableFeatureButtons.map((btn) => btn.key);
+        const newKeys = [...this.visibleFeatureKeys, key];
+        newKeys.sort((a, b) => configKeys.indexOf(a) - configKeys.indexOf(b));
+        this.visibleFeatureKeys = newKeys;
+      } else {
+        this.visibleFeatureKeys = this.visibleFeatureKeys.filter((k) => k !== key);
       }
     },
     // ****** 手动处理分页变化，避免 watch 循环 ******
@@ -2098,6 +2186,22 @@ export default {
 }
 
 .filter-popover-content .el-checkbox {
+  display: flex;
+  margin: 6px 0;
+}
+
+.more-feature-btn {
+  flex-shrink: 0;
+}
+
+.more-feature-trigger {
+  font-size: 18px !important;
+  font-weight: 550 !important;
+  padding: 10px 20px !important;
+  height: auto !important;
+}
+
+.feature-popover-content .el-checkbox {
   display: flex;
   margin: 6px 0;
 }

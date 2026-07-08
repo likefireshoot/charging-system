@@ -209,27 +209,6 @@
     </template>
   </el-dialog>
 
-  <!-- 撤销充值确认对话框 -->
-  <el-dialog
-    v-model="cancelRechargeDialogVisible"
-    title="撤销充值确认"
-    width="500px"
-    :close-on-click-modal="false"
-    :close-on-press-escape="false"
-    :lock-scroll="false"
-  >
-    <div style="font-size: 22px; color: #333; line-height: 1.8; text-align: center; padding: 10px 0;">
-      确定要撤销该笔充值记录吗？<br />
-      <span style="color: #e6a23c; font-size: 18px;">此操作不可恢复，请谨慎操作。</span>
-    </div>
-    <template #footer>
-      <div style="display: flex; justify-content: center; gap: 20px;">
-        <el-button type="success" @click="confirmCancelRecharge" style="width: 120px; font-size: 16px;">确认撤销</el-button>
-        <el-button @click="cancelRechargeDialogVisible = false" style="width: 120px; font-size: 16px;">取消</el-button>
-      </div>
-    </template>
-  </el-dialog>
-
   <!-- 隐藏的 PDF 容器，用于打印 -->
   <div id="print-container" style="position: absolute; left: -9999px; top: 0;"></div>
 
@@ -253,11 +232,83 @@
       </div>
     </template>
   </el-dialog>
+
+  <!-- 微信未退款强制撤销警告弹窗 -->
+  <el-dialog
+    v-model="forceCancelDialogVisible"
+    width="580px"
+    :close-on-click-modal="false"
+    custom-class="force-cancel-dialog"
+    :lock-scroll="false"
+    :show-close="false"
+  >
+    <template #header>
+      <div class="force-cancel-header">
+        <el-icon size="28" color="#E6A23C"><WarningFilled /></el-icon>
+        <span class="force-cancel-title">操作警告</span>
+      </div>
+    </template>
+    <div class="force-cancel-content">
+      <div class="force-cancel-alert">
+        <div class="alert-icon">
+          <el-icon size="48" color="#E6A23C"><WarningFilled /></el-icon>
+        </div>
+        <div class="alert-main">
+          <p class="alert-title">该记录为<strong class="highlight-red">微信支付</strong>且<strong class="highlight-red">未退款</strong></p>
+          <p class="alert-desc">请先进行微信退款后再撤销充值，以保证账目一致。</p>
+        </div>
+      </div>
+      <div class="force-cancel-info">
+        <div class="info-title">交易详情</div>
+        <div class="info-grid">
+          <div class="info-item">
+            <span class="info-label">用户名称</span>
+            <span class="info-value">{{ forceCancelRow?.userName || '-' }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">充值金额</span>
+            <span class="info-value amount-highlight">{{ forceCancelRow?.rechargeAmount || '0' }} 元</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">充值时间</span>
+            <span class="info-value">{{ forceCancelRow?.createTime || '-' }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">交易方式</span>
+            <span class="info-value wechat-tag">微信支付</span>
+          </div>
+        </div>
+      </div>
+      <div class="force-cancel-notice">
+        <el-icon size="20" color="#E6A23C"><WarningFilled /></el-icon>
+        <span>注意：撤销后该笔交易的微信退款通道将永久关闭，请确认已通过现金方式完成退款。</span>
+      </div>
+      <div class="force-cancel-checkbox">
+        <el-checkbox v-model="forceCancelChecked" size="large">
+          <span class="checkbox-text">我已知晓撤销后本笔交易无法再通过微信退款</span>
+        </el-checkbox>
+      </div>
+    </div>
+    <template #footer>
+      <div class="force-cancel-footer">
+        <el-button
+          type="danger"
+          :disabled="!forceCancelChecked"
+          @click="confirmForceCancel"
+          size="large"
+        >
+          仍要撤销，已现金退款
+        </el-button>
+        <el-button @click="forceCancelDialogVisible = false" size="large">知道了</el-button>
+      </div>
+    </template>
+  </el-dialog>
 </template>
 
 <script>
 import service from "@/api/request";
 import { ElMessage } from "element-plus";
+import { WarningFilled } from "@element-plus/icons-vue";
 import axios from "axios";
 
 export default {
@@ -314,8 +365,14 @@ export default {
       cancelDialogVisible: false,
       cancelTipText: "",
       cancelRowInfo: {}, // 存储当前要撤销的单行数据
-      cancelRechargeDialogVisible: false,
-      pendingCancelRechargeId: null,
+
+      // 微信未退款强制撤销警告弹窗
+      forceCancelDialogVisible: false,
+      forceCancelChecked: false,
+      forceCancelRow: null,
+
+      // 微信退款防重
+      refunding: false,
     };
   },
   computed: {
@@ -754,7 +811,23 @@ export default {
         ElMessage.warning("请至少选择一条记录");
         return;
       }
-      let id = this.multipleSelection[0].rechargeRecordId;
+      const row = this.multipleSelection[0];
+      if (row.rechargeType === '微信支付' && row.status == 1) {
+        this.cancelDialogVisible = false;
+        this.forceCancelRow = row;
+        this.forceCancelChecked = false;
+        this.forceCancelDialogVisible = true;
+        return;
+      }
+      this.doCancelRecharge(this.multipleSelection[0].rechargeRecordId);
+    },
+    confirmForceCancel() {
+      const row = this.forceCancelRow;
+      if (!row) return;
+      this.forceCancelDialogVisible = false;
+      this.doCancelRecharge(row.rechargeRecordId);
+    },
+    doCancelRecharge(id) {
       const userInfo = JSON.parse(sessionStorage.getItem("userData") || "{}");
       const cancelStaffId = userInfo.staffId;
       if (!cancelStaffId) {
@@ -762,7 +835,6 @@ export default {
         return;
       }
       let url = `/userManage/userCharge/cancelRecharge/${id}?cancelStaffId=${cancelStaffId}`;
-      // let url = `/userManage/userCharge/cancelRecharge/${id}`;
       axios
         .post(`${url}`)
         .then((response) => {
@@ -780,6 +852,7 @@ export default {
         });
     },
     handleWechatRefund() {
+      if (this.refunding) return;
       const selectedRows = this.multipleSelection;
 
       if (!selectedRows || selectedRows.length === 0) {
@@ -811,6 +884,7 @@ export default {
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
+        this.refunding = true;
         axios.post('/userManage/userCharge/batchRefundWeChatRecharge', recordIds)
           .then(res => {
             if (res.data.code === 200) {
@@ -841,6 +915,13 @@ export default {
                 );
               }
 
+              if (successCount > 0) {
+                this.$alert('微信退款已成功，请同步进行撤销充值操作，以保证账目一致。', '温馨提示', {
+                  confirmButtonText: '知道了',
+                  type: 'info'
+                });
+              }
+
               this.reflush();
             } else {
               this.$message.error(res.data.msg || '退款失败');
@@ -849,6 +930,8 @@ export default {
           .catch(error => {
             console.error('批量退款异常:', error);
             this.$message.error('系统异常: ' + (error.message || '请稍后重试'));
+          }).finally(() => {
+            this.refunding = false;
           });
       }).catch(() => {
       });
@@ -1207,6 +1290,138 @@ export default {
   font-weight: 400;
   font-size: 12px;
   padding: 2px 10px;
+}
+
+/* 微信未退款强制撤销弹窗 */
+.force-cancel-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.force-cancel-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: #303133;
+}
+
+.force-cancel-content {
+  padding: 10px 0;
+}
+
+.force-cancel-alert {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px 24px;
+  background: #fef0f0;
+  border-left: 5px solid #E6A23C;
+  border-radius: 6px;
+  margin-bottom: 20px;
+}
+
+.alert-icon {
+  flex-shrink: 0;
+}
+
+.alert-main {
+  flex: 1;
+}
+
+.alert-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: #303133;
+  margin: 0 0 6px 0;
+}
+
+.alert-title .highlight-red {
+  color: #F56C6C;
+  font-size: 22px;
+}
+
+.alert-desc {
+  font-size: 16px;
+  color: #606266;
+  margin: 0;
+}
+
+.force-cancel-info {
+  background: #f5f7fa;
+  border-radius: 6px;
+  padding: 16px 20px;
+  margin-bottom: 16px;
+}
+
+.info-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #303133;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #e4e7ed;
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px 24px;
+}
+
+.info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.info-label {
+  font-size: 14px;
+  color: #909399;
+}
+
+.info-value {
+  font-size: 18px;
+  font-weight: 600;
+  color: #303133;
+}
+
+.amount-highlight {
+  color: #F56C6C;
+  font-size: 22px;
+}
+
+.wechat-tag {
+  color: #07C160;
+}
+
+.force-cancel-notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 12px 16px;
+  background: #fdf6ec;
+  border: 1px solid #faecd8;
+  border-radius: 6px;
+  margin-bottom: 20px;
+  font-size: 15px;
+  color: #E6A23C;
+  line-height: 1.6;
+}
+
+.force-cancel-checkbox {
+  padding: 8px 0;
+}
+
+.checkbox-text {
+  font-size: 17px;
+  font-weight: 600;
+  color: #303133;
+}
+
+.force-cancel-footer {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
 }
 </style>
 
