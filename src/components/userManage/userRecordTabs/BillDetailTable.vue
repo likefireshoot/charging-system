@@ -99,11 +99,11 @@
         <el-table-column property="waterFee" label="水费" min-width="100" align="center">
           <template #default="scope">{{ scope.row.waterFee }}</template>
         </el-table-column>
-        <el-table-column property="minFee" label="保底消费" min-width="110" align="center">
-          <template #default="scope">{{ scope.row.minFee }}</template>
-        </el-table-column>
         <el-table-column property="sewageFee" label="污水处理费" min-width="130" align="center">
           <template #default="scope">{{ scope.row.sewageFee }}</template>
+        </el-table-column>
+        <el-table-column property="minFee" label="保底消费" min-width="110" align="center">
+          <template #default="scope">{{ scope.row.minFee }}</template>
         </el-table-column>
         <el-table-column property="createTime" label="算费日期" min-width="140" align="center" />
       </el-table>
