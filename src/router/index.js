@@ -34,6 +34,7 @@ import commandLog from "../views/commandLog.vue";
 import errorReportRecord from "../views/errorReportRecord.vue";
 import historyDataManage from "@/views/historyDataManage.vue";
 import billDetailReport from "@/components/report/billDetailReport.vue";
+import abnormalChargeReport from "@/components/report/abnormalChargeReport.vue";
 
 const routes = [
   {
@@ -137,6 +138,11 @@ const routes = [
             path: "billDetailReport",
             name: "billDetailReport",
             component: billDetailReport,
+          },
+          {
+            path: "abnormalChargeReport",
+            name: "abnormalChargeReport",
+            component: abnormalChargeReport,
           },
         ],
       },
