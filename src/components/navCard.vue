@@ -201,7 +201,7 @@ let navLists = reactive([
       { id: 48, name: "用水年报表", icon: require("@/assets/menu/icon17.png"), icon2: require("@/assets/menu/icon18.png"), path: "/report/readingCountYearlyReport" },
       { id: 49, name: "用户报表", icon: require("@/assets/menu/icon3.png"), icon2: require("@/assets/menu/icon4.png"), path: "/report/accountsReport" },
       { id: 491, name: "扣费明细报表", icon: require("@/assets/menu/icon5.png"), icon2: require("@/assets/menu/icon6.png"), path: "/report/billDetailReport" },
-      { id: 492, name: "异常扣费统计", icon: require("@/assets/menu/icon5.png"), icon2: require("@/assets/menu/icon6.png"), path: "/report/abnormalChargeReport" },
+      { id: 492, name: "大额扣费审计", icon: require("@/assets/menu/icon5.png"), icon2: require("@/assets/menu/icon6.png"), path: "/report/abnormalChargeReport" },
     ],
   },
   {
@@ -269,7 +269,7 @@ const adminNavList = reactive([
       { id: 48, name: "用水、扣费年报表", icon: require("@/assets/menu/icon17.png"), icon2: require("@/assets/menu/icon18.png"), path: "/report/readingCountYearlyReport" },
       { id: 49, name: "用户报表", icon: require("@/assets/menu/icon3.png"), icon2: require("@/assets/menu/icon4.png"), path: "/report/accountsReport" },
       { id: 491, name: "扣费明细报表", icon: require("@/assets/menu/icon5.png"), icon2: require("@/assets/menu/icon6.png"), path: "/report/billDetailReport" },
-      { id: 492, name: "异常扣费统计", icon: require("@/assets/menu/icon5.png"), icon2: require("@/assets/menu/icon6.png"), path: "/report/abnormalChargeReport" },
+      { id: 492, name: "大额扣费审计", icon: require("@/assets/menu/icon5.png"), icon2: require("@/assets/menu/icon6.png"), path: "/report/abnormalChargeReport" },
     ],
   },
   {
@@ -320,7 +320,7 @@ const nonAdminNavList = reactive([
       { id: 48, name: "用水、扣费年报表", icon: require("@/assets/menu/icon17.png"), icon2: require("@/assets/menu/icon18.png"), path: "/report/readingCountYearlyReport" },
       { id: 49, name: "用户报表", icon: require("@/assets/menu/icon3.png"), icon2: require("@/assets/menu/icon4.png"), path: "/report/accountsReport" },
       { id: 491, name: "扣费明细报表", icon: require("@/assets/menu/icon5.png"), icon2: require("@/assets/menu/icon6.png"), path: "/report/billDetailReport" },
-      { id: 492, name: "异常扣费统计", icon: require("@/assets/menu/icon5.png"), icon2: require("@/assets/menu/icon6.png"), path: "/report/abnormalChargeReport" },
+      { id: 492, name: "大额扣费审计", icon: require("@/assets/menu/icon5.png"), icon2: require("@/assets/menu/icon6.png"), path: "/report/abnormalChargeReport" },
     ],
   },
   {

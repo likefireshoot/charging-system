@@ -53,7 +53,7 @@
 
     <div class="abnormal-info">
       <div class="report-title">
-        <h2>异常扣费统计报表（{{ params.dateRange && params.dateRange[0] ? params.dateRange[0] : '' }} - {{ params.dateRange && params.dateRange[1] ? params.dateRange[1] : '' }}）</h2>
+        <h2>大额扣费审计（{{ params.dateRange && params.dateRange[0] ? params.dateRange[0] : '' }} - {{ params.dateRange && params.dateRange[1] ? params.dateRange[1] : '' }}）</h2>
       </div>
 
       <!-- 功能键预留区 -->
@@ -226,7 +226,7 @@ export default {
         const url = window.URL.createObjectURL(new Blob([response.data]));
         const link = document.createElement("a");
         link.href = url;
-        link.download = "abnormalChargeReport.xlsx";
+        link.download = "大额扣费审计.xlsx";
         link.click();
         window.URL.revokeObjectURL(url);
         ElMessage.success("导出成功");
