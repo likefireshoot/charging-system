@@ -114,19 +114,19 @@
           v-if="staffPermissionIds.includes(11)"
           v-show="isFeatureVisible('rechargeRecord')">
           <img src="@/assets/yonghu/icon7.png" alt="" />
-          <span>充值记录查询</span>
+          <span>充值记录</span>
         </div>
         <div class="recharge-record-btn" @click="recharge_cancel_record_btn_click"
              v-if="staffPermissionIds.includes(11)"
              v-show="isFeatureVisible('rechargeCancelRecord')">
           <img src="@/assets/yonghu/icon7.png" alt="" />
-          <span>充值撤销记录查询</span>
+          <span>充值撤销记录</span>
         </div>
         <div class="water-meter-record-btn" @click="change_record_btn_click"
           v-if="staffPermissionIds.includes(14)"
           v-show="isFeatureVisible('changeRecord')">
           <img src="@/assets/yonghu/icon9.png" alt="" />
-          <span>换表记录查询</span>
+          <span>换表记录</span>
         </div>
         <div class="export-in-btn" @click="multi_edit_meter_price" v-show="isFeatureVisible('batchPrice')">
           <img src="@/assets/jiage/icon3.png" alt="" />
@@ -210,6 +210,10 @@
                 <span @click="handleUserInfo(scope.row)"
                   style="color: #46b97e; display: block; width: 100%; text-align: center">{{ scope.row.userName
                   }}</span>
+                <!-- 当isPause=1 显示暂停气泡 -->
+                <span v-if="scope.row.isPause === 1" style="font-size: 12px;padding: 1px 8px; border-radius: 10px; line-height: 20px; white-space: nowrap;color: #b47500;background-color: #fff7cc;border: 1px solid #ffdd80;">
+                暂停使用
+                </span>
               </template>
             </el-table-column>
             <el-table-column property="meterCode" label="表号" min-width="100" align="center" />
@@ -240,7 +244,7 @@
             <!-- <el-table-column property="imei" label="IMEI号" width="280" align="center" /> -->
 <!--            <el-table-column property="meterType" label="表类型" min-width="70" align="center" />-->
             <el-table-column property="meterVendor" label="厂商" min-width="70" align="center" />
-            <el-table-column property="priceName" label="价格类型" min-width="100" align="center">
+            <el-table-column property="priceName" label="价格" min-width="90" align="center">
               <template #default="scope">
     <span
       v-if="scope.row.priceId"
@@ -251,7 +255,7 @@
                 <span v-else>{{ scope.row.priceName }}</span>
               </template>
             </el-table-column>
-            <el-table-column property="smsConfigName" label="短信" min-width="70" align="center">
+            <el-table-column property="smsConfigName" label="短信" min-width="80" align="center">
               <template #default="scope">
     <span
       v-if="scope.row.smsConfigId"
@@ -262,8 +266,8 @@
                 <span v-else>{{ scope.row.smsConfigName }}</span>
               </template>
             </el-table-column>
-
-            <el-table-column property="userAddr" label="用户地址" min-width="100" align="center" />
+             <el-table-column property="companyName" label="水厂" width="90" align="center" />
+            <el-table-column property="userAddr" label="地址" min-width="90" align="center" />
             <!-- <el-table-column property="companyName" label="所属水厂" width="280" align="center" /> -->
             <el-table-column property="regionName" label="区域" min-width="70" align="center" />
             <el-table-column property="phone" label="联系电话" min-width="100" align="center" />
@@ -734,9 +738,9 @@ export default {
         { key: 'balance', label: '余额调整', permission: 9 },
         { key: 'recharge', label: '充值', permission: 10 },
         { key: 'changeMeter', label: '换表', permission: 13 },
-        { key: 'rechargeRecord', label: '充值记录查询', permission: 11 },
-        { key: 'rechargeCancelRecord', label: '充值撤销记录查询', permission: 11 },
-        { key: 'changeRecord', label: '换表记录查询', permission: 14 },
+        { key: 'rechargeRecord', label: '充值记录', permission: 11 },
+        { key: 'rechargeCancelRecord', label: '充值撤销记录', permission: 11 },
+        { key: 'changeRecord', label: '换表记录', permission: 14 },
         { key: 'batchPrice', label: '批量修改水价类型', permission: null },
         { key: 'export', label: '导出', permission: null },
         { key: 'commonMeterTemplate', label: '普表用水量模板下载', permission: null, defaultVisible: false },
@@ -750,10 +754,27 @@ export default {
       filterFieldConfigs: [
         { key: "company", label: "所属水厂", type: "select", placeholder: "请选择所属水厂", optionsKey: "companyList" },
         { key: "userId", label: "用户号", type: "input" },
-        { key: "userName", label: "用户名称", type: "input" },
+        { key: "userName", label: "用户名", type: "input" },
         { key: "meterCode", label: "表号", type: "input", inputType: "number" },
-        { key: "userPhone", label: "联系电话", type: "input" },
-        { key: "meterVendor", label: "厂商", type: "input" },
+        { key: "userPhone", label: "电话", type: "input" },
+        // { key: "meterVendor", label: "厂商", type: "input" },
+        {
+          key: "meterVendor",
+          label: "厂商",
+          type: "select",
+          clearable: true,
+          options: [
+            { label: "圣鑫", value: "圣鑫" },
+            { label: "旧圣鑫", value: "旧圣鑫" },
+            { label: "太阳能", value: "太阳能" },
+            { label: "信驰", value: "信驰" },
+            { label: "旧信驰", value: "旧信驰" },
+            { label: "旧信驰KF01", value: "旧信驰KF01" },
+            { label: "4G信驰", value: "4G信驰" },
+            { label: "集万讯", value: "集万讯" },
+            { label: "千宝通", value: "千宝通" }
+          ]
+        },
         { key: "meterType", label: "水表类型", type: "select", optionsKey: "shuibiao_list", defaultVisible: false },
         { key: "battery", label: "电量", type: "select", clearable: true, options: [{ label: "正常", value: "正常" }, { label: "异常", value: "异常" }] },
         { key: "valveStatus", label: "阀门状态", type: "select", clearable: true, options: [{ label: "开阀", value: "开阀" }, { label: "关阀", value: "关阀" }, { label: "故障", value: "故障" }] },
@@ -1265,8 +1286,10 @@ export default {
     //       ElMessage.error(errorMessage);
     //     });
     // },
-    selectable() {
-      return true; // 目前允许所有行选择，你可以加上你的业务逻辑
+    selectable(row) {
+      // return true; // 目前允许所有行选择，你可以加上你的业务逻辑
+      // isPause=1 暂停用户，返回false禁止勾选
+      return row.isPause !== 1;
     },
     handleSelectionChange(val) {
       this.multipleSelection = val;
@@ -2130,7 +2153,7 @@ export default {
   justify-content: center;
   /* 确保子元素在父容器中垂直居中 */
   flex-direction: column;
-  width: 11%;
+  width: 10%;
   height: 100%;
   margin-right: 10px;
 }

@@ -64,7 +64,7 @@
         <el-table-column property="commandStatus" label="通讯状态" min-width="130" align="center" />
         <el-table-column property="createTime" label="通讯下发时间" min-width="180" align="center" />
         <el-table-column property="finishTime" label="通讯完成时间" min-width="180" align="center" />
-        <el-table-column property="meterVendor" label="厂商" min-width="120" align="center" />
+<!--        <el-table-column property="meterVendor" label="厂商" min-width="120" align="center" />-->
         <el-table-column property="displayStaffName" label="下发员工" min-width="120" align="center" />
         <el-table-column property="description" label="描述" min-width="260" align="center" show-overflow-tooltip />
       </el-table>

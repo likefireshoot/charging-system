@@ -109,11 +109,11 @@
             </div>
           </template>
         </el-table-column>
-        <el-table-column property="readingCount" label="水表读数/吨" min-width="160" align="center" />
-        <el-table-column property="deltaWater" label="本次用水量/吨" min-width="160" align="center" />
-        <el-table-column property="feeThisTime" label="本次扣费/元" min-width="160" align="center" />
-        <el-table-column property="balanceThisTime" label="本次余额/元" min-width="160" align="center" />
-        <el-table-column property="valveStatus" label="阀门状态" min-width="160" align="center" />
+        <el-table-column property="readingCount" label="读数/吨" min-width="130" align="center" />
+        <el-table-column property="deltaWater" label="用水量/吨" min-width="130" align="center" />
+        <el-table-column property="feeThisTime" label="扣费/元" min-width="130" align="center" />
+        <el-table-column property="balanceThisTime" label="余额/元" min-width="130" align="center" />
+        <el-table-column property="valveStatus" label="阀门" min-width="100" align="center" />
         <el-table-column property="createTime" label="抄表时间" min-width="180" align="center" />
 <!--        <el-table-column property="userPhone" label="手机号" min-width="180" align="center" />-->
       </el-table>

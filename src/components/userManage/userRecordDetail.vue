@@ -16,9 +16,16 @@
           <div class="data-list">
             <div class="data-item"><span>用户号：</span>{{ currentUser.userId || '-' }}</div>
             <div class="data-item"><span>用户名称：</span>{{ currentUser.userName || '-' }}</div>
+            <div class="data-item" v-if="currentUser.isPause === 1">
+              <span>用户状态：</span>
+              <span style="max-width: 80px;font-size: 18px;padding: 1px 8px; border-radius: 10px; line-height: 25px; white-space: nowrap;color: #b47500;background-color: #fff7cc;border: 1px solid #ffdd80;">
+              暂停使用
+              </span>
+            </div>
             <div class="data-item"><span>联系电话：</span>{{ currentUser.phone || '-' }}</div>
             <div class="data-item"><span>开户时间：</span>{{ currentUser.createTime || '-' }}</div>
             <div class="data-item"><span>用户地址：</span>{{ currentUser.userAddr || '-' }}</div>
+            <div class="data-item"><span>所属区域：</span>{{ currentUser.regionName || '-' }}</div>
             <div class="data-item"><span>价格类型：</span>{{ currentUser.userType || '-' }}</div>
           </div>
         </div>
@@ -70,6 +77,7 @@
             :key="tab.type"
             :class="['tab-item', { active: activeTab === tab.type }]"
             @click="switchTab(tab.type)"
+            v-show="tab.type !== 'commandDispatch' || currentUser.isPause !==1"
           >
             {{ tab.name }}
           </div>
@@ -87,6 +95,7 @@
               :is="currentTabComponent"
               :user="currentUser"
               :user-meters="userMeters"
+              :user-is-pause="currentUser.isPause"
               @update-total-money="handleTotalMoneyUpdate"
             />
           </keep-alive>
@@ -134,13 +143,13 @@ export default {
       source: "",
       activeTab: "bill",
       tabs: [
+        { name: "抄表记录", type: "meter" },
         { name: "扣费记录", type: "bill" },
+        { name: "扣费明细表", type: "billDetail"},
         { name: "充值记录", type: "transaction" },
         { name: "充值撤销记录", type: "rechargeCancel" },
-        { name: "抄表记录", type: "meter" },
-        { name: "命令下发记录", type: "command" },
         { name: "命令下发", type: "commandDispatch" },
-        { name: "扣费明细表", type: "billDetail"},
+        { name: "命令下发记录", type: "command" },
         // { name: "操作历史", type: "operation" }
       ]
     };
@@ -179,6 +188,8 @@ export default {
   },
   methods: {
     switchTab(type) {
+      // 暂停用户不能切命令下发
+      if (type === "commandDispatch" && this.currentUser.isPause === 1) return;
       this.activeTab = type;
     },
     async fetchUserInfo() {
@@ -205,12 +216,19 @@ export default {
           companyId: r.companyId || this.$route.query.companyId || "",
           userName: r.userName || "",
           userAddr: r.userAddr || "",
+          regionName: r.regionName || "",
           phone: r.userPhone || "",
           userType: r.priceName || "",
           createTime: r.createTime || "",
           meterType: r.meterType || "",
           balance: r.balance ?? 0,
+          // 新增接收暂停状态
+          isPause: r.isPause ?? 0,
         };
+        // 如果用户暂停且当前是命令下发，自动切命令记录
+        if (this.currentUser.isPause === 1 && this.activeTab === "commandDispatch") {
+          this.activeTab = "command";
+        }
       } catch (error) {
         console.error("获取用户信息失败", error);
         ElMessage.error("获取用户信息失败");

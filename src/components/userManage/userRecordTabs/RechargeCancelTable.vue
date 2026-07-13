@@ -2,12 +2,13 @@
   <div class="transaction-table-container">
     <div class="search-bar">
       <div class="search-input-item">
-        <span>充值类型</span>
+        <span>退款方式</span>
         <el-select v-model="transactionData.rechargeType" placeholder="全部" style="width: 130px; font-size: 18px;" @change="handleTimeTypeChange">
           <el-option label="全部" value="" />
           <el-option label="现金" value="现金" />
           <el-option label="微信支付" value="微信支付" />
           <el-option label="免费赠送" value="免费赠送" />
+          <el-option label="现金（销户退费）" value="现金（销户退费）" />
         </el-select>
       </div>
       <div class="search-input-item">
@@ -90,39 +91,39 @@
         <el-table-column type="selection" width="50" align="center" fixed="left" />
         <el-table-column property="userId" label="用户号" min-width="120" align="center" fixed="left" />
         <el-table-column property="userName" label="用户名称" min-width="140" align="center" />
-        <el-table-column property="regionName" label="所属区域" min-width="120" align="center" />
+<!--        <el-table-column property="regionName" label="所属区域" min-width="120" align="center" />-->
 <!--        <el-table-column property="userPhone" label="联系电话" min-width="130" align="center" />-->
-        <el-table-column label="表号" min-width="180" align="center">
-          <template #default="scope">
-            <div class="meter-code-cell">
-              <span class="meter-code-text">{{ scope.row.meterCode || "-" }}</span>
-              <span v-if="meterStatusMap[scope.row.meterCode] !== undefined"
-                    :class="['meter-status', meterStatusMap[scope.row.meterCode] === '0' ? 'current' : 'history']">
-                {{ meterStatusMap[scope.row.meterCode] === '0' ? '当前表' : '历史表' }}
-              </span>
-            </div>
-          </template>
-        </el-table-column>
-        <el-table-column property="rechargeType" label="充值方式" min-width="100" align="center" />
+<!--        <el-table-column label="表号" min-width="180" align="center">-->
+<!--          <template #default="scope">-->
+<!--            <div class="meter-code-cell">-->
+<!--              <span class="meter-code-text">{{ scope.row.meterCode || "-" }}</span>-->
+<!--              <span v-if="meterStatusMap[scope.row.meterCode] !== undefined"-->
+<!--                    :class="['meter-status', meterStatusMap[scope.row.meterCode] === '0' ? 'current' : 'history']">-->
+<!--                {{ meterStatusMap[scope.row.meterCode] === '0' ? '当前表' : '历史表' }}-->
+<!--              </span>-->
+<!--            </div>-->
+<!--          </template>-->
+<!--        </el-table-column>-->
+        <el-table-column property="rechargeType" label="退款方式" min-width="100" align="center" />
         <el-table-column property="rechargeAmount" label="充值金额" min-width="110" align="center">
           <template #default="scope">{{ scope.row.rechargeAmount }} 元</template>
         </el-table-column>
         <el-table-column property="createTime" label="充值时间" min-width="170" align="center" />
         <el-table-column property="createCancelTime" label="撤销时间" min-width="170" align="center" />
-        <el-table-column property="cancelStaffName" label="撤销员工" min-width="100" align="center" />
-        <el-table-column property="rechargeUser" label="充值员工" min-width="100" align="center" />
-        <el-table-column property="oldBalance" label="充值前余额/元" min-width="120" align="center">
-          <template #default="scope">{{ scope.row.oldBalance }} 元</template>
-        </el-table-column>
-        <el-table-column property="newBalance" label="充值后余额/元" min-width="120" align="center">
-          <template #default="scope">{{ scope.row.newBalance }} 元</template>
-        </el-table-column>
+<!--        <el-table-column property="oldBalance" label="充值前余额/元" min-width="120" align="center">-->
+<!--          <template #default="scope">{{ scope.row.oldBalance }} 元</template>-->
+<!--        </el-table-column>-->
+<!--        <el-table-column property="newBalance" label="充值后余额/元" min-width="120" align="center">-->
+<!--          <template #default="scope">{{ scope.row.newBalance }} 元</template>-->
+<!--        </el-table-column>-->
         <el-table-column property="cancelOldBalance" label="撤销前余额/元" min-width="130" align="center">
           <template #default="scope">{{ scope.row.cancelOldBalance ?? "-" }} 元</template>
         </el-table-column>
         <el-table-column property="cancelNewBalance" label="撤销后余额/元" min-width="130" align="center">
           <template #default="scope">{{ scope.row.cancelNewBalance ?? "-" }} 元</template>
         </el-table-column>
+        <el-table-column property="rechargeUser" label="充值员工" min-width="100" align="center" />
+        <el-table-column property="cancelStaffName" label="撤销员工" min-width="100" align="center" />
 <!--        <el-table-column property="meterType" label="水表类型" min-width="100" align="center" />-->
       </el-table>
     </div>

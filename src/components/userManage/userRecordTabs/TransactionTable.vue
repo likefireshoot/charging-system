@@ -70,15 +70,15 @@
     </div>
 
     <div class="tool-bar">
-      <div class="tool-btn" :class="{ 'disabled-btn': multipleSelection.length !== 1 }" @click="multipleSelection.length === 1 && handleReceipt()">
+      <div v-if="this.isPause === 1" class="tool-btn" :class="{ 'disabled-btn': multipleSelection.length !== 1 }" @click="multipleSelection.length === 1 && handleReceipt()">
         <img src="@/assets/yonghu/icon26.png" alt="" />
         <span>开收据</span>
       </div>
-      <div class="tool-btn" style="margin-right: 10px; width: 130px" :class="{ 'disabled-btn': multipleSelection.length !== 1 }" @click="multipleSelection.length === 1 && openCancelDialog()">
+      <div v-if="this.isPause === 1" class="tool-btn" style="margin-right: 10px; width: 130px" :class="{ 'disabled-btn': multipleSelection.length !== 1 }" @click="multipleSelection.length === 1 && openCancelDialog()">
         <img src="@/assets/yonghu/icon27.png" alt="" style="margin-left: 7px" />
         <span style="font-size: 20px; margin-left: 10px; color: #5a5a5a">撤销充值</span>
       </div>
-      <div class="export-out-btn" style="margin-right: 10px; width: 130px" :class="{ 'btn-disabled': !canWechatRefund }" @click="canWechatRefund && handleWechatRefund()">
+      <div v-if="this.isPause === 1" class="export-out-btn" style="margin-right: 10px; width: 130px" :class="{ 'btn-disabled': !canWechatRefund }" @click="canWechatRefund && handleWechatRefund()">
         <img src="@/assets/yonghu/icon1.3.png" alt="" style="margin-left: 7px" />
         <span style="font-size: 20px; margin-left: 10px; color: #5a5a5a">微信退款</span>
       </div>
@@ -115,9 +115,9 @@
         <el-table-column type="selection" width="50" align="center" fixed="left" />
         <el-table-column property="userId" label="用户号" min-width="120" align="center" fixed="left" />
         <el-table-column property="userName" label="用户名称" min-width="120" align="center" />
-        <el-table-column property="regionName" label="所属区域" min-width="120" align="center" />
+<!--        <el-table-column property="regionName" label="所属区域" min-width="120" align="center" />-->
 <!--        <el-table-column property="userPhone" label="联系电话" min-width="130" align="center" />-->
-        <el-table-column label="表号" min-width="190" align="center">
+        <el-table-column label="表号" min-width="195" align="center">
           <template #default="scope">
             <div class="meter-code-cell">
               <span class="meter-code-text">{{ scope.row.meterCode || "-" }}</span>
@@ -130,7 +130,7 @@
         </el-table-column>
 <!--        <el-table-column property="meterType" label="水表类型" min-width="100" align="center" />-->
 <!--        <el-table-column property="payerPhone" label="缴费人手机号" min-width="140" align="center" />-->
-        <el-table-column property="rechargeType" label="交易方式" min-width="90" align="center" />
+        <el-table-column property="rechargeType" label="交易方式" min-width="100" align="center" />
         <el-table-column property="rechargeAmount" label="交易金额" min-width="110" align="center">
           <template #default="scope">{{ scope.row.rechargeAmount }} 元</template>
         </el-table-column>
@@ -280,7 +280,12 @@ export default {
     userMeters: {
       type: Array,
       default: () => []
-    }
+    },
+    // 新增接收父页面传过来的用户暂停状态
+    isPause: {
+      type: Number,
+      default: 0
+    },
   },
   emits: ["close"],
   computed: {
