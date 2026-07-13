@@ -45,6 +45,7 @@
             <el-option label="旧信驰KF01" value="旧信驰KF01" />
             <el-option label="旧圣鑫" value="旧圣鑫" />
             <el-option label="集万讯" value="集万讯" />
+            <el-option label="千宝通" value="千宝通" />
             <el-option label="太阳能" value="太阳能" />
           </el-select>
         </div>
