@@ -238,7 +238,7 @@ export default {
           <div style="margin-top: 20px;">
             <p style="font-weight: 600; color: #333; margin: 0 0 6px 0; font-size: 17px;">建议操作：</p>
             <ul style="padding: 0 0 0 20px; margin: 6px 0; list-style: disc;">
-              <li style="margin-bottom: 8px;">若新水表已有充值/扣费，请使用'换表'功能重新操作，而不是撤回。</li>
+              <li style="margin-bottom: 8px;">如果新水表已经产生充值或扣费记录，请再次使用"换表"功能，将新表换回旧表即可。</li>
               <li>若确定无新表变动，可以继续撤回操作。</li>
             </ul>
           </div>
