@@ -55,7 +55,7 @@
                     <el-form-item prop="valveState" style="margin: 0">
                       <el-select v-model="params_set_tai.valveState">
                         <el-option label="开阀" value="1"></el-option>
-                        <el-option label="关阀" value="2"></el-option>
+                        <el-option label="关阀" value="0"></el-option>
                       </el-select>
                     </el-form-item>
                   </div>

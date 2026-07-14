@@ -38,7 +38,7 @@
                   <el-form-item prop="valveState">
                     <el-select v-model="params_set_tai.valveState" placeholder="请选择阀门状态" class="param-select">
                       <el-option label="开阀" value="1" />
-                      <el-option label="关阀" value="2" />
+                      <el-option label="关阀" value="0" />
                     </el-select>
                   </el-form-item>
                 </div>
