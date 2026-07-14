@@ -297,7 +297,7 @@ async function goLogin() {
     return;
   }
   try {
-    let { code, data } = await proxy.ajax.post("/staff/login", param, true);
+    let { code, data } = await proxy.ajax.post("/staff/loginWithCaptcha", param, true);
     if (code == 200) {
       sessionStorage.setItem("userData", JSON.stringify(data));
       store.commit("setUserData", data);
