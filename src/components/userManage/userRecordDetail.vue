@@ -20,6 +20,7 @@
             <div class="data-item"><span>开户时间：</span>{{ currentUser.createTime || '-' }}</div>
             <div class="data-item"><span>用户地址：</span>{{ currentUser.userAddr || '-' }}</div>
             <div class="data-item"><span>价格类型：</span>{{ currentUser.userType || '-' }}</div>
+            <div class="data-item"><span>所属水厂：</span>{{ currentUser.companyName || '-' }}</div>
           </div>
         </div>
 
@@ -210,6 +211,7 @@ export default {
           createTime: r.createTime || "",
           meterType: r.meterType || "",
           balance: r.balance ?? 0,
+          companyName: r.companyName || "",
         };
       } catch (error) {
         console.error("获取用户信息失败", error);
