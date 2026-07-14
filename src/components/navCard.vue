@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <div class="navPage">
     <div class="inBox" v-if="slide">
       <div class="returnCard" @click.stop="slide = false">
@@ -242,6 +242,7 @@ if (staffPermissionIds.value.includes(55)) { navLists.push({ id: 12, name: "历�
 }
 if (staffPermissionIds.value.includes(39)) { navLists.push({ id: 8, name: "操作日志", icon: require("@/assets/add/icon-10.png"), icon2: require("@/assets/add/icon-11.png"), path: "/logManage" });
 }
+navLists.push({ id: 13, name: "快速抄表", icon: require("@/assets/menu/icon5.png"), icon2: require("@/assets/menu/icon6.png"), path: "/quickMeterReport" });
 
 const adminNavList = reactive([
   { id: 0, name: "首页", icon: require("@/assets/menu/icon1.png"), icon2: require("@/assets/menu/icon2.png"), path: "/homePage" },
@@ -292,6 +293,7 @@ const adminNavList = reactive([
   { id: 11, name: "角色管理", icon: require("@/assets/menu/icon27.png"), icon2: require("@/assets/menu/icon28.png"), path: "/roleManage" },
   { id: 12, name: "历史数据管理", icon: require("@/assets/menu/icon17.png"), icon2: require("@/assets/menu/icon18.png"), path: "/historyDataManage" },
   { id: 8, name: "操作日志", icon: require("@/assets/add/icon-10.png"), icon2: require("@/assets/add/icon-11.png"), path: "/logManage" },
+  { id: 13, name: "快速抄表", icon: require("@/assets/menu/icon5.png"), icon2: require("@/assets/menu/icon6.png"), path: "/quickMeterReport" },
 ]);
 // 定义非管理员的navList
 const nonAdminNavList = reactive([
@@ -337,6 +339,7 @@ const nonAdminNavList = reactive([
     ],
   },
   { id: 6, name: "警告管理", icon: require("@/assets/menu/icon19.png"), icon2: require("@/assets/menu/icon20.png"), path: "/warningManage" },
+  { id: 13, name: "快速抄表", icon: require("@/assets/menu/icon5.png"), icon2: require("@/assets/menu/icon6.png"), path: "/quickMeterReport" },
 ]);
 
 // ✅ 排序：按 adminNavList 的顺序
