@@ -34,66 +34,32 @@
               <div style="width: 94%; height: 1px; background-color: #e9e9e9"></div>
             </div>
             <div class="set-content">
-              <div v-if="node.id == '' || node.id == 1 || node.id == 2 || node.id >= 9" class="set-content-container">
+              <div v-if="node.id == '' || node.id == 1" class="set-content-container">
                 <div class="set-input" style="width: 100%; height: 175px; justify-content: center; align-items: center">
                   <img src="@/assets/yonghu/0.png" alt="" style="width: auto; height: 75%" />
                   <span>暂无参数...</span>
                 </div>
               </div>
               <div v-else>
-                <div class="set-content-container" v-if="node.label === '设置读数'">
+                <el-form class="set-content-container" v-if="node.label === '设置读数'" :model="params_set_tai" :rules="readCountRules" ref="readCountForm">
                   <div class="set-input">
                     <span>读数</span>
-                    <el-input v-model="params_set_tai.readCount"></el-input>
+                    <el-form-item prop="readCount" style="margin: 0">
+                      <el-input v-model="params_set_tai.readCount"></el-input>
+                    </el-form-item>
                   </div>
-                </div>
-                <div class="set-content-container" v-if="node.label === '阀门控制'">
+                </el-form>
+                <el-form class="set-content-container" v-if="node.label === '阀门控制'" :model="params_set_tai" :rules="valveControlRules" ref="valveControlForm">
                   <div class="set-input">
                     <span>阀门状态</span>
-                    <el-select v-model="params_set_tai.valveState">
-                      <el-option label="开阀" value="1"></el-option>
-                      <el-option label="关阀" value="2"></el-option>
-                      <el-option label="阀门摆动" value="3"></el-option>
-                    </el-select>
+                    <el-form-item prop="valveState" style="margin: 0">
+                      <el-select v-model="params_set_tai.valveState">
+                        <el-option label="开阀" value="1"></el-option>
+                        <el-option label="关阀" value="2"></el-option>
+                      </el-select>
+                    </el-form-item>
                   </div>
-                </div>
-                <div class="set-content-container" v-if="node.label === '修改表地址'">
-                  <div class="set-input">
-                    <span>表地址</span>
-                    <el-input v-model="params_set_tai.address"></el-input>
-                  </div>
-                </div>
-                <div class="set-content-container" v-if="node.label === '设置网络参数'">
-                  <div class="set-input">
-                    <span>IP地址</span>
-                    <el-input v-model="params_set_tai.networkParams.ip"></el-input>
-                  </div>
-                  <div class="set-input">
-                    <span>端口号</span>
-                    <el-input v-model="params_set_tai.networkParams.port"></el-input>
-                  </div>
-                </div>
-                <div class="set-content-container" v-if="node.label === '设置上报周期'">
-                  <div class="set-input">
-                    <span>上报周期（分钟）</span>
-                    <el-input v-model="params_set_tai.uploadCycle"></el-input>
-                  </div>
-                </div>
-                <div class="set-content-container" v-if="node.label === '设置准确上报时间'">
-                  <div class="set-input" style="width: 100%">
-                    <span>准确上报时间</span>
-                    <div style="width: 100%; display: flex; justify-content: space-between">
-                      <el-input style="margin-right: 10px" v-model="params_set_tai.uploadTime.year" placeholder="年">年</el-input>
-                      <el-input style="margin-right: 10px" v-model="params_set_tai.uploadTime.month" placeholder="月">月</el-input>
-                      <el-input style="margin-right: 10px" v-model="params_set_tai.uploadTime.day" placeholder="日">日</el-input>
-                      <el-input style="margin-right: 10px" v-model="params_set_tai.uploadTime.hour" placeholder="时">时</el-input>
-                      <el-input style="margin-right: 10px" v-model="params_set_tai.uploadTime.minute" placeholder="分">分</el-input>
-                      <el-input style="margin-right: 10px" v-model="params_set_tai.uploadTime.second" placeholder="秒">秒</el-input>
-                    </div>
-                  </div>
-                </div>
-                <div class="set-content-container" v-if="node.label === '清零'"></div>
-                <div class="set-content-container" v-if="node.label === '休眠'"></div>
+                </el-form>
               </div>
             </div>
           </div>
@@ -106,91 +72,16 @@
               <div style="width: 94%; height: 1px; background-color: #e9e9e9"></div>
             </div>
             <div class="get-content">
-              <div v-if="node.id <= 10" class="set-content-container">
+              <div class="set-content-container">
                 <div class="set-input" style="width: 100%; height: 175px; justify-content: center; align-items: center">
                   <img src="@/assets/yonghu/0.png" alt="" style="width: auto; height: 75%" />
                   <span>暂无返回值...</span>
                 </div>
               </div>
-              <div v-else>
-                <div class="set-content-container" v-if="node.label === '获取表地址'">
-                  <div class="set-input">
-                    <span>表地址</span>
-                    <el-input v-model="params_get_tai.address"></el-input>
-                  </div>
-                </div>
-                <div class="set-content-container" v-if="node.label === '获取当前流量数'">
-                  <div class="set-input">
-                    <span>当前流量数（升）</span>
-                    <el-input v-model="params_get_tai.currentFlow"></el-input>
-                  </div>
-                </div>
-                <div class="set-content-container" v-if="node.label === '获取可用流量总数'">
-                  <div class="set-input">
-                    <span>可用流量总数（升）</span>
-                    <el-input v-model="params_get_tai.availableFlow"></el-input>
-                  </div>
-                </div>
-                <div class="set-content-container" v-if="node.label === '获取上报周期'">
-                  <div class="set-input">
-                    <span>上报周期（分钟）</span>
-                    <el-input v-model="params_get_tai.uploadCycle"></el-input>
-                  </div>
-                </div>
-                <div class="set-content-container" v-if="node.label === '获取抄表日期'">
-                  <div class="set-input" style="width: 100%">
-                    <span>抄表日期</span>
-                    <div style="width: 100%; display: flex; justify-content: space-between">
-                      <el-input style="margin-right: 10px" v-model="params_get_tai.chaobiao.year" placeholder="年">年</el-input>
-                      <el-input style="margin-right: 10px" v-model="params_get_tai.chaobiao.month" placeholder="月">月</el-input>
-                      <el-input style="margin-right: 10px" v-model="params_get_tai.chaobiao.day" placeholder="日">日</el-input>
-                      <el-input style="margin-right: 10px" v-model="params_get_tai.chaobiao.hour" placeholder="时">时</el-input>
-                      <el-input style="margin-right: 10px" v-model="params_get_tai.chaobiao.minute" placeholder="分">分</el-input>
-                      <el-input style="margin-right: 10px" v-model="params_get_tai.chaobiao.second" placeholder="秒">秒</el-input>
-                    </div>
-                  </div>
-                </div>
-                <div class="set-content-container" v-if="node.label === '获取阀门状态'">
-                  <div class="set-input">
-                    <span>阀门状态</span>
-                    <el-input v-model="params_get_tai.valveState"></el-input>
-                  </div>
-                </div>
-                <div class="set-content-container" v-if="node.label === '获取电压'">
-                  <div class="set-input">
-                    <span>电压（V）</span>
-                    <el-input v-model="params_get_tai.voltage"></el-input>
-                  </div>
-                </div>
-                <div class="set-content-container" v-if="node.label === '获取信号强度'">
-                  <div class="set-input">
-                    <span>信号强度</span>
-                    <el-input v-model="params_get_tai.signalStrength"></el-input>
-                  </div>
-                </div>
-                <div class="set-content-container" v-if="node.label === '获取硬件版本号'">
-                  <div class="set-input">
-                    <span>硬件版本号</span>
-                    <el-input v-model="params_get_tai.hardwareVersion"></el-input>
-                  </div>
-                </div>
-                <div class="set-content-container" v-if="node.label === '获取IMSI'">
-                  <div class="set-input">
-                    <span>IMSI</span>
-                    <el-input v-model="params_get_tai.imsi"></el-input>
-                  </div>
-                </div>
-                <div class="set-content-container" v-if="node.label === '获取ICCID'">
-                  <div class="set-input">
-                    <span>ICCID</span>
-                    <el-input v-model="params_get_tai.iccid"></el-input>
-                  </div>
-                </div>
-              </div>
             </div>
           </div>
           <div class="btns">
-            <div class="confirm-btn" @click="commit_xinchi">
+            <div class="confirm-btn" @click="commit_qianbaotong">
               <el-icon style="margin-left: 15%"><Check /></el-icon>
               <span style="font-size: 16px; margin-left: 15%">确认</span>
             </div>
@@ -225,6 +116,22 @@ export default {
     },
   },
   data() {
+    const validateReadCount = (rule, value, callback) => {
+      if (value === null || value === undefined || value === "") {
+        callback(new Error("读数不能为空"));
+      } else if (isNaN(value) || Number(value) < 0) {
+        callback(new Error("读数必须为非负数"));
+      } else {
+        callback();
+      }
+    };
+    const validateValveState = (rule, value, callback) => {
+      if (!value) {
+        callback(new Error("请选择阀门状态"));
+      } else {
+        callback();
+      }
+    };
     return {
       commandFilterText: "",
       //当前所选择到的子节点的信息
@@ -253,138 +160,18 @@ export default {
               value: 4,
               label: "阀门控制",
             },
-            {
-              id: 5,
-              value: 5,
-              label: "修改表地址",
-            },
-            {
-              id: 6,
-              value: 6,
-              label: "设置网络参数",
-            },
-            {
-              id: 7,
-              value: 7,
-              label: "设置上报周期",
-            },
-            {
-              id: 8,
-              value: 8,
-              label: "设置准确上报时间",
-            },
-            {
-              id: 9,
-              value: 9,
-              label: "清零",
-            },
-            {
-              id: 10,
-              value: 10,
-              label: "休眠",
-            },
-          ],
-        },
-        {
-          id: 2,
-          value: 2,
-          label: "下发获取命令",
-          children: [
-            {
-              id: 11,
-              value: 11,
-              label: "获取表地址",
-            },
-            {
-              id: 12,
-              value: 12,
-              label: "获取当前流量数",
-            },
-            {
-              id: 13,
-              value: 13,
-              label: "获取可用流量总数",
-            },
-            {
-              id: 14,
-              value: 14,
-              label: "获取上报周期",
-            },
-            {
-              id: 15,
-              value: 15,
-              label: "获取抄表日期",
-            },
-            {
-              id: 16,
-              value: 16,
-              label: "获取阀门状态",
-            },
-            {
-              id: 17,
-              value: 17,
-              label: "获取电压",
-            },
-            {
-              id: 18,
-              value: 18,
-              label: "获取信号强度",
-            },
-            {
-              id: 19,
-              value: 19,
-              label: "获取硬件版本号",
-            },
-            {
-              id: 20,
-              value: 20,
-              label: "获取IMSI",
-            },
-            {
-              id: 21,
-              value: 21,
-              label: "获取ICCID",
-            },
           ],
         },
       ],
       params_set_tai: {
         readCount: "",
         valveState: "",
-        address: "",
-        networkParams: {
-          ip: "",
-          port: "",
-        },
-        uploadCycle: "",
-        uploadTime: {
-          year: "",
-          month: "",
-          day: "",
-          hour: "",
-          minute: "",
-          second: "",
-        },
       },
-      params_get_tai: {
-        address: "",
-        currentFlow: "",
-        availableFlow: "",
-        uploadCycle: "",
-        chaobiao: {
-          year: "",
-          month: "",
-          day: "",
-          hour: "",
-          minute: "",
-          second: "",
-        },
-        valveState: "",
-        voltage: "",
-        signalStrength: "",
-        hardwareVersion: "",
-        imsi: "",
-        iccid: "",
+      readCountRules: {
+        readCount: [{ validator: validateReadCount, trigger: "blur" }],
+      },
+      valveControlRules: {
+        valveState: [{ validator: validateValveState, trigger: "change" }],
       },
     };
   },
@@ -418,43 +205,57 @@ export default {
       this.node.label = "";
       this.$emit("close");
     },
-    /**
-     * 将年、月、日、时、分、秒转换为 YYYY-MM-DD HH:MM:SS 格式的字符串
-     */
-    formatDateTime(year, month, day, hour, minute, second) {
-      // 补零函数，确保个位数前有0
-      const padZero = (num) => num.toString().padStart(2, "0");
-      // 构建并返回格式化的日期时间字符串
-      return `${year}-${padZero(month)}-${padZero(day)} ${padZero(hour)}:${padZero(minute)}:${padZero(second)}`;
+    getMeterCode() {
+      return this.data.meterCode || this.data.imei;
     },
-    commit_xinchi() {
-      if (this.node.label === "设置周期上报参数") {
-        const imei = this.data.imei;
-        const status = this.params_set_tai.zhouqishangbao.way;
-        const weeks = this.params_set_tai.zhouqishangbao.week;
-        const cycleIntervals = this.params_set_tai.zhouqishangbao.interval;
-        const { year, month, day, hour, minute, second } = this.params_set_tai.zhouqishangbao;
-        if (status === "" || weeks == null || cycleIntervals == null || year === "" || month === "" || day === "" || hour === "" || minute === "" || second === "") {
-          ElMessage.error("所有的参数均不能为空！");
+    commit_qianbaotong() {
+      const meterCode = this.getMeterCode();
+      if (!meterCode) {
+        ElMessage.error("未获取到水表编号");
+        return;
+      }
+      if (this.node.label === "设置读数") {
+        if (!this.$refs.readCountForm) {
+          ElMessage.error("表单未加载完成，请稍后重试");
           return;
         }
-        // 调用格式化函数
-        const time = this.formatDateTime(year, month, day, hour, minute, second);
-        service
-          .get(`/xinchi/xinChiSetCycleParametersCommand?imei=${imei}&status=${status}&weeks=${weeks}&cycleIntervals=${cycleIntervals}&time=${time}`)
-          .then((res) => {
-            if (res.code === 200) {
-              ElMessage.success("周期上报参数设置成功！");
-              this.closeCommandDialog();
-            } else {
-              ElMessage.error(res.msg);
-            }
-          })
-          .catch((error) => {
-            ElMessage.error(error.message || "设置周期上报参数失败!");
-          });
+        this.$refs.readCountForm.validate((valid) => {
+          if (!valid) return;
+          service
+            .get(`/command/qianBaoTong/qianBaoTongSetReadCount?meterCode=${meterCode}&readCount=${this.params_set_tai.readCount}`)
+            .then((res) => {
+              if (res.code === 200) {
+                ElMessage.success("设置读数成功");
+                this.closeCommandDialog();
+              } else {
+                ElMessage.error(res.msg || res.code);
+              }
+            })
+            .catch((error) => {
+              ElMessage.error(error.message || "设置读数失败");
+            });
+        });
       } else if (this.node.label === "阀门控制") {
-        ElMessage.error("暂未开通");
+        if (!this.$refs.valveControlForm) {
+          ElMessage.error("表单未加载完成，请稍后重试");
+          return;
+        }
+        this.$refs.valveControlForm.validate((valid) => {
+          if (!valid) return;
+          service
+            .get(`/command/qianBaoTong/qianBaoTongValveCommand?meterCode=${meterCode}&status=${this.params_set_tai.valveState}`)
+            .then((res) => {
+              if (res.code === 200) {
+                ElMessage.success("阀门控制成功");
+                this.closeCommandDialog();
+              } else {
+                ElMessage.error(res.msg || res.code);
+              }
+            })
+            .catch((error) => {
+              ElMessage.error(error.message || "命令下发失败");
+            });
+        });
       }
     },
   },
@@ -558,6 +359,19 @@ export default {
 
 .set-input > .el-input {
   height: 35px;
+  width: 100%;
+}
+
+.set-input > .el-form-item {
+  width: 100%;
+}
+
+.set-input > .el-form-item .el-input,
+.set-input > .el-form-item .el-select {
+  width: 100%;
+}
+
+.set-input > .el-form-item .el-select .el-input {
   width: 100%;
 }
 

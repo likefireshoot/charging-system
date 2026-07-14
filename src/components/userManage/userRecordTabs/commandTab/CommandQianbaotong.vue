@@ -24,51 +24,29 @@
               <span class="empty-text">请在左侧命令树中选择一条命令</span>
             </div>
             <div v-else>
-              <div class="set-content-container" v-if="node.label === '设置读数'">
-                <div class="set-input"><span>读数</span><el-input v-model="params_set_tai.readCount" class="param-input" /></div>
-              </div>
-              <div class="set-content-container" v-if="node.label === '阀门控制'">
-                <div class="set-input">
-                  <span>阀门状态</span>
-                  <el-select v-model="params_set_tai.valveState" class="param-select">
-                    <el-option label="开阀" value="1" /><el-option label="关阀" value="2" /><el-option label="阀门摆动" value="3" />
-                  </el-select>
+              <el-form v-if="node.label === '设置读数'" ref="readCountForm" :model="params_set_tai" :rules="readCountRules" class="param-form">
+                <div class="param-field">
+                  <span class="param-label">读数</span>
+                  <el-form-item prop="readCount">
+                    <el-input v-model="params_set_tai.readCount" class="param-input" />
+                  </el-form-item>
                 </div>
-              </div>
-              <div class="set-content-container" v-if="node.label === '修改表地址'">
-                <div class="set-input"><span>表地址</span><el-input v-model="params_set_tai.address" class="param-input" /></div>
-              </div>
-              <div class="set-content-container" v-if="node.label === '设置网络参数'">
-                <div class="set-input"><span>IP地址</span><el-input v-model="params_set_tai.networkParams.ip" class="param-input" /></div>
-                <div class="set-input"><span>端口号</span><el-input v-model="params_set_tai.networkParams.port" class="param-input" /></div>
-              </div>
-              <div class="set-content-container" v-if="node.label === '设置上报周期'">
-                <div class="set-input"><span>上报周期（分钟）</span><el-input v-model="params_set_tai.uploadCycle" class="param-input" /></div>
-              </div>
-              <div class="set-content-container" v-if="node.label === '设置准确上报时间'">
-                <div class="set-input" style="width: 100%">
-                  <span>准确上报时间</span>
-                  <div class="datetime-row">
-                    <el-input v-model="params_set_tai.uploadTime.year" class="param-input-inline" placeholder="年" />
-                    <el-input v-model="params_set_tai.uploadTime.month" class="param-input-inline" placeholder="月" />
-                    <el-input v-model="params_set_tai.uploadTime.day" class="param-input-inline" placeholder="日" />
-                    <el-input v-model="params_set_tai.uploadTime.hour" class="param-input-inline" placeholder="时" />
-                    <el-input v-model="params_set_tai.uploadTime.minute" class="param-input-inline" placeholder="分" />
-                    <el-input v-model="params_set_tai.uploadTime.second" class="param-input-inline" placeholder="秒" />
-                  </div>
+              </el-form>
+              <el-form v-else-if="node.label === '阀门控制'" ref="valveControlForm" :model="params_set_tai" :rules="valveControlRules" class="param-form">
+                <div class="param-field">
+                  <span class="param-label">阀门状态</span>
+                  <el-form-item prop="valveState">
+                    <el-select v-model="params_set_tai.valveState" placeholder="请选择阀门状态" class="param-select">
+                      <el-option label="开阀" value="1" />
+                      <el-option label="关阀" value="2" />
+                    </el-select>
+                  </el-form-item>
                 </div>
-              </div>
-              <div class="set-content-container" v-if="node.label === '清零'"></div>
-              <div class="set-content-container" v-if="node.label === '休眠'"></div>
-              <div class="set-content-container" v-if="node.label && node.label.startsWith('获取')">
-                <div class="set-input" style="width:100%;height:150px;justify-content:center;align-items:center">
-                  <img src="@/assets/yonghu/0.png" alt="" style="height:75%" /><span>暂无返回值...</span>
-                </div>
-              </div>
+              </el-form>
             </div>
           </div>
           <div class="btn-row">
-            <button class="confirm-btn" @click="commit_xinchi"><el-icon><Check /></el-icon><span>确认下发</span></button>
+            <button class="confirm-btn" @click="commit_qianbaotong"><el-icon><Check /></el-icon><span>确认下发</span></button>
           </div>
         </div>
       </div>
@@ -84,36 +62,38 @@ export default {
   name: "CommandQianbaotong",
   props: { meterData: { type: Object, default: () => ({}) } },
   data() {
+    const validateReadCount = (rule, value, callback) => {
+      if (value === null || value === undefined || value === "") {
+        callback(new Error("读数不能为空"));
+      } else if (isNaN(value) || Number(value) < 0) {
+        callback(new Error("读数必须为非负数"));
+      } else {
+        callback();
+      }
+    };
+    const validateValveState = (rule, value, callback) => {
+      if (!value) {
+        callback(new Error("请选择阀门状态"));
+      } else {
+        callback();
+      }
+    };
     return {
       commandFilterText: "",
       node: { label: "", id: "", value: "" },
       commandProps: { children: "children", label: "label" },
       command_qianbaotong_data: [
         { id: 1, value: 1, label: "下发控制命令", children: [
-          { id: 3, value: 3, label: "设置读数" }, { id: 4, value: 4, label: "阀门控制" },
-          { id: 5, value: 5, label: "修改表地址" }, { id: 6, value: 6, label: "设置网络参数" },
-          { id: 7, value: 7, label: "设置上报周期" }, { id: 8, value: 8, label: "设置准确上报时间" },
-          { id: 9, value: 9, label: "清零" }, { id: 10, value: 10, label: "休眠" },
-        ]},
-        { id: 2, value: 2, label: "下发获取命令", children: [
-          { id: 11, value: 11, label: "获取表地址" }, { id: 12, value: 12, label: "获取当前流量数" },
-          { id: 13, value: 13, label: "获取可用流量总数" }, { id: 14, value: 14, label: "获取上报周期" },
-          { id: 15, value: 15, label: "获取抄表日期" }, { id: 16, value: 16, label: "获取阀门状态" },
-          { id: 17, value: 17, label: "获取电压" }, { id: 18, value: 18, label: "获取信号强度" },
-          { id: 19, value: 19, label: "获取硬件版本号" }, { id: 20, value: 20, label: "获取IMSI" },
-          { id: 21, value: 21, label: "获取ICCID" },
+          { id: 3, value: 3, label: "设置读数" },
+          { id: 4, value: 4, label: "阀门控制" },
         ]},
       ],
       params_set_tai: {
-        readCount: "", valveState: "", address: "",
-        networkParams: { ip: "", port: "" }, uploadCycle: "",
-        uploadTime: { year: "", month: "", day: "", hour: "", minute: "", second: "" },
+        readCount: "",
+        valveState: "",
       },
-      params_get_tai: {
-        address: "", currentFlow: "", availableFlow: "", uploadCycle: "",
-        chaobiao: { year: "", month: "", day: "", hour: "", minute: "", second: "" },
-        valveState: "", voltage: "", signalStrength: "", hardwareVersion: "", imsi: "", iccid: "",
-      },
+      readCountRules: { readCount: [{ validator: validateReadCount, trigger: "blur" }] },
+      valveControlRules: { valveState: [{ validator: validateValveState, trigger: "change" }] },
     };
   },
   computed: {
@@ -129,23 +109,56 @@ export default {
   methods: {
     command_filterNode(value, data) { if (!value) return true; return data.label.includes(value); },
     handleNodeClick(node) { this.node.id = node.id; this.node.value = node.value; this.node.label = node.label; },
-    formatDateTime(year, month, day, hour, minute, second) {
-      const pad = (n) => n.toString().padStart(2, "0");
-      return `${year}-${pad(month)}-${pad(day)} ${pad(hour)}:${pad(minute)}:${pad(second)}`;
+    getMeterCode() {
+      return this.meterData.meterCode || this.meterData.imei;
     },
-    commit_xinchi() {
-      if (this.node.label === "设置周期上报参数") {
-        const imei = this.meterData.imei; const status = this.params_set_tai.zhouqishangbao && this.params_set_tai.zhouqishangbao.way;
-        const weeks = this.params_set_tai.zhouqishangbao && this.params_set_tai.zhouqishangbao.week;
-        const cycleIntervals = this.params_set_tai.zhouqishangbao && this.params_set_tai.zhouqishangbao.interval;
-        const p = this.params_set_tai.zhouqishangbao || {};
-        const { year, month, day, hour, minute, second } = p;
-        if (status === "" || weeks == null || cycleIntervals == null || year === "" || month === "" || day === "" || hour === "" || minute === "" || second === "") { ElMessage.error("所有的参数均不能为空！"); return; }
-        const time = this.formatDateTime(year, month, day, hour, minute, second);
-        service.get(`/xinchi/xinChiSetCycleParametersCommand?imei=${imei}&status=${status}&weeks=${weeks}&cycleIntervals=${cycleIntervals}&time=${time}`).then((res) => {
-          if (res.code === 200) { ElMessage.success("周期上报参数设置成功！"); } else { ElMessage.error(res.msg); }
-        }).catch((error) => { ElMessage.error(error.message || "设置周期上报参数失败!"); });
-      } else if (this.node.label === "阀门控制") { ElMessage.error("暂未开通"); }
+    commit_qianbaotong() {
+      const meterCode = this.getMeterCode();
+      if (!meterCode) {
+        ElMessage.error("未获取到水表编号");
+        return;
+      }
+      if (this.node.label === "设置读数") {
+        if (!this.$refs.readCountForm) {
+          ElMessage.error("表单未加载完成，请稍后重试");
+          return;
+        }
+        this.$refs.readCountForm.validate((valid) => {
+          if (!valid) return;
+          service
+            .get(`/command/qianBaoTong/qianBaoTongSetReadCount?meterCode=${meterCode}&readCount=${this.params_set_tai.readCount}`)
+            .then((res) => {
+              if (res.code === 200) {
+                ElMessage.success("设置读数成功");
+              } else {
+                ElMessage.error(res.msg || res.code);
+              }
+            })
+            .catch((error) => {
+              ElMessage.error(error.message || "设置读数失败");
+            });
+        });
+      } else if (this.node.label === "阀门控制") {
+        if (!this.$refs.valveControlForm) {
+          ElMessage.error("表单未加载完成，请稍后重试");
+          return;
+        }
+        this.$refs.valveControlForm.validate((valid) => {
+          if (!valid) return;
+          service
+            .get(`/command/qianBaoTong/qianBaoTongValveCommand?meterCode=${meterCode}&status=${this.params_set_tai.valveState}`)
+            .then((res) => {
+              if (res.code === 200) {
+                ElMessage.success("阀门控制成功");
+              } else {
+                ElMessage.error(res.msg || res.code);
+              }
+            })
+            .catch((error) => {
+              ElMessage.error(error.message || "命令下发失败");
+            });
+        });
+      }
     },
   },
 };
@@ -180,6 +193,11 @@ export default {
 .empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; gap: 24px; }
 .empty-state img { height: 160px; opacity: 0.35; }
 .empty-text { font-size: 24px; color: #b0b3b8; letter-spacing: 2px; }
+.param-form { display: flex; flex-wrap: wrap; gap: 16px 24px; max-width: 900px; }
+.param-field { display: flex; flex-direction: column; gap: 8px; width: 220px; }
+.param-label { font-size: 20px; font-weight: 600; color: #606266; }
+.param-field :deep(.el-form-item) { margin-bottom: 0; }
+.param-field :deep(.el-form-item__error) { font-size: 16px; padding-top: 4px; }
 .set-content-container { width: 100%; display: flex; flex-wrap: wrap; gap: 16px; }
 .set-input { display: flex; flex-direction: column; gap: 8px; width: 220px; }
 .set-input > span { font-size: 20px; font-weight: 600; color: #606266; }
