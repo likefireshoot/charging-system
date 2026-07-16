@@ -100,7 +100,17 @@
                   </div>
                 </template>
               </el-table-column>
-              <el-table-column property="readingCount" label="水表读数/吨" min-width="160" align="center" />
+              <!-- 根据 reportStatus 显示读数或状态 -->
+              <el-table-column label="水表读数/吨" min-width="160" align="center">
+                <template #default="{ row }">
+                  <!-- 🔍 调试信息 -->
+                  <span v-if="row.reportStatus && row.reportStatus !== '正常'" class="status-tag">
+                    {{ row.reportStatus }}
+                  </span>
+                  <span v-else>{{ row.readingCount }}</span>
+                  <!-- <span style="font-size: 10px; color: #999;">({{ row.reportStatus || '无状态' }})</span> -->
+                </template>
+              </el-table-column>
               <el-table-column property="deltaWater" label="本次用水量/吨" min-width="160" align="center" />
               <el-table-column property="feeThisTime" label="本次扣费/元" min-width="160" align="center" />
               <el-table-column property="balanceThisTime" label="本次余额/元" min-width="160" align="center"/>
@@ -222,7 +232,6 @@ export default {
       //     }
       //   }
       const nonEmptyParams = this.filterNonEmptyParams(this.chaobiaoData);
-      console.log(nonEmptyParams);
       // 如果有非空参数，则发起请求
       if (Object.keys(nonEmptyParams).length > 0) {
         // 初始化查询字符串
@@ -250,7 +259,6 @@ export default {
               this.totalWater = response.data;
             } else {
               //ElMessage.error(response.msg);
-              console.log(response.msg);
             }
           })
           .catch((error) => {
@@ -290,6 +298,7 @@ export default {
       if (this.isLoading) return
       this.isLoading = true
       const nonEmptyParams = this.filterNonEmptyParams(this.startData);
+      
       // 如果有非空参数，则发起请求
       if (Object.keys(nonEmptyParams).length > 0) {
         // 初始化查询字符串
@@ -309,6 +318,7 @@ export default {
         }
         // 拼接完整的 URL
         const url = `/userManage/meterRead/showReadMeterRecords/${this.currentPage}${queryString}`;
+        
         service
           .get(url)
           .then((response) => {
@@ -317,7 +327,13 @@ export default {
                 v.theId = this.pageSize * (response.data.currentPages - 1) + i + 1;
               });
               this.chaobiaoTableData = response.data.userInfoData;
-              console.log(response.data);
+              
+              // 🔍 调试信息：检查 reportStatus 字段
+              if (this.chaobiaoTableData.length > 0) {
+                // 检查是否有异常状态的记录
+                const abnormalRecords = this.chaobiaoTableData.filter(item => item.reportStatus && item.reportStatus !== '正常');
+              }
+              
               if (this.chaobiaoTableData.length > 0) {
                 this.chaobiaoTableData.forEach((item) => {
                   item.createTime = item.createTime.replace("T", " ");
@@ -328,7 +344,6 @@ export default {
               this.getTotalWater();
             } else {
               //ElMessage.error(response.msg);
-              console.log(response.msg);
             }
           })
           .catch((error) => {
@@ -467,7 +482,6 @@ export default {
     },
     search() {
       const nonEmptyParams = this.filterNonEmptyParams(this.chaobiaoData);
-      console.log(nonEmptyParams);
       // 如果有非空参数，则发起请求
       if (Object.keys(nonEmptyParams).length > 0) {
         // 初始化查询字符串
@@ -853,6 +867,16 @@ export default {
   color: #8a8f99;
   background-color: #f3f4f6;
   border-color: #dcdfe6;
+}
+
+.status-tag {
+  display: inline-block;
+  padding: 2px 8px;
+  background-color: #fff1f0;
+  color: #f56c6c;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
 }
 
 .chaobiao-table {

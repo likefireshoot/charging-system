@@ -109,11 +109,19 @@
             </div>
           </template>
         </el-table-column>
-        <el-table-column property="readingCount" label="读数/吨" min-width="130" align="center" />
-        <el-table-column property="deltaWater" label="用水量/吨" min-width="130" align="center" />
-        <el-table-column property="feeThisTime" label="扣费/元" min-width="130" align="center" />
-        <el-table-column property="balanceThisTime" label="余额/元" min-width="130" align="center" />
-        <el-table-column property="valveStatus" label="阀门" min-width="100" align="center" />
+        <!-- 根据 reportStatus 显示读数或状态 -->
+        <el-table-column label="水表读数/吨" min-width="160" align="center">
+          <template #default="{ row }">
+            <span v-if="row.reportStatus && row.reportStatus !== '正常'" class="status-tag">
+              {{ row.reportStatus }}
+            </span>
+            <span v-else>{{ row.readingCount }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column property="deltaWater" label="本次用水量/吨" min-width="160" align="center" />
+        <el-table-column property="feeThisTime" label="本次扣费/元" min-width="160" align="center" />
+        <el-table-column property="balanceThisTime" label="本次余额/元" min-width="160" align="center" />
+        <el-table-column property="valveStatus" label="阀门状态" min-width="160" align="center" />
         <el-table-column property="createTime" label="抄表时间" min-width="180" align="center" />
 <!--        <el-table-column property="userPhone" label="手机号" min-width="180" align="center" />-->
       </el-table>
@@ -705,6 +713,17 @@ export default {
   color: #8a8f99;
   background-color: #f3f4f6;
   border-color: #dcdfe6;
+}
+
+
+.status-tag {
+  display: inline-block;
+  padding: 2px 8px;
+  background-color: #fff1f0;
+  color: #f56c6c;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
 }
 
 .table-wrapper {
