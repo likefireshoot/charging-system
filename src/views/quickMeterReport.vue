@@ -83,18 +83,6 @@
             <el-table-column prop="userName" label="用户名" min-width="120" align="center" />
             <el-table-column prop="address" label="地址" min-width="200" align="center" show-overflow-tooltip />
             <el-table-column prop="lastReading" label="上月数" min-width="120" align="center" />
-            <el-table-column prop="currentReading" label="本月数" min-width="120" align="center">
-              <template #default="{ row }">
-                <el-input 
-                  v-if="selectedUsers.includes(row)" 
-                  v-model="row.currentReadingInput" 
-                  type="number"
-                  size="small"
-                  placeholder="请输入"
-                />
-                <span v-else>-</span>
-              </template>
-            </el-table-column>
           </el-table>
 
           <!-- 分页器 -->
@@ -1029,9 +1017,8 @@ fetchCompanyList();
         .action-buttons {
           display: flex;
           justify-content: center;
-          padding: 20px 0 10px;
+          padding: 10px 0 10px;
           border-top: 1px solid #ebeef5;
-          margin-top: 10px;
 
           :deep(.el-button) {
             min-width: 180px;
