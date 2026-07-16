@@ -35,6 +35,7 @@ import errorReportRecord from "../views/errorReportRecord.vue";
 import historyDataManage from "@/views/historyDataManage.vue";
 import billDetailReport from "@/components/report/billDetailReport.vue";
 import abnormalChargeReport from "@/components/report/abnormalChargeReport.vue";
+import rechargeDetailReport from "@/components/report/rechargeDetailReport.vue";
 
 const routes = [
   {
@@ -133,6 +134,11 @@ const routes = [
             path: "readingCountYearlyReport",
             name: "readingCountYearlyReport",
             component: readingCountYearlyReport,
+          },
+          {
+            path: "rechargeDetailReport",
+            name: "rechargeDetailReport",
+            component: rechargeDetailReport,
           },
           {
             path: "billDetailReport",

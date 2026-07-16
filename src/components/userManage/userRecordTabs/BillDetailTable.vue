@@ -90,7 +90,7 @@
         <el-table-column property="theId" label="序号" width="70" align="center" fixed="left" />
         <el-table-column property="userId" label="用户号" min-width="100" align="center" />
         <el-table-column property="userName" label="用户名" min-width="140" align="center" />
-        <el-table-column property="userAddr" label="地址" min-width="260" align="center" />
+<!--        <el-table-column property="userAddr" label="地址" min-width="260" align="center" />-->
         <el-table-column property="startRead" label="起码" min-width="100" align="center" />
         <el-table-column property="endRead" label="止码" min-width="100" align="center" />
         <el-table-column property="waterUse" label="用水量" min-width="100" align="center">

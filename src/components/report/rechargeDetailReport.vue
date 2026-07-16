@@ -11,14 +11,14 @@
         </div>
         <div class="search-input">
           <span>区域</span>
-          <el-select class="big-font-el-select" v-model="params.region" multiple collapse-tags clearable placeholder="全部区域">
+          <el-select class="big-font-el-select" v-model="params.region" clearable placeholder="全部区域">
             <el-option v-for="item in quyu_data" :key="item.id" :label="item.label" :value="item.value"></el-option>
           </el-select>
         </div>
-        <div class="search-input">
-          <span>价格类型</span>
-          <el-select class="big-font-el-select" v-model="params.priceId" clearable placeholder="全部单价">
-            <el-option v-for="item in priceOptionList" :key="item.priceId" :value="item.priceId" :label="item.priceName"></el-option>
+        <div class="search-input" style="margin-left: 20px">
+          <span>收费人</span>
+          <el-select v-model="params.rechargeUser" clearable filterable placeholder="请选择收费人">
+            <el-option v-for="item in staffNameOptions" :key="item" :label="item" :value="item"></el-option>
           </el-select>
         </div>
         <div class="search-input">
@@ -49,35 +49,28 @@
 
     <div class="main-content">
       <div class="report-title">
-        <h2>用户用水扣费明细统计报表（{{ params.dateRange[0] }} - {{ params.dateRange[1] }}）</h2>
+        <h2>收费明细统计报表（{{ params.dateRange[0] }} - {{ params.dateRange[1] }}）</h2>
       </div>
       <div class="total-table-wrapper" style="width: 95%; margin: 0 auto;display: flex; flex-direction: column">
         <div class="table-scroll">
-        <el-table
-            class="detail-table"
-            :data="detailTableData"
-            border
-            v-loading="loading"
-            style="width:100%"
-            height="100%"
-            :header-cell-style="{ height: '66px',background: '#46B97E', color: '#FFFFFF', fontWeight: 'bold', fontSize: '23px' }"
-            :row-style="{ height: '50px' }"
-            :cell-style="{ fontSize: '23px', textAlign: 'center' }"
-        >
-          <el-table-column label="序号" width="120" align="center" >
-            <template #default="scope">
-              {{ (params.pageNum - 1) * params.pageSize + scope.$index + 1 }}
-            </template>
-          </el-table-column>>
-          <el-table-column property="regionName" label="区域名称" align="center" />
-          <el-table-column property="priceName" label="价格类型" align="center" />
-          <el-table-column label="费用构成明细" align="center">
-            <el-table-column property="waterFee" label="水费总额（元）" align="center" />
-            <el-table-column property="sewageFee" label="污水处理费总额（元）" align="center" />
-            <el-table-column property="baseFee" label="保底扣费总额（元）" align="center" />
-          </el-table-column>
-          <el-table-column property="totalCharge" label="总扣费金额（元）" align="center" />
-        </el-table>
+          <el-table
+              class="detail-table"
+              :data="detailTableData"
+              border
+              v-loading="loading"
+              style="width:100%"
+              height="100%"
+              :header-cell-style="{ height: '66px',background: '#46B97E', color: '#FFFFFF', fontWeight: 'bold', fontSize: '23px' }"
+              :row-style="{ height: '50px' }"
+              :cell-style="{ fontSize: '23px', textAlign: 'center' }"
+          >
+            <el-table-column property="businessDate" label="营业时间" align="center" />
+            <el-table-column property="totalCount" label="交易笔数" align="center" />
+            <el-table-column property="giveAmount" label="赠送金额（元）" align="center" />
+            <el-table-column property="cashAmount" label="现金（元）" align="center" />
+            <el-table-column property="wxAmount" label="微信支付（元）" align="center" />
+            <el-table-column property="actualAmount" label="实收总金额（元）" align="center" />
+          </el-table>
         </div>
         <!-- 底部单独汇总行表格，无表头，固定在下方 -->
         <el-table
@@ -88,15 +81,12 @@
             :cell-style="{ fontSize: '23px', textAlign: 'center', fontWeight: 'bold'}"
             row-class-name="summary-row"
         >
-          <el-table-column width="120" />
-          <el-table-column prop="regionName" align="center" />
-          <el-table-column prop="priceName" align="center" />
-          <el-table-column label="费用构成明细" align="center">
-            <el-table-column prop="waterFee" align="center" />
-            <el-table-column prop="sewageFee" align="center" />
-            <el-table-column prop="baseFee" align="center" />
-          </el-table-column>
-          <el-table-column prop="totalCharge" align="center" />
+          <el-table-column property="businessDate" align="center" />
+          <el-table-column property="totalCount" align="center" />
+          <el-table-column property="giveAmount" align="center" />
+          <el-table-column property="cashAmount" align="center" />
+          <el-table-column property="wxAmount" align="center" />
+          <el-table-column property="actualAmount" align="center" />
         </el-table>
 
       </div>
@@ -119,7 +109,6 @@
 </template>
 
 <script>
-// 删掉无用echarts、markRaw、导出图表导入
 import service from "@/api/request";
 import { ElMessage } from "element-plus";
 export default {
@@ -130,46 +119,44 @@ export default {
       const now = new Date();
       const year = now.getFullYear();
       const month = now.getMonth();
-      let firstDay = new Date(year, month, 1);
-      if (year === 2026 && month === 6) {
-        firstDay = new Date(year, month, 8);
-      }
-      const lastDay = new Date(year, month + 1, 0);
+      const firstDay = new Date(year, month, 1);
+      // const lastDay = new Date(year, month + 1, 0);
+      const today = new Date();
       const formatDate = (date) => {
         const y = date.getFullYear();
         const m = String(date.getMonth() + 1).padStart(2, "0");
         const d = String(date.getDate()).padStart(2, "0");
         return `${y}-${m}-${d}`;
       };
-      return [formatDate(firstDay), formatDate(lastDay)];
+      return [formatDate(firstDay), formatDate(today)];
     };
 
     return {
       // 搜索参数
       params: {
-        region: [],
+        region: null,
         dateRange: getMonthRange(),
         company: null,
-        priceId: null,
         pageNum: 1,
         pageSize: 15,
+        rechargeUser: null,
       },
       companyId: JSON.parse(sessionStorage.getItem("userData")).companyId,
       // 下拉数据源
       companyList: [],
       quyu_data: [],
-      priceOptionList: [],
+      staffNameOptions: [],
       loading: false,
       // 【新增2行】明细数组、汇总行对象
       detailTableData: [],
       totalTable: [
         {
-          regionName: "统计总额",
-          waterFee: "0.00",
-          sewageFee: "0.00",
-          baseFee: "0.00",
-          totalCharge: "0.00",
-          priceName: ""
+          businessDate: "统计总额",
+          totalCount: 0,
+          giveAmount: "0.00",
+          cashAmount: "0.00",
+          wxAmount: "0.00",
+          actualAmount: "0.00"
         }
       ],
       totalNum: 0, // 总条数
@@ -177,16 +164,15 @@ export default {
   },
   watch: {
     "params.company"() {
-      this.params.region = [];
+      this.params.region = null;
       this.getRegionData();
-      this.getPriceOptionList();
     },
   },
   mounted() {
     // 逐个捕获接口错误，单个接口失败不阻塞页面渲染
     this.getCompanyList().catch(() => {});
     this.getRegionData().catch(() => {});
-    this.getPriceOptionList().catch(() => {});
+    this.getStaffNames().catch(() => {});
     this.fetchTotalData().catch(() => {});
   },
   methods: {
@@ -240,72 +226,66 @@ export default {
       }
     },
 
-    // 获取价格下拉列表
-    async getPriceOptionList() {
-      try {
-        const reqParams = {
-          pageNo: 1,
-          pageSize: 9999999,
-        };
-        if (this.companyId === 1 && this.params.company) {
-          reqParams.companyId = this.params.company;
-        } else if (this.companyId !== 1) {
-          reqParams.companyId = this.companyId;
-        }
-        const res = await service.post("/price/queryPriceMg", reqParams);
-        if (res.code === 200) {
-          this.priceOptionList = res.data.records.map(item => ({
-            priceId: item.priceId,
-            priceName: item.priceName
-          }));
-        } else {
-          ElMessage.error(res.msg || "加载价格列表失败");
-        }
-      } catch (err) {
-        console.error("获取价格下拉失败", err);
-        ElMessage.error("获取价格配置失败");
-      }
+    // 获取收费人列表
+    async getStaffNames() {
+      service
+          .get("/staff/getStaffNames")
+          .then((response) => {
+            if (response.code === 200) {
+              this.staffNameOptions = [...new Set((response.data || []).filter(Boolean))];
+            } else {
+              ElMessage.error(response.msg);
+            }
+          })
+          .catch(() => {
+            ElMessage.error("获取收费人列表失败");
+          });
     },
 
     handleCompanyChange() {
-      this.params.region = [];
+      this.params.region = null;
       this.getRegionData();
-      this.getPriceOptionList();
     },
 
-    // 查询总额数据
-    // 【全部替换原有fetchTotalData】
     async fetchTotalData() {
       this.loading = true;
       this.detailTableData = [];
       try {
-        const body = {
-          startDate: this.params.dateRange[0],
-          endDate: this.params.dateRange[1],
-          companyId: this.params.company || this.companyId,
-          regionId: this.params.region.length ? this.params.region : [],
-          priceId: this.params.priceId ?? null,
-          pageNum: this.params.pageNum,
-          pageSize: this.params.pageSize
-        };
-        const response = await service.post("/feeGroupReport", body);
+        const baseParams = new URLSearchParams();
+        baseParams.append("companyId", this.params.company || this.companyId)
+        baseParams.append("startDate", this.params.dateRange[0])
+        baseParams.append("endDate", this.params.dateRange[1])
+        if (this.params.region !== null) {
+          baseParams.append("regionId", this.params.region);
+        }
+        if (this.params.rechargeUser !== null){
+          baseParams.append("rechargeUser", this.params.rechargeUser);
+        }
+        const detailParams = new URLSearchParams(baseParams);
+        detailParams.append('pageNum', this.params.pageNum);
+        detailParams.append('pageSize', this.params.pageSize);
+        const response = await service.get(`/rechargeDailyReport?${detailParams.toString()}`);
+        const totalRes = await service.get(`/rechargeDailyTotal?${baseParams.toString()}`);
         if (response.code === 200) {
-          this.detailTableData = response.data.items || [];
-          this.totalNum = response.data.totalNum || 0;
-          const total = response.data.total;
-          // 赋值底部汇总行
+          this.detailTableData = response.data.records || [];
+          this.totalNum = response.data.total || 0;
+        } else {
+          ElMessage.error(response.msg || "查询失败");
+        }
+        if (totalRes.code === 200) {
+          const total = totalRes.data;
           this.totalTable = [
             {
-              regionName: "统计总额",
-              priceName: "",
-              waterFee: (total.waterFee || 0).toFixed(2),
-              sewageFee: (total.sewageFee || 0).toFixed(2),
-              baseFee: (total.baseFee || 0).toFixed(2),
-              totalCharge: (total.totalCharge || 0).toFixed(2)
+              businessDate: "统计总额",
+              totalCount: total.totalCount,
+              giveAmount: Number(total.giveAmount).toFixed(2),
+              cashAmount: Number(total.cashAmount).toFixed(2),
+              wxAmount: Number(total.wxAmount).toFixed(2),
+              actualAmount: Number(total.actualAmount).toFixed(2)
             }
           ];
         } else {
-          ElMessage.error(response.msg || "查询失败");
+          ElMessage.error(totalRes.msg || "汇总数据查询失败");
         }
       } catch (err) {
         ElMessage.error("数据查询异常");
@@ -321,22 +301,23 @@ export default {
         const year = now.getFullYear();
         const month = now.getMonth();
         const firstDay = new Date(year, month, 1);
-        const lastDay = new Date(year, month + 1, 0);
+        // const lastDay = new Date(year, month + 1, 0);
+        const today = new Date();
         const formatDate = (date) => {
           const y = date.getFullYear();
           const m = String(date.getMonth() + 1).padStart(2, "0");
           const d = String(date.getDate()).padStart(2, "0");
           return `${y}-${m}-${d}`;
         };
-        return [formatDate(firstDay), formatDate(lastDay)];
+        return [formatDate(firstDay), formatDate(today)];
       };
       this.params = {
-        region: [],
+        region: null,
         dateRange: getMonthRange(),
         company: null,
-        priceId: null,
         pageNum: 1,
-        pageSize: this.params.pageSize
+        pageSize: this.params.pageSize,
+        rechargeUser: null,
       };
       this.fetchTotalData();
     },

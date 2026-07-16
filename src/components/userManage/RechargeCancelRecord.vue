@@ -21,11 +21,12 @@
             <el-input v-model="transactionData.meterCode" placeholder="请输入..." />
           </div>
           <div class="search-input" style="width: 18%; margin-right: 10px">
-            <span>收费类型</span>
+            <span>退款方式</span>
             <el-select v-model="transactionData.rechargeType" placeholder="请选择收费类型">
               <el-option label="现金" value="现金"></el-option>
               <el-option label="微信支付" value="微信支付"></el-option>
               <el-option label="免费赠送" value="免费赠送"></el-option>
+              <el-option label="现金（销户退费）" value="现金（销户退费）" />
             </el-select>
           </div>
           <div class="search-input" style="width: 25%; margin-right: 10px">
@@ -89,7 +90,7 @@
                   </div>
                 </template>
               </el-table-column>
-              <el-table-column property="rechargeType" label="充值方式" min-width="100" align="center" />
+              <el-table-column property="rechargeType" label="退款方式" min-width="100" align="center" />
               <el-table-column property="rechargeAmount" label="充值金额" min-width="110" align="center">
                 <template #default="scope">{{ scope.row.rechargeAmount }} 元</template>
               </el-table-column>

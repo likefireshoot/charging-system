@@ -113,8 +113,16 @@
               v-loading="isLoading"
             >
               <el-table-column type="selection" :selectable="selectable" min-width="40" align="center" fixed="left" />
-              <el-table-column property="userId" label="用户号" min-width="50" align="center" fixed="left" />
-              <el-table-column property="userName" label="用户名称" min-width="65" align="center" />
+              <el-table-column property="userId" label="用户号" min-width="70" align="center" fixed="left" />
+              <el-table-column property="userName" label="用户名称" min-width="65" align="center" >
+                <template #default="scope">
+                  <span>{{ scope.row.userName }}</span>
+                  <!-- 当isPause=1 显示暂停气泡 -->
+                  <span v-if="scope.row.isPause === 1" style="font-size: 12px;padding: 1px 8px; border-radius: 10px; line-height: 20px; white-space: nowrap;color: #b47500;background-color: #fff7cc;border: 1px solid #ffdd80;">
+                暂停使用
+                </span>
+                </template>
+              </el-table-column>
               <el-table-column property="userAddr" label="用户地址" min-width="75" align="center" />
               <el-table-column property="regionName" label="所属区域" min-width="75" align="center" />
               <el-table-column property="userPhone" label="联系电话" min-width="80" align="center" />
@@ -126,7 +134,7 @@
               <el-table-column property="oldBalance" label="充值前余额/元" min-width="85" align="center" />
               <el-table-column property="newBalance" label="充值后余额/元" min-width="85" align="center" />
               <el-table-column property="createTime" label="充值时间" min-width="85" align="center" />
-              <el-table-column property="status" label="微信是否已退费" min-width="100" align="center">
+              <el-table-column property="status" label="微信是否已退费" min-width="80" align="center">
                 <template #default="{ row }">
                   <span v-if="row.rechargeType === '微信支付'" class="refund-status-badge" :class="row.status === 2 ? 'refunded' : 'not-refunded'">
                     {{ row.status === 2 ? '是' : '否' }}
@@ -423,8 +431,10 @@ export default {
       this.fetchRechargeRecordData(page);
     },
 
-    selectable() {
-      return true; // 目前允许所有行选择，你可以加上你的业务逻辑
+    selectable(row) {
+      // return true; // 目前允许所有行选择，你可以加上你的业务逻辑
+      // 只允许选中非暂停使用的用户
+      return row.isPause !== 1;
     },
     handleSelectionChange(val) {
       this.multipleSelection = val;

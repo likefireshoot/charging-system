@@ -90,6 +90,9 @@ export default {
       // ****** 锁
       isLoading: false,
 
+      // 新增：是否需要重新查询总数
+      needRefreshTotal: true,
+
     };
   },
   watch: {
@@ -176,7 +179,10 @@ export default {
 
       // 分别定义两个独立请求Promise
       const listPromise = service.post("/historyData/listMissingMeter", reqParams, { headers });
-      const countPromise = axios.post("/historyData/countMissingMeter", reqParams, { headers });
+      let countPromise = null;
+      if (this.needRefreshTotal) {
+        countPromise = axios.post("/historyData/countMissingMeter", reqParams, {headers});
+      }
 
       // 列表接口先返回 → 立刻渲染表格，不等总数
       listPromise.then(listRes => {
@@ -191,6 +197,7 @@ export default {
       });
 
       // 总数接口先返回 → 立刻更新分页total，不等列表
+      if (this.needRefreshTotal) {
       countPromise.then(countRes => {
         console.log("统计接口返回:",countRes)
 
@@ -209,20 +216,26 @@ export default {
         ElMessage.error("总数请求异常");
         console.error("总数接口报错：", err);
       });
+      }
 
-      // 等待两个接口全部结束，统一关闭loading
-      Promise.allSettled([listPromise, countPromise]).finally(() => {
+      // 等待列表（有总数则等两个，否则只等列表）
+      const allPromise = this.needRefreshTotal ? Promise.allSettled([listPromise, countPromise]) : listPromise;
+      allPromise.finally(() => {
         this.isLoading = false;
+        // 首次查询完后，关闭总数刷新标记，翻页不再查总数
+        this.needRefreshTotal = false;
       });
     },
     search() {
       this.params.page = 1;
+      this.needRefreshTotal = true
       this.getHistoryData();
     },
     clear(isSearch) {
       this.params.queryDate = '2026-03-10';
       if (typeof isSearch != 'number' || isNaN(isSearch)) {
         this.params.page = 1;
+        this.needRefreshTotal = true;
         this.getHistoryData();
       }
     },

@@ -91,9 +91,86 @@
           <el-icon style="margin-left: -3%; color: #45ba7e"><Close /></el-icon>
           <span style="font-size: 20px; margin-left: 9%; color: #5a5a5a">取消</span>
         </div>
+        <div v-if="data.isPause === 0" class="operate-btn stop-btn" @click="openStopDialog" >
+          <img src="@/assets/menu/icon20.png" alt="" style="margin-left: 8px" />
+          <span style="font-size: 20px; margin-left: 9%;">暂停使用</span>
+        </div>
+        <div v-if="data.isPause === 1" class="operate-btn stop-btn" @click="openStartDialog" >
+          <img src="@/assets/menu/icon20.png" alt="" style="margin-left: 8px" />
+          <span style="font-size: 20px; margin-left: 9%;">恢复使用</span>
+        </div>
+        <div class="operate-btn refund-btn" @click="openRefundBalanceDialog">
+          <img src="@/assets/menu/icon5.png" alt="" style="margin-left: 10px" />
+          <span style="font-size: 20px; margin-left: 9%; color: #5a5a5a">余额退款</span>
+        </div>
+        <div class="operate-btn close-btn" @click="openCloseAccountDialog">
+          <img src="@/assets/yonghu/icon4.png" alt="" style="margin-left: 8px" />
+          <span style="font-size: 20px; margin-left: 9%; color: #5a5a5a">销户</span>
+        </div>
       </div>
     </div>
   </div>
+
+  <!-- 新增：暂停使用弹窗 -->
+  <el-dialog v-model="stopDialogVisible" title="暂停用户确认" width="600" :lock-scroll="false">
+    <div style="font-size: 20px; text-align: center; line-height: 2; padding: 10px 0;">
+      确定要将用户【{{ data.userName }}】暂停使用吗？暂停后将不再收取保底费并下达水表关阀命令
+    </div>
+    <template #footer>
+      <div style="display: flex; justify-content: center; gap: 20px;">
+        <el-button @click="stopDialogVisible = false">取消</el-button>
+        <el-button @click="handleStopUser" style="background-color: #45ba7e; color: #fff" :loading="loading" :disabled="loading">确认暂停</el-button>
+      </div>
+    </template>
+  </el-dialog>
+
+  <el-dialog v-model="startDialogVisible" title="恢复用户确认" width="600" :lock-scroll="false">
+    <div style="font-size: 20px; text-align: center; line-height: 2; padding: 10px 0;">
+      确定要将用户【{{ data.userName }}】恢复使用吗？恢复后将开始收取保底费并下达水表开阀命令
+    </div>
+    <template #footer>
+      <div style="display: flex; justify-content: center; gap: 20px;">
+        <el-button @click="stopDialogVisible = false">取消</el-button>
+        <el-button @click="handleStartUser" style="background-color: #45ba7e; color: #fff" :loading="loading" :disabled="loading">确认恢复</el-button>
+      </div>
+    </template>
+  </el-dialog>
+
+  <!-- 新增：销户退款选择弹窗 -->
+  <el-dialog v-model="closeAccountDialogVisible" title="销户退款确认" width="600" :lock-scroll="false">
+    <div style="padding: 10px; font-size: 20px; color: #5a5a5a; line-height: 2; text-align: center;">
+      <div v-if="Number(data.balance) > 0" style="color:#5a5a5a;">
+        用户【{{ data.userName }}】当前余额 {{ data.balance }} 元，请注意先执行【余额退款】操作！！！
+      </div>
+      <div v-else-if="Number(data.balance) < 0" style="color:#5a5a5a;">
+        用户【{{ data.userName }}】当前欠费 {{ Math.abs(Number(data.balance)) }} 元，用户需结清欠费！
+      </div>
+      <div v-else style="color:#5a5a5a;">
+        确定要将用户【{{ data.userName }}】永久销户吗？销户后用户绑定关系将全部清除，无法恢复！
+      </div>
+    </div>
+    <template #footer>
+      <div style="display: flex; justify-content: center; gap: 20px;">
+        <el-button @click="closeAccountDialogVisible = false">取消</el-button>
+        <el-button @click="handleCloseAccount" style="background-color: #45ba7e; color: #fff" :loading="loading" :disabled="loading">确认销户</el-button>
+      </div>
+    </template>
+  </el-dialog>
+
+  <!-- 新增：余额预退款弹窗（只退余额，不销户） -->
+  <el-dialog v-model="refundBalanceDialogVisible" title="余额退款确认" width="600" custom-class="big-title-dialog" :lock-scroll="false">
+    <div style="padding: 10px;">
+      <div style="font-size: 20px; color: #5a5a5a; line-height: 2; text-align: center;">
+        确定要将用户【{{ data.userName }}】账户内 {{ data.balance }} 元余额全部返还？操作后用户账号保留，仅清空账户余额。
+      </div>
+    </div>
+    <template #footer>
+      <div style="display: flex; justify-content: center; gap: 20px;">
+        <el-button @click="refundBalanceDialogVisible = false">取消</el-button>
+        <el-button @click="handleRefundBalance" style="background-color: #45ba7e; color: #fff" :loading="loading" :disabled="loading">确认退款</el-button>
+      </div>
+    </template>
+  </el-dialog>
 </template>
 
 <script>
@@ -151,6 +228,15 @@ export default {
       sms_config_list: [],
       approver_list: [],
       companyList: [],
+      // 暂停弹窗控制
+      stopDialogVisible: false,
+      // 恢复弹窗控制
+      startDialogVisible: false,
+      // 销户弹窗控制+退款类型
+      closeAccountDialogVisible: false,
+      // 余额预退款弹窗
+      refundBalanceDialogVisible: false,
+      loading: false,
     };
   },
   async mounted() {
@@ -420,6 +506,125 @@ export default {
           ElMessage.error("修改失败");
         });
     },
+
+    // 打开暂停弹窗
+    openStopDialog() {
+      this.stopDialogVisible = true;
+    },
+    // 暂停用户执行
+    async handleStopUser() {
+      this.loading = true;
+      try {
+        const form = {
+          imei: this.data.imei,
+          staffId: this.$store.state.userData.staffId
+        };
+        const res = await service.post("/userManage/userCharge/pauseMeter", form);
+        if (res.code === 200) {
+          ElMessage.success("操作成功，用户已暂停");
+          this.stopDialogVisible = false;
+          this.handleUserInfoClose();
+        } else {
+          ElMessage.error(res.msg || "暂停失败");
+        }
+      } catch (err) {
+        console.error("暂停接口报错：", err);
+        ElMessage.error("暂停请求异常，请稍后重试");
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    // 打开恢复弹窗
+    openStartDialog() {
+      this.startDialogVisible = true;
+    },
+    // 恢复用户执行
+    async handleStartUser() {
+      this.loading = true;
+      // 暂停接口预留 resumeMeter
+      try {
+        const form = {
+          imei: this.data.imei,
+          staffId: this.$store.state.userData.staffId
+        };
+        const res = await service.post("/userManage/userCharge/resumeMeter", form);
+        if (res.code === 200) {
+          ElMessage.success("操作成功，用户已恢复");
+          this.stopDialogVisible = false;
+          this.handleUserInfoClose();
+        } else {
+          ElMessage.error(res.msg || "恢复失败");
+        }
+      } catch (err) {
+        console.error("暂停接口报错：", err);
+        ElMessage.error("恢复请求异常，请稍后重试");
+      } finally {
+        this.loading = false;
+      }
+    },
+
+// 打开销户弹窗
+    openCloseAccountDialog() {
+      // 默认选中现金
+      this.closeAccountDialogVisible = true;
+    },
+// 销户执行
+    handleCloseAccount() {
+      this.loading = true;
+      const form = {
+        imei: this.data.imei,
+        staffId: this.$store.state.userData.staffId
+      };
+      service.post("/userManage/userCharge/cancelUserMeter", form).then(res => {
+        if (res.code === 200) {
+          ElMessage.success("销户成功");
+          this.closeAccountDialogVisible = false;
+          this.handleUserInfoClose();
+        } else {
+          ElMessage.error(res.msg || "销户失败");
+        }
+      }).catch(err => {
+        ElMessage.error("销户请求异常");
+        console.error("销户接口报错：", err);
+      });
+      this.loading = false;
+    },
+    // 打开余额预退款弹窗
+    openRefundBalanceDialog() {
+      this.refundBalanceDialogVisible = true;
+    },
+// 执行余额预退款（仅退余额，不销户）
+    handleRefundBalance() {
+      this.loading = true;
+      const balance = Number(this.data.balance);
+      if (balance < 0) {
+        ElMessage.warning(`当前用户欠费，无法执行退款操作`);
+        this.loading = false;
+        return;
+      }else if (balance === 0){
+        ElMessage.warning(`当前用户余额为 0 元，无法执行退款操作`);
+        this.loading = false;
+        return;
+      }
+      const form = {
+        imei: this.data.imei,
+        staffId: this.$store.state.userData.staffId
+      };
+      service.post("/userManage/userCharge/cancelRefund", form).then(res => {
+        if (res.code === 200) {
+          ElMessage.success("余额退款成功");
+          this.refundBalanceDialogVisible = false;
+          this.handleUserInfoClose();
+        } else {
+          ElMessage.error(res.msg || "退款失败");
+        }
+      }).catch(err => {
+        ElMessage.error("退款请求异常");
+        console.error("退款接口报错：", err);
+      });
+      this.loading = false;
+    },
   },
 };
 </script>
@@ -526,6 +731,31 @@ export default {
 
 .cancel-btn {
   background-color: #fff;
-  margin-right: 5%;
+  margin-right: 15px;
+}
+
+.operate-btn {
+  height: 35px;
+  width: 90px;
+  cursor: pointer;
+  border: 1px solid #f2f2f2;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+}
+.stop-btn {
+  width: 135px;
+  background-color: #45ba7e;
+  margin-right: 15px;
+  color: #fff;
+}
+.close-btn {
+  background-color: #fff;
+  margin-right: 30px;
+}
+.refund-btn {
+  width: 135px;
+  background-color: #fff;
+  margin-right: 15px;
 }
 </style>
