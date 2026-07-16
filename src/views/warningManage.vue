@@ -968,8 +968,13 @@ export default {
       }
     },
     exportExcel() {
+      // 复制params并剔除分页参数 pageNo、pageSize
+      const tempParams = { ...this.params };
+      delete tempParams.pageNo;
+      delete tempParams.pageSize;
+
       const exportParams = {
-        ...this.params,
+        ...tempParams,
         companyId: this.companyId === 1 ? this.params.company || null : this.companyId,
       };
       if (this.region) {
