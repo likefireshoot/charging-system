@@ -70,15 +70,15 @@
     </div>
 
     <div class="tool-bar">
-      <div v-if="this.isPause === 1" class="tool-btn" :class="{ 'disabled-btn': multipleSelection.length !== 1 }" @click="multipleSelection.length === 1 && handleReceipt()">
+      <div v-if="this.userIsPause === 0" class="tool-btn" :class="{ 'disabled-btn': multipleSelection.length !== 1 }" @click="multipleSelection.length === 1 && handleReceipt()">
         <img src="@/assets/yonghu/icon26.png" alt="" />
         <span>开收据</span>
       </div>
-      <div v-if="this.isPause === 1" class="tool-btn" style="margin-right: 10px; width: 130px" :class="{ 'disabled-btn': multipleSelection.length !== 1 }" @click="multipleSelection.length === 1 && openCancelDialog()">
+      <div v-if="this.userIsPause === 0" class="tool-btn" style="margin-right: 10px; width: 130px" :class="{ 'disabled-btn': multipleSelection.length !== 1 }" @click="multipleSelection.length === 1 && openCancelDialog()">
         <img src="@/assets/yonghu/icon27.png" alt="" style="margin-left: 7px" />
         <span style="font-size: 20px; margin-left: 10px; color: #5a5a5a">撤销充值</span>
       </div>
-      <div v-if="this.isPause === 1" class="export-out-btn" style="margin-right: 10px; width: 130px" :class="{ 'btn-disabled': !canWechatRefund }" @click="canWechatRefund && handleWechatRefund()">
+      <div v-if="this.userIsPause === 0" class="export-out-btn" style="margin-right: 10px; width: 130px" :class="{ 'btn-disabled': !canWechatRefund }" @click="canWechatRefund && handleWechatRefund()">
         <img src="@/assets/yonghu/icon1.3.png" alt="" style="margin-left: 7px" />
         <span style="font-size: 20px; margin-left: 10px; color: #5a5a5a">微信退款</span>
       </div>
@@ -282,7 +282,7 @@ export default {
       default: () => []
     },
     // 新增接收父页面传过来的用户暂停状态
-    isPause: {
+    userIsPause: {
       type: Number,
       default: 0
     },
