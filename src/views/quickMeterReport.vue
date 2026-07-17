@@ -133,7 +133,7 @@
                   <span class="label">用户名</span>
                   <span class="value">{{ selectedUserDetail.userName }}</span>
                 </div>
-                <div class="info-item full-width">
+                <div class="info-item">
                   <span class="label">地址</span>
                   <span class="value">{{ selectedUserDetail.address }}</span>
                 </div>
@@ -204,10 +204,10 @@
               </div>
               <el-table
                 :data="reportHistory"
-                size="small"
+                size="medium"
                 stripe
                 border
-                max-height="280"
+                max-height="440"
               >
                 <el-table-column prop="createTime" label="抄表时间" min-width="140" align="center">
                   <template #default="{ row }">
@@ -721,7 +721,7 @@ fetchCompanyList();
         gap: 10px;
 
         .form-label {
-          font-size: 14px;
+          font-size: 20px;
           color: #606266;
           white-space: nowrap;
 
@@ -771,13 +771,13 @@ fetchCompanyList();
 
         h3 {
           margin: 0;
-          font-size: 16px;
+          font-size: 20px;
           font-weight: 600;
           color: #303133;
         }
 
         .result-count {
-          font-size: 14px;
+          font-size: 20px;
           color: #909399;
         }
       }
@@ -836,7 +836,7 @@ fetchCompanyList();
 
         h3 {
           margin: 0;
-          font-size: 16px;
+          font-size: 20px;
           font-weight: 600;
           color: #303133;
         }
@@ -853,7 +853,7 @@ fetchCompanyList();
         // 基本信息区域
         .info-section {
           .section-title {
-            font-size: 15px;
+            font-size: 20px;
             font-weight: 600;
             color: #303133;
             margin-bottom: 16px;
@@ -862,8 +862,8 @@ fetchCompanyList();
           }
 
           .info-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
+            display: flex;
+            flex-wrap: wrap;
             gap: 12px;
 
             .info-item {
@@ -872,21 +872,23 @@ fetchCompanyList();
               padding: 8px 12px;
               background-color: #f9f9f9;
               border-radius: 6px;
+              flex: 1;
+              min-width: 200px;
 
               &.full-width {
-                grid-column: span 2;
+                flex-basis: 100%;
               }
 
               .label {
                 width: 70px;
-                font-size: 13px;
+                font-size: 20px;
                 color: #909399;
                 flex-shrink: 0;
               }
 
               .value {
                 flex: 1;
-                font-size: 14px;
+                font-size: 20px;
                 color: #303133;
                 font-weight: 500;
                 word-break: break-all;
@@ -898,7 +900,7 @@ fetchCompanyList();
         // 抄表信息区域
         .reading-section {
           .section-title {
-            font-size: 15px;
+            font-size: 20px;
             font-weight: 600;
             color: #303133;
             margin-bottom: 16px;
@@ -908,7 +910,7 @@ fetchCompanyList();
 
           .reading-grid {
             display: flex;
-            flex-direction: column;
+            flex-wrap: wrap;
             gap: 12px;
 
             .reading-item {
@@ -917,24 +919,26 @@ fetchCompanyList();
               padding: 12px;
               background-color: #f9f9f9;
               border-radius: 6px;
+              flex: 1;
+              min-width: 200px;
 
               .label {
                 width: 80px;
-                font-size: 14px;
+                font-size: 20px;
                 color: #909399;
                 flex-shrink: 0;
               }
 
               .value {
                 flex: 1;
-                font-size: 14px;
+                font-size: 20px;
                 color: #303133;
                 font-weight: 500;
 
                 &.amount {
                   color: #46b97e;
                   font-weight: 600;
-                  font-size: 16px;
+                  font-size: 20px;
                 }
               }
 
@@ -942,7 +946,7 @@ fetchCompanyList();
                 .value {
                   color: #46b97e;
                   font-weight: 600;
-                  font-size: 16px;
+                  font-size: 20px;
                 }
               }
 
@@ -960,7 +964,7 @@ fetchCompanyList();
                 border-left: 3px solid #f56c6c;
                 
                 .tip-text {
-                  font-size: 13px;
+                  font-size: 20px;
                   color: #f56c6c;
                   line-height: 1.5;
                 }
@@ -975,7 +979,7 @@ fetchCompanyList();
             display: flex;
             align-items: center;
             gap: 8px;
-            font-size: 15px;
+            font-size: 20px;
             font-weight: 600;
             color: #303133;
             margin-bottom: 16px;
@@ -988,7 +992,7 @@ fetchCompanyList();
           }
 
           :deep(.el-table) {
-            font-size: 13px;
+            font-size: 20px;
 
             .el-table__header th {
               background-color: #f5f7fa;
@@ -1007,7 +1011,7 @@ fetchCompanyList();
               background-color: #fff1f0;
               color: #f56c6c;
               border-radius: 4px;
-              font-size: 12px;
+              font-size: 16px;
               font-weight: 500;
             }
           }
@@ -1023,7 +1027,7 @@ fetchCompanyList();
           :deep(.el-button) {
             min-width: 180px;
             height: 44px;
-            font-size: 15px;
+            font-size: 20px;
           }
         }
       }
@@ -1109,11 +1113,11 @@ fetchCompanyList();
           gap: 12px;
 
           h3 {
-            font-size: 14px;
+            font-size: 20px;
           }
 
           .result-count {
-            font-size: 12px;
+            font-size: 20px;
           }
         }
 
