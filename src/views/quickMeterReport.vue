@@ -383,7 +383,18 @@ const fetchCompanyList = async () => {
     const res = await service.get('/getAllUnblockCompany');
     
     if (res.code === 200) {
-      companyList.value = res.data || [];
+      let allCompanies = res.data || [];
+
+      // 获取当前登录用户的 companyId
+      const userData = JSON.parse(sessionStorage.getItem('userData'));
+      const currentCompanyId = userData?.companyId;
+
+      // 如果 companyId !== 1，只显示当前用户所在的水厂
+      if (currentCompanyId && currentCompanyId !== 1) {
+        allCompanies = allCompanies.filter(company => company.companyId === currentCompanyId);
+      }
+
+      companyList.value = allCompanies;
 
       // 如果只有一个水厂，自动选中
       if (companyList.value.length === 1) {
