@@ -22,7 +22,7 @@
             </div>
             <div class="abnormal-num">
               <div style="width: 25px; height: 3px; background-color: #f3d04e"></div>
-              <span style="font-size: 20px">异常表数</span>
+              <span style="font-size: 20px">预警表数</span>
               <div>
                 <span style="font-size: 18px; font-family: 'Microsoft YaHei'; font-weight: bold">{{ shebeiStatus.abnormal }}</span>
                 <span style="margin-left: 5px">-{{ shebeiStatus.abnormal_percent }}</span>
@@ -68,14 +68,14 @@
           <div class="shebei-warning-item">
             <img src="@/assets/shouye/icon2.png" @click="toWarnPath('水表0用量用户')" alt="" />
             <div class="shebei-warning-item-text">
-              <span style="font-size: 22px">水表0用量用户</span>
+              <span style="font-size: 22px">近期0用水用户</span>
               <span style="font-size: 22px; font-family: 'Microsoft YaHei'; font-weight: bold; margin-top: 5px">{{ shebeiWarning.zerouserL }}</span>
             </div>
           </div>
           <div class="shebei-warning-item">
             <img src="@/assets/shouye/icon3.png" @click="toWarnPath('水表大用量用户')" alt="" />
             <div class="shebei-warning-item-text">
-              <span style="font-size: 22px">大用量异常用户</span>
+              <span style="font-size: 22px">大用水量用户</span>
               <span style="font-size: 22px; font-family: 'Microsoft YaHei'; font-weight: bold; margin-top: 5px">{{ shebeiWarning.dayongliang }}</span>
             </div>
           </div>

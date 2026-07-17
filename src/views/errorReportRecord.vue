@@ -92,7 +92,7 @@
             ref="multipleTableRef"
             :data="ErrorRecordData"
             row-key="staffId"
-            style="width: 100%; height: 100%; table-layout: fixed; overflow-y: auto"
+            style="width: 100%; height: 100%; table-layout: fixed; overflow-y: auto; margin-left: 1%"
             border
             :header-cell-style="{ background: '#46B97E', color: '#FFFFFF' }"
             @selection-change="handleSelectionChange"
@@ -163,7 +163,7 @@
             </template>
 
           </el-table-column>
-          <el-table-column label="操作" :width="lastLoginTimeWidth" align="center" #default="scope">
+          <el-table-column label="操作" :width="operationWidth" align="center" #default="scope">
             <div v-if="scope.row.status === 0 || scope.row.status === null">
               <el-button type="danger" size="large" @click="edit(scope.row.id, 1)">忽略</el-button>
 
@@ -244,6 +244,7 @@ export default {
       companyWidth: 0,
       vendorWidth: 0,
       factoryDateWidth: 0,
+      operationWidth: 0,  // 操作列宽
       // 父容器元素
       parentContainer: null,
       // ResizeObserver 实例
@@ -285,17 +286,18 @@ export default {
       return {
         selection: 5,
         index: 7,
-        account: 13,
-        worker_name: 12,
+        account: 9,
+        worker_name: 8,
         company: 6,
         address: 14,
         phone: 6,
         post: 7,
         role: 8,
         //password: 10,
-        last_login_time: 11,
+        last_login_time: 9,
         vendor: 8,
         factory_date: 10,
+        operation: 12,
       };
     },
   },
@@ -430,6 +432,7 @@ export default {
         this.lastLoginTimeWidth = (this.columnPercentages.last_login_time / 100) * parentWidth;
         this.vendorWidth = (this.columnPercentages.vendor / 100) * parentWidth;
         this.factoryDateWidth = (this.columnPercentages.factory_date / 100) * parentWidth;
+        this.operationWidth = (this.columnPercentages.operation / 100) * parentWidth;
       }
     },
     getRegionData() {

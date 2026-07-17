@@ -38,7 +38,7 @@
           <div class="more-filter-btn">
             <span>&nbsp;</span>
             <el-button class="more-filter-trigger">
-              更多筛选
+              更多搜索项
               <el-icon style="margin-left: 4px"><ArrowDown /></el-icon>
             </el-button>
           </div>
@@ -627,6 +627,7 @@ export default {
         company: null, // 新增所属水厂参数
         companyId: null, // 所属水厂ID
         userPhone: "", // 联系电话
+        userAddr: "", // 新增地址搜索参数
         order: 0,   // ****** 默认按照时间顺序倒叙排列表格 ******
       },
       price_list: [],
@@ -755,6 +756,8 @@ export default {
         { key: "company", label: "所属水厂", type: "select", placeholder: "请选择所属水厂", optionsKey: "companyList" },
         { key: "userId", label: "用户号", type: "input" },
         { key: "userName", label: "用户名", type: "input" },
+        // 新增地址筛选
+        { key: "userAddr", label: "地址", type: "input" },
         { key: "meterCode", label: "表号", type: "input", inputType: "number" },
         { key: "userPhone", label: "电话", type: "input" },
         // { key: "meterVendor", label: "厂商", type: "input" },
@@ -777,10 +780,10 @@ export default {
         },
         { key: "meterType", label: "水表类型", type: "select", optionsKey: "shuibiao_list", defaultVisible: false },
         { key: "battery", label: "电量", type: "select", clearable: true, options: [{ label: "正常", value: "正常" }, { label: "异常", value: "异常" }] },
-        { key: "valveStatus", label: "阀门状态", type: "select", clearable: true, options: [{ label: "开阀", value: "开阀" }, { label: "关阀", value: "关阀" }, { label: "故障", value: "故障" }] },
+        { key: "valveStatus", label: "阀门", type: "select", clearable: true, options: [{ label: "开阀", value: "开阀" }, { label: "关阀", value: "关阀" }, { label: "故障", value: "故障" }] },
       ],
       visibleFilterKeys: [],
-      maxVisibleFilters: 7,
+      maxVisibleFilters: 8,
       moreFiltersVisible: false,
     };
   },
@@ -1958,6 +1961,7 @@ export default {
         company: null,
         companyId: null,
         userPhone: "",
+        userAddr: "", // 重置地址
         order: 0,
       };
       this.sortField = "time";
@@ -2153,7 +2157,7 @@ export default {
   justify-content: center;
   /* 确保子元素在父容器中垂直居中 */
   flex-direction: column;
-  width: 10%;
+  width: 8%;
   height: 100%;
   margin-right: 10px;
 }
