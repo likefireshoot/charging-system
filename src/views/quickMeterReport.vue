@@ -147,9 +147,9 @@
               </div>
             </div>
 
-            <!-- 抄表信息 -->
+            <!-- 抄表数据 -->
             <div class="reading-section">
-              <div class="section-title">抄表信息</div>
+              <div class="section-title">抄表数据</div>
               <div class="reading-grid">
                 <div class="reading-item highlight">
                   <span class="label">上月读数</span>
@@ -195,13 +195,26 @@
                   </el-radio-group>
                 </div>
               </div>
+
+              <!-- 提交按钮 - 移到抄表信息区域底部 -->
+              <div class="action-buttons-inline">
+                <el-button
+                  type="primary"
+                  @click="submitSingleUser"
+                  :disabled="!canSubmitSingle"
+                  size="large"
+                >
+                  <el-icon><Upload /></el-icon>
+                  <span>提交该用户</span>
+                </el-button>
+              </div>
             </div>
 
-            <!-- 最近抄表记录 -->
+            <!-- 抄表记录 -->
             <div class="history-section" v-if="reportHistory.length > 0">
               <div class="section-title">
                 <el-icon><Document /></el-icon>
-                <span>最近抄表记录</span>
+                <span>抄表记录</span>
               </div>
               <el-table
                 :data="reportHistory"
@@ -1137,6 +1150,21 @@ fetchCompanyList();
               }
             }
           }
+
+          // 内联提交按钮样式
+          .action-buttons-inline {
+            display: flex;
+            justify-content: center;
+            padding: 20px 0 10px;
+            margin-top: 10px;
+            border-top: 1px solid #ebeef5;
+
+            :deep(.el-button) {
+              min-width: 180px;
+              height: 44px;
+              font-size: 20px;
+            }
+          }
         }
 
         // 抄表记录区域
@@ -1185,17 +1213,9 @@ fetchCompanyList();
 
         // 操作按钮
         .action-buttons {
-          display: flex;
-          justify-content: center;
-          padding: 10px 0 10px;
-          border-top: 1px solid #ebeef5;
-
-          :deep(.el-button) {
-            min-width: 180px;
-            height: 44px;
-            font-size: 20px;
-          }
+          display: none;
         }
+
       }
     }
   }
