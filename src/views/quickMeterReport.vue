@@ -5,19 +5,7 @@
       <div class="search-form">
         <div class="form-item">
           <label class="form-label">水厂</label>
-          <el-select
-            v-model="searchParams.companyId"
-            placeholder="请选择水厂"
-            clearable
-            @change="handleCompanyChange"
-          >
-            <el-option
-              v-for="item in companyList"
-              :key="item.companyId"
-              :label="item.companyName"
-              :value="item.companyId"
-            />
-          </el-select>
+          <span class="company-name">{{ currentCompanyName }}</span>
         </div>
 
         <div class="form-item">
@@ -27,7 +15,7 @@
             placeholder="请先选择水厂"
             clearable
             @change="handleRegionChange"
-            :disabled="!searchParams.companyId"
+            :disabled="!currentCompanyId"
           >
             <el-option 
               v-for="item in regionList" 
@@ -173,8 +161,10 @@
                   <span class="label">本月读数</span>
                   <el-input 
                     v-model="selectedUserDetail.currentReadingInput" 
-                    type="number"
+                    type="text"
+                    inputmode="decimal"
                     placeholder="请输入本月数"
+                    @input="handleCurrentReadingInput"
                   />
                 </div>
                               
@@ -288,6 +278,10 @@ const searchParams = reactive({
   region: ''
 });
 
+// 当前登录用户的公司信息
+const currentCompanyId = ref(null);
+const currentCompanyName = ref('');
+
 // 水厂列表
 const companyList = ref([]);
 
@@ -387,20 +381,26 @@ const fetchCompanyList = async () => {
 
       // 获取当前登录用户的 companyId
       const userData = JSON.parse(sessionStorage.getItem('userData'));
-      const currentCompanyId = userData?.companyId;
+      currentCompanyId.value = userData?.companyId;
+
+      // 根据当前登录用户的 companyId 设置水厂名称
+      const currentUserCompany = allCompanies.find(company => company.companyId === currentCompanyId.value);
+      if (currentUserCompany) {
+        currentCompanyName.value = currentUserCompany.companyName;
+        searchParams.companyId = currentCompanyId.value;
+
+        // 自动加载该水厂的区域列表
+        handleCompanyChange(currentCompanyId.value);
+      } else {
+        currentCompanyName.value = '-';
+      }
 
       // 如果 companyId !== 1，只显示当前用户所在的水厂
-      if (currentCompanyId && currentCompanyId !== 1) {
-        allCompanies = allCompanies.filter(company => company.companyId === currentCompanyId);
+      if (currentCompanyId.value && currentCompanyId.value !== 1) {
+        allCompanies = allCompanies.filter(company => company.companyId === currentCompanyId.value);
       }
 
       companyList.value = allCompanies;
-
-      // 如果只有一个水厂，自动选中
-      if (companyList.value.length === 1) {
-        searchParams.companyId = companyList.value[0].companyId;
-        handleCompanyChange(searchParams.companyId);
-      }
     } else {
       ElMessage.error(res.msg || '获取水厂列表失败');
     }
@@ -478,6 +478,13 @@ const handleRegionChange = async (regionId) => {
       }));
       
       ElMessage.success(`已加载 ${userList.value.length} 个用户`);
+
+      // 自动选中第一个用户
+      if (userList.value.length > 0) {
+        const firstUser = userList.value[0];
+        selectedUserId.value = firstUser.userId;
+        loadUserDetail(firstUser);
+      }
     } else {
       ElMessage.error(res.msg || '获取用户列表失败');
       userList.value = [];
@@ -622,6 +629,23 @@ const handleReportStatusChange = (status) => {
   }
 };
 
+// 处理本月读数输入（只允许数字和小数点）
+const handleCurrentReadingInput = (value) => {
+  // 移除非数字和非小数点的字符
+  let newValue = value.replace(/[^\d.]/g, '');
+
+  // 确保只有一个小数点
+  const parts = newValue.split('.');
+  if (parts.length > 2) {
+    newValue = parts[0] + '.' + parts.slice(1).join('');
+  }
+
+  // 更新值
+  if (selectedUserDetail.value) {
+    selectedUserDetail.value.currentReadingInput = newValue;
+  }
+};
+
 // 提交单个用户
 const submitSingleUser = async () => {
   if (!selectedUserDetail.value) {
@@ -680,6 +704,9 @@ const submitSingleUser = async () => {
       
       // 关闭详情面板
       closeDetailPanel();
+
+      // 自动选中下一个用户
+      selectNextUser();
     } else {
       ElMessage.error(res.msg || '提交失败');
     }
@@ -688,6 +715,44 @@ const submitSingleUser = async () => {
     ElMessage.error(error.message || '提交失败');
   } finally {
     loading.value = false;
+  }
+};
+
+// 选中下一个用户
+const selectNextUser = () => {
+  if (!selectedUserId.value || userList.value.length === 0) {
+    return;
+  }
+
+  // 找到当前选中的用户在列表中的索引
+  const currentIndex = userList.value.findIndex(user => user.userId === selectedUserId.value);
+
+  if (currentIndex === -1) {
+    return;
+  }
+
+  // 计算下一个用户的索引
+  const nextIndex = currentIndex + 1;
+
+  // 如果还有下一个用户，选中它
+  if (nextIndex < userList.value.length) {
+    const nextUser = userList.value[nextIndex];
+    selectedUserId.value = nextUser.userId;
+    loadUserDetail(nextUser);
+
+    // 如果在分页列表中看不到下一个用户，调整当前页
+    const currentPageFirstIndex = (currentPage.value - 1) * pageSize.value;
+    const currentPageLastIndex = currentPageFirstIndex + pageSize.value - 1;
+
+    if (nextIndex > currentPageLastIndex) {
+      // 下一页
+      currentPage.value++;
+    }
+  } else {
+    // 已经是最后一个用户，清空选中状态
+    selectedUserId.value = null;
+    closeDetailPanel();
+    ElMessage.info('已是最后一个用户');
   }
 };
 
@@ -749,6 +814,15 @@ fetchCompanyList();
             content: '* ';
             color: #f56c6c;
           }
+        }
+
+        // 水厂名称样式
+        .company-name {
+          font-size: 20px;
+          color: #303133;
+          font-weight: 500;
+          min-width: 150px;
+          display: inline-block;
         }
 
         :deep(.el-select),
@@ -1011,9 +1085,9 @@ fetchCompanyList();
                 }
                 
                 :deep(.el-radio-group) {
-                  display: flex;
-                  flex-wrap: wrap;
-                  gap: 12px;
+                  display: grid;
+                  grid-template-columns: repeat(5, auto);
+                  gap: 16px 24px;
                   flex: 1;
                 }
                 
@@ -1030,11 +1104,23 @@ fetchCompanyList();
                 :deep(.el-radio__inner) {
                   width: 20px;
                   height: 20px;
+                  border: 2px solid #333;
+                  background-color: #fff;
+
+                  &::after {
+                    background-color: #46b97e;
+                  }
+                }
+
+                :deep(.el-radio__input.is-checked .el-radio__inner) {
+                  border-color: #46b97e;
+                  background-color: #46b97e;
                 }
                 
                 :deep(.el-radio__label) {
                   font-size: 20px;
                   color: #303133;
+                  padding-left: 8px;
                 }
               }
               
