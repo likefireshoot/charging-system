@@ -12,7 +12,7 @@
           <label class="form-label">区域</label>
           <el-select 
             v-model="searchParams.region" 
-            placeholder="请先选择水厂"
+            placeholder="选择区域"
             clearable
             @change="handleRegionChange"
             :disabled="!currentCompanyId"
@@ -52,9 +52,11 @@
               <el-icon><Search /></el-icon>
             </template>
           </el-input>
-          <span class="result-count" v-if="userList.length > 0">
-            共 {{ filteredUserList.length }} 个用户
-          </span>
+          <div class="auto-jump-control">
+            <el-checkbox v-model="autoJumpEnabled" size="large">
+              自动跳变
+            </el-checkbox>
+          </div>
         </div>
 
         <div class="table-container">
@@ -348,6 +350,9 @@ const reportHistory = ref([]);
 
 // 加载状态
 const loading = ref(false);
+
+// 自动跳变开关
+const autoJumpEnabled = ref(true);
 
 // 是否可以提交单个用户（正常状态需要输入本月数，异常状态不需要）
 const canSubmitSingle = computed(() => {
@@ -718,8 +723,12 @@ const submitSingleUser = async () => {
       // 关闭详情面板
       closeDetailPanel();
 
-      // 自动选中下一个用户
-      selectNextUser();
+      // 如果开启了自动跳变，选中下一个用户
+      if (autoJumpEnabled.value) {
+        selectNextUser();
+      } else {
+        ElMessage.success('提交成功');
+      }
     } else {
       ElMessage.error(res.msg || '提交失败');
     }
@@ -846,6 +855,22 @@ fetchCompanyList();
 
       .form-actions {
         margin-left: auto;
+      }
+
+      // 自动跳变控制样式
+      .auto-jump-control {
+        display: flex;
+        align-items: center;
+
+        :deep(.el-checkbox__label) {
+          font-size: 20px;
+          color: #606266;
+        }
+
+        :deep(.el-checkbox__inner) {
+          width: 18px;
+          height: 18px;
+        }
       }
     }
   }
