@@ -27,6 +27,11 @@
         </div>
 
         <div class="form-actions">
+          <el-button type="primary" @click="goToReviewPage">
+            <el-icon><Check /></el-icon>
+            <span>审核</span>
+          </el-button>
+          
           <el-button type="danger" @click="handleClearAll">
             <el-icon><Delete /></el-icon>
             <span>清空</span>
@@ -283,9 +288,12 @@
 
 <script setup>
 import { ref, reactive, computed } from 'vue';
+import { useRouter } from 'vue-router';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import { ArrowDown, Close, Search, Document, Check, Upload, Delete } from '@element-plus/icons-vue';
 import service from '@/api/request';
+
+const router = useRouter();
 
 // 搜索参数
 const searchParams = reactive({
@@ -664,7 +672,12 @@ const handleCurrentReadingInput = (value) => {
   }
 };
 
-// 提交单个用户
+// 跳转到审核页面
+const goToReviewPage = () => {
+  router.push('/reviewMeterReport');
+};
+
+// 提交单个用户（改为提交到审核表）
 const submitSingleUser = async () => {
   if (!selectedUserDetail.value) {
     ElMessage.warning('请先选择用户');
@@ -701,11 +714,11 @@ const submitSingleUser = async () => {
       submitData.endRead = selectedUserDetail.value.currentReadingInput;
     }
     
-    // 调用后端接口提交单个用户
-    const res = await service.post('/manual/charge/submit', submitData);
+    // 调用后端接口提交到审核表
+    const res = await service.post('/manual/charge/submitForReview', submitData);
     
     if (res.code === 200) {
-      let successMsg = `用户 ${selectedUserDetail.value.userName} 提交成功`;
+      let successMsg = `用户 ${selectedUserDetail.value.userName} 已提交审核`;
       if (selectedUserDetail.value.reportStatus !== '正常') {
         successMsg += `（状态：${selectedUserDetail.value.reportStatus}）`;
       }
