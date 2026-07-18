@@ -74,27 +74,26 @@
             :data="paginatedUserList"
             stripe
             border
-            @selection-change="handleSelectionChange"
+            @row-click="handleRowClick"
             v-loading="loading"
             height="800"
+            highlight-current-row
           >
-            <el-table-column type="selection" width="55" align="center" />
+            <el-table-column label="选择" width="55" align="center">
+              <template #default="{ row }">
+                <el-radio
+                  v-model="selectedUserId"
+                  :label="row.userId"
+                  @change="handleRadioChange(row)"
+                >
+                  &nbsp;
+                </el-radio>
+              </template>
+            </el-table-column>
             <el-table-column prop="userId" label="用户号" min-width="120" align="center" />
             <el-table-column prop="userName" label="用户名" min-width="120" align="center" />
             <el-table-column prop="address" label="地址" min-width="200" align="center" show-overflow-tooltip />
             <el-table-column prop="lastReading" label="上月数" min-width="120" align="center" />
-            <el-table-column prop="currentReading" label="本月数" min-width="120" align="center">
-              <template #default="{ row }">
-                <el-input 
-                  v-if="selectedUsers.includes(row)" 
-                  v-model="row.currentReadingInput" 
-                  type="number"
-                  size="small"
-                  placeholder="请输入"
-                />
-                <span v-else>-</span>
-              </template>
-            </el-table-column>
           </el-table>
 
           <!-- 分页器 -->
@@ -145,7 +144,11 @@
                   <span class="label">用户名</span>
                   <span class="value">{{ selectedUserDetail.userName }}</span>
                 </div>
-                <div class="info-item full-width">
+                <div class="info-item">
+                  <span class="label">用户电话</span>
+                  <span class="value">{{ selectedUserDetail.userPhone || '-' }}</span>
+                </div>
+                <div class="info-item">
                   <span class="label">地址</span>
                   <span class="value">{{ selectedUserDetail.address }}</span>
                 </div>
@@ -164,27 +167,7 @@
                   <span class="label">上月读数</span>
                   <span class="value">{{ selectedUserDetail.lastReading }} 吨</span>
                 </div>
-                
-                <!-- 抄表状态下拉框 -->
-                <div class="reading-item">
-                  <span class="label">抄表状态</span>
-                  <el-select 
-                    v-model="selectedUserDetail.reportStatus" 
-                    placeholder="请选择抄表状态"
-                    @change="handleReportStatusChange"
-                  >
-                    <el-option label="正常" value="正常" />
-                    <el-option label="表数未动" value="表数未动" />
-                    <el-option label="表不清" value="表不清" />
-                    <el-option label="表破" value="表破" />
-                    <el-option label="表埋" value="表埋" />
-                    <el-option label="暂拆" value="暂拆" />
-                    <el-option label="止码未到" value="止码未到" />
-                    <el-option label="其他" value="其他" />
-                    <el-option label="无人在家" value="无人在家" />
-                  </el-select>
-                </div>
-                
+                              
                 <!-- 本月读数（仅正常状态时显示） -->
                 <div class="reading-item" v-if="selectedUserDetail.reportStatus === '正常'">
                   <span class="label">本月读数</span>
@@ -194,16 +177,32 @@
                     placeholder="请输入本月数"
                   />
                 </div>
-                
+                              
                 <!-- 异常状态提示 -->
                 <div class="reading-item abnormal-tip" v-else>
                   <span class="label">状态说明</span>
-                  <span class="tip-text">当前选择“{{ selectedUserDetail.reportStatus }}”，不更新读数和余额，仅记录状态</span>
+                  <span class="tip-text">当前选择"{{ selectedUserDetail.reportStatus }}"，不更新读数和余额，仅记录状态</span>
                 </div>
-                
+                              
                 <div class="reading-item" v-if="selectedUserDetail.balance !== undefined">
                   <span class="label">当前余额</span>
                   <span class="value amount">{{ formatMoney(selectedUserDetail.balance) }} 元</span>
+                </div>
+                              
+                <!-- 抄表状态单选组 - 放在第二行 -->
+                <div class="reading-item status-row full-width">
+                  <span class="label">抄表状态</span>
+                  <el-radio-group v-model="selectedUserDetail.reportStatus" @change="handleReportStatusChange">
+                    <el-radio label="正常">正常</el-radio>
+                    <el-radio label="表数未动">表数未动</el-radio>
+                    <el-radio label="表不清">表不清</el-radio>
+                    <el-radio label="表破">表破</el-radio>
+                    <el-radio label="表埋">表埋</el-radio>
+                    <el-radio label="暂拆">暂拆</el-radio>
+                    <el-radio label="止码未到">止码未到</el-radio>
+                    <el-radio label="其他">其他</el-radio>
+                    <el-radio label="无人在家">无人在家</el-radio>
+                  </el-radio-group>
                 </div>
               </div>
             </div>
@@ -216,10 +215,10 @@
               </div>
               <el-table
                 :data="reportHistory"
-                size="small"
+                size="medium"
                 stripe
                 border
-                max-height="280"
+                max-height="400"
               >
                 <el-table-column prop="createTime" label="抄表时间" min-width="140" align="center">
                   <template #default="{ row }">
@@ -331,6 +330,9 @@ const paginatedUserList = computed(() => {
 // 选中的用户
 const selectedUsers = ref([]);
 
+// 选中的用户ID（单选）
+const selectedUserId = ref(null);
+
 // 选中的用户详情
 const selectedUserDetail = ref(null);
 
@@ -381,7 +383,18 @@ const fetchCompanyList = async () => {
     const res = await service.get('/getAllUnblockCompany');
     
     if (res.code === 200) {
-      companyList.value = res.data || [];
+      let allCompanies = res.data || [];
+
+      // 获取当前登录用户的 companyId
+      const userData = JSON.parse(sessionStorage.getItem('userData'));
+      const currentCompanyId = userData?.companyId;
+
+      // 如果 companyId !== 1，只显示当前用户所在的水厂
+      if (currentCompanyId && currentCompanyId !== 1) {
+        allCompanies = allCompanies.filter(company => company.companyId === currentCompanyId);
+      }
+
+      companyList.value = allCompanies;
 
       // 如果只有一个水厂，自动选中
       if (companyList.value.length === 1) {
@@ -411,16 +424,20 @@ const handleCompanyChange = async (companyId) => {
     const res = await service.get(`/getRegion?companyId=${companyId}`);
     
     if (res.code === 200) {
-      regionList.value = res.data || [];
+      // 筛选出区域名称包含"普表"的区域
+      const allRegions = res.data || [];
+      regionList.value = allRegions.filter(region =>
+        region.regionName && region.regionName.includes('普表')
+      );
 
       // 清空用户列表和选中的区域
       userList.value = [];
       searchParams.region = '';
 
       if (regionList.value.length > 0) {
-        ElMessage.success(`已加载 ${regionList.value.length} 个区域`);
+        ElMessage.success(`已加载 ${regionList.value.length} 个普表区域`);
       } else {
-        ElMessage.warning('该水厂下暂无区域');
+        ElMessage.warning('该水厂下暂无普表区域');
       }
     } else {
       ElMessage.error(res.msg || '获取区域列表失败');
@@ -451,6 +468,7 @@ const handleRegionChange = async (regionId) => {
         userId: user.userId,
         userName: user.userName,
         address: user.userAddr,
+        userPhone: user.userPhone || '',
         lastReading: user.lastReading || 0,
         currentReading: null,
         currentReadingInput: '',
@@ -486,47 +504,37 @@ const handleUserSearch = () => {
   currentPage.value = 1;
   
   // 清空选中状态，因为过滤后可能不包含之前选中的用户
-  // 只在搜索结果为空时才清空选中状态
   if (filteredUserList.value.length === 0) {
-    selectedUsers.value = [];
+    selectedUserId.value = null;
     closeDetailPanel();
   } else {
-    // 如果搜索结果不为空，尝试保留已选中的用户
-    const stillSelected = selectedUsers.value.filter(user =>
-      filteredUserList.value.includes(user)
-    );
+    // 如果搜索结果不为空，检查当前选中的用户是否还在结果中
+    const currentSelected = filteredUserList.value.find(user => user.userId === selectedUserId.value);
 
-    if (stillSelected.length !== selectedUsers.value.length) {
-      // 如果有用户不在搜索结果中，需要更新选中状态
-      selectedUsers.value = stillSelected;
-
-      // 如果只选中一个用户，重新加载抄表记录
-      if (stillSelected.length === 1) {
-        loadReportHistory(stillSelected[0].userId);
-      } else {
-        closeDetailPanel();
-      }
+    if (!currentSelected && selectedUserId.value) {
+      // 选中的用户不在搜索结果中，清空选中状态
+      selectedUserId.value = null;
+      closeDetailPanel();
     }
   }
 };
 
-// 选择用户变化
-const handleSelectionChange = (selection) => {
-  selectedUsers.value = selection;
-  
-  // 如果只选中一个用户，显示详情面板并加载抄表记录
-  if (selection.length === 1) {
-    // 使用深拷贝确保响应式
-    selectedUserDetail.value = JSON.parse(JSON.stringify(selection[0]));
-    loadReportHistory(selection[0].userId);
-  } else if (selection.length === 0) {
-    selectedUserDetail.value = null;
-    reportHistory.value = [];
-  } else {
-    // 选中多个用户时，不显示详情面板
-    selectedUserDetail.value = null;
-    reportHistory.value = [];
-  }
+// 行点击事件
+const handleRowClick = (row) => {
+  selectedUserId.value = row.userId;
+  loadUserDetail(row);
+};
+
+// 单选按钮变化事件
+const handleRadioChange = (row) => {
+  loadUserDetail(row);
+};
+
+// 加载用户详情
+const loadUserDetail = (user) => {
+  // 使用深拷贝确保响应式
+  selectedUserDetail.value = JSON.parse(JSON.stringify(user));
+  loadReportHistory(user.userId);
 };
 
 // 分页大小变化
@@ -581,7 +589,7 @@ const handleClearAll = async () => {
     );
     
     // 清空选中状态
-    selectedUsers.value = [];
+    selectedUserId.value = null;
     selectedUserDetail.value = null;
     reportHistory.value = [];
     
@@ -709,7 +717,7 @@ fetchCompanyList();
 .quick-meter-report {
   display: flex;
   flex-direction: column;
-  min-height: calc(100vh - 60px);
+  height: 135vh;
   background-color: #f5f7fa;
   padding: 20px;
   gap: 20px;
@@ -733,7 +741,7 @@ fetchCompanyList();
         gap: 10px;
 
         .form-label {
-          font-size: 14px;
+          font-size: 20px;
           color: #606266;
           white-space: nowrap;
 
@@ -783,13 +791,13 @@ fetchCompanyList();
 
         h3 {
           margin: 0;
-          font-size: 16px;
+          font-size: 20px;
           font-weight: 600;
           color: #303133;
         }
 
         .result-count {
-          font-size: 14px;
+          font-size: 20px;
           color: #909399;
         }
       }
@@ -845,10 +853,11 @@ fetchCompanyList();
         justify-content: space-between;
         padding: 16px 20px;
         border-bottom: 1px solid #ebeef5;
+        flex-shrink: 0;
 
         h3 {
           margin: 0;
-          font-size: 16px;
+          font-size: 20px;
           font-weight: 600;
           color: #303133;
         }
@@ -857,15 +866,35 @@ fetchCompanyList();
       .detail-content {
         flex: 1;
         overflow-y: auto;
+        overflow-x: hidden;
         padding: 20px;
         display: flex;
         flex-direction: column;
         gap: 20px;
+        min-height: 0;
+
+        &::-webkit-scrollbar {
+          width: 8px;
+        }
+
+        &::-webkit-scrollbar-track {
+          background: #f1f1f1;
+          border-radius: 4px;
+        }
+
+        &::-webkit-scrollbar-thumb {
+          background: #c1c1c1;
+          border-radius: 4px;
+
+          &:hover {
+            background: #a8a8a8;
+          }
+        }
 
         // 基本信息区域
         .info-section {
           .section-title {
-            font-size: 15px;
+            font-size: 20px;
             font-weight: 600;
             color: #303133;
             margin-bottom: 16px;
@@ -874,8 +903,8 @@ fetchCompanyList();
           }
 
           .info-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
+            display: flex;
+            flex-wrap: wrap;
             gap: 12px;
 
             .info-item {
@@ -884,21 +913,23 @@ fetchCompanyList();
               padding: 8px 12px;
               background-color: #f9f9f9;
               border-radius: 6px;
+              flex: 1;
+              min-width: 200px;
 
               &.full-width {
-                grid-column: span 2;
+                flex-basis: 100%;
               }
 
               .label {
                 width: 70px;
-                font-size: 13px;
+                font-size: 20px;
                 color: #909399;
                 flex-shrink: 0;
               }
 
               .value {
                 flex: 1;
-                font-size: 14px;
+                font-size: 20px;
                 color: #303133;
                 font-weight: 500;
                 word-break: break-all;
@@ -910,7 +941,7 @@ fetchCompanyList();
         // 抄表信息区域
         .reading-section {
           .section-title {
-            font-size: 15px;
+            font-size: 20px;
             font-weight: 600;
             color: #303133;
             margin-bottom: 16px;
@@ -920,7 +951,7 @@ fetchCompanyList();
 
           .reading-grid {
             display: flex;
-            flex-direction: column;
+            flex-wrap: wrap;
             gap: 12px;
 
             .reading-item {
@@ -929,24 +960,30 @@ fetchCompanyList();
               padding: 12px;
               background-color: #f9f9f9;
               border-radius: 6px;
+              flex: 1;
+              min-width: 200px;
+
+              &.full-width {
+                flex-basis: 100%;
+              }
 
               .label {
                 width: 80px;
-                font-size: 14px;
+                font-size: 20px;
                 color: #909399;
                 flex-shrink: 0;
               }
 
               .value {
                 flex: 1;
-                font-size: 14px;
+                font-size: 20px;
                 color: #303133;
                 font-weight: 500;
 
                 &.amount {
                   color: #46b97e;
                   font-weight: 600;
-                  font-size: 16px;
+                  font-size: 20px;
                 }
               }
 
@@ -954,7 +991,7 @@ fetchCompanyList();
                 .value {
                   color: #46b97e;
                   font-weight: 600;
-                  font-size: 16px;
+                  font-size: 20px;
                 }
               }
 
@@ -966,13 +1003,48 @@ fetchCompanyList();
                 flex: 1;
               }
               
+              // 状态单选组样式
+              &.status-row {
+                .label {
+                  align-self: flex-start;
+                  padding-top: 8px;
+                }
+                
+                :deep(.el-radio-group) {
+                  display: flex;
+                  flex-wrap: wrap;
+                  gap: 12px;
+                  flex: 1;
+                }
+                
+                :deep(.el-radio) {
+                  margin-right: 0;
+                  font-size: 20px;
+                }
+                
+                :deep(.el-radio__input) {
+                  width: 24px;
+                  height: 24px;
+                }
+                
+                :deep(.el-radio__inner) {
+                  width: 20px;
+                  height: 20px;
+                }
+                
+                :deep(.el-radio__label) {
+                  font-size: 20px;
+                  color: #303133;
+                }
+              }
+              
               // 异常状态提示样式
               &.abnormal-tip {
                 background-color: #fef0f0;
                 border-left: 3px solid #f56c6c;
                 
                 .tip-text {
-                  font-size: 13px;
+                  font-size: 20px;
                   color: #f56c6c;
                   line-height: 1.5;
                 }
@@ -987,7 +1059,7 @@ fetchCompanyList();
             display: flex;
             align-items: center;
             gap: 8px;
-            font-size: 15px;
+            font-size: 20px;
             font-weight: 600;
             color: #303133;
             margin-bottom: 16px;
@@ -1000,7 +1072,7 @@ fetchCompanyList();
           }
 
           :deep(.el-table) {
-            font-size: 13px;
+            font-size: 20px;
 
             .el-table__header th {
               background-color: #f5f7fa;
@@ -1019,7 +1091,7 @@ fetchCompanyList();
               background-color: #fff1f0;
               color: #f56c6c;
               border-radius: 4px;
-              font-size: 12px;
+              font-size: 16px;
               font-weight: 500;
             }
           }
@@ -1029,14 +1101,13 @@ fetchCompanyList();
         .action-buttons {
           display: flex;
           justify-content: center;
-          padding: 20px 0 10px;
+          padding: 10px 0 10px;
           border-top: 1px solid #ebeef5;
-          margin-top: 10px;
 
           :deep(.el-button) {
             min-width: 180px;
             height: 44px;
-            font-size: 15px;
+            font-size: 20px;
           }
         }
       }
@@ -1122,11 +1193,11 @@ fetchCompanyList();
           gap: 12px;
 
           h3 {
-            font-size: 14px;
+            font-size: 20px;
           }
 
           .result-count {
-            font-size: 12px;
+            font-size: 20px;
           }
         }
 
