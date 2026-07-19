@@ -119,10 +119,18 @@
           </template>
         </el-table-column>
         <el-table-column property="deltaWater" label="用水量" min-width="100" align="center" />
+        <!-- 新增结算量 -->
+        <el-table-column label="结算量" min-width="100" align="center">
+          <template #default="scope">{{ scope.row.settleTon }}</template>
+        </el-table-column>
+        <!-- 新增扣费吨值 -->
+        <el-table-column label="扣费吨值" min-width="100" align="center">
+          <template #default="scope">{{ scope.row.deductTon }}</template>
+        </el-table-column>
         <el-table-column property="feeThisTime" label="扣费" min-width="100" align="center" />
         <el-table-column property="balanceThisTime" label="余额" min-width="100" align="center" />
         <el-table-column property="valveStatus" label="阀门" min-width="60" align="center" />
-        <el-table-column property="createTime" label="抄表时间" min-width="180" align="center" />
+        <el-table-column property="createTime" label="抄表时间" min-width="150" align="center" />
 <!--        <el-table-column property="userPhone" label="手机号" min-width="180" align="center" />-->
       </el-table>
     </div>
@@ -193,6 +201,29 @@ export default {
     }
   },
   methods: {
+    // 计算每行结算量、扣费吨值（倒序列表，取上一行结算量做差值）
+    calcSettleTonData(list) {
+      if (!list || list.length === 0) return list;
+      // 遍历生成结算量：读数向下取整
+      const calcList = list.map(item => {
+        const readNum = Number(item.readingCount || 0);
+        return {
+          ...item,
+          settleTon: Math.floor(readNum)
+        };
+      });
+      // 倒序列表，逐行计算扣费吨值 = 当前结算量 - 上一条结算量
+      for (let i = 0; i < calcList.length; i++) {
+        const current = calcList[i];
+        const prev = calcList[i + 1]; // 下一条是更早抄表记录
+        if (!prev) {
+          current.deductTon = 0; // 第一行无更早数据，扣费吨值0
+        } else {
+          current.deductTon = current.settleTon - prev.settleTon;
+        }
+      }
+      return calcList;
+    },
     isCurrentMeter(row) {
       return String(row?.meterCode ?? "") === String(this.user?.meterCode ?? "");
     },
@@ -270,10 +301,16 @@ export default {
             item.theId = this.pageSize * (response.data.currentPages - 1) + index + 1;
           });
 
-          this.list = records.map(item => ({
+          // this.list = records.map(item => ({
+          //   ...item,
+          //   createTime: item.createTime ? item.createTime.replace("T", " ") : ""
+          // }));
+          let tempList = records.map(item => ({
             ...item,
             createTime: item.createTime ? item.createTime.replace("T", " ") : ""
           }));
+          // 计算结算量、扣费吨值
+          this.list = this.calcSettleTonData(tempList);
 
           this.total = response.data.totalElements || 0;
           await this.fetchTotalWater();
@@ -306,10 +343,15 @@ export default {
             item.theId = this.pageSize * (response.data.currentPages - 1) + index + 1;
           });
 
-          this.list = records.map(item => ({
+          // this.list = records.map(item => ({
+          //   ...item,
+          //   createTime: item.createTime ? item.createTime.replace("T", " ") : ""
+          // }));
+          let tempList = records.map(item => ({
             ...item,
             createTime: item.createTime ? item.createTime.replace("T", " ") : ""
           }));
+          this.list = this.calcSettleTonData(tempList);
 
           this.total = response.data.totalElements || 0;
           await this.fetchTotalWater();

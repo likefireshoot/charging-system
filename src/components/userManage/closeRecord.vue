@@ -1,10 +1,10 @@
 <template>
-  <div class="recharge-record-dialog" v-if="recharge_cancel_record_dialogFormVisible">
+  <div class="recharge-record-dialog" v-if="close_record_dialogFormVisible">
     <div class="recharge-record-dialog-content">
       <div class="title">
         <div style="margin-left: 10px; display: flex; align-items: center">
           <img src="@/assets/yonghu/icon7.png" alt="" style="margin-right: 8px" />
-          <span style="font-size: 20px">充值撤销记录</span>
+          <span style="font-size: 20px">销户记录</span>
         </div>
         <div style="margin-right: 10px; cursor: pointer" @click="handleRechargeRecordDialogClose">
           <img src="@/assets/close.png" alt="" />
@@ -12,28 +12,66 @@
       </div>
       <div class="recharge-record-content">
         <div class="serach-box">
-          <div class="search-input" style="width: 15%; margin-right: 10px">
+          <div class="search-input"  v-if="companyId === 1">
+            <span>所属水厂</span>
+            <el-select v-model="params.companyId" placeholder="请选择所属水厂">
+              <el-option v-for="item in companyList" :key="item.id" :value="item.id" :label="item.name"></el-option>
+            </el-select>
+          </div>
+          <div class="search-input">
+            <span>区域</span>
+            <el-select v-model="params.region" clearable filterable placeholder="区域">
+              <el-option v-for="item in quyu_data" :key="item.id" :label="item.label" :value="item.label"> </el-option>
+            </el-select>
+          </div>
+          <div class="search-input" >
             <span>用户号</span>
-            <el-input v-model="transactionData.userId" placeholder="请输入..." />
+            <el-input v-model="params.userId" placeholder="请输入..." />
           </div>
-          <div class="search-input" style="width: 18%; margin-right: 10px">
+          <div class="search-input" >
+            <span>用户名</span>
+            <el-input v-model="params.userName" placeholder="请输入..." />
+          </div>
+          <div class="search-input" >
             <span>表号</span>
-            <el-input v-model="transactionData.meterCode" placeholder="请输入..." />
+            <el-input v-model="params.meterCode" placeholder="请输入..." />
           </div>
-          <div class="search-input" style="width: 18%; margin-right: 10px">
-            <span>退款方式</span>
-            <el-select v-model="transactionData.rechargeType" placeholder="请选择收费类型">
-              <el-option label="现金" value="现金"></el-option>
-              <el-option label="微信支付" value="微信支付"></el-option>
-              <el-option label="免费赠送" value="免费赠送"></el-option>
-              <el-option label="现金（销户退费）" value="现金（销户退费）" />
+          <div class="search-input" >
+            <span>电话</span>
+            <el-input v-model="params.userPhone" placeholder="请输入..." />
+          </div>
+<!--          <div class="search-input">-->
+<!--            <span>厂商</span>-->
+<!--            <el-select class="big-font-el-select" v-model="params.meterVendor" clearable placeholder="请选择">-->
+<!--              <el-option label="圣鑫" value="圣鑫"></el-option>-->
+<!--              <el-option label="旧圣鑫" value="旧圣鑫"></el-option>-->
+<!--              <el-option label="太阳能" value="太阳能"></el-option>-->
+<!--              <el-option label="信驰" value="信驰"></el-option>-->
+<!--              <el-option label="旧信驰" value="旧信驰"></el-option>-->
+<!--              <el-option label="旧信驰KF01" value="旧信驰KF01"></el-option>-->
+<!--              <el-option label="4G信驰" value="4G信驰"></el-option>-->
+<!--              <el-option label="集万讯" value="集万讯"></el-option>-->
+<!--              <el-option label="千宝通" value="千宝通"></el-option>-->
+<!--            </el-select>-->
+<!--          </div>-->
+<!--          <div class="search-input">-->
+<!--            <span>阀门</span>-->
+<!--            <el-select class="big-font-el-select" v-model="params.valveStatus">-->
+<!--              <el-option label="开阀" value="开阀"></el-option>-->
+<!--              <el-option label="关阀" value="关阀"></el-option>-->
+<!--            </el-select>-->
+<!--          </div>-->
+          <div class="search-input">
+            <span>操作人</span>
+            <el-select v-model="params.operateStaffName" clearable filterable placeholder="请选择操作人">
+              <el-option v-for="item in staffNameOptions" :key="item" :label="item" :value="item"></el-option>
             </el-select>
           </div>
           <div class="search-input" style="width: 25%; margin-right: 10px">
             <span>时间</span>
             <div class="time-input">
               <el-date-picker
-                v-model="transactionData.dateRange"
+                v-model="params.dateRange"
                 type="daterange"
                 range-separator="至"
                 start-placeholder="开始日期"
@@ -57,10 +95,6 @@
         </div>
         <div class="recharge-record-list">
           <div class="command-buttons">
-            <div class="export-btn" @click="exportExcel">
-              <img src="@/assets/yonghu/icon1.3.png" alt="" />
-              <span>导出</span>
-            </div>
             <div class="reflush" style="margin-left: 10px" @click="reflush">
               <img src="@/assets/yonghu/icon15.png" alt="" />
             </div>
@@ -69,7 +103,7 @@
             <el-table
               ref="multipleTableRef"
               :data="list"
-              row-key="theId"
+              row-key="historyBindId"
               style="width: auto; height: 100%; table-layout: fixed; overflow-x: auto; overflow-y: auto"
               :max-height="tableMaxHeight"
               border
@@ -77,44 +111,33 @@
               @selection-change="handleSelectionChange"
               id="recharge-record-table"
               class="table"
+              v-loading="loading"
             >
               <el-table-column type="selection" width="50" align="center" fixed="left" />
+              <el-table-column label="序号" width="90" align="center" fixed="left">
+                <template #default="scope">{{ scope.row.theId }}</template>
+              </el-table-column>
               <el-table-column property="userId" label="用户号" min-width="120" align="center" fixed="left" />
-              <el-table-column property="userName" label="用户名称" min-width="140" align="center" />
-              <el-table-column property="regionName" label="所属区域" min-width="100" align="center" />
-              <el-table-column property="userPhone" label="联系电话" min-width="100" align="center" />
-              <el-table-column label="表号" min-width="120" align="center">
+              <el-table-column property="userName" label="用户名" min-width="120" align="center" />
+              <el-table-column property="meterCode" label="表号" min-width="160" align="center" />
+              <el-table-column property="reading" label="读数" min-width="100" align="center">
+                <template #default="scope">{{ scope.row.reading ?? "-" }}</template>
+              </el-table-column>
+              <el-table-column property="valveStatus" label="阀门" min-width="70" align="center" />
+              <el-table-column property="battery" label="电量" min-width="70" align="center" />
+              <el-table-column property="meterVendor" label="厂商" min-width="100" align="center" />
+              <el-table-column property="companyName" label="水厂" min-width="120" align="center" />
+              <el-table-column property="userAddr" label="地址" min-width="130" align="center" />
+              <el-table-column property="regionName" label="区域" min-width="100" align="center" />
+              <el-table-column property="userPhone" label="联系电话" min-width="130" align="center" />
+              <el-table-column label="销户时间" min-width="150" align="center">
                 <template #default="scope">
-                  <div class="meter-code-cell">
-                    <span class="meter-code-text">{{ scope.row.meterCode || "-" }}</span>
-                    <span v-if="meterStatusMap[scope.row.meterCode] !== undefined"
-                          :class="['meter-status', meterStatusMap[scope.row.meterCode] === '0' ? 'current' : 'history']">
-                {{ meterStatusMap[scope.row.meterCode] === '0' ? '当前表' : '历史表' }}
-              </span>
-                  </div>
+                  {{ scope.row.unbindTime ? scope.row.unbindTime.split('.')[0] : '-' }}
                 </template>
               </el-table-column>
-              <el-table-column property="rechargeType" label="退款方式" min-width="100" align="center" />
-              <el-table-column property="rechargeAmount" label="充值金额" min-width="110" align="center">
-                <template #default="scope">{{ scope.row.rechargeAmount }} 元</template>
+              <el-table-column property="operateStaffName" label="操作人" min-width="110" align="center">
+                <template #default="scope">{{ scope.row.operateStaffName ?? "-" }}</template>
               </el-table-column>
-              <el-table-column property="createTime" label="充值时间" min-width="140" align="center" />
-              <el-table-column property="createCancelTime" label="撤销时间" min-width="140" align="center" />
-              <el-table-column property="cancelStaffName" label="撤销员工" min-width="100" align="center" />
-              <el-table-column property="rechargeUser" label="充值员工" min-width="100" align="center" />
-              <el-table-column property="oldBalance" label="充值前余额" min-width="120" align="center">
-                <template #default="scope">{{ scope.row.oldBalance }}</template>
-              </el-table-column>
-              <el-table-column property="newBalance" label="充值后余额" min-width="120" align="center">
-                <template #default="scope">{{ scope.row.newBalance }}</template>
-              </el-table-column>
-              <el-table-column property="cancelOldBalance" label="撤销前余额" min-width="130" align="center">
-                <template #default="scope">{{ scope.row.cancelOldBalance ?? "-" }}</template>
-              </el-table-column>
-              <el-table-column property="cancelNewBalance" label="撤销后余额" min-width="130" align="center">
-                <template #default="scope">{{ scope.row.cancelNewBalance ?? "-" }}</template>
-              </el-table-column>
-              <el-table-column property="meterType" label="水表类型" min-width="100" align="center" />
             </el-table>
           </div>
 
@@ -137,7 +160,7 @@ import axios from "axios";
 
 export default {
   props: {
-    recharge_cancel_record_dialogFormVisible: {
+    close_record_dialogFormVisible: {
       type: Boolean,
       default: false,
     },
@@ -156,12 +179,18 @@ export default {
   },
   data() {
     return {
-      // 原有搜索条件不变，仅改名transactionData
-      transactionData: {
+      // 搜索条件不变，params
+      params: {
+        companyId: null,
+        region: null,
         dateRange: [],
         meterCode: "",
         userId: "",
-        rechargeType: "",
+        userName: "",
+        userPhone: "",
+        unbindStartTime: "",
+        unbindEndTime: "",
+        operateStaffName: "",
       },
       loading: false,
       list: [], // 对应上方list，替换原tableData
@@ -170,6 +199,10 @@ export default {
       currentPage: 1,
       pageSize: 30,
       companyId: JSON.parse(sessionStorage.getItem("userData")).companyId,
+      companyList: [],
+      quyu_data: [],
+      staffNameOptions: [],
+
     };
   },
   computed: {
@@ -184,10 +217,136 @@ export default {
       return map;
     }
   },
+  watch: {
+    // 切换水厂清空区域，重新获取区域
+    "params.companyId"() {
+      this.params.region = "";
+      this.getRegionData();
+    }
+  },
   mounted() {
+    this.getCompanyList();
+    this.getRegionData();
+    this.getStaffNames();
     this.queryList();
   },
   methods: {
+    getCompanyList() {
+      service
+        .get("/getAllUnblockCompany")
+        .then((response) => {
+          if (response.code === 200) {
+            this.companyList = response.data.map((item) => {
+              return {
+                id: item.companyId,
+                name: item.companyName,
+              };
+            });
+          } else {
+            ElMessage.error(response.msg);
+          }
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+    },
+    getRegionData() {
+      let url = "";
+      if (this.companyId === 1) {
+        if (this.params.companyId) {
+          url = `/getRegion?companyId=${this.params.companyId}`;
+        } else {
+          url = `/getRegion`;
+        }
+      } else {
+        url = `/getRegion?companyId=${this.companyId}`;
+      }
+      service
+        .get(`${url}`)
+        .then((response) => {
+          if (response.code === 200) {
+            this.quyu_data = response.data.map((item) => {
+              return {
+                id: item.regionId,
+                value: item.regionId,
+                label: item.regionName,
+              };
+            });
+          }
+        })
+        .catch((error) => {
+          ElMessage.error("获取区域数据失败");
+        });
+    },
+    getStaffNames() {
+      service
+        .get("/staff/getStaffNames")
+        .then((response) => {
+          if (response.code === 200) {
+            this.staffNameOptions = [...new Set((response.data || []).filter(Boolean))];
+          } else {
+            ElMessage.error(response.msg);
+          }
+        })
+        .catch(() => {
+          ElMessage.error("获取收费人列表失败");
+        });
+    },
+    syncCompanyIdParam() {
+      if (this.companyId === 1) {
+        this.params.companyId = this.params.companyId || "";
+      } else {
+        this.params.companyId = this.companyId;
+      }
+    },
+    buildQueryParams() {
+      this.syncCompanyIdParam();
+      const tempParams = {
+        pageNo: this.currentPage,
+        pageSize: this.pageSize,
+        companyId: this.params.companyId,
+        regionName: this.params.region,
+        userId: this.params.userId,
+        userName: this.params.userName,
+        userPhone: this.params.userPhone,
+        meterCode: this.params.meterCode,
+        operateStaffName: this.params.operateStaffName,
+      };
+      // 日期区间映射接口 unbindStartTime/unbindEndTime
+      if (this.params.dateRange && this.params.dateRange.length === 2) {
+        tempParams.unbindStartTime = `${this.params.dateRange[0]} 00:00:00`;
+        tempParams.unbindEndTime = `${this.params.dateRange[1]} 23:59:59`;
+      }
+      return this.filterEmptyParams(tempParams);
+    },
+    async queryList(page = this.currentPage) {
+      if (this.loading) return;
+      this.loading = true;
+      this.currentPage = page;
+      const params = this.buildQueryParams();
+      try {
+        // GET 改 POST，参数放data里
+        const res = await service.post("/userManage/userCharge/cancelUser/list", params);
+        if (res.code === 200) {
+          const arr = res.data.records || [];
+          this.list = arr.map((item, idx) => {
+            return {
+              ...item,
+              theId: this.pageSize * (this.currentPage - 1) + idx + 1,
+              unbindTime: item.unbindTime ? item.unbindTime.replace("T", " ") : ""
+            };
+          });
+          this.total = res.data.total || 0;
+        } else {
+          ElMessage.error(res.msg);
+        }
+      } catch (err) {
+        console.error("查询暂停记录失败", err);
+        ElMessage.error("数据请求失败，请稍后重试");
+      } finally {
+        this.loading = false;
+      }
+    },
     handleRechargeRecordDialogClose() {
       this.$emit("close");
     },
@@ -203,20 +362,6 @@ export default {
       this.queryList(page);
     },
 
-    // 组装查询参数（兼容你现有dateRange拆分为startDate/endDate）
-    buildQueryParams() {
-      const params = {
-        ...this.transactionData,
-        companyId: this.companyId
-      };
-      // 拆分日期区间
-      if (this.transactionData.dateRange && this.transactionData.dateRange.length === 2) {
-        params.createTime = `${this.transactionData.dateRange[0]} 00:00:00`;
-        params.endTime = `${this.transactionData.dateRange[1]} 23:59:59`;
-      }
-      return this.filterEmptyParams(params);
-    },
-
     // 拼接url参数
     buildQueryStr(params) {
       let str = "";
@@ -227,59 +372,33 @@ export default {
       return str;
     },
 
-    // 核心查询方法，对齐上方接口 /showSingleCancelRechargeMeterRecords
-    async queryList(page = this.currentPage) {
-      if (this.loading) return;
-      this.loading = true;
-      try {
-        const params = this.buildQueryParams();
-        const queryStr = this.buildQueryStr(params);
-        // 统一接口地址（单人撤销记录）
-        const url = `/userManage/userCharge/showSingleCancelRechargeMeterRecords/${page}${queryStr}`;
-        console.log("请求地址：", url);
-        const res = await service.get(url);
-        if (res.code === 200) {
-          const arr = res.data.userSingleCancelRechargeRecordData || [];
-          // 格式化时间、生成序号theId，和上方完全一致
-          this.list = arr.map((item, idx) => {
-            return {
-              ...item,
-              theId: this.pageSize * (res.data.currentPages - 1) + idx + 1,
-              createTime: item.createTime ? item.createTime.replace("T", " ") : "",
-              createCancelTime: item.createCancelTime ? item.createCancelTime.replace("T", " ") : ""
-            };
-          });
-          this.total = res.data.totalElements || 0;
-        } else {
-          ElMessage.error(res.msg);
-        }
-      } catch (err) {
-        console.error("查询撤销记录失败", err);
-        ElMessage.error("查询撤销记录失败");
-      } finally {
-        this.loading = false;
-      }
-    },
-
     // 搜索按钮
     search() {
-      // 仅校验：至少有一个条件
-      const hasDate = this.transactionData.dateRange && this.transactionData.dateRange.length === 2;
-      const hasOther = !!this.transactionData.userId || !!this.transactionData.meterCode || !!this.transactionData.rechargeType;
-      if (!hasDate && !hasOther) {
-        ElMessage.warning("请输入查询条件");
-        return;
-      }
+      // const hasDate = this.params.dateRange && this.params.dateRange.length === 2;
+      // const hasOther = !!this.params.userId || !!this.params.userName || !!this.params.meterCode
+      //   || !!this.params.userPhone || !!this.params.region || !!this.params.operateStaffName;
+      // if (!hasDate && !hasOther) {
+      //   ElMessage.warning("请输入查询条件");
+      //   return;
+      // }
       this.currentPage = 1;
       this.queryList();
     },
 
     // 清空
     clear(isSearch) {
-      this.transactionData.dateRange = [];
-      this.transactionData.meterCode = "";
-      this.transactionData.userId = "";
-      this.transactionData.rechargeType = "";
+      this.params = {
+        companyId: null,
+        region: null,
+        dateRange: [],
+        meterCode: "",
+        userId: "",
+        userName: "",
+        userPhone: "",
+        unbindStartTime: "",
+        unbindEndTime: "",
+        operateStaffName: "",
+      };
       this.currentPage = 1;
       if (typeof isSearch != "number" || isNaN(isSearch)) {
         this.queryList();
@@ -306,42 +425,7 @@ export default {
         }
       }
       return obj;
-    },
-
-    // 导出撤销充值全局Excel
-    async exportExcel() {
-      try {
-        const params = this.buildQueryParams();
-        const queryStr = this.buildQueryStr(params);
-        // 后端导出接口地址
-        const url = `/userManage/userCharge/exportCancelRechargeGlobal${queryStr}`;
-        const res = await service.get(url, {
-          responseType: "blob"
-        });
-
-        const blob = new Blob([res.data], {
-          type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-        });
-
-        if (blob.size === 0) {
-          ElMessage.warning("当前筛选条件无导出数据");
-          return;
-        }
-
-        const downloadUrl = window.URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.href = downloadUrl;
-        link.download = "充值撤销记录表.xlsx";
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        window.URL.revokeObjectURL(downloadUrl);
-        ElMessage.success("导出成功");
-      } catch (error) {
-        console.error("撤销充值记录导出失败：", error);
-        ElMessage.error("导出失败：" + (error.response?.data?.message || error.message));
-      }
-    },
+    }
   },
 };
 </script>
@@ -563,30 +647,6 @@ export default {
   font-size: 20px;
   background-color: #fff;
   border: 2px solid #f2f2f2;
-}
-
-.export-btn {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 16px;
-  border-radius: 4px;
-  cursor: pointer;
-  background-color: #fff;
-  border: 1px solid #dcdfe6;
-  transition: all 0.3s;
-  font-size: 20px;
-  color: #606266;
-}
-
-.export-btn img {
-  width: 18px;
-  height: 18px;
-}
-
-.export-btn:hover {
-  background-color: #f5f7fa;
-  border-color: #46B97E;
 }
 
 .page-box {

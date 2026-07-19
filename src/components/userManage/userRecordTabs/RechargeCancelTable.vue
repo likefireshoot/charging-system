@@ -71,6 +71,10 @@
     </div>
 
     <div class="tool-bar">
+      <div class="export-btn" @click="exportExcel">
+        <img src="@/assets/yonghu/icon1.3.png" alt="" />
+        <span>导出</span>
+      </div>
       <div class="refresh-btn" @click="handleRefresh">
         <img src="@/assets/yonghu/icon15.png" alt="" />
       </div>
@@ -89,8 +93,8 @@
         @selection-change="handleSelectionChange"
       >
         <el-table-column type="selection" width="50" align="center" fixed="left" />
-        <el-table-column property="userId" label="用户号" min-width="120" align="center" fixed="left" />
-        <el-table-column property="userName" label="用户名称" min-width="140" align="center" />
+        <el-table-column property="userId" label="用户号" min-width="100" align="center" fixed="left" />
+        <el-table-column property="userName" label="用户名称" min-width="130" align="center" />
 <!--        <el-table-column property="regionName" label="所属区域" min-width="120" align="center" />-->
 <!--        <el-table-column property="userPhone" label="联系电话" min-width="130" align="center" />-->
 <!--        <el-table-column label="表号" min-width="180" align="center">-->
@@ -108,18 +112,18 @@
         <el-table-column property="rechargeAmount" label="充值金额" min-width="110" align="center">
           <template #default="scope">{{ scope.row.rechargeAmount }} 元</template>
         </el-table-column>
-        <el-table-column property="createTime" label="充值时间" min-width="170" align="center" />
-        <el-table-column property="createCancelTime" label="撤销时间" min-width="170" align="center" />
+        <el-table-column property="createTime" label="充值时间" min-width="150" align="center" />
+        <el-table-column property="createCancelTime" label="撤销时间" min-width="150" align="center" />
 <!--        <el-table-column property="oldBalance" label="充值前余额/元" min-width="120" align="center">-->
 <!--          <template #default="scope">{{ scope.row.oldBalance }} 元</template>-->
 <!--        </el-table-column>-->
 <!--        <el-table-column property="newBalance" label="充值后余额/元" min-width="120" align="center">-->
 <!--          <template #default="scope">{{ scope.row.newBalance }} 元</template>-->
 <!--        </el-table-column>-->
-        <el-table-column property="cancelOldBalance" label="撤销前余额/元" min-width="130" align="center">
+        <el-table-column property="cancelOldBalance" label="撤销前余额" min-width="130" align="center">
           <template #default="scope">{{ scope.row.cancelOldBalance ?? "-" }} 元</template>
         </el-table-column>
-        <el-table-column property="cancelNewBalance" label="撤销后余额/元" min-width="130" align="center">
+        <el-table-column property="cancelNewBalance" label="撤销后余额" min-width="130" align="center">
           <template #default="scope">{{ scope.row.cancelNewBalance ?? "-" }} 元</template>
         </el-table-column>
         <el-table-column property="rechargeUser" label="充值员工" min-width="100" align="center" />
@@ -191,6 +195,39 @@ export default {
     this.queryList();
   },
   methods: {
+    async exportExcel() {
+      try {
+        const params = this.buildQueryParams();
+        const queryStr = this.buildQueryStr(params);
+        // 后端个人导出接口地址
+        const url = `/userManage/userCharge/exportCancelRechargePersonal${queryStr}`;
+        const res = await service.get(url, {
+          responseType: "blob"
+        });
+
+        const blob = new Blob([res.data], {
+          type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        });
+
+        if (blob.size === 0) {
+          ElMessage.warning("当前筛选条件无导出数据");
+          return;
+        }
+
+        const downloadUrl = window.URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = downloadUrl;
+        link.download = `${this.user.userName || "用户"}_充值撤销记录.xlsx`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(downloadUrl);
+        ElMessage.success("导出成功");
+      } catch (error) {
+        console.error("撤销充值记录导出失败：", error);
+        ElMessage.error("导出失败：" + (error.response?.data?.message || error.message));
+      }
+    },
     initData() {
       this.transactionData.userId = this.user.userId;
       this.transactionData.companyId = this.user.companyId;
@@ -499,7 +536,7 @@ export default {
   margin-bottom: 15px;
 }
 
-.tool-btn, .refresh-btn {
+.tool-btn, .refresh-btn,.export-btn {
   display: flex;
   align-items: center;
   gap: 6px;
@@ -513,12 +550,12 @@ export default {
   color: #606266;
 }
 
-.tool-btn img, .refresh-btn img {
+.tool-btn img, .refresh-btn img, .export-btn img {
   width: 18px;
   height: 18px;
 }
 
-.tool-btn:hover, .refresh-btn:hover {
+.tool-btn:hover, .refresh-btn:hover, .export-btn:hover {
   background-color: #f5f7fa;
   border-color: #46B97E;
 }

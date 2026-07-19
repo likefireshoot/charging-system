@@ -67,16 +67,17 @@
     </div>
 
     <div class="tool-bar">
-<!--      <div class="export-btn" @click="exportExcel">-->
-<!--        <img src="@/assets/yonghu/icon1.3.png" alt="" />-->
-<!--        <span>导出</span>-->
-<!--      </div>-->
+      <div class="export-btn" @click="exportExcel">
+        <img src="@/assets/yonghu/icon1.3.png" alt="" />
+        <span>导出</span>
+      </div>
       <div class="refresh-btn" @click="handleRefresh">
         <img src="@/assets/yonghu/icon15.png" alt="" />
       </div>
     </div>
 
     <div class="table-wrapper">
+      <div class="table-scroll">
       <el-table
           :data="list"
           border
@@ -106,6 +107,26 @@
           <template #default="scope">{{ scope.row.minFee }}</template>
         </el-table-column>
         <el-table-column property="createTime" label="算费日期" min-width="140" align="center" />
+      </el-table>
+    </div>
+      <!-- 底部固定汇总行，无表头，紧贴表格下方 -->
+      <el-table
+        :data="totalSummaryRow"
+        border
+        style="width:100%;margin-top:-1px;"
+        :show-header="false"
+        row-class-name="summary-row"
+      >
+        <el-table-column property="theId" width="120" align="center" fixed="left" />
+        <el-table-column property="userId" min-width="100" align="center" />
+        <el-table-column property="userName" min-width="140" align="center" />
+        <el-table-column property="startRead" min-width="100" align="center" />
+        <el-table-column property="endRead" min-width="100" align="center" />
+        <el-table-column property="waterUse" min-width="100" align="center" />
+        <el-table-column property="waterFee" min-width="100" align="center" />
+        <el-table-column property="sewageFee" min-width="130" align="center" />
+        <el-table-column property="minFee" min-width="110" align="center" />
+        <el-table-column property="createTime" min-width="140" align="center" />
       </el-table>
     </div>
 
@@ -154,7 +175,23 @@ export default {
         timeType: "day",
         createTime: "",
         dateRange: null
-      }
+      },
+
+      // 新增底部汇总行
+      totalSummaryRow: [
+        {
+          theId: "统计总额",
+          userId: "",
+          userName: "",
+          startRead: "",
+          endRead: "",
+          waterUse: "0",
+          waterFee: "0.00",
+          sewageFee: "0.00",
+          minFee: "0.00",
+          createTime: ""
+        }
+      ],
     };
   },
   mounted() {
@@ -246,7 +283,7 @@ export default {
       }
       return queryString;
     },
-    async fetchBillDetailRecords() {
+    async fetchBillDetailRecords(isPageChange = false) {
       if (!this.user.userId || !this.user.meterCode || this.isLoading) {
         return;
       }
@@ -273,7 +310,9 @@ export default {
           this.list = records;
           this.total = response.data.totalElements || 0;
           // 获取汇总水费、污水处理费
-          // await this.fetchTotalFee();
+          if (!isPageChange){
+            await this.fetchSumData();
+          }
         } else {
           ElMessage.error(response.msg);
         }
@@ -285,20 +324,6 @@ export default {
         this.isLoading = false;
       }
     },
-    // async fetchTotalFee() {
-    //   try {
-    //     const params = this.buildQueryParams();
-    //     const queryString = this.buildQueryString(params);
-    //     const url = `/userManage/userCharge/getBillDetailTotal${queryString}`;
-    //     const response = await service.get(url);
-    //     if (response.code === 200) {
-    //       this.waterTotal = response.data.waterTotal || 0;
-    //       this.sewageTotal = response.data.sewageTotal || 0;
-    //     }
-    //   } catch (error) {
-    //     console.error("获取费用汇总失败", error);
-    //   }
-    // },
     handleSearch() {
       if (this.searchParams.timeType === "custom") {
         if (!this.searchParams.dateRange || this.searchParams.dateRange.length !== 2) {
@@ -326,7 +351,7 @@ export default {
     },
     handlePageChange(page) {
       this.currentPage = page;
-      this.fetchBillDetailRecords();
+      this.fetchBillDetailRecords(true);
     },
     filterNonEmptyParams(params) {
       const filteredParams = {};
@@ -341,42 +366,86 @@ export default {
       }
       return filteredParams;
     },
+
+    // 导出接口待对接
     async exportExcel() {
       try {
         const params = this.buildQueryParams();
-        const response = await axios({
-          url: "/userManage/userCharge/exportBillDetailRecord",
-          method: "GET",
-          responseType: "blob",
-          params: params
+        const queryStr = this.buildQueryString(params);
+        console.log('导出参数', params)
+        // 使用全局service携带token与/api前缀，统一项目请求规范
+        const res = await service.get(`/chargeDetail/export${queryStr}`, {
+          responseType: "blob"
         });
 
-        if (response.status !== 200) {
-          throw new Error("导出失败: " + response.statusText);
-        }
-
-        const blob = new Blob([response.data], {
+        const blob = new Blob([res.data], {
           type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         });
 
         if (blob.size === 0) {
-          ElMessage.warning("内容为空，无法下载");
+          ElMessage.warning("当前筛选条件无导出数据");
           return;
         }
 
+        // 创建下载链接
+        const downloadUrl = window.URL.createObjectURL(blob);
         const link = document.createElement("a");
-        link.href = window.URL.createObjectURL(blob);
+        link.href = downloadUrl;
         link.download = `${this.user.userName || "用户"}_扣费明细记录.xlsx`;
         document.body.appendChild(link);
         link.click();
+        // 释放资源
         document.body.removeChild(link);
-        window.URL.revokeObjectURL(link.href);
+        window.URL.revokeObjectURL(downloadUrl);
         ElMessage.success("导出成功");
       } catch (error) {
-        console.error("导出失败:", error);
-        ElMessage.error("导出失败: " + error.message);
+        console.error("扣费明细表导出失败：", error);
+        ElMessage.error("导出失败：" + (error.response?.data?.message || error.message));
       }
-    }
+    },
+    // 请求后端全局扣费汇总接口
+    async fetchSumData() {
+      try {
+        const params = this.buildQueryParams();
+        const queryStr = this.buildQueryString(params);
+        const res = await service.get(`/chargeDetail/sum${queryStr}`);
+        if (res.code === 200 && res.data) {
+          const sumData = res.data;
+          // 赋值底部汇总行
+          this.totalSummaryRow = [
+            {
+              theId: "统计总额",
+              userId: "",
+              userName: "",
+              startRead: "",
+              endRead: "",
+              waterUse: Number(sumData.totalWaterUse || 0).toFixed(2),
+              waterFee: Number(sumData.totalWaterFee || 0).toFixed(2),
+              sewageFee: Number(sumData.totalSewageFee || 0).toFixed(2),
+              minFee: Number(sumData.totalMinFee || 0).toFixed(2),
+              createTime: ""
+            }
+          ];
+        }
+      } catch (err) {
+        console.error("获取扣费汇总失败", err);
+        // 报错不阻断列表展示，重置汇总为0
+        this.totalSummaryRow = [
+          {
+            theId: "统计总额",
+            userId: "",
+            userName: "",
+            startRead: "",
+            endRead: "",
+            waterUse: "0.00",
+            waterFee: "0.00",
+            sewageFee: "0.00",
+            minFee: "0.00",
+            createTime: ""
+          }
+        ];
+      }
+    },
   }
 };
 </script>
@@ -602,5 +671,29 @@ export default {
 .pagination-container :deep(.el-pagination__jump input) {
   height: 36px;
   line-height: 36px;
+}
+
+.table-wrapper {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.table-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+/* 汇总行样式：绿色底色白色加粗文字 */
+:deep(.summary-row) {
+  height: 50px !important;
+  background-color: #46B97E !important;
+}
+:deep(.summary-row td) {
+  font-weight: bold;
+  color: #ffffff;
+  font-size: 21px;
+  text-align: center;
 }
 </style>

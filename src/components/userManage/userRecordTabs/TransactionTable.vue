@@ -130,19 +130,19 @@
         </el-table-column>
 <!--        <el-table-column property="meterType" label="水表类型" min-width="100" align="center" />-->
 <!--        <el-table-column property="payerPhone" label="缴费人手机号" min-width="140" align="center" />-->
-        <el-table-column property="rechargeType" label="交易方式" min-width="100" align="center" />
+        <el-table-column property="rechargeType" label="交易方式" min-width="70" align="center" />
         <el-table-column property="rechargeAmount" label="交易金额" min-width="110" align="center">
           <template #default="scope">{{ scope.row.rechargeAmount }} 元</template>
         </el-table-column>
-        <el-table-column property="oldBalance" label="充值前余额/元" min-width="120" align="center">
+        <el-table-column property="oldBalance" label="充值前余额" min-width="120" align="center">
           <template #default="scope">{{ scope.row.oldBalance }} 元</template>
         </el-table-column>
-        <el-table-column property="newBalance" label="充值后余额/元" min-width="120" align="center">
+        <el-table-column property="newBalance" label="充值后余额" min-width="120" align="center">
           <template #default="scope">{{ scope.row.newBalance }} 元</template>
         </el-table-column>
         <el-table-column property="createTime" label="交易时间" min-width="170" align="center" />
         <el-table-column property="rechargeUser" label="收费人" min-width="100" align="center" />
-        <el-table-column property="status" label="微信是否已退费" min-width="90" align="center">
+        <el-table-column property="status" label="微信退费" min-width="70" align="center">
           <template #default="{ row }">
             <span v-if="row.rechargeType === '微信支付'" class="refund-status-badge" :class="row.status === 2 ? 'refunded' : 'not-refunded'">
               {{ row.status === 2 ? '是' : '否' }}
@@ -150,7 +150,7 @@
             <span v-else style="color: #b0b3bb;">-</span>
           </template>
         </el-table-column>
-        <el-table-column property="hasShouju" label="是否开收据" min-width="90" align="center">
+        <el-table-column property="hasShouju" label="开收据" min-width="80" align="center">
           <template #default="{ row }">
             <span class="receipt-badge" :class="row.hasShouju ? 'receipt-yes' : 'receipt-no'">
               {{ row.hasShouju ? '是' : '否' }}
