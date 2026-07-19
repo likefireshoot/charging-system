@@ -92,6 +92,7 @@
         v-loading="loading"
         height="650"
         @selection-change="handleSelectionChange"
+        ref="tableRef"
       >
         <el-table-column type="selection" width="55" align="center" />
         
@@ -115,10 +116,22 @@
         <el-table-column prop="endReading" label="止码(吨)" min-width="100" align="center">
           <template #default="{ row }">
             <span v-if="row.reportStatus !== '正常'">-</span>
+            <el-input
+              v-else-if="editingRow?.id === row.id"
+              v-model="editingEndReading"
+              type="number"
+              size="small"
+              ref="endReadingInputRef"
+              @blur="submitEndReading(row)"
+              @keyup.enter="submitEndReading(row)"
+              @keyup.esc="cancelEditEndReadingInline"
+              class="end-reading-input"
+              style="width: 80px;"
+            />
             <span
               v-else
               class="editable-end-reading"
-              @click="handleEditEndReading(row)"
+              @click="startEditEndReading(row)"
             >
               {{ row.endReading }}
             </span>
@@ -135,35 +148,40 @@
             {{ formatDate(row.createTime) }}
           </template>
         </el-table-column>
-        
-        <el-table-column label="操作" width="100" align="center" fixed="right">
-          <template #default="{ row }">
-            <el-button 
-              type="primary" 
-              size="small"
-              @click="handleSingleReview(row)"
-            >
-              审核
-            </el-button>
-          </template>
-        </el-table-column>
       </el-table>
 
       <!-- 分页器 -->
       <div class="pagination-container" v-if="filteredReviewList.length > 0">
         <div class="pagination-info">
+          <el-button-group>
+            <el-button 
+              size="small" 
+              :type="isCurrentPageAllSelected ? 'primary' : 'default'"
+              @click="toggleSelectCurrentPage"
+            >
+              {{ isCurrentPageAllSelected ? '取消本页' : '选择本页' }}
+            </el-button>
+            <el-button 
+              size="small" 
+              :type="isAllSelected ? 'primary' : 'default'"
+              @click="toggleSelectAll"
+            >
+              {{ isAllSelected ? '取消全部' : '选择全部' }}
+            </el-button>
+          </el-button-group>
           <span class="total-count">共 {{ filteredReviewList.length }} 条</span>
         </div>
         
         <el-pagination
           v-model:current-page="currentPage"
           v-model:page-size="pageSize"
-          :page-sizes="[10, 20, 50, 100]"
+          :page-sizes="[1, 10, 20, 50, 100]"
           :total="filteredReviewList.length"
           layout="sizes, prev, pager, next, jumper, total"
           @size-change="handleSizeChange"
           @current-change="handleCurrentChange"
         />
+
       </div>
 
       <!-- 空数据提示 -->
@@ -173,50 +191,10 @@
     </div>
   </div>
 
-  <!-- 止码编辑对话框 -->
-  <el-dialog
-    v-model="editDialogVisible"
-    title="修改止码"
-    width="500px"
-    :close-on-click-modal="false"
-  >
-    <div class="end-reading-form">
-      <el-form label-width="100px" size="large">
-        <el-form-item label="用户号：">
-          <span class="info-text">{{ currentEditingRow?.userId || '-' }}</span>
-        </el-form-item>
-
-        <el-form-item label="用户姓名：">
-          <span class="info-text">{{ currentEditingRow?.userName || '-' }}</span>
-        </el-form-item>
-
-        <el-form-item label="当前止码：">
-          <span class="info-text highlight">{{ currentEditingRow?.endReading || '0' }} 吨</span>
-        </el-form-item>
-
-        <el-form-item label="新止码：" required>
-          <el-input
-            v-model="newEndReading"
-            type="number"
-            placeholder="请输入新止码"
-            inputmode="decimal"
-            clearable
-          />
-        </el-form-item>
-      </el-form>
-    </div>
-
-    <template #footer>
-      <span class="dialog-footer">
-        <el-button @click="cancelEditEndReading">取消</el-button>
-        <el-button type="primary" @click="confirmEditEndReading">确定</el-button>
-      </span>
-    </template>
-  </el-dialog>
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted } from 'vue';
+import { ref, reactive, computed, onMounted, nextTick } from 'vue';
 import { useRouter } from 'vue-router';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import { Document, Search, Delete, Check, ArrowLeft } from '@element-plus/icons-vue';
@@ -252,16 +230,16 @@ const pageSize = ref(20);
 // 选中的行
 const selectedRows = ref([]);
 
-// 全选状态
-const selectAll = ref(false);
-
 // 加载状态
 const loading = ref(false);
 
-// 止码编辑相关
-const editDialogVisible = ref(false);
-const currentEditingRow = ref(null);
-const newEndReading = ref('');
+// 止码编辑相关（内联编辑）
+const editingRow = ref(null);
+const editingEndReading = ref('');
+const endReadingInputRef = ref(null);
+
+// 表格引用
+const tableRef = ref(null);
 
 // 过滤后的审核列表（根据搜索关键词）
 const filteredReviewList = computed(() => {
@@ -466,28 +444,124 @@ const handleClearAll = async () => {
   }
 };
 
-// 表格选择变化
+// 表格选择变化 - 只在用户手动操作时更新 selectedRows
 const handleSelectionChange = (selection) => {
-  selectedRows.value = selection;
+  // 如果是程序操作期间，不更新 selectedRows
+  if (isProgrammaticOperation.value) {
+    return;
+  }
+  
+  // 用户手动操作：同步 selection 到 selectedRows
+  // 需要合并当前页的 selection 和其他页已选的记录
+  const currentPageIds = paginatedReviewList.value.map(row => row.id);
+  const otherPageSelected = selectedRows.value.filter(row =>
+    !currentPageIds.includes(row.id)
+  );
+
+  selectedRows.value = [...otherPageSelected, ...selection];
 };
 
-// 处理止码编辑
-const handleEditEndReading = (row) => {
+// 标记是否是程序操作（用于区分用户操作和程序操作）
+const isProgrammaticOperation = ref(false);
+
+// 判断当前页是否全部选中
+const isCurrentPageAllSelected = computed(() => {
+  const currentPageNormalRows = paginatedReviewList.value.filter(row => row.reportStatus === '正常');
+  if (currentPageNormalRows.length === 0) return false;
+  
+  return currentPageNormalRows.every(row => 
+    selectedRows.value.some(selected => selected.id === row.id)
+  );
+});
+
+// 判断是否全部选中
+const isAllSelected = computed(() => {
+  const allNormalRows = filteredReviewList.value.filter(row => row.reportStatus === '正常');
+  if (allNormalRows.length === 0) return false;
+  
+  return allNormalRows.every(row => 
+    selectedRows.value.some(selected => selected.id === row.id)
+  );
+});
+
+// 切换选择本页
+const toggleSelectCurrentPage = () => {
+  const currentPageNormalRows = paginatedReviewList.value.filter(row => row.reportStatus === '正常');
+  
+  if (isCurrentPageAllSelected.value) {
+    // 取消选择本页：移除当前页已选中的记录
+    const currentPageIds = new Set(currentPageNormalRows.map(row => row.id));
+    selectedRows.value = selectedRows.value.filter(row => !currentPageIds.has(row.id));
+  } else {
+    // 选择本页：添加当前页所有正常记录
+    const otherPageSelected = selectedRows.value.filter(row =>
+      !paginatedReviewList.value.some(pageRow => pageRow.id === row.id)
+    );
+    selectedRows.value = [...otherPageSelected, ...currentPageNormalRows];
+  }
+  
+  // 更新表格显示
+  updateTableSelection();
+};
+
+// 切换选择全部
+const toggleSelectAll = () => {
+  const allNormalRows = filteredReviewList.value.filter(row => row.reportStatus === '正常');
+  
+  if (isAllSelected.value) {
+    // 取消选择全部：清空所有选中
+    selectedRows.value = [];
+  } else {
+    // 选择全部：选中所有正常状态的记录
+    selectedRows.value = allNormalRows;
+  }
+  
+  // 更新表格显示
+  updateTableSelection();
+};
+
+// 更新表格选中状态
+const updateTableSelection = () => {
+  isProgrammaticOperation.value = true;
+  
+  nextTick(() => {
+    if (tableRef.value) {
+      tableRef.value.clearSelection();
+      
+      selectedRows.value.forEach(row => {
+        tableRef.value.toggleRowSelection(row, true);
+      });
+      
+      setTimeout(() => {
+        isProgrammaticOperation.value = false;
+      }, 100);
+    }
+  });
+};
+
+// 开始编辑止码（内联）
+const startEditEndReading = async (row) => {
   if (!row || row.reportStatus !== '正常') return;
 
-  currentEditingRow.value = row;
-  newEndReading.value = row.endReading || '';
-  editDialogVisible.value = true;
+  editingRow.value = row;
+  editingEndReading.value = row.endReading || '';
+
+  // 等待 DOM 更新后聚焦输入框
+  await nextTick();
+  if (endReadingInputRef.value) {
+    endReadingInputRef.value.focus();
+  }
 };
 
-// 确认修改止码
-const confirmEditEndReading = async () => {
-  if (!currentEditingRow.value) return;
+// 提交止码修改（内联）
+const submitEndReading = async (row) => {
+  if (!editingRow.value || editingRow.value.id !== row.id) return;
 
   // 验证输入
-  const value = parseFloat(newEndReading.value);
+  const value = parseFloat(editingEndReading.value);
   if (isNaN(value) || value < 0) {
     ElMessage.error('请输入有效的正数');
+    cancelEditEndReadingInline();
     return;
   }
 
@@ -496,7 +570,7 @@ const confirmEditEndReading = async () => {
 
     // 调用后端接口更新止码
     const res = await service.post('/manual/charge/updateEndReading', {
-      id: currentEditingRow.value.id,
+      id: row.id,
       endReading: value
     });
 
@@ -504,57 +578,69 @@ const confirmEditEndReading = async () => {
       ElMessage.success('止码修改成功');
 
       // 更新本地数据
-      currentEditingRow.value.endReading = value;
+      row.endReading = value;
 
       // 重新计算本期用量（如果有起码的话）
-      if (currentEditingRow.value.startReading !== undefined) {
-        currentEditingRow.value.deltaWater = value - currentEditingRow.value.startReading;
+      if (row.startReading !== undefined) {
+        row.deltaWater = value - row.startReading;
       }
 
-      // 关闭对话框
-      editDialogVisible.value = false;
+      // 退出编辑模式
+      editingRow.value = null;
+      editingEndReading.value = '';
     } else {
       ElMessage.error(res.msg || '修改失败');
+      cancelEditEndReadingInline();
     }
   } catch (error) {
     console.error('修改止码错误:', error);
     ElMessage.error(error.message || '修改失败');
+    cancelEditEndReadingInline();
   } finally {
     loading.value = false;
   }
 };
 
-// 取消修改止码
-const cancelEditEndReading = () => {
-  editDialogVisible.value = false;
-  currentEditingRow.value = null;
-  newEndReading.value = '';
-};
-
-// 全选/取消全选
-const handleSelectAll = (val) => {
-  if (val) {
-    // 全选当前页
-    const tableComponent = document.querySelector('.el-table');
-    if (tableComponent) {
-      const checkboxes = tableComponent.querySelectorAll('.el-checkbox__input:not(.is-checked)');
-      checkboxes.forEach(checkbox => checkbox.click());
-    }
-  } else {
-    // 取消全选
-    selectedRows.value = [];
-  }
+// 取消编辑止码（内联）
+const cancelEditEndReadingInline = () => {
+  editingRow.value = null;
+  editingEndReading.value = '';
 };
 
 // 分页大小变化
 const handleSizeChange = (val) => {
   pageSize.value = val;
   currentPage.value = 1;
+
+  // 恢复选中状态
+  nextTick(() => {
+    restoreSelection();
+  });
 };
 
 // 当前页变化
 const handleCurrentChange = (val) => {
   currentPage.value = val;
+
+  // 恢复选中状态
+  nextTick(() => {
+    restoreSelection();
+  });
+};
+
+// 恢复选中状态
+const restoreSelection = () => {
+  if (!tableRef.value || selectedRows.value.length === 0) {
+    return;
+  }
+
+  // 遍历当前页的数据，如果该行在 selectedRows 中，则选中
+  paginatedReviewList.value.forEach(row => {
+    const isSelected = selectedRows.value.some(selected => selected.id === row.id);
+    if (isSelected) {
+      tableRef.value.toggleRowSelection(row, true);
+    }
+  });
 };
 
 // 单个审核
@@ -627,10 +713,6 @@ const handleBatchReview = async () => {
     
     // 构建批量审核数据
     const reviewIds = selectedRows.value.map(row => row.id);
-    
-    // 调试日志：检查是否有有效的ID
-    console.log('选中的记录:', selectedRows.value);
-    console.log('审核IDs:', reviewIds);
 
     // 验证ID是否有效
     if (!reviewIds || reviewIds.length === 0 || reviewIds.some(id => !id)) {
@@ -652,16 +734,11 @@ const handleBatchReview = async () => {
       
       // 清空选中状态
       selectedRows.value = [];
-      selectAll.value = false;
     } else {
       ElMessage.error(res.msg || '批量审核失败');
     }
   } catch (error) {
     if (error !== 'cancel') {
-      console.error('批量审核错误详情:', error);
-      console.error('错误响应:', error.response);
-      console.error('错误消息:', error.message);
-
       // 根据错误类型给出更具体的提示
       if (error.response?.status === 404) {
         ElMessage.error('批量审核接口未找到，请联系后端开发人员');
@@ -824,6 +901,9 @@ onMounted(() => {
   padding: 4px 8px;
   border-radius: 4px;
   transition: all 0.3s;
+  display: inline-block;
+  min-width: 40px;
+  text-align: center;
 
   &:hover {
     background-color: #f0f9ff;
@@ -831,55 +911,20 @@ onMounted(() => {
   }
 }
 
-// 止码编辑对话框样式
-.end-reading-form {
-  padding: 20px 10px;
-
-  .info-text {
-    font-size: 16px;
-    color: #303133;
-    font-weight: 500;
-
-    &.highlight {
-      color: #46b97e;
-      font-weight: 600;
-      font-size: 18px;
-    }
-  }
-
-  :deep(.el-form-item) {
-    margin-bottom: 20px;
-
-    .el-form-item__label {
-      font-size: 16px;
-      color: #606266;
-      font-weight: 500;
+// 止码输入框样式 - 隐藏上下箭头
+.end-reading-input {
+  :deep(.el-input__inner) {
+    /* Chrome, Safari, Edge, Opera */
+    &::-webkit-outer-spin-button,
+    &::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
     }
 
-    .el-form-item__content {
-      display: flex;
-      align-items: center;
+    /* Firefox */
+    &[type='number'] {
+      -moz-appearance: textfield;
     }
-  }
-
-  :deep(.el-input) {
-    .el-input__inner {
-      height: 40px;
-      line-height: 40px;
-      font-size: 16px;
-    }
-  }
-}
-
-.dialog-footer {
-  display: flex;
-  justify-content: center;
-  gap: 15px;
-
-  .el-button {
-    min-width: 100px;
-    height: 40px;
-    font-size: 16px;
   }
 }
 

@@ -360,7 +360,7 @@ const reportHistory = ref([]);
 const loading = ref(false);
 
 // 自动跳变开关
-const autoJumpEnabled = ref(true);
+const autoJumpEnabled = ref(false);
 
 // 是否可以提交单个用户（正常状态需要输入本月数，异常状态不需要）
 const canSubmitSingle = computed(() => {
