@@ -860,32 +860,6 @@ fetchCompanyList();
           width: 200px;
         }
 
-        // 区域下拉框专用样式（提高特异性）
-        & .region-select {
-          :deep(.el-input__wrapper) {
-            min-height: 90px;
-            padding: 0 20px;
-            border-radius: 8px;
-            box-shadow: 0 0 0 1px #46b97e inset;
-
-            &:hover {
-              box-shadow: 0 0 0 2px #46b97e inset;
-            }
-          }
-
-          :deep(.el-input__inner) {
-            font-size: 40px !important;
-            height: 90px !important;
-            line-height: 90px !important;
-          }
-
-          :deep(.el-select-dropdown__item) {
-            font-size: 36px;
-            height: 60px;
-            line-height: 60px;
-          }
-        }
-
         // 水厂名称样式
         .company-name {
           font-size: 24px;
@@ -898,6 +872,37 @@ fetchCompanyList();
 
       .form-actions {
         margin-left: auto;
+      }
+    }
+
+    // 区域下拉框专用样式 - 针对 el-select 的正确结构
+    :deep(.region-select) {
+      // 下拉框整体容器高度
+      .el-select__wrapper {
+        min-height: 40px !important;
+        padding: 0 20px !important;
+        border-radius: 8px !important;
+      }
+
+      // 选中项/占位符文字样式
+      .el-select__selected-item,
+      .el-select__placeholder {
+        font-size: 24px !important;
+        height: 40px !important;
+        line-height: 40px !important;
+        color: #606266 !important;
+      }
+
+      // 下拉箭头图标
+      .el-select__caret {
+        font-size: 36px !important;
+      }
+
+      // 下拉选项列表中的每一项
+      .el-select-dropdown__item {
+        font-size: 36px !important;
+        height: 60px !important;
+        line-height: 60px !important;
       }
     }
   }
