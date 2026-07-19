@@ -71,11 +71,37 @@
       </div>
 
       <div class="header-right">
-        <el-button type="primary" @click="handleBatchReview" :disabled="selectedRows.length === 0">
+        <!-- 审核通过（针对单个用户） -->
+        <el-button 
+          type="success" 
+          @click="handleSingleReview"
+          :disabled="selectedRows.length !== 1"
+        >
           <el-icon><Check /></el-icon>
-          <span>审核</span>
+          <span>审核通过</span>
         </el-button>
         
+        <!-- 本页审核通过 -->
+        <el-button 
+          type="primary" 
+          @click="handleCurrentPageReview"
+          :disabled="paginatedReviewList.length === 0"
+        >
+          <el-icon><Check /></el-icon>
+          <span>本页审核通过</span>
+        </el-button>
+        
+        <!-- 全部审核通过 -->
+        <el-button 
+          type="warning" 
+          @click="handleAllReview"
+          :disabled="filteredReviewList.length === 0"
+        >
+          <el-icon><Check /></el-icon>
+          <span>全部审核通过</span>
+        </el-button>
+        
+        <!-- 返回 -->
         <el-button @click="goBack">
           <el-icon><ArrowLeft /></el-icon>
           <span>返回</span>
@@ -643,11 +669,18 @@ const restoreSelection = () => {
   });
 };
 
-// 单个审核
-const handleSingleReview = async (row) => {
+// 单个审核（针对某一个用户）
+const handleSingleReview = async () => {
+  if (selectedRows.value.length !== 1) {
+    ElMessage.warning('请选择一条记录进行审核');
+    return;
+  }
+  
+  const row = selectedRows.value[0];
+  
   try {
     await ElMessageBox.confirm(
-      `确认审核用户 ${row.userName} 的抄表记录吗？`,
+      `确认审核用户【${row.userName}】的记录吗？`,
       '审核确认',
       {
         confirmButtonText: '确定',
@@ -659,31 +692,24 @@ const handleSingleReview = async (row) => {
     loading.value = true;
     
     // 调用审核接口
-    const res = await service.post('/manual/charge/review', {
-      id: row.id,
+    const res = await service.post('/manual/charge/batchReview', {
+      ids: [row.id],
       approved: true
     });
     
     if (res.code === 200) {
-      ElMessage.success('审核成功');
+      ElMessage.success(`成功审核用户【${row.userName}】的记录`);
       
       // 从列表中移除已审核的记录
-      const index = reviewList.value.findIndex(item => item.id === row.id);
-      if (index > -1) {
-        reviewList.value.splice(index, 1);
-      }
+      reviewList.value = reviewList.value.filter(item => item.id !== row.id);
       
-      // 如果在选中列表中，也移除
-      const selectedIndex = selectedRows.value.findIndex(item => item.id === row.id);
-      if (selectedIndex > -1) {
-        selectedRows.value.splice(selectedIndex, 1);
-      }
+      // 清空选中状态
+      selectedRows.value = [];
     } else {
       ElMessage.error(res.msg || '审核失败');
     }
   } catch (error) {
     if (error !== 'cancel') {
-      console.error('审核错误:', error);
       ElMessage.error(error.message || '审核失败');
     }
   } finally {
@@ -691,7 +717,135 @@ const handleSingleReview = async (row) => {
   }
 };
 
-// 批量审核
+// 本页审核通过
+const handleCurrentPageReview = async () => {
+  const currentPageRows = paginatedReviewList.value.filter(row => row.reportStatus === '正常');
+  
+  if (currentPageRows.length === 0) {
+    ElMessage.warning('当前页没有可审核的记录');
+    return;
+  }
+  
+  try {
+    await ElMessageBox.confirm(
+      `确认审核当前页的 ${currentPageRows.length} 条记录吗？`,
+      '本页审核确认',
+      {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'info'
+      }
+    );
+    
+    loading.value = true;
+    
+    // 构建审核数据
+    const reviewIds = currentPageRows.map(row => row.id);
+    
+    // 验证ID是否有效
+    if (!reviewIds || reviewIds.length === 0 || reviewIds.some(id => !id)) {
+      ElMessage.error('记录ID无效，请刷新页面后重试');
+      return;
+    }
+    
+    // 调用批量审核接口
+    const res = await service.post('/manual/charge/batchReview', {
+      ids: reviewIds,
+      approved: true
+    });
+    
+    if (res.code === 200) {
+      ElMessage.success(`成功审核 ${reviewIds.length} 条记录`);
+      
+      // 从列表中移除已审核的记录
+      reviewList.value = reviewList.value.filter(item => !reviewIds.includes(item.id));
+      
+      // 清空选中状态
+      selectedRows.value = [];
+      
+      // 自动加载下一页
+      setTimeout(() => {
+        if (paginatedReviewList.value.length > 0 && currentPage.value < Math.ceil(filteredReviewList.value.length / pageSize.value)) {
+          // 还有下一页，自动跳转
+          currentPage.value++;
+        } else {
+          // 已经是最后一页或没有数据了
+          ElMessage.info('已审核完所有数据');
+        }
+      }, 500);
+    } else {
+      ElMessage.error(res.msg || '审核失败');
+    }
+  } catch (error) {
+    if (error !== 'cancel') {
+      ElMessage.error(error.message || '审核失败');
+    }
+  } finally {
+    loading.value = false;
+  }
+};
+
+// 全部审核通过
+const handleAllReview = async () => {
+  const allNormalRows = filteredReviewList.value.filter(row => row.reportStatus === '正常');
+  
+  if (allNormalRows.length === 0) {
+    ElMessage.warning('没有可审核的记录');
+    return;
+  }
+  
+  try {
+    await ElMessageBox.confirm(
+      `确认审核全部的 ${allNormalRows.length} 条记录吗？此操作不可撤销！`,
+      '全部审核确认',
+      {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }
+    );
+    
+    loading.value = true;
+    
+    // 构建审核数据
+    const reviewIds = allNormalRows.map(row => row.id);
+    
+    // 验证ID是否有效
+    if (!reviewIds || reviewIds.length === 0 || reviewIds.some(id => !id)) {
+      ElMessage.error('记录ID无效，请刷新页面后重试');
+      return;
+    }
+    
+    // 调用批量审核接口
+    const res = await service.post('/manual/charge/batchReview', {
+      ids: reviewIds,
+      approved: true
+    });
+    
+    if (res.code === 200) {
+      ElMessage.success(`成功审核 ${reviewIds.length} 条记录`);
+      
+      // 从列表中移除已审核的记录
+      reviewList.value = reviewList.value.filter(item => !reviewIds.includes(item.id));
+      
+      // 清空选中状态
+      selectedRows.value = [];
+      
+      // 重置到第一页
+      currentPage.value = 1;
+    } else {
+      ElMessage.error(res.msg || '审核失败');
+    }
+  } catch (error) {
+    if (error !== 'cancel') {
+      ElMessage.error(error.message || '审核失败');
+    }
+  } finally {
+    loading.value = false;
+  }
+};
+
+// 批量审核（保留用于兼容性）
 const handleBatchReview = async () => {
   if (selectedRows.value.length === 0) {
     ElMessage.warning('请先选择要审核的记录');
