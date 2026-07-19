@@ -16,6 +16,7 @@
             clearable
             @change="handleRegionChange"
             :disabled="!currentCompanyId"
+            class="region-select"
           >
             <el-option 
               v-for="item in regionList" 
@@ -59,7 +60,7 @@
           </el-input>
           <div class="auto-jump-control">
             <el-checkbox v-model="autoJumpEnabled" size="large">
-              自动跳变
+              <span class="checkbox-label">自动跳变</span>
             </el-checkbox>
           </div>
         </div>
@@ -89,6 +90,11 @@
             <el-table-column prop="userName" label="用户名" min-width="120" align="center" />
             <el-table-column prop="address" label="地址" min-width="200" align="center" show-overflow-tooltip />
             <el-table-column prop="lastReading" label="上月数" min-width="120" align="center" />
+            <el-table-column prop="currentReading" label="本月数" min-width="120" align="center">
+              <template #default="{ row }">
+                <span>{{ row.currentReading || '-' }}</span>
+              </template>
+            </el-table-column>
           </el-table>
 
           <!-- 分页器 -->
@@ -121,9 +127,6 @@
         <template v-else>
           <div class="panel-header">
             <h3>用户详情 - {{ selectedUserDetail.userName }}</h3>
-            <el-button type="text" @click="closeDetailPanel">
-              <el-icon><Close /></el-icon>
-            </el-button>
           </div>
 
           <div class="detail-content">
@@ -140,7 +143,7 @@
                   <span class="value">{{ selectedUserDetail.userName }}</span>
                 </div>
                 <div class="info-item">
-                  <span class="label">用户电话</span>
+                  <span class="label">电话</span>
                   <span class="value">{{ selectedUserDetail.userPhone || '-' }}</span>
                 </div>
                 <div class="info-item">
@@ -172,6 +175,7 @@
                     inputmode="decimal"
                     placeholder="请输入本月数"
                     @input="handleCurrentReadingInput"
+                    class="current-reading-input"
                   />
                 </div>
                               
@@ -728,7 +732,7 @@ const submitSingleUser = async () => {
       if (selectedUserDetail.value.reportStatus === '正常') {
         const userInList = userList.value.find(u => u.userId === selectedUserDetail.value.userId);
         if (userInList) {
-          userInList.currentReading = selectedUserDetail.value.currentReadingInput;
+          userInList.currentReading = parseFloat(selectedUserDetail.value.currentReadingInput) || null;
           userInList.balance = res.data.newBalance || userInList.balance;
         }
       }
@@ -841,7 +845,7 @@ fetchCompanyList();
         gap: 10px;
 
         .form-label {
-          font-size: 20px;
+          font-size: 24px;
           color: #606266;
           white-space: nowrap;
 
@@ -853,7 +857,7 @@ fetchCompanyList();
 
         // 水厂名称样式
         .company-name {
-          font-size: 20px;
+          font-size: 24px;
           color: #303133;
           font-weight: 500;
           min-width: 150px;
@@ -1122,6 +1126,14 @@ fetchCompanyList();
 
               :deep(.el-input) {
                 flex: 1;
+
+                &.current-reading-input {
+                  :deep(.el-input__inner) {
+                    height: 48px;
+                    line-height: 48px;
+                    font-size: 20px;
+                  }
+                }
               }
               
               :deep(.el-select) {
