@@ -456,17 +456,34 @@ watch(
       nonAdminNavList.forEach((item) => navLists.push({ ...item }));
     }
 
+    // 只有 companyId 在允许列表中才显示普表抄表菜单
     if (newUserData && allowedCompanyIds.includes(Number(newUserData.companyId))) {
-      console.log('✅ 添加快速抄表菜单 - companyId:', newUserData.companyId);
-      navLists.push({
+      console.log('✅ 允许访问普表抄表功能 - companyId:', newUserData.companyId);
+
+      // 找到普表抄表菜单的位置并添加到 navLists
+      const meterReadingMenu = {
         id: 13,
-        name: "快速抄表",
+        name: "普表抄表",
         icon: require("@/assets/menu/icon5.png"),
         icon2: require("@/assets/menu/icon6.png"),
-        path: "/quickMeterReport"
-      });
+        path: "/meterReading",
+        arrowIcon1,
+        arrowIcon2,
+        children: [
+          { id: 131, name: "快速抄表", icon: require("@/assets/menu/icon11.png"), icon2: require("@/assets/menu/icon12.png"), path: "/meterReading/quickMeterReport" },
+          { id: 132, name: "抄表审核", icon: require("@/assets/menu/icon13.png"), icon2: require("@/assets/menu/icon14.png"), path: "/meterReading/reviewMeterReport" }
+        ]
+      };
+
+      // 将普表抄表菜单插入到合适位置（例如在通知管理之后）
+      const reportManageIndex = navLists.findIndex(item => item.id === 5);
+      if (reportManageIndex !== -1) {
+        navLists.splice(reportManageIndex + 1, 0, meterReadingMenu);
+      } else {
+        navLists.push(meterReadingMenu);
+      }
     } else {
-      console.log('❌ 不添加快速抄表菜单 - companyId:', newUserData?.companyId);
+      console.log('❌ 不允许访问普表抄表功能 - companyId:', newUserData?.companyId);
     }
 
     watchRoute();

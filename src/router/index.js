@@ -78,14 +78,21 @@ const routes = [
         component: userRecordDetail,
       },
       {
-        path: "/quickMeterReport",
-        name: "quickMeterReport",
-        component: quickMeterReport,
-      },
-      {
-        path: "/reviewMeterReport",
-        name: "reviewMeterReport",
-        component: reviewMeterReport,
+        path: "/meterReading",
+        name: "meterReading",
+        redirect: "/meterReading/quickMeterReport",
+        children: [
+          {
+            path: "quickMeterReport",
+            name: "quickMeterReport",
+            component: quickMeterReport,
+          },
+          {
+            path: "reviewMeterReport",
+            name: "reviewMeterReport",
+            component: reviewMeterReport,
+          }
+        ]
       },
       {
         path: "/priceManage",

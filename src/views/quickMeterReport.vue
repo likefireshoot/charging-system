@@ -16,6 +16,7 @@
             clearable
             @change="handleRegionChange"
             :disabled="!currentCompanyId"
+            class="region-select"
           >
             <el-option 
               v-for="item in regionList" 
@@ -27,11 +28,6 @@
         </div>
 
         <div class="form-actions">
-          <el-button type="primary" @click="goToReviewPage">
-            <el-icon><Check /></el-icon>
-            <span>审核</span>
-          </el-button>
-          
           <el-button type="danger" @click="handleClearAll">
             <el-icon><Delete /></el-icon>
             <span>清空</span>
@@ -59,7 +55,7 @@
           </el-input>
           <div class="auto-jump-control">
             <el-checkbox v-model="autoJumpEnabled" size="large">
-              自动跳变
+              <span class="checkbox-label">自动跳变</span>
             </el-checkbox>
           </div>
         </div>
@@ -87,8 +83,13 @@
             </el-table-column>
             <el-table-column prop="userId" label="用户号" min-width="120" align="center" />
             <el-table-column prop="userName" label="用户名" min-width="120" align="center" />
-            <el-table-column prop="address" label="地址" min-width="200" align="center" show-overflow-tooltip />
             <el-table-column prop="lastReading" label="上月数" min-width="120" align="center" />
+            <el-table-column prop="currentReading" label="本月数" min-width="120" align="center">
+              <template #default="{ row }">
+                <span>{{ row.currentReading || '-' }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column prop="address" label="地址" min-width="200" align="center" show-overflow-tooltip />
           </el-table>
 
           <!-- 分页器 -->
@@ -121,9 +122,6 @@
         <template v-else>
           <div class="panel-header">
             <h3>用户详情 - {{ selectedUserDetail.userName }}</h3>
-            <el-button type="text" @click="closeDetailPanel">
-              <el-icon><Close /></el-icon>
-            </el-button>
           </div>
 
           <div class="detail-content">
@@ -140,7 +138,7 @@
                   <span class="value">{{ selectedUserDetail.userName }}</span>
                 </div>
                 <div class="info-item">
-                  <span class="label">用户电话</span>
+                  <span class="label">电话</span>
                   <span class="value">{{ selectedUserDetail.userPhone || '-' }}</span>
                 </div>
                 <div class="info-item">
@@ -172,13 +170,14 @@
                     inputmode="decimal"
                     placeholder="请输入本月数"
                     @input="handleCurrentReadingInput"
+                    class="current-reading-input"
                   />
                 </div>
                               
                 <!-- 异常状态提示 -->
                 <div class="reading-item abnormal-tip" v-else>
                   <span class="label">状态说明</span>
-                  <span class="tip-text">当前选择"{{ selectedUserDetail.reportStatus }}"，不更新读数和余额，仅记录状态</span>
+                  <span class="tip-text">当前选择"{{ selectedUserDetail.reportStatus }}"</span>
                 </div>
                               
                 <div class="reading-item" v-if="selectedUserDetail.balance !== undefined">
@@ -360,7 +359,7 @@ const reportHistory = ref([]);
 const loading = ref(false);
 
 // 自动跳变开关
-const autoJumpEnabled = ref(true);
+const autoJumpEnabled = ref(false);
 
 // 是否可以提交单个用户（正常状态需要输入本月数，异常状态不需要）
 const canSubmitSingle = computed(() => {
@@ -672,11 +671,6 @@ const handleCurrentReadingInput = (value) => {
   }
 };
 
-// 跳转到审核页面
-const goToReviewPage = () => {
-  router.push('/reviewMeterReport');
-};
-
 // 提交单个用户（改为提交到审核表）
 const submitSingleUser = async () => {
   if (!selectedUserDetail.value) {
@@ -728,7 +722,7 @@ const submitSingleUser = async () => {
       if (selectedUserDetail.value.reportStatus === '正常') {
         const userInList = userList.value.find(u => u.userId === selectedUserDetail.value.userId);
         if (userInList) {
-          userInList.currentReading = selectedUserDetail.value.currentReadingInput;
+          userInList.currentReading = parseFloat(selectedUserDetail.value.currentReadingInput) || null;
           userInList.balance = res.data.newBalance || userInList.balance;
         }
       }
@@ -755,12 +749,12 @@ const submitSingleUser = async () => {
 
 // 选中下一个用户
 const selectNextUser = () => {
-  if (!selectedUserId.value || userList.value.length === 0) {
+  if (!selectedUserId.value || filteredUserList.value.length === 0) {
     return;
   }
 
-  // 找到当前选中的用户在列表中的索引
-  const currentIndex = userList.value.findIndex(user => user.userId === selectedUserId.value);
+  // 找到当前选中的用户在过滤后列表中的索引（使用过滤后的列表）
+  const currentIndex = filteredUserList.value.findIndex(user => user.userId === selectedUserId.value);
 
   if (currentIndex === -1) {
     return;
@@ -770,8 +764,8 @@ const selectNextUser = () => {
   const nextIndex = currentIndex + 1;
 
   // 如果还有下一个用户，选中它
-  if (nextIndex < userList.value.length) {
-    const nextUser = userList.value[nextIndex];
+  if (nextIndex < filteredUserList.value.length) {
+    const nextUser = filteredUserList.value[nextIndex];
     selectedUserId.value = nextUser.userId;
     loadUserDetail(nextUser);
 
@@ -826,7 +820,7 @@ fetchCompanyList();
   .search-header {
     background-color: #fff;
     border-radius: 8px;
-    padding: 20px;
+    padding: 30px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 
     .search-form {
@@ -841,7 +835,7 @@ fetchCompanyList();
         gap: 10px;
 
         .form-label {
-          font-size: 20px;
+          font-size: 24px;
           color: #606266;
           white-space: nowrap;
 
@@ -851,39 +845,54 @@ fetchCompanyList();
           }
         }
 
+        :deep(.el-select),
+        :deep(.el-input) {
+          width: 200px;
+        }
+
         // 水厂名称样式
         .company-name {
-          font-size: 20px;
+          font-size: 24px;
           color: #303133;
           font-weight: 500;
           min-width: 150px;
           display: inline-block;
-        }
-
-        :deep(.el-select),
-        :deep(.el-input) {
-          width: 200px;
         }
       }
 
       .form-actions {
         margin-left: auto;
       }
+    }
 
-      // 自动跳变控制样式
-      .auto-jump-control {
-        display: flex;
-        align-items: center;
+    // 区域下拉框专用样式 - 针对 el-select 的正确结构
+    :deep(.region-select) {
+      // 下拉框整体容器高度
+      .el-select__wrapper {
+        min-height: 40px !important;
+        padding: 0 20px !important;
+        border-radius: 8px !important;
+      }
 
-        :deep(.el-checkbox__label) {
-          font-size: 20px;
-          color: #606266;
-        }
+      // 选中项/占位符文字样式
+      .el-select__selected-item,
+      .el-select__placeholder {
+        font-size: 24px !important;
+        height: 40px !important;
+        line-height: 40px !important;
+        color: #606266 !important;
+      }
 
-        :deep(.el-checkbox__inner) {
-          width: 18px;
-          height: 18px;
-        }
+      // 下拉箭头图标
+      .el-select__caret {
+        font-size: 36px !important;
+      }
+
+      // 下拉选项列表中的每一项
+      .el-select-dropdown__item {
+        font-size: 36px !important;
+        height: 60px !important;
+        line-height: 60px !important;
       }
     }
   }
@@ -924,6 +933,38 @@ fetchCompanyList();
         .result-count {
           font-size: 20px;
           color: #909399;
+        }
+
+        // 自动跳变控制调整
+        .auto-jump-control {
+          display: flex;
+          align-items: center;
+
+          :deep(.el-checkbox__label) {
+            font-size: 32px;
+            font-weight: 500;
+            color: #303133;
+          }
+
+          :deep(.el-checkbox__inner) {
+            width: 28px;
+            height: 28px;
+
+            &::after {
+              width: 10px;
+              height: 16px;
+              left: 8px;
+              top: 4px;
+            }
+          }
+
+          :deep(.el-checkbox) {
+            font-size: 0;
+
+            .el-checkbox__input {
+              margin-right: 8px;
+            }
+          }
         }
       }
 
@@ -1122,6 +1163,14 @@ fetchCompanyList();
 
               :deep(.el-input) {
                 flex: 1;
+
+                &.current-reading-input {
+                  :deep(.el-input__inner) {
+                    height: 48px;
+                    line-height: 48px;
+                    font-size: 20px;
+                  }
+                }
               }
               
               :deep(.el-select) {
