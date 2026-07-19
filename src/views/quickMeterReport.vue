@@ -83,13 +83,13 @@
             </el-table-column>
             <el-table-column prop="userId" label="用户号" min-width="120" align="center" />
             <el-table-column prop="userName" label="用户名" min-width="120" align="center" />
-            <el-table-column prop="address" label="地址" min-width="200" align="center" show-overflow-tooltip />
             <el-table-column prop="lastReading" label="上月数" min-width="120" align="center" />
             <el-table-column prop="currentReading" label="本月数" min-width="120" align="center">
               <template #default="{ row }">
                 <span>{{ row.currentReading || '-' }}</span>
               </template>
             </el-table-column>
+            <el-table-column prop="address" label="地址" min-width="200" align="center" show-overflow-tooltip />
           </el-table>
 
           <!-- 分页器 -->
@@ -749,12 +749,12 @@ const submitSingleUser = async () => {
 
 // 选中下一个用户
 const selectNextUser = () => {
-  if (!selectedUserId.value || userList.value.length === 0) {
+  if (!selectedUserId.value || filteredUserList.value.length === 0) {
     return;
   }
 
-  // 找到当前选中的用户在列表中的索引
-  const currentIndex = userList.value.findIndex(user => user.userId === selectedUserId.value);
+  // 找到当前选中的用户在过滤后列表中的索引（使用过滤后的列表）
+  const currentIndex = filteredUserList.value.findIndex(user => user.userId === selectedUserId.value);
 
   if (currentIndex === -1) {
     return;
@@ -764,8 +764,8 @@ const selectNextUser = () => {
   const nextIndex = currentIndex + 1;
 
   // 如果还有下一个用户，选中它
-  if (nextIndex < userList.value.length) {
-    const nextUser = userList.value[nextIndex];
+  if (nextIndex < filteredUserList.value.length) {
+    const nextUser = filteredUserList.value[nextIndex];
     selectedUserId.value = nextUser.userId;
     loadUserDetail(nextUser);
 
