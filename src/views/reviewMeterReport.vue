@@ -984,7 +984,7 @@ onMounted(() => {
         gap: 10px;
 
         .form-label {
-          font-size: 20px;
+          font-size: 24px;
           color: #606266;
           white-space: nowrap;
         }
@@ -992,6 +992,24 @@ onMounted(() => {
         :deep(.el-select),
         :deep(.el-input) {
           width: 200px;
+
+          // 修改下拉框内部文字大小
+          .el-select__wrapper,
+          .el-select__input,
+          .el-select__placeholder,
+          .el-select__selected-item {
+            font-size: 24px;
+          }
+
+          // 修改下拉选项列表中的文字大小
+          .el-select-dropdown__item {
+            font-size: 24px;
+          }
+        }
+
+        // 修改输入框内部文字大小
+        :deep(.el-input__inner) {
+          font-size: 24px;
         }
       }
 
@@ -1058,6 +1076,7 @@ onMounted(() => {
   display: inline-block;
   min-width: 40px;
   text-align: center;
+  font-size: 24px;
 
   &:hover {
     background-color: #f0f9ff;
@@ -1068,6 +1087,10 @@ onMounted(() => {
 // 止码输入框样式 - 隐藏上下箭头
 .end-reading-input {
   :deep(.el-input__inner) {
+    font-size: 24px;
+    height: 40px;
+    line-height: 40px;
+
     /* Chrome, Safari, Edge, Opera */
     &::-webkit-outer-spin-button,
     &::-webkit-inner-spin-button {
@@ -1079,6 +1102,11 @@ onMounted(() => {
     &[type='number'] {
       -moz-appearance: textfield;
     }
+  }
+
+  // 设置输入框整体高度
+  :deep(.el-input) {
+    --el-input-height: 40px;
   }
 }
 
