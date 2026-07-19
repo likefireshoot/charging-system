@@ -855,6 +855,37 @@ fetchCompanyList();
           }
         }
 
+        :deep(.el-select),
+        :deep(.el-input) {
+          width: 200px;
+        }
+
+        // 区域下拉框专用样式（提高特异性）
+        .region-select {
+          :deep(.el-input__wrapper) {
+            min-height: 90px;
+            padding: 0 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 0 1px #46b97e inset;
+
+            &:hover {
+              box-shadow: 0 0 0 2px #46b97e inset;
+            }
+          }
+
+          :deep(.el-input__inner) {
+            font-size: 40px;
+            height: 90px;
+            line-height: 90px;
+          }
+
+          :deep(.el-select-dropdown__item) {
+            font-size: 36px;
+            height: 60px;
+            line-height: 60px;
+          }
+        }
+
         // 水厂名称样式
         .company-name {
           font-size: 24px;
@@ -863,31 +894,10 @@ fetchCompanyList();
           min-width: 150px;
           display: inline-block;
         }
-
-        :deep(.el-select),
-        :deep(.el-input) {
-          width: 200px;
-        }
       }
 
       .form-actions {
         margin-left: auto;
-      }
-
-      // 自动跳变控制样式
-      .auto-jump-control {
-        display: flex;
-        align-items: center;
-
-        :deep(.el-checkbox__label) {
-          font-size: 20px;
-          color: #606266;
-        }
-
-        :deep(.el-checkbox__inner) {
-          width: 18px;
-          height: 18px;
-        }
       }
     }
   }
@@ -928,6 +938,38 @@ fetchCompanyList();
         .result-count {
           font-size: 20px;
           color: #909399;
+        }
+
+        // 自动跳变控制调整
+        .auto-jump-control {
+          display: flex;
+          align-items: center;
+
+          :deep(.el-checkbox__label) {
+            font-size: 32px;
+            font-weight: 500;
+            color: #303133;
+          }
+
+          :deep(.el-checkbox__inner) {
+            width: 28px;
+            height: 28px;
+
+            &::after {
+              width: 10px;
+              height: 16px;
+              left: 8px;
+              top: 4px;
+            }
+          }
+
+          :deep(.el-checkbox) {
+            font-size: 0;
+
+            .el-checkbox__input {
+              margin-right: 8px;
+            }
+          }
         }
       }
 
