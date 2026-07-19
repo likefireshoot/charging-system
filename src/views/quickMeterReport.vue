@@ -178,7 +178,7 @@
                 <!-- 异常状态提示 -->
                 <div class="reading-item abnormal-tip" v-else>
                   <span class="label">状态说明</span>
-                  <span class="tip-text">当前选择"{{ selectedUserDetail.reportStatus }}"，不更新读数和余额，仅记录状态</span>
+                  <span class="tip-text">当前选择"{{ selectedUserDetail.reportStatus }}"</span>
                 </div>
                               
                 <div class="reading-item" v-if="selectedUserDetail.balance !== undefined">
