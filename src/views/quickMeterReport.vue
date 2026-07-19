@@ -28,11 +28,6 @@
         </div>
 
         <div class="form-actions">
-          <el-button type="primary" @click="goToReviewPage">
-            <el-icon><Check /></el-icon>
-            <span>审核</span>
-          </el-button>
-          
           <el-button type="danger" @click="handleClearAll">
             <el-icon><Delete /></el-icon>
             <span>清空</span>
@@ -674,11 +669,6 @@ const handleCurrentReadingInput = (value) => {
   if (selectedUserDetail.value) {
     selectedUserDetail.value.currentReadingInput = newValue;
   }
-};
-
-// 跳转到审核页面
-const goToReviewPage = () => {
-  router.push('/reviewMeterReport');
 };
 
 // 提交单个用户（改为提交到审核表）

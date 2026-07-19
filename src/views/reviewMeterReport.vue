@@ -911,7 +911,7 @@ const handleBatchReview = async () => {
 
 // 返回快速抄表页面
 const goBack = () => {
-  router.push('/quickMeterReport');
+  router.push('/meterReading/quickMeterReport');
 };
 
 // 初始化

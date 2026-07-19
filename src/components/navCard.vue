@@ -249,6 +249,22 @@ if (staffPermissionIds.value.includes(39)) {
     path: "/logManage"
   });
 }
+// 添加普表抄表菜单（包含两个子菜单）
+if (staffPermissionIds.value.includes(55) || staffPermissionIds.value.includes(1)) {
+  navLists.push({
+    id: 13,
+    name: "普表抄表",
+    icon: require("@/assets/menu/icon5.png"),
+    icon2: require("@/assets/menu/icon6.png"),
+    path: "/meterReading",
+    arrowIcon1,
+    arrowIcon2,
+    children: [
+      { id: 131, name: "快速抄表", icon: require("@/assets/menu/icon11.png"), icon2: require("@/assets/menu/icon12.png"), path: "/meterReading/quickMeterReport" },
+      { id: 132, name: "抄表审核", icon: require("@/assets/menu/icon13.png"), icon2: require("@/assets/menu/icon14.png"), path: "/meterReading/reviewMeterReport" }
+    ]
+  });
+}
 const adminNavList = reactive([
   { id: 0, name: "首页", icon: require("@/assets/menu/icon1.png"), icon2: require("@/assets/menu/icon2.png"), path: "/homePage" },
   { id: 1, name: "开户管理", icon: require("@//assets/menu/icon24.png"), icon2: require("@/assets/menu/icon23.png"), path: "/accountManage" },
@@ -297,6 +313,20 @@ const adminNavList = reactive([
   { id: 11, name: "角色管理", icon: require("@/assets/menu/icon27.png"), icon2: require("@/assets/menu/icon28.png"), path: "/roleManage" },
   { id: 12, name: "历史数据管理", icon: require("@/assets/menu/icon17.png"), icon2: require("@/assets/menu/icon18.png"), path: "/historyDataManage" },
   { id: 8, name: "操作日志", icon: require("@/assets/add/icon-10.png"), icon2: require("@/assets/add/icon-11.png"), path: "/logManage" },
+  // 添加普表抄表菜单（包含两个子菜单）
+  {
+    id: 13,
+    name: "普表抄表",
+    icon: require("@/assets/menu/icon5.png"),
+    icon2: require("@/assets/menu/icon6.png"),
+    path: "/meterReading",
+    arrowIcon1,
+    arrowIcon2,
+    children: [
+      { id: 131, name: "快速抄表", icon: require("@/assets/menu/icon11.png"), icon2: require("@/assets/menu/icon12.png"), path: "/meterReading/quickMeterReport" },
+      { id: 132, name: "抄表审核", icon: require("@/assets/menu/icon13.png"), icon2: require("@/assets/menu/icon14.png"), path: "/meterReading/reviewMeterReport" }
+    ]
+  },
 ]);
 
 const nonAdminNavList = reactive([
@@ -340,6 +370,20 @@ const nonAdminNavList = reactive([
     ],
   },
   { id: 6, name: "警告管理", icon: require("@/assets/menu/icon19.png"), icon2: require("@/assets/menu/icon20.png"), path: "/warningManage" },
+  // 添加普表抄表菜单（包含两个子菜单）
+  {
+    id: 13,
+    name: "普表抄表",
+    icon: require("@/assets/menu/icon5.png"),
+    icon2: require("@/assets/menu/icon6.png"),
+    path: "/meterReading",
+    arrowIcon1,
+    arrowIcon2,
+    children: [
+      { id: 131, name: "快速抄表", icon: require("@/assets/menu/icon11.png"), icon2: require("@/assets/menu/icon12.png"), path: "/meterReading/quickMeterReport" },
+      { id: 132, name: "抄表审核", icon: require("@/assets/menu/icon13.png"), icon2: require("@/assets/menu/icon14.png"), path: "/meterReading/reviewMeterReport" }
+    ]
+  },
 ]);
 
 navLists.sort((a, b) => {
@@ -454,16 +498,10 @@ watch(
     }
 
     if (newUserData && allowedCompanyIds.includes(Number(newUserData.companyId))) {
-      console.log('✅ 添加快速抄表菜单 - companyId:', newUserData.companyId);
-      navLists.push({
-        id: 13,
-        name: "快速抄表",
-        icon: require("@/assets/menu/icon5.png"),
-        icon2: require("@/assets/menu/icon6.png"),
-        path: "/quickMeterReport"
-      });
+      console.log('✅ 允许访问普表抄表功能 - companyId:', newUserData.companyId);
+      // 普表抄表菜单已在上方根据权限动态添加，此处无需重复添加
     } else {
-      console.log('❌ 不添加快速抄表菜单 - companyId:', newUserData?.companyId);
+      console.log('❌ 不允许访问普表抄表功能 - companyId:', newUserData?.companyId);
     }
 
     watchRoute();
