@@ -492,38 +492,34 @@ const isProgrammaticOperation = ref(false);
 
 // 判断当前页是否全部选中
 const isCurrentPageAllSelected = computed(() => {
-  const currentPageNormalRows = paginatedReviewList.value.filter(row => row.reportStatus === '正常');
-  if (currentPageNormalRows.length === 0) return false;
+  if (paginatedReviewList.value.length === 0) return false;
   
-  return currentPageNormalRows.every(row => 
+  return paginatedReviewList.value.every(row =>
     selectedRows.value.some(selected => selected.id === row.id)
   );
 });
 
 // 判断是否全部选中
 const isAllSelected = computed(() => {
-  const allNormalRows = filteredReviewList.value.filter(row => row.reportStatus === '正常');
-  if (allNormalRows.length === 0) return false;
+  if (filteredReviewList.value.length === 0) return false;
   
-  return allNormalRows.every(row => 
+  return filteredReviewList.value.every(row =>
     selectedRows.value.some(selected => selected.id === row.id)
   );
 });
 
 // 切换选择本页
 const toggleSelectCurrentPage = () => {
-  const currentPageNormalRows = paginatedReviewList.value.filter(row => row.reportStatus === '正常');
-  
   if (isCurrentPageAllSelected.value) {
     // 取消选择本页：移除当前页已选中的记录
-    const currentPageIds = new Set(currentPageNormalRows.map(row => row.id));
+    const currentPageIds = new Set(paginatedReviewList.value.map(row => row.id));
     selectedRows.value = selectedRows.value.filter(row => !currentPageIds.has(row.id));
   } else {
-    // 选择本页：添加当前页所有正常记录
+    // 选择本页：添加当前页所有记录（包括异常状态）
     const otherPageSelected = selectedRows.value.filter(row =>
       !paginatedReviewList.value.some(pageRow => pageRow.id === row.id)
     );
-    selectedRows.value = [...otherPageSelected, ...currentPageNormalRows];
+    selectedRows.value = [...otherPageSelected, ...paginatedReviewList.value];
   }
   
   // 更新表格显示
@@ -532,14 +528,12 @@ const toggleSelectCurrentPage = () => {
 
 // 切换选择全部
 const toggleSelectAll = () => {
-  const allNormalRows = filteredReviewList.value.filter(row => row.reportStatus === '正常');
-  
   if (isAllSelected.value) {
     // 取消选择全部：清空所有选中
     selectedRows.value = [];
   } else {
-    // 选择全部：选中所有正常状态的记录
-    selectedRows.value = allNormalRows;
+    // 选择全部：选中所有记录（包括异常状态）
+    selectedRows.value = filteredReviewList.value;
   }
   
   // 更新表格显示
@@ -719,7 +713,7 @@ const handleSingleReview = async () => {
 
 // 本页审核通过
 const handleCurrentPageReview = async () => {
-  const currentPageRows = paginatedReviewList.value.filter(row => row.reportStatus === '正常');
+  const currentPageRows = paginatedReviewList.value;
   
   if (currentPageRows.length === 0) {
     ElMessage.warning('当前页没有可审核的记录');
@@ -787,16 +781,16 @@ const handleCurrentPageReview = async () => {
 
 // 全部审核通过
 const handleAllReview = async () => {
-  const allNormalRows = filteredReviewList.value.filter(row => row.reportStatus === '正常');
+  const allRows = filteredReviewList.value;
   
-  if (allNormalRows.length === 0) {
+  if (allRows.length === 0) {
     ElMessage.warning('没有可审核的记录');
     return;
   }
   
   try {
     await ElMessageBox.confirm(
-      `确认审核全部的 ${allNormalRows.length} 条记录吗？此操作不可撤销！`,
+      `确认审核全部的 ${allRows.length} 条记录吗？此操作不可撤销！`,
       '全部审核确认',
       {
         confirmButtonText: '确定',
@@ -808,7 +802,7 @@ const handleAllReview = async () => {
     loading.value = true;
     
     // 构建审核数据
-    const reviewIds = allNormalRows.map(row => row.id);
+    const reviewIds = allRows.map(row => row.id);
     
     // 验证ID是否有效
     if (!reviewIds || reviewIds.length === 0 || reviewIds.some(id => !id)) {
