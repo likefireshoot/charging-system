@@ -10,19 +10,7 @@
       <div class="search-form">
         <div class="form-item">
           <label class="form-label">水厂</label>
-          <el-select 
-            v-model="searchParams.companyId" 
-            placeholder="选择水厂"
-            clearable
-            @change="handleCompanyChange"
-          >
-            <el-option 
-              v-for="item in companyList" 
-              :key="item.companyId"
-              :label="item.companyName"
-              :value="item.companyId"
-            />
-          </el-select>
+          <span class="company-name">{{ currentCompanyName }}</span>
         </div>
 
         <div class="form-item">
@@ -32,7 +20,7 @@
             placeholder="选择区域"
             clearable
             @change="handleRegionChange"
-            :disabled="!searchParams.companyId"
+            :disabled="!currentCompanyId"
           >
             <el-option 
               v-for="item in regionList" 
@@ -236,6 +224,7 @@ const searchParams = reactive({
 
 // 当前登录用户的公司信息
 const currentCompanyId = ref(null);
+const currentCompanyName = ref('');
 
 // 水厂列表
 const companyList = ref([]);
@@ -321,18 +310,24 @@ const fetchCompanyList = async () => {
       const userData = JSON.parse(sessionStorage.getItem('userData'));
       currentCompanyId.value = userData?.companyId;
 
+      // 根据当前登录用户的 companyId 设置水厂名称
+      const currentUserCompany = allCompanies.find(company => company.companyId === currentCompanyId.value);
+      if (currentUserCompany) {
+        currentCompanyName.value = currentUserCompany.companyName;
+        searchParams.companyId = currentCompanyId.value;
+
+        // 自动加载该水厂的区域列表
+        handleCompanyChange(currentCompanyId.value);
+      } else {
+        currentCompanyName.value = '-';
+      }
+
       // 如果 companyId !== 1，只显示当前用户所在的水厂
       if (currentCompanyId.value && currentCompanyId.value !== 1) {
         allCompanies = allCompanies.filter(company => company.companyId === currentCompanyId.value);
       }
 
       companyList.value = allCompanies;
-      
-      // 如果有当前公司，自动选中
-      if (currentCompanyId.value) {
-        searchParams.companyId = currentCompanyId.value;
-        handleCompanyChange(currentCompanyId.value);
-      }
     } else {
       ElMessage.error(res.msg || '获取水厂列表失败');
     }
@@ -981,6 +976,15 @@ onMounted(() => {
           font-size: 24px;
           color: #606266;
           white-space: nowrap;
+        }
+
+        // 水厂名称样式
+        .company-name {
+          font-size: 24px;
+          color: #303133;
+          font-weight: 500;
+          min-width: 150px;
+          display: inline-block;
         }
 
         :deep(.el-select),
