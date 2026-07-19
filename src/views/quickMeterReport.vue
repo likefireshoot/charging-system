@@ -5,29 +5,17 @@
       <div class="search-form">
         <div class="form-item">
           <label class="form-label">水厂</label>
-          <el-select
-            v-model="searchParams.companyId"
-            placeholder="请选择水厂"
-            clearable
-            @change="handleCompanyChange"
-          >
-            <el-option
-              v-for="item in companyList"
-              :key="item.companyId"
-              :label="item.companyName"
-              :value="item.companyId"
-            />
-          </el-select>
+          <span class="company-name">{{ currentCompanyName }}</span>
         </div>
 
         <div class="form-item">
           <label class="form-label">区域</label>
           <el-select 
             v-model="searchParams.region" 
-            placeholder="请先选择水厂"
+            placeholder="选择区域"
             clearable
             @change="handleRegionChange"
-            :disabled="!searchParams.companyId"
+            :disabled="!currentCompanyId"
           >
             <el-option 
               v-for="item in regionList" 
@@ -39,6 +27,11 @@
         </div>
 
         <div class="form-actions">
+          <el-button type="primary" @click="goToReviewPage">
+            <el-icon><Check /></el-icon>
+            <span>审核</span>
+          </el-button>
+          
           <el-button type="danger" @click="handleClearAll">
             <el-icon><Delete /></el-icon>
             <span>清空</span>
@@ -64,9 +57,11 @@
               <el-icon><Search /></el-icon>
             </template>
           </el-input>
-          <span class="result-count" v-if="userList.length > 0">
-            共 {{ filteredUserList.length }} 个用户
-          </span>
+          <div class="auto-jump-control">
+            <el-checkbox v-model="autoJumpEnabled" size="large">
+              自动跳变
+            </el-checkbox>
+          </div>
         </div>
 
         <div class="table-container">
@@ -159,9 +154,9 @@
               </div>
             </div>
 
-            <!-- 抄表信息 -->
+            <!-- 抄表数据 -->
             <div class="reading-section">
-              <div class="section-title">抄表信息</div>
+              <div class="section-title">抄表数据</div>
               <div class="reading-grid">
                 <div class="reading-item highlight">
                   <span class="label">上月读数</span>
@@ -173,8 +168,10 @@
                   <span class="label">本月读数</span>
                   <el-input 
                     v-model="selectedUserDetail.currentReadingInput" 
-                    type="number"
+                    type="text"
+                    inputmode="decimal"
                     placeholder="请输入本月数"
+                    @input="handleCurrentReadingInput"
                   />
                 </div>
                               
@@ -205,13 +202,26 @@
                   </el-radio-group>
                 </div>
               </div>
+
+              <!-- 提交按钮 - 移到抄表信息区域底部 -->
+              <div class="action-buttons-inline">
+                <el-button
+                  type="primary"
+                  @click="submitSingleUser"
+                  :disabled="!canSubmitSingle"
+                  size="large"
+                >
+                  <el-icon><Upload /></el-icon>
+                  <span>提交该用户</span>
+                </el-button>
+              </div>
             </div>
 
-            <!-- 最近抄表记录 -->
+            <!-- 抄表记录 -->
             <div class="history-section" v-if="reportHistory.length > 0">
               <div class="section-title">
                 <el-icon><Document /></el-icon>
-                <span>最近抄表记录</span>
+                <span>抄表记录</span>
               </div>
               <el-table
                 :data="reportHistory"
@@ -278,15 +288,22 @@
 
 <script setup>
 import { ref, reactive, computed } from 'vue';
+import { useRouter } from 'vue-router';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import { ArrowDown, Close, Search, Document, Check, Upload, Delete } from '@element-plus/icons-vue';
 import service from '@/api/request';
+
+const router = useRouter();
 
 // 搜索参数
 const searchParams = reactive({
   companyId: '', // 新增：水厂ID
   region: ''
 });
+
+// 当前登录用户的公司信息
+const currentCompanyId = ref(null);
+const currentCompanyName = ref('');
 
 // 水厂列表
 const companyList = ref([]);
@@ -342,6 +359,9 @@ const reportHistory = ref([]);
 // 加载状态
 const loading = ref(false);
 
+// 自动跳变开关
+const autoJumpEnabled = ref(true);
+
 // 是否可以提交单个用户（正常状态需要输入本月数，异常状态不需要）
 const canSubmitSingle = computed(() => {
   if (!selectedUserDetail.value) return false;
@@ -387,20 +407,26 @@ const fetchCompanyList = async () => {
 
       // 获取当前登录用户的 companyId
       const userData = JSON.parse(sessionStorage.getItem('userData'));
-      const currentCompanyId = userData?.companyId;
+      currentCompanyId.value = userData?.companyId;
+
+      // 根据当前登录用户的 companyId 设置水厂名称
+      const currentUserCompany = allCompanies.find(company => company.companyId === currentCompanyId.value);
+      if (currentUserCompany) {
+        currentCompanyName.value = currentUserCompany.companyName;
+        searchParams.companyId = currentCompanyId.value;
+
+        // 自动加载该水厂的区域列表
+        handleCompanyChange(currentCompanyId.value);
+      } else {
+        currentCompanyName.value = '-';
+      }
 
       // 如果 companyId !== 1，只显示当前用户所在的水厂
-      if (currentCompanyId && currentCompanyId !== 1) {
-        allCompanies = allCompanies.filter(company => company.companyId === currentCompanyId);
+      if (currentCompanyId.value && currentCompanyId.value !== 1) {
+        allCompanies = allCompanies.filter(company => company.companyId === currentCompanyId.value);
       }
 
       companyList.value = allCompanies;
-
-      // 如果只有一个水厂，自动选中
-      if (companyList.value.length === 1) {
-        searchParams.companyId = companyList.value[0].companyId;
-        handleCompanyChange(searchParams.companyId);
-      }
     } else {
       ElMessage.error(res.msg || '获取水厂列表失败');
     }
@@ -478,6 +504,13 @@ const handleRegionChange = async (regionId) => {
       }));
       
       ElMessage.success(`已加载 ${userList.value.length} 个用户`);
+
+      // 自动选中第一个用户
+      if (userList.value.length > 0) {
+        const firstUser = userList.value[0];
+        selectedUserId.value = firstUser.userId;
+        loadUserDetail(firstUser);
+      }
     } else {
       ElMessage.error(res.msg || '获取用户列表失败');
       userList.value = [];
@@ -622,7 +655,29 @@ const handleReportStatusChange = (status) => {
   }
 };
 
-// 提交单个用户
+// 处理本月读数输入（只允许数字和小数点）
+const handleCurrentReadingInput = (value) => {
+  // 移除非数字和非小数点的字符
+  let newValue = value.replace(/[^\d.]/g, '');
+
+  // 确保只有一个小数点
+  const parts = newValue.split('.');
+  if (parts.length > 2) {
+    newValue = parts[0] + '.' + parts.slice(1).join('');
+  }
+
+  // 更新值
+  if (selectedUserDetail.value) {
+    selectedUserDetail.value.currentReadingInput = newValue;
+  }
+};
+
+// 跳转到审核页面
+const goToReviewPage = () => {
+  router.push('/reviewMeterReport');
+};
+
+// 提交单个用户（改为提交到审核表）
 const submitSingleUser = async () => {
   if (!selectedUserDetail.value) {
     ElMessage.warning('请先选择用户');
@@ -659,11 +714,11 @@ const submitSingleUser = async () => {
       submitData.endRead = selectedUserDetail.value.currentReadingInput;
     }
     
-    // 调用后端接口提交单个用户
-    const res = await service.post('/manual/charge/submit', submitData);
+    // 调用后端接口提交到审核表
+    const res = await service.post('/manual/charge/submitForReview', submitData);
     
     if (res.code === 200) {
-      let successMsg = `用户 ${selectedUserDetail.value.userName} 提交成功`;
+      let successMsg = `用户 ${selectedUserDetail.value.userName} 已提交审核`;
       if (selectedUserDetail.value.reportStatus !== '正常') {
         successMsg += `（状态：${selectedUserDetail.value.reportStatus}）`;
       }
@@ -680,6 +735,13 @@ const submitSingleUser = async () => {
       
       // 关闭详情面板
       closeDetailPanel();
+
+      // 如果开启了自动跳变，选中下一个用户
+      if (autoJumpEnabled.value) {
+        selectNextUser();
+      } else {
+        ElMessage.success('提交成功');
+      }
     } else {
       ElMessage.error(res.msg || '提交失败');
     }
@@ -688,6 +750,44 @@ const submitSingleUser = async () => {
     ElMessage.error(error.message || '提交失败');
   } finally {
     loading.value = false;
+  }
+};
+
+// 选中下一个用户
+const selectNextUser = () => {
+  if (!selectedUserId.value || userList.value.length === 0) {
+    return;
+  }
+
+  // 找到当前选中的用户在列表中的索引
+  const currentIndex = userList.value.findIndex(user => user.userId === selectedUserId.value);
+
+  if (currentIndex === -1) {
+    return;
+  }
+
+  // 计算下一个用户的索引
+  const nextIndex = currentIndex + 1;
+
+  // 如果还有下一个用户，选中它
+  if (nextIndex < userList.value.length) {
+    const nextUser = userList.value[nextIndex];
+    selectedUserId.value = nextUser.userId;
+    loadUserDetail(nextUser);
+
+    // 如果在分页列表中看不到下一个用户，调整当前页
+    const currentPageFirstIndex = (currentPage.value - 1) * pageSize.value;
+    const currentPageLastIndex = currentPageFirstIndex + pageSize.value - 1;
+
+    if (nextIndex > currentPageLastIndex) {
+      // 下一页
+      currentPage.value++;
+    }
+  } else {
+    // 已经是最后一个用户，清空选中状态
+    selectedUserId.value = null;
+    closeDetailPanel();
+    ElMessage.info('已是最后一个用户');
   }
 };
 
@@ -751,6 +851,15 @@ fetchCompanyList();
           }
         }
 
+        // 水厂名称样式
+        .company-name {
+          font-size: 20px;
+          color: #303133;
+          font-weight: 500;
+          min-width: 150px;
+          display: inline-block;
+        }
+
         :deep(.el-select),
         :deep(.el-input) {
           width: 200px;
@@ -759,6 +868,22 @@ fetchCompanyList();
 
       .form-actions {
         margin-left: auto;
+      }
+
+      // 自动跳变控制样式
+      .auto-jump-control {
+        display: flex;
+        align-items: center;
+
+        :deep(.el-checkbox__label) {
+          font-size: 20px;
+          color: #606266;
+        }
+
+        :deep(.el-checkbox__inner) {
+          width: 18px;
+          height: 18px;
+        }
       }
     }
   }
@@ -1011,9 +1136,9 @@ fetchCompanyList();
                 }
                 
                 :deep(.el-radio-group) {
-                  display: flex;
-                  flex-wrap: wrap;
-                  gap: 12px;
+                  display: grid;
+                  grid-template-columns: repeat(5, auto);
+                  gap: 16px 24px;
                   flex: 1;
                 }
                 
@@ -1030,11 +1155,23 @@ fetchCompanyList();
                 :deep(.el-radio__inner) {
                   width: 20px;
                   height: 20px;
+                  border: 2px solid #333;
+                  background-color: #fff;
+
+                  &::after {
+                    background-color: #46b97e;
+                  }
+                }
+
+                :deep(.el-radio__input.is-checked .el-radio__inner) {
+                  border-color: #46b97e;
+                  background-color: #46b97e;
                 }
                 
                 :deep(.el-radio__label) {
                   font-size: 20px;
                   color: #303133;
+                  padding-left: 8px;
                 }
               }
               
@@ -1049,6 +1186,21 @@ fetchCompanyList();
                   line-height: 1.5;
                 }
               }
+            }
+          }
+
+          // 内联提交按钮样式
+          .action-buttons-inline {
+            display: flex;
+            justify-content: center;
+            padding: 20px 0 10px;
+            margin-top: 10px;
+            border-top: 1px solid #ebeef5;
+
+            :deep(.el-button) {
+              min-width: 180px;
+              height: 44px;
+              font-size: 20px;
             }
           }
         }
@@ -1099,17 +1251,9 @@ fetchCompanyList();
 
         // 操作按钮
         .action-buttons {
-          display: flex;
-          justify-content: center;
-          padding: 10px 0 10px;
-          border-top: 1px solid #ebeef5;
-
-          :deep(.el-button) {
-            min-width: 180px;
-            height: 44px;
-            font-size: 20px;
-          }
+          display: none;
         }
+
       }
     }
   }

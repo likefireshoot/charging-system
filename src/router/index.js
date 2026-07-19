@@ -37,6 +37,7 @@ import billDetailReport from "@/components/report/billDetailReport.vue";
 import abnormalChargeReport from "@/components/report/abnormalChargeReport.vue";
 import quickMeterReport from "@/views/quickMeterReport.vue";
 import rechargeDetailReport from "@/components/report/rechargeDetailReport.vue";
+import reviewMeterReport from "@/views/reviewMeterReport.vue";
 
 const routes = [
   {
@@ -80,6 +81,11 @@ const routes = [
         path: "/quickMeterReport",
         name: "quickMeterReport",
         component: quickMeterReport,
+      },
+      {
+        path: "/reviewMeterReport",
+        name: "reviewMeterReport",
+        component: reviewMeterReport,
       },
       {
         path: "/priceManage",
