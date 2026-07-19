@@ -830,7 +830,7 @@ fetchCompanyList();
   .search-header {
     background-color: #fff;
     border-radius: 8px;
-    padding: 20px;
+    padding: 30px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 
     .search-form {
@@ -861,7 +861,7 @@ fetchCompanyList();
         }
 
         // 区域下拉框专用样式（提高特异性）
-        .region-select {
+        & .region-select {
           :deep(.el-input__wrapper) {
             min-height: 90px;
             padding: 0 20px;
@@ -874,9 +874,9 @@ fetchCompanyList();
           }
 
           :deep(.el-input__inner) {
-            font-size: 40px;
-            height: 90px;
-            line-height: 90px;
+            font-size: 40px !important;
+            height: 90px !important;
+            line-height: 90px !important;
           }
 
           :deep(.el-select-dropdown__item) {
