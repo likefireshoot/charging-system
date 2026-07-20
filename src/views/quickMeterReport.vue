@@ -81,7 +81,11 @@
                 </el-radio>
               </template>
             </el-table-column>
-            <el-table-column prop="userId" label="用户号" min-width="120" align="center" />
+            <el-table-column prop="userId" label="用户号" min-width="120" align="center">
+              <template #default="{ row }">
+                <span>{{ formatUserId(row.userId) }}</span>
+              </template>
+            </el-table-column>
             <el-table-column prop="userName" label="用户名" min-width="120" align="center" />
             <el-table-column prop="lastReading" label="上月数" min-width="120" align="center" />
             <el-table-column prop="currentReading" label="本月数" min-width="120" align="center">
@@ -131,7 +135,7 @@
               <div class="info-grid">
                 <div class="info-item">
                   <span class="label">用户号</span>
-                  <span class="value">{{ selectedUserDetail.userId }}</span>
+                  <span class="value">{{ formatUserId(selectedUserDetail.userId) }}</span>
                 </div>
                 <div class="info-item">
                   <span class="label">用户名</span>
@@ -394,6 +398,14 @@ const formatDate = (dateStr) => {
   const hour = String(date.getHours()).padStart(2, '0');
   const minute = String(date.getMinutes()).padStart(2, '0');
   return `${year}-${month}-${day} ${hour}:${minute}`;
+};
+
+// 格式化用户号（去掉前三位）
+const formatUserId = (userId) => {
+  if (!userId) return '-';
+  const userIdStr = userId.toString();
+  // 如果长度大于3，去掉前三位；否则直接返回
+  return userIdStr.length > 3 ? userIdStr.substring(3) : userIdStr;
 };
 
 // 获取水厂列表
