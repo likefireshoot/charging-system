@@ -121,7 +121,7 @@
         <el-table-column prop="address" label="用户地址" min-width="200" align="center" show-overflow-tooltip />
         <el-table-column prop="reportStatus" label="抄表状态" min-width="100" align="center">
           <template #default="{ row }">
-            <el-tag :type="row.reportStatus === '正常' ? 'success' : 'warning'" size="small">
+            <el-tag :type="row.reportStatus === '正常' ? 'success' : 'warning'" size="small" class="status-tag-large">
               {{ row.reportStatus }}
             </el-tag>
           </template>
@@ -167,22 +167,6 @@
       <!-- 分页器 -->
       <div class="pagination-container" v-if="filteredReviewList.length > 0">
         <div class="pagination-info">
-          <el-button-group>
-            <el-button 
-              size="small" 
-              :type="isCurrentPageAllSelected ? 'primary' : 'default'"
-              @click="toggleSelectCurrentPage"
-            >
-              {{ isCurrentPageAllSelected ? '取消本页' : '选择本页' }}
-            </el-button>
-            <el-button 
-              size="small" 
-              :type="isAllSelected ? 'primary' : 'default'"
-              @click="toggleSelectAll"
-            >
-              {{ isAllSelected ? '取消全部' : '选择全部' }}
-            </el-button>
-          </el-button-group>
           <span class="total-count">共 {{ filteredReviewList.length }} 条</span>
         </div>
         
@@ -405,7 +389,6 @@ const handleRegionChange = async (regionId) => {
         balance: item.balance || 0
       }));
       
-      ElMessage.success(`已加载 ${reviewList.value.length} 条待审核记录`);
     } else {
       ElMessage.error(res.msg || '获取审核列表失败');
       reviewList.value = [];
@@ -1034,6 +1017,26 @@ onMounted(() => {
     display: flex;
     flex-direction: column;
     overflow: hidden;
+
+    :deep(.el-table) {
+      font-size: 20px;
+
+      .el-table__header th {
+        background-color: #f5f7fa;
+        font-weight: 600;
+        color: #606266;
+      }
+
+      .el-table__body td {
+        color: #606266;
+      }
+
+      // 抄表状态列字体加大到22px
+      .status-tag-large {
+        font-size: 22px !important;
+        padding: 6px 12px;
+      }
+    }
 
     .empty-state {
       padding: 40px 0;

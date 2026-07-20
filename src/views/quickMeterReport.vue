@@ -472,7 +472,6 @@ const handleCompanyChange = async (companyId) => {
       searchParams.region = '';
 
       if (regionList.value.length > 0) {
-        ElMessage.success(`已加载 ${regionList.value.length} 个普表区域`);
       } else {
         ElMessage.warning('该水厂下暂无普表区域');
       }
@@ -937,7 +936,7 @@ fetchCompanyList();
 
         h3 {
           margin: 0;
-          font-size: 20px;
+          font-size: 24px;
           font-weight: 600;
           color: #303133;
         }
@@ -953,7 +952,7 @@ fetchCompanyList();
           align-items: center;
 
           :deep(.el-checkbox__label) {
-            font-size: 32px;
+            font-size: 24px;
             font-weight: 500;
             color: #303133;
           }
@@ -1035,7 +1034,7 @@ fetchCompanyList();
 
         h3 {
           margin: 0;
-          font-size: 20px;
+          font-size: 24px;
           font-weight: 600;
           color: #303133;
         }
@@ -1072,14 +1071,14 @@ fetchCompanyList();
         // 基本信息区域
         .info-section {
           .section-title {
-            font-size: 20px;
+            font-size: 24px;
             font-weight: 600;
             color: #303133;
             margin-bottom: 16px;
             padding-bottom: 10px;
             border-bottom: 2px solid #46b97e;
           }
-
+          
           .info-grid {
             display: flex;
             flex-wrap: wrap;
@@ -1119,14 +1118,14 @@ fetchCompanyList();
         // 抄表信息区域
         .reading-section {
           .section-title {
-            font-size: 20px;
+            font-size: 24px;
             font-weight: 600;
             color: #303133;
             margin-bottom: 16px;
             padding-bottom: 10px;
             border-bottom: 2px solid #46b97e;
           }
-
+          
           .reading-grid {
             display: flex;
             flex-wrap: wrap;
@@ -1176,11 +1175,12 @@ fetchCompanyList();
               :deep(.el-input) {
                 flex: 1;
 
-                &.current-reading-input {
-                  :deep(.el-input__inner) {
-                    height: 48px;
-                    line-height: 48px;
-                    font-size: 20px;
+                // 本月数输入框特殊样式 - 使用属性选择器匹配class
+                &[class*="current-reading-input"] {
+                  .el-input__inner {
+                    height: 60px !important;
+                    line-height: 60px !important;
+                    font-size: 28px !important;
                   }
                 }
               }
@@ -1205,7 +1205,7 @@ fetchCompanyList();
                 
                 :deep(.el-radio) {
                   margin-right: 0;
-                  font-size: 20px;
+                  font-size: 22px;
                 }
                 
                 :deep(.el-radio__input) {
@@ -1230,7 +1230,7 @@ fetchCompanyList();
                 }
                 
                 :deep(.el-radio__label) {
-                  font-size: 20px;
+                  font-size: 22px;
                   color: #303133;
                   padding-left: 8px;
                 }
@@ -1272,18 +1272,18 @@ fetchCompanyList();
             display: flex;
             align-items: center;
             gap: 8px;
-            font-size: 20px;
+            font-size: 24px;
             font-weight: 600;
             color: #303133;
             margin-bottom: 16px;
             padding-bottom: 10px;
             border-bottom: 2px solid #46b97e;
-
+          
             .el-icon {
               color: #46b97e;
             }
           }
-
+          
           :deep(.el-table) {
             font-size: 20px;
 
