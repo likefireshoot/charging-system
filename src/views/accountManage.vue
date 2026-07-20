@@ -138,6 +138,28 @@
     <deleteVue v-if="delete_dialogFormVisible" :delete_dialogFormVisible="delete_dialogFormVisible" :data="multipleSelection" @close="closeDeleteDialog"></deleteVue>
     <!-- 设备绑定弹出框 -->
     <deviceBindingVue v-if="deviceBinding_dialogFormVisible" :deviceBinding_dialogFormVisible="deviceBinding_dialogFormVisible" @close="closeDeviceBindingDialog"></deviceBindingVue>
+
+    <!-- 导入时选择所属水厂弹窗 -->
+    <div class="import-company-overlay" v-if="importCompanyDialogVisible" @click.self="cancelImportCompany">
+      <div class="import-company-dialog">
+        <div class="dialog-title-bar">
+          <span>水厂归属</span>
+          <div class="title-close" @click="cancelImportCompany">
+            <img src="@/assets/close.png" alt="" />
+          </div>
+        </div>
+        <div class="dialog-body-row">
+          <span>请选择所导入用户数据的归属水厂：</span>
+          <el-select v-model="selectedImportCompanyId" placeholder="请选择所属水厂" style="width: 280px">
+            <el-option v-for="item in companyList" :key="item.id" :label="item.name" :value="item.id" />
+          </el-select>
+        </div>
+        <div class="dialog-footer-row">
+          <div class="cancel-btn" @click="cancelImportCompany">取消</div>
+          <div class="confirm-btn" @click="confirmImportCompany">确认导入</div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -216,6 +238,11 @@ export default {
       delete_dialogFormVisible: false,
       deviceBinding_dialogFormVisible: false,
 
+      // 导入水厂选择弹窗
+      importCompanyDialogVisible: false,
+      selectedImportCompanyId: null,
+      pendingImportFile: null,
+
       // ****** 请求锁，避免重复请求 ******
       isLoading: false,
     };
@@ -290,6 +317,7 @@ export default {
       return data.label.includes(value);
     },
     handleNodeClick(data) {
+      this.isLoading = true;
       this.quyu_selected = data;
       console.log(this.quyu_selected);
       let regionId = data.id;
@@ -328,6 +356,9 @@ export default {
           // 提取错误信息
           const errorMessage = error.response?.data?.msg || "请求发生错误";
           ElMessage.error(errorMessage);
+        })
+        .finally(() => {
+          this.isLoading = false;
         });
     },
     selectable() {
@@ -389,6 +420,7 @@ export default {
         });
     },
     getUserInfo() {
+      this.isLoading = true;
       let param = {
         page: 1,
         pageSize: 50,
@@ -409,9 +441,6 @@ export default {
               v.theId = this.pageSize * (response.data.currentPages - 1) + i + 1;
             });
             this.yonghuData = response.data.list;
-            // this.yonghuData.forEach((item) => {
-            //   item.updateTime = item.updateTime.replace("T", " ");
-            // });
             this.total = response.data.total;
             this.currentPage = response.data.currentPages;
             console.log(this.yonghuData);
@@ -421,9 +450,13 @@ export default {
         })
         .catch((error) => {
           ElMessage.error(error);
+        })
+        .finally(() => {
+          this.isLoading = false;
         });
     },
     reflush() {
+      this.isLoading = true;
       this.clear(1);
       this.filterText = "";
       this.$refs.treeRef.setCurrentKey(null);
@@ -448,15 +481,15 @@ export default {
               v.theId = this.pageSize * (response.data.currentPages - 1) + i + 1;
             });
             this.yonghuData = response.data.list;
-            // this.yonghuData.forEach((item) => {
-            //   item.updateTime = item.updateTime.replace("T", " ");
-            // });
             this.total = response.data.total;
             this.currentPage = 1;
           }
         })
         .catch((error) => {
           ElMessage.error("获取用户数据失败");
+        })
+        .finally(() => {
+          this.isLoading = false;
         });
     },
     getRegionData() {
@@ -692,8 +725,8 @@ export default {
       this.$refs.bindFileInput.value = "";
       this.$refs.bindFileInput.click();
     },
-    // 处理文件上传
-    async importUserAndBind() {
+    // 处理文件上传 — 先弹出水厂选择弹窗
+    importUserAndBind() {
       const fileInput = this.$refs.userAndBindFileInput;
       const file = fileInput.files[0];
 
@@ -709,38 +742,60 @@ export default {
         return;
       }
 
-      const formData = new FormData();
-      const companyId = this.companyId === 1 ? this.param.company : this.companyId;
-      if (!companyId) {
-        ElMessage.warning("请先选择所属水厂");
+      // 非总厂则直接使用当前公司ID
+      if (this.companyId !== 1) {
+        this.selectedImportCompanyId = this.companyId;
+        this.doImportUserAndBind(file);
         return;
       }
+
+      // 总厂：弹出水厂选择弹窗
+      this.pendingImportFile = file;
+      this.selectedImportCompanyId = null;
+      this.importCompanyDialogVisible = true;
+    },
+    // 确认导入
+    async confirmImportCompany() {
+      if (!this.selectedImportCompanyId) {
+        ElMessage.warning("请选择所属水厂");
+        return;
+      }
+      this.importCompanyDialogVisible = false;
+      await this.doImportUserAndBind(this.pendingImportFile);
+      this.pendingImportFile = null;
+    },
+    // 取消导入
+    cancelImportCompany() {
+      this.importCompanyDialogVisible = false;
+      this.pendingImportFile = null;
+      this.$refs.userAndBindFileInput.value = "";
+    },
+    // 执行导入
+    async doImportUserAndBind(file) {
+      const formData = new FormData();
       formData.append("file", file);
-      formData.append("companyId", companyId);
+      formData.append("companyId", this.selectedImportCompanyId);
+
       try {
         const response = await service.post("/userManage/userCharge/importUserAndMeterBind", formData, { responseType: "blob" });
-        console.log(response);
-        // 获取 Blob 对象
         const blob = new Blob([response.data], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
 
         if (blob.size === 0) {
           ElMessage.success("导入成功");
-          fileInput.value = ""; // 清空文件输入框
+          this.$refs.userAndBindFileInput.value = "";
           this.reflush();
           return;
         }
 
         ElMessage.warning("部分数据导入失败，等待下载失败列表");
-
-        // 创建一个链接元素
         const link = document.createElement("a");
-        link.href = window.URL.createObjectURL(blob); // 创建 Blob URL
-        link.download = "开户绑定导入失败列表.xlsx"; // 设置下载文件名
+        link.href = window.URL.createObjectURL(blob);
+        link.download = "开户绑定导入失败列表.xlsx";
         document.body.appendChild(link);
-        link.click(); // 触发下载
-        document.body.removeChild(link); // 移除链接元素
-        window.URL.revokeObjectURL(link.href); // 释放 Blob URL
-        fileInput.value = ""; // 清空文件输入框
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(link.href);
+        this.$refs.userAndBindFileInput.value = "";
         this.reflush();
       } catch (error) {
         const errorMessage = error.response?.data?.message || error.message || "未知错误";
@@ -1206,6 +1261,125 @@ export default {
   right: 0;
   z-index: 199;
   background-color: rgb(31 33 38 / 15%);
+}
+
+/* ========== 导入水厂选择弹窗 ========== */
+.import-company-overlay {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 299;
+  background-color: rgb(31 33 38 / 20%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.import-company-dialog {
+  width: 900px; /* 增加弹窗宽度以容纳更大字体 */
+  background: #fff;
+  border-radius: 6px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+}
+
+.dialog-title-bar {
+  height: 60px; /* 增加标题栏高度 */
+  line-height: 60px;
+  font-size: 22px; /* 标题字体放大至22px */
+  font-weight: normal;
+  color: #333;
+  padding: 0 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #eee;
+}
+
+.title-close {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+.title-close img {
+  width: 24px; /* 略微放大关闭按钮图标 */
+  height: 24px;
+}
+
+.dialog-body-row {
+  padding: 32px 28px; /* 增加内边距 */
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.dialog-body-row > span {
+  font-size: 22px; /* 提示文字放大至22px */
+  color: #555;
+  white-space: nowrap;
+}
+
+.dialog-body-row :deep(.el-select) {
+  width: 320px; /* 增加下拉框宽度 */
+}
+.dialog-body-row :deep(.el-input__wrapper) {
+  height: 46px; /* 增加输入框高度 */
+  font-size: 22px; /* 输入框内文字放大 */
+}
+.dialog-body-row :deep(.el-select__selected-item) {
+  font-size: 22px; /* 选中项文字放大 */
+}
+.dialog-body-row :deep(.el-select .el-select__caret) {
+  font-size: 22px; /* 下拉箭头放大 */
+}
+.dialog-body-row :deep(.el-select-dropdown__item) {
+  font-size: 22px; /* 下拉选项文字放大 */
+  height: 44px; /* 增加选项高度 */
+  line-height: 44px;
+}
+
+.dialog-footer-row {
+  display: flex;
+  justify-content: flex-end;
+  gap: 18px;
+  padding: 18px 28px;
+  border-top: 1px solid #eee;
+}
+
+.dialog-footer-row .cancel-btn,
+.dialog-footer-row .confirm-btn {
+  height: 46px; /* 增加按钮高度 */
+  width: 130px; /* 增加按钮宽度 */
+  cursor: pointer;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px; /* 按钮字体放大至22px */
+  transition: all 0.3s;
+}
+
+.dialog-footer-row .cancel-btn {
+  background: #fff;
+  border: 1px solid #dcdfe6;
+  color: #606266;
+}
+
+.dialog-footer-row .cancel-btn:hover {
+  border-color: #46B97E;
+  color: #46B97E;
+}
+
+.dialog-footer-row .confirm-btn {
+  background: #46B97E;
+  border: 1px solid #46B97E;
+  color: #fff;
+}
+
+.dialog-footer-row .confirm-btn:hover {
+  background: #3aa06b;
 }
 </style>
 

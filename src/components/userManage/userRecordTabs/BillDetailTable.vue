@@ -1,17 +1,6 @@
 <template>
   <div class="bill-table-container">
     <div class="search-bar">
-      <!-- 扣费类型筛选 - 暂时注释
-      <div class="search-input-item">
-        <span>扣费类型</span>
-        <el-select v-model="searchParams.chargeType" placeholder="全部" clearable style="width: 120px">
-          <el-option label="全部" value="" />
-          <el-option label="抄表扣费" value="0" />
-          <el-option label="保底扣费" value="1" />
-          <el-option label="补扣费用" value="2" />
-        </el-select>
-      </div>
-      -->
       <div class="search-input-item">
         <span style="margin-right: 20px">时间</span>
         <div class="time-input">
@@ -22,47 +11,49 @@
             <el-option label="自定义" value="custom" />
           </el-select>
           <el-date-picker
-            v-if="searchParams.timeType === 'year'"
-            v-model="searchParams.createTime"
-            type="year"
-            placeholder="选择年份"
-            value-format="YYYY"
-            style="width: 180px; font-size: 18px;"
+              v-if="searchParams.timeType === 'year'"
+              v-model="searchParams.createTime"
+              type="year"
+              placeholder="选择年份"
+              value-format="YYYY"
+              style="width: 180px; font-size: 18px;"
           />
           <el-date-picker
-            v-else-if="searchParams.timeType === 'month'"
-            v-model="searchParams.createTime"
-            type="month"
-            placeholder="选择月份"
-            value-format="YYYY-MM"
-            style="width: 180px; font-size: 18px;"
+              v-else-if="searchParams.timeType === 'month'"
+              v-model="searchParams.createTime"
+              type="month"
+              placeholder="选择月份"
+              value-format="YYYY-MM"
+              style="width: 180px; font-size: 18px;"
           />
           <el-date-picker
-            v-else-if="searchParams.timeType === 'day'"
-            v-model="searchParams.createTime"
-            type="date"
-            placeholder="选择日期"
-            format="YYYY-MM-DD"
-            value-format="YYYY-MM-DD"
-            style="width: 200px; font-size: 18px;"
+              v-else-if="searchParams.timeType === 'day'"
+              v-model="searchParams.createTime"
+              type="date"
+              placeholder="选择日期"
+              format="YYYY-MM-DD"
+              value-format="YYYY-MM-DD"
+              style="width: 200px; font-size: 18px;"
           />
           <el-date-picker
-            v-else-if="searchParams.timeType === 'custom'"
-            v-model="searchParams.dateRange"
-            type="daterange"
-            range-separator="至"
-            start-placeholder="开始日期"
-            end-placeholder="结束日期"
-            format="YYYY-MM-DD"
-            value-format="YYYY-MM-DD"
-            style="width: 300px; font-size: 18px;"
+              v-else-if="searchParams.timeType === 'custom'"
+              v-model="searchParams.dateRange"
+              type="daterange"
+              range-separator="至"
+              start-placeholder="开始日期"
+              end-placeholder="结束日期"
+              format="YYYY-MM-DD"
+              value-format="YYYY-MM-DD"
+              style="width: 300px; font-size: 18px;"
           />
         </div>
       </div>
-      <div class="total-summary">
-        <span class="summary-label">消费额汇总</span>
-        <span class="summary-value">{{ totalMoney }} 元</span>
-      </div>
+<!--      <div class="total-summary">-->
+<!--        <span class="summary-label">水费汇总</span>-->
+<!--        <span class="summary-value">{{ waterTotal }} 元</span>-->
+<!--        <span class="summary-label" style="margin-left:20px">污水处理费汇总</span>-->
+<!--        <span class="summary-value">{{ sewageTotal }} 元</span>-->
+<!--      </div>-->
       <div class="search-buttons">
         <div class="search-btn" @click="handleSearch">
           <img src="@/assets/yonghu/icon16.png" alt="" />
@@ -76,19 +67,10 @@
     </div>
 
     <div class="tool-bar">
-      <div class="export-btn" @click="downloadTemplate" v-if="staffPermissionIds.includes(54)">
-        <img src="@/assets/yonghu/icon1.png" alt="" />
-        <span>历史数据导⼊模版下载</span>
-      </div>
-      <div class="export-btn" @click="triggerFileInput" v-if="staffPermissionIds.includes(54)">
-        <img src="@/assets/yonghu/icon2.png" alt="" />
-        <span>历史数据导⼊</span>
-        <input ref="fileInput" type="file" accept=".xls,.xlsx" style="display: none" @change="handleImport" />
-      </div>
-      <div class="export-btn" @click="exportExcel">
-        <img src="@/assets/yonghu/icon1.3.png" alt="" />
-        <span>导出</span>
-      </div>
+<!--      <div class="export-btn" @click="exportExcel">-->
+<!--        <img src="@/assets/yonghu/icon1.3.png" alt="" />-->
+<!--        <span>导出</span>-->
+<!--      </div>-->
       <div class="refresh-btn" @click="handleRefresh">
         <img src="@/assets/yonghu/icon15.png" alt="" />
       </div>
@@ -96,43 +78,44 @@
 
     <div class="table-wrapper">
       <el-table
-        :data="list"
-        border
-        v-loading="loading"
-        style="width: 100%"
-        :header-cell-style="{ background: '#46B97E', color: '#FFFFFF' }"
-        :row-style="{ height: '50px' }"
-        height="100%"
+          :data="list"
+          border
+          v-loading="loading"
+          style="width: 100%"
+          :header-cell-style="{ background: '#46B97E', color: '#FFFFFF' }"
+          :row-style="{ height: '50px' }"
+          height="100%"
       >
         <el-table-column type="selection" width="50" align="center" fixed="left" />
-        <el-table-column property="userId" label="用户号" min-width="120" align="center" />
-        <el-table-column property="userName" label="用户名称" min-width="140" align="center" />
-        <el-table-column property="meterCode" label="表号" min-width="160" align="center" />
-        <el-table-column property="chargeAmount" label="扣费金额" min-width="110" align="center">
-          <template #default="scope">{{ scope.row.chargeAmount }} 元</template>
+        <el-table-column property="theId" label="序号" width="70" align="center" fixed="left" />
+        <el-table-column property="userId" label="用户号" min-width="100" align="center" />
+        <el-table-column property="userName" label="用户名" min-width="140" align="center" />
+        <el-table-column property="userAddr" label="地址" min-width="260" align="center" />
+        <el-table-column property="startRead" label="起码" min-width="100" align="center" />
+        <el-table-column property="endRead" label="止码" min-width="100" align="center" />
+        <el-table-column property="waterUse" label="用水量" min-width="100" align="center">
+          <template #default="scope">{{ scope.row.waterUse }}</template>
         </el-table-column>
-        <el-table-column property="oldBalance" label="原金额" min-width="110" align="center">
-          <template #default="scope">{{ scope.row.oldBalance }} 元</template>
+        <el-table-column property="waterFee" label="水费" min-width="100" align="center">
+          <template #default="scope">{{ scope.row.waterFee }}</template>
         </el-table-column>
-        <el-table-column property="newBalance" label="余额" min-width="110" align="center">
-          <template #default="scope">{{ scope.row.newBalance }} 元</template>
+        <el-table-column property="sewageFee" label="污水处理费" min-width="130" align="center">
+          <template #default="scope">{{ scope.row.sewageFee }}</template>
         </el-table-column>
-        <el-table-column property="createTime" label="扣费时间" min-width="180" align="center" />
-        <el-table-column label="扣费类型" min-width="120" align="center">
-          <template #default="scope">
-            <span>{{ formatChargeType(scope.row.type) }}</span>
-          </template>
+        <el-table-column property="minFee" label="保底消费" min-width="110" align="center">
+          <template #default="scope">{{ scope.row.minFee }}</template>
         </el-table-column>
+        <el-table-column property="createTime" label="算费日期" min-width="140" align="center" />
       </el-table>
     </div>
 
     <div class="pagination-container">
       <el-pagination
-        v-model:current-page="currentPage"
-        layout="total, prev, pager, next, jumper"
-        :page-size="pageSize"
-        :total="total"
-        @current-change="handlePageChange"
+          v-model:current-page="currentPage"
+          layout="total, prev, pager, next, jumper"
+          :page-size="pageSize"
+          :total="total"
+          @current-change="handlePageChange"
       />
     </div>
   </div>
@@ -144,7 +127,7 @@ import service from "@/api/request";
 import axios from "axios";
 
 export default {
-  name: "BillTable",
+  name: "BillDetailTable",
   props: {
     user: {
       type: Object,
@@ -153,7 +136,7 @@ export default {
       }
     }
   },
-  emits: ["update-total-money"],
+  emits: [],
   data() {
     return {
       loading: false,
@@ -164,9 +147,10 @@ export default {
       pageSize: 30,
       staffPermissionIds: JSON.parse(sessionStorage.getItem("userData") || "{}").staffPermissionIds || [],
       token: JSON.parse(sessionStorage.getItem("userData") || "{}").token || "",
-      totalMoney: 0,
+      // 汇总金额
+      // waterTotal: 0,  // 总水费
+      // sewageTotal: 0, // 总污水费
       searchParams: {
-        // chargeType: "", // 扣费类型 - 暂时注释
         timeType: "day",
         createTime: "",
         dateRange: null
@@ -174,19 +158,19 @@ export default {
     };
   },
   mounted() {
-    this.fetchBillRecords();
+    this.fetchBillDetailRecords();
   },
   watch: {
     "user.userId"(newValue, oldValue) {
       if (newValue && newValue !== oldValue) {
         this.currentPage = 1;
-        this.fetchBillRecords();
+        this.fetchBillDetailRecords();
       }
     },
     "user.meterCode"(newValue, oldValue) {
       if (newValue && newValue !== oldValue) {
         this.currentPage = 1;
-        this.fetchBillRecords();
+        this.fetchBillDetailRecords();
       }
     },
     "searchParams.timeType"() {
@@ -195,90 +179,6 @@ export default {
     }
   },
   methods: {
-    // 导出模板
-    downloadTemplate() {
-      axios({
-        url: "/import/importChargeTemplate",
-        method: "GET",
-        responseType: "blob",
-        headers: {
-          Authorization: this.token
-        }
-      })
-        .then((response) => {
-          if (response.status !== 200) {
-            throw new Error("下载失败: " + response.statusText);
-          }
-
-          const blob = new Blob([response.data], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
-          const link = document.createElement("a");
-          link.href = window.URL.createObjectURL(blob);
-          link.download = "历史扣费数据导⼊模版下载.xlsx";
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
-          window.URL.revokeObjectURL(link.href);
-        })
-        .catch((error) => {
-          console.error("下载失败:", error);
-          ElMessage.error("下载失败: " + error.message);
-        });
-    },
-
-    // 触发文件选择
-    triggerFileInput() {
-      this.$refs.fileInput.value = "";
-      this.$refs.fileInput.click();
-    },
-
-// 导入文件
-    async handleImport() {
-      const fileInput = this.$refs.fileInput;
-      const file = fileInput.files[0];
-
-      if (!file) {
-        ElMessage.warning("请选择要上传的文件");
-        return;
-      }
-
-      const allowedTypes = ["application/vnd.ms-excel", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"];
-      if (!allowedTypes.includes(file.type)) {
-        ElMessage.warning("仅支持上传 .xls 或 .xlsx 文件");
-        return;
-      }
-
-      const formData = new FormData();
-      formData.append("file", file);
-      formData.append("companyId", this.user.companyId);
-
-      try {
-        const response = await service.post("/import/importChargeRecord", formData, { responseType: "blob" });
-        const blob = new Blob([response.data], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
-
-        if (blob.size === 0) {
-          ElMessage.success("导入成功");
-          fileInput.value = "";
-          this.handleRefresh();
-          return;
-        }
-
-        ElMessage.warning("部分数据导入失败，等待下载失败列表");
-        const link = document.createElement("a");
-        link.href = window.URL.createObjectURL(blob);
-        link.download = "扣费记录导入失败列表.xlsx";
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        window.URL.revokeObjectURL(link.href);
-        fileInput.value = "";
-        this.handleRefresh();
-      } catch (error) {
-        const errorMessage = error.response?.data?.message || error.message || "未知错误";
-        ElMessage.error("导入失败: " + errorMessage);
-        console.error("上传失败:", error);
-      }
-    },
-
     buildQueryParams() {
       let params = {
         userId: this.user.userId,
@@ -286,38 +186,47 @@ export default {
         companyId: this.user.companyId
       };
 
-      // 扣费类型筛选 - 暂时注释
-      // if (this.searchParams.chargeType !== "") {
-      //   params.type = this.searchParams.chargeType;
-      // }
-
       if (this.searchParams.timeType === "custom") {
         if (this.searchParams.dateRange && this.searchParams.dateRange.length === 2) {
           params.createTime = `${this.searchParams.dateRange[0]} 00:00:00`;
           params.endTime = `${this.searchParams.dateRange[1]} 23:59:59`;
+          params.timeType = 4;
         }
       } else if (this.searchParams.createTime && this.searchParams.timeType) {
-        let formattedTime = "";
+        let start = "";
+        let end = "";
         let timeTypeValue = null;
-
         switch (this.searchParams.timeType) {
           case "year":
-            formattedTime = `${this.searchParams.createTime}-01-01 00:00:00`;
+            // 选年份：起始当年1月1日，结束当年12月31日23:59:59
+            start = `${this.searchParams.createTime}-01-01 00:00:00`;
+            end = `${this.searchParams.createTime}-12-31 23:59:59`;
             timeTypeValue = 1;
             break;
           case "month":
-            formattedTime = `${this.searchParams.createTime}-01 00:00:00`;
+            // 选月份：起始当月1号，次月1号前一秒
+            const [y, m] = this.searchParams.createTime.split("-");
+            const nextMonth = Number(m) + 1;
+            if (nextMonth === 13) {
+              start = `${y}-12-01 00:00:00`;
+              end = `${Number(y) + 1}-01-01 00:00:00`;
+            } else {
+              start = `${y}-${String(nextMonth - 1).padStart(2, '0')}-01 00:00:00`;
+              end = `${y}-${String(nextMonth).padStart(2, '0')}-01 00:00:00`;
+            }
             timeTypeValue = 2;
             break;
           case "day":
-            formattedTime = `${this.searchParams.createTime} 00:00:00`;
+            // 选单日：当天0点 ~ 当天23:59:59
+            start = `${this.searchParams.createTime} 00:00:00`;
+            end = `${this.searchParams.createTime} 23:59:59`;
             timeTypeValue = 3;
             break;
         }
-
         if (timeTypeValue) {
           params.timeType = timeTypeValue;
-          params.createTime = formattedTime;
+          params.createTime = start;
+          params.endTime = end;
         }
       }
 
@@ -337,7 +246,7 @@ export default {
       }
       return queryString;
     },
-    async fetchBillRecords() {
+    async fetchBillDetailRecords() {
       if (!this.user.userId || !this.user.meterCode || this.isLoading) {
         return;
       }
@@ -348,53 +257,48 @@ export default {
       try {
         const params = this.buildQueryParams();
         const queryString = this.buildQueryString(params);
-        const url = `/userManage/userCharge/showMeterChargeRecords/${this.currentPage}${queryString}`;
+        // 替换为后端扣费详情接口
+        const url = `/chargeDetail/list/${this.currentPage}${queryString}`;
         const response = await service.get(url);
 
         if (response.code === 200) {
-          const records = response.data.userSingleRechargeRecordData || [];
+          const records = response.data.dataList || [];
           records.map((item, index) => {
             item.theId = this.pageSize * (response.data.currentPages - 1) + index + 1;
+            // 格式化日期
+            if(item.createTime) item.createTime = item.createTime.substring(0,10);
             return item;
           });
 
-          this.list = records.map((item) => {
-            if (item.createTime) {
-              return {
-                ...item,
-                createTime: item.createTime.replace("T", " ")
-              };
-            }
-            return item;
-          });
-
+          this.list = records;
           this.total = response.data.totalElements || 0;
-          await this.fetchTotalMoney();
+          // 获取汇总水费、污水处理费
+          // await this.fetchTotalFee();
         } else {
           ElMessage.error(response.msg);
         }
       } catch (error) {
-        console.error("获取账单记录失败", error);
-        ElMessage.error("获取账单记录失败");
+        console.error("获取扣费详情记录失败", error);
+        ElMessage.error("获取扣费详情记录失败");
       } finally {
         this.loading = false;
         this.isLoading = false;
       }
     },
-    async fetchTotalMoney() {
-      try {
-        const params = this.buildQueryParams();
-        const queryString = this.buildQueryString(params);
-        const url = `/userManage/userCharge/getTotalChargeAmount${queryString}`;
-        const response = await service.get(url);
-        if (response.code === 200) {
-          this.totalMoney = response.data || 0;
-          this.$emit("update-total-money", response.data || 0);
-        }
-      } catch (error) {
-        console.error("获取扣费总额失败", error);
-      }
-    },
+    // async fetchTotalFee() {
+    //   try {
+    //     const params = this.buildQueryParams();
+    //     const queryString = this.buildQueryString(params);
+    //     const url = `/userManage/userCharge/getBillDetailTotal${queryString}`;
+    //     const response = await service.get(url);
+    //     if (response.code === 200) {
+    //       this.waterTotal = response.data.waterTotal || 0;
+    //       this.sewageTotal = response.data.sewageTotal || 0;
+    //     }
+    //   } catch (error) {
+    //     console.error("获取费用汇总失败", error);
+    //   }
+    // },
     handleSearch() {
       if (this.searchParams.timeType === "custom") {
         if (!this.searchParams.dateRange || this.searchParams.dateRange.length !== 2) {
@@ -406,24 +310,23 @@ export default {
         return;
       }
       this.currentPage = 1;
-      this.fetchBillRecords();
+      this.fetchBillDetailRecords();
     },
     handleClear() {
       this.searchParams = {
-        // chargeType: "", // 扣费类型 - 暂时注释
         timeType: "day",
         createTime: "",
         dateRange: null
       };
       this.currentPage = 1;
-      this.fetchBillRecords();
+      this.fetchBillDetailRecords();
     },
     handleRefresh() {
       this.handleClear();
     },
     handlePageChange(page) {
       this.currentPage = page;
-      this.fetchBillRecords();
+      this.fetchBillDetailRecords();
     },
     filterNonEmptyParams(params) {
       const filteredParams = {};
@@ -438,18 +341,11 @@ export default {
       }
       return filteredParams;
     },
-    // 扣费类型格式化函数
-    formatChargeType(type) {
-      if (type === 0 || type === "0") return "抄表扣费";
-      if (type === 1 || type === "1") return "保底扣费";
-      if (type === 2 || type === "2") return "补扣费用";
-      return "-";
-    },
     async exportExcel() {
       try {
         const params = this.buildQueryParams();
         const response = await axios({
-          url: "/userManage/userCharge/exportChargeRecord",
+          url: "/userManage/userCharge/exportBillDetailRecord",
           method: "GET",
           responseType: "blob",
           params: params
@@ -470,7 +366,7 @@ export default {
 
         const link = document.createElement("a");
         link.href = window.URL.createObjectURL(blob);
-        link.download = `${this.user.userName || "用户"}_历史扣费记录.xlsx`;
+        link.download = `${this.user.userName || "用户"}_扣费明细记录.xlsx`;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
@@ -570,7 +466,7 @@ export default {
 
 .total-summary .summary-label {
   font-size: 20px;
-  letter-spacing: 2px;  /* 调大字间距 */
+  letter-spacing: 2px;
   color: #5a5a5a;
 }
 
@@ -584,6 +480,7 @@ export default {
   display: flex;
   align-items: center;
   gap: 12px;
+  margin-left: auto; /* 核心：自动挤到最右侧 */
 }
 
 .search-btn, .clear-btn {

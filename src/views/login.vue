@@ -32,9 +32,32 @@
               <input type="password" v-model="param.password" placeholder="请输入密码" />
             </label>
           </li>
+          <li class="captchaLi">
+            <label class="captchaLabel" style="height: 55px; flex: 0 0 auto;">
+              <img src="@/assets/icon2.svg" alt="" class="icon" />
+              <input
+                  type="text"
+                  class="captchaInput"
+                  v-model="param.captchaCode"
+                  placeholder="请输入验证码"
+                  @keyup.enter="goLogin"
+              />
+            </label>
+            <!-- 验证码图片放到输入框下方，左侧带“验证码：”文字，点击图片刷新 -->
+            <div class="captchaImgWrap">
+              <span class="captchaImgLabel">验证码：</span>
+              <img
+                  :src="captchaImg"
+                  @click="getCaptcha"
+                  class="captchaImg"
+                  alt="点击刷新验证码"
+                  title="看不清？点击刷新"
+              />
+            </div>
+          </li>
           <li>
             <div class="txt">
-              <a @click.stop="toggleRegister">注册</a>
+              <!--              <a @click.stop="toggleRegister">注册</a>-->
               <a @click.stop="showForgetPassword" class="forget">忘记密码</a>
             </div>
           </li>
@@ -152,6 +175,7 @@ const route = useRouter();
 
 onMounted(() => {
   getCompanyList();
+  getCaptcha();
   console.log("onmounted");
   console.log(proxy.ajax);
 });
@@ -159,9 +183,14 @@ onMounted(() => {
 const isRegister = ref(false);
 const isForgetPassword = ref(false);
 
+// 图形验证码图片（Base64 Data URI）
+const captchaImg = ref("");
+
 const param = reactive({
   account: "",
   password: "",
+  captchaId: "",
+  captchaCode: "",
 });
 
 const registerParam = reactive({
@@ -186,26 +215,40 @@ const forgetPasswordParam = reactive({
 
 function getCompanyList() {
   service
-    .get("/getAllUnblockCompany")
-    .then((response) => {
-      if (response.code === 200) {
-        companyList.value = response.data.map((item) => {
-          return {
-            id: item.companyId,
-            name: item.companyName,
-          };
-        });
-      } else {
-        ElMessage.error(response.msg);
-      }
-    })
-    .catch((error) => {
-      console.error(error);
-    });
+      .get("/getAllUnblockCompany")
+      .then((response) => {
+        if (response.code === 200) {
+          companyList.value = response.data.map((item) => {
+            return {
+              id: item.companyId,
+              name: item.companyName,
+            };
+          });
+        } else {
+          ElMessage.error(response.msg);
+        }
+      })
+      .catch((error) => {
+        console.error(error);
+      });
 }
 
 function forget() {
   console.log("forget");
+}
+
+// 获取登录图形验证码，点击图片可刷新
+async function getCaptcha() {
+  try {
+    const res = await proxy.ajax.get("/staff/captcha");
+    if (res.code === 200) {
+      captchaImg.value = res.data.imageBase64;
+      param.captchaId = res.data.captchaId;
+      param.captchaCode = "";
+    }
+  } catch (error) {
+    console.error("获取验证码失败", error);
+  }
 }
 
 // async function goLogin() {
@@ -240,8 +283,21 @@ function forget() {
 // }
 
 async function goLogin() {
+  // 基础校验：账号、密码、图形验证码均不能为空
+  if (param.account === "") {
+    ElMessage.error("请输入账户");
+    return;
+  }
+  if (param.password === "") {
+    ElMessage.error("请输入密码");
+    return;
+  }
+  if (param.captchaCode === "") {
+    ElMessage.error("请输入验证码");
+    return;
+  }
   try {
-    let { code, data } = await proxy.ajax.post("/staff/login", param, true);
+    let { code, data } = await proxy.ajax.post("/staff/loginWithCaptcha", param, true);
     if (code == 200) {
       sessionStorage.setItem("userData", JSON.stringify(data));
       store.commit("setUserData", data);
@@ -279,6 +335,8 @@ async function goLogin() {
     }
   } catch (error) {
     console.error("登录请求异常", error);
+    // 验证码为一次性使用，登录失败后刷新验证码
+    getCaptcha();
   }
 }
 
@@ -316,19 +374,19 @@ async function goRegister() {
   registerParam.staffAddr = "湖北省武汉市";
   console.log(registerParam);
   proxy.ajax
-    .post("/staff/registerStaff", registerParam)
-    .then((res) => {
-      if (res.code === 200) {
-        ElMessage.success("注册成功，请登录");
-        toggleRegister();
-      } else {
-        ElMessage.error(res.msg || "注册失败");
-      }
-    })
-    .catch((err) => {
-      console.error("注册失败：", err);
-      ElMessage.error("注册失败：", err);
-    });
+      .post("/staff/registerStaff", registerParam)
+      .then((res) => {
+        if (res.code === 200) {
+          ElMessage.success("注册成功，请登录");
+          toggleRegister();
+        } else {
+          ElMessage.error(res.msg || "注册失败");
+        }
+      })
+      .catch((err) => {
+        console.error("注册失败：", err);
+        ElMessage.error("注册失败：", err);
+      });
 }
 
 function showForgetPassword() {
@@ -362,18 +420,18 @@ async function registerGetVerificationCode() {
     return;
   }
   await proxy.ajax
-    .get(`/staff/sendCaptcha?phoneNum=${registerParam.staffPhone}`)
-    .then((res) => {
-      if (res.code === 200) {
-        ElMessage.success("验证码已发送，请查收");
-      } else {
-        ElMessage.error(res.msg || "获取验证码失败");
-      }
-    })
-    .catch((err) => {
-      console.error("获取验证码失败：", err);
-      ElMessage.error("获取验证码失败：", err);
-    });
+      .get(`/staff/sendCaptcha?phoneNum=${registerParam.staffPhone}`)
+      .then((res) => {
+        if (res.code === 200) {
+          ElMessage.success("验证码已发送，请查收");
+        } else {
+          ElMessage.error(res.msg || "获取验证码失败");
+        }
+      })
+      .catch((err) => {
+        console.error("获取验证码失败：", err);
+        ElMessage.error("获取验证码失败：", err);
+      });
 }
 
 async function getVerificationCode() {
@@ -386,18 +444,18 @@ async function getVerificationCode() {
     return;
   }
   await proxy.ajax
-    .get(`/staff/sendCaptcha?phoneNum=${forgetPasswordParam.phone}`)
-    .then((res) => {
-      if (res.code === 200) {
-        ElMessage.success("验证码已发送，请查收");
-      } else {
-        ElMessage.error(res.msg || "获取验证码失败");
-      }
-    })
-    .catch((err) => {
-      console.error("获取验证码失败：", err);
-      ElMessage.error("获取验证码失败：", err);
-    });
+      .get(`/staff/sendCaptcha?phoneNum=${forgetPasswordParam.phone}`)
+      .then((res) => {
+        if (res.code === 200) {
+          ElMessage.success("验证码已发送，请查收");
+        } else {
+          ElMessage.error(res.msg || "获取验证码失败");
+        }
+      })
+      .catch((err) => {
+        console.error("获取验证码失败：", err);
+        ElMessage.error("获取验证码失败：", err);
+      });
 }
 
 async function resetPassword() {
@@ -421,19 +479,19 @@ async function resetPassword() {
   };
   console.log(requestData);
   proxy.ajax
-    .post("/staff/resetPassword", requestData)
-    .then((res) => {
-      if (res.code === 200) {
-        ElMessage.success("重置密码成功。请登录");
-        hideForgetPassword();
-      } else {
-        ElMessage.error(res.msg || "重置密码失败");
-      }
-    })
-    .catch((err) => {
-      console.error("重置密码失败：", err);
-      ElMessage.error("重置密码失败：", err);
-    });
+      .post("/staff/resetPassword", requestData)
+      .then((res) => {
+        if (res.code === 200) {
+          ElMessage.success("重置密码成功。请登录");
+          hideForgetPassword();
+        } else {
+          ElMessage.error(res.msg || "重置密码失败");
+        }
+      })
+      .catch((err) => {
+        console.error("重置密码失败：", err);
+        ElMessage.error("重置密码失败：", err);
+      });
 }
 </script>
 
@@ -451,6 +509,47 @@ async function resetPassword() {
     font-size: 22px;
     padding-left: 0px;
   }
+}
+
+/* 验证码栏：输入框在上、验证码图片在下（纵向排列） */
+.captchaLi {
+  flex-direction: column;
+  align-items: stretch;
+}
+
+/* 绿色输入框宽度与账号/密码栏一致；高度用行内 style 设为 55px
+   （覆盖基础样式 .card .form ul li label 的 48px，与账号/密码栏保持一致） */
+.captchaLabel {
+  width: 100%;
+}
+
+.captchaInput {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* 输入框下方一行：左侧“验证码：”文字 + 右侧验证码图片 */
+.captchaImgWrap {
+  align-self: flex-start;
+  display: flex;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.captchaImgLabel {
+  margin-right: 10px;
+  font-size: 20px;
+  color: #585657;
+  white-space: nowrap;
+}
+
+/* 验证码图片，点击刷新 */
+.captchaImg {
+  width: 150px;
+  height: 50px;
+  cursor: pointer;
+  border-radius: 6px;
+  object-fit: contain;
 }
 
 .card {
@@ -533,10 +632,12 @@ async function resetPassword() {
         label {
           flex: 1;
           border-radius: 10px;
+          height: 55px;
+          box-sizing: border-box;
+          width: 100%;
           display: flex;
           align-items: center;
           background: #dff0ed;
-          height: 48px;
           padding: 0 18px;
           margin-top: 10px;
           img {
@@ -544,7 +645,9 @@ async function resetPassword() {
             margin-right: 14px;
           }
           input {
+            width: 100%;
             flex: 1;
+            min-width: 0;
             font-size: 22px;
             color: #585657;
             &::placeholder {

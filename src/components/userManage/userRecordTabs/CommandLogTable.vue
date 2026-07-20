@@ -58,12 +58,14 @@
         height="100%"
       >
         <el-table-column property="theId" label="序号" width="80" align="center" fixed="left" />
+        <el-table-column property="displayUserId" label="用户号" min-width="120" align="center" />
         <el-table-column property="meterCode" label="表号" min-width="150" align="center" />
         <el-table-column property="commandType" label="通讯类别" min-width="130" align="center" />
         <el-table-column property="commandStatus" label="通讯状态" min-width="130" align="center" />
         <el-table-column property="createTime" label="通讯下发时间" min-width="180" align="center" />
         <el-table-column property="finishTime" label="通讯完成时间" min-width="180" align="center" />
         <el-table-column property="meterVendor" label="厂商" min-width="120" align="center" />
+        <el-table-column property="displayStaffName" label="下发员工" min-width="120" align="center" />
         <el-table-column property="description" label="描述" min-width="260" align="center" show-overflow-tooltip />
       </el-table>
     </div>
@@ -161,6 +163,8 @@ export default {
           this.list = records.map((item, index) => ({
             ...item,
             theId: this.pageSize * (current - 1) + index + 1,
+            displayUserId: this.formatUserId(item.userId),
+            displayStaffName: item.sendStaffName || "",
             createTime: item.createTime ? item.createTime.replace("T", " ") : "",
             finishTime: item.finishTime ? item.finishTime.replace("T", " ") : ""
           }));
@@ -209,6 +213,16 @@ export default {
         }
       }
       return filteredParams;
+    },
+    formatUserId(userId) {
+      if (userId === null || userId === undefined || userId === "") {
+        return "";
+      }
+      const numericUserId = Number(userId);
+      if (Number.isNaN(numericUserId)) {
+        return userId;
+      }
+      return numericUserId % 10000000;
     }
   }
 };

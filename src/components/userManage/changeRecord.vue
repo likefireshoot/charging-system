@@ -95,7 +95,7 @@
               <input ref="fileInput" type="file" accept=".xls,.xlsx" style="display: none" @change="exportIn" />
             </div>
             <div class="export-out-btn" style="margin-right: 10px" @click="exportExcel">
-              <img src="@/assets/yonghu/icon2.png" alt="" style="margin-left: 7px" />
+              <img src="@/assets/yonghu/icon1.3.png" alt="" style="margin-left: 7px" />
               <span style="font-size: 20px; margin-left: 10px; color: #5a5a5a">导出</span>
             </div>
             <div class="reflush" style="margin-left: 10px" @click="reflush">
@@ -158,7 +158,7 @@
 
 <script>
 import service from "@/api/request";
-import { ElMessage } from "element-plus";
+import { ElMessage, ElMessageBox } from "element-plus";
 import axios from "axios";
 
 export default {
@@ -231,19 +231,50 @@ export default {
 
     withdraw(meterChangeRecordId) {
       console.log(meterChangeRecordId);
-      let url = `/userManage/meterRead/withdrawChangeMeter/` + meterChangeRecordId; // 所属水厂ID
-      service
-        .get(url)
-        .then((res) => {
-          if (res.code === 200) {
-            ElMessage.success("撤回成功");
-            this.getChangeRecordData();
-          } else {
-            ElMessage.error(res.msg);
-          }
+      ElMessageBox.confirm(
+        `<div style="font-size: 16px; color: #555; line-height: 1.8;">
+          <p style="margin: 0 0 12px 0;">你即将撤回本次换表操作，这会用历史水表数据覆盖当前水表数据。</p>
+          <p style="color: #e74c3c; font-weight: 600; margin: 12px 0; font-size: 16px;">⚠️ 如果在撤回前已经对新水表进行了充值或扣费，这些变动将被覆盖。</p>
+          <div style="margin-top: 20px;">
+            <p style="font-weight: 600; color: #333; margin: 0 0 6px 0; font-size: 17px;">建议操作：</p>
+            <ul style="padding: 0 0 0 20px; margin: 6px 0; list-style: disc;">
+              <li style="margin-bottom: 8px;">如果新水表已经产生充值或扣费记录，请再次使用"换表"功能，将新表换回旧表即可。</li>
+              <li>若确定无新表变动，可以继续撤回操作。</li>
+            </ul>
+          </div>
+        </div>`,
+        "撤回换表操作存在风险",
+        {
+          confirmButtonText: "确认撤回",
+          cancelButtonText: "取消",
+          type: "warning",
+          dangerouslyUseHTMLString: true,
+          closeOnClickModal: false,
+          lockScroll: false,
+          distinguishCancelAndClose: true,
+          customClass: "withdraw-warning-dialog",
+          confirmButtonClass: "withdraw-confirm-btn",
+          cancelButtonClass: "withdraw-cancel-btn",
+        }
+      )
+        .then(() => {
+          let url = `/userManage/meterRead/withdrawChangeMeter/` + meterChangeRecordId;
+          service
+            .get(url)
+            .then((res) => {
+              if (res.code === 200) {
+                ElMessage.success("撤回成功");
+                this.getChangeRecordData();
+              } else {
+                ElMessage.error(res.msg);
+              }
+            })
+            .catch((err) => {
+              ElMessage.error(err);
+            });
         })
-        .catch((err) => {
-          ElMessage.error(err);
+        .catch(() => {
+          // 用户点击取消或关闭，不做任何操作
         });
     },
     selectable() {
@@ -862,5 +893,93 @@ export default {
   align-items: center;
   position: absolute;
   bottom: 0;
+}
+</style>
+
+<!-- 撤回警告弹窗全局样式（非 scoped，因 ElMessageBox 渲染到 body） -->
+<style>
+/* 修复 ElMessageBox 弹出时因 body 滚动条消失导致的横向收缩 */
+html {
+  overflow-y: scroll;
+}
+
+.withdraw-warning-dialog {
+  width: 460px !important;
+  border-radius: 8px !important;
+  padding: 28px 36px !important;
+}
+
+.withdraw-warning-dialog .el-message-box__header {
+  padding: 0 0 20px 0 !important;
+}
+
+/* 隐藏默认的圆圈感叹号图标 */
+.withdraw-warning-dialog .el-message-box__status {
+  display: none !important;
+}
+
+/* 标题样式 + 自定义警告图标（⚠️ 替换掉圆圈感叹号） */
+.withdraw-warning-dialog .el-message-box__title {
+  font-size: 20px;
+  font-weight: 600;
+  color: #333;
+  display: flex;
+  align-items: center;
+  position: relative;
+  padding-left: 28px;
+}
+
+.withdraw-warning-dialog .el-message-box__title::before {
+  content: "⚠️";
+  position: absolute;
+  left: 0;
+  font-size: 22px;
+}
+
+.withdraw-warning-dialog .el-message-box__content {
+  padding: 0 !important;
+}
+
+.withdraw-warning-dialog .el-message-box__message {
+  padding: 0 !important;
+}
+
+.withdraw-warning-dialog .el-message-box__btns {
+  padding: 24px 0 0 0 !important;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+/* 确认撤回按钮（红色） */
+.withdraw-warning-dialog .withdraw-confirm-btn {
+  background-color: #e74c3c !important;
+  border-color: #e74c3c !important;
+  color: #fff !important;
+  padding: 10px 24px !important;
+  border-radius: 4px !important;
+  font-size: 15px !important;
+}
+
+.withdraw-warning-dialog .withdraw-confirm-btn:hover,
+.withdraw-warning-dialog .withdraw-confirm-btn:focus {
+  background-color: #c0392b !important;
+  border-color: #c0392b !important;
+}
+
+/* 取消按钮（灰色） */
+.withdraw-warning-dialog .withdraw-cancel-btn {
+  background-color: #f5f5f5 !important;
+  border-color: #e0e0e0 !important;
+  color: #333 !important;
+  padding: 10px 24px !important;
+  border-radius: 4px !important;
+  font-size: 15px !important;
+}
+
+.withdraw-warning-dialog .withdraw-cancel-btn:hover,
+.withdraw-warning-dialog .withdraw-cancel-btn:focus {
+  background-color: #e8e8e8 !important;
+  border-color: #d0d0d0 !important;
 }
 </style>

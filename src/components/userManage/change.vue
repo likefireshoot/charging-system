@@ -66,7 +66,7 @@
 
 <script>
 import service from "@/api/request";
-import { ElMessage } from "element-plus";
+import { ElMessage, ElMessageBox } from "element-plus";
 
 export default {
   props: {
@@ -137,7 +137,7 @@ export default {
     refreshChargePreview() {
       const oldCount = this.normalizeNumber(this.changeData.oldCount);
       const changeCount = this.normalizeNumber(this.changeData.changeCount);
-      if (!this.changeData.oldMeterCode || oldCount === null || changeCount === null || changeCount <= oldCount) {
+      if (!this.changeData.oldMeterCode || oldCount === null || changeCount === null || changeCount < oldCount) {
         this.previewCharge = "0.00";
         return;
       }
@@ -203,29 +203,73 @@ export default {
         ElMessage.error("换表时表数格式不正确");
         return;
       }
-      if (oldCount !== null && changeCount <= oldCount) {
-        ElMessage.error("换表时表数必须大于旧表读数");
+      if (oldCount !== null && changeCount < oldCount) {
+        ElMessage.error("换表时表数不能小于旧表读数");
         return;
       }
 
-      service
-        .put("/userManage/meterRead/changeMeter", {
-          oldMeterCode: formData.oldMeterCode,
-          newMeterCode: formData.newMeterCode,
-          newReading: newMeterReading,
-          changeReading: changeCount,
+      const doSubmit = () => {
+        service
+          .put("/userManage/meterRead/changeMeter", {
+            oldMeterCode: formData.oldMeterCode,
+            newMeterCode: formData.newMeterCode,
+            newReading: newMeterReading,
+            changeReading: changeCount,
+          })
+          .then((res) => {
+            if (res.code === 200) {
+              ElMessage.success("提交成功");
+              this.handleChangeCancel();
+            } else {
+              ElMessage.error("提交失败：" + res.msg);
+            }
+          })
+          .catch((err) => {
+            ElMessage.error("提交失败：" + err.message);
+          });
+      };
+
+      ElMessageBox.confirm(
+        `<div class="confirm-body">
+          <div class="confirm-title">请确认以下换表信息</div>
+          <div class="confirm-section">
+            <div class="section-title">用户信息</div>
+            <div class="section-row">
+              <span class="field"><label>用户号：</label>${formData.userId}</span>
+              <span class="field"><label>用户名称：</label>${formData.userName}</span>
+            </div>
+          </div>
+          <div class="confirm-section">
+            <div class="section-title">旧表信息</div>
+            <div class="section-row">
+              <span class="field"><label>表号：</label>${formData.oldMeterCode}</span>
+              <span class="field"><label>旧表读数：</label>${formData.oldCount}</span>
+              <span class="field"><label>换表时读数：</label>${formData.changeCount}</span>
+            </div>
+          </div>
+          <div class="confirm-section">
+            <div class="section-title">新表信息</div>
+            <div class="section-row">
+              <span class="field"><label>表号：</label>${formData.newMeterCode}</span>
+              <span class="field"><label>新表读数：</label><b>${formData.newMeterReading}</b></span>
+            </div>
+          </div>
+          <div class="confirm-warning">⚠ 新表将从该读数开始计费，请务必确认清楚，否则可能造成不必要的扣费。</div>
+        </div>`,
+        "确认换表",
+        {
+          confirmButtonText: "确认提交",
+          cancelButtonText: "取消",
+          dangerouslyUseHTMLString: true,
+          type: "warning",
+          customClass: "change-confirm-box",
+          lockScroll: false,
+        }
+      )
+        .then(() => {
+          doSubmit();
         })
-        .then((res) => {
-          if (res.code === 200) {
-            ElMessage.success("提交成功");
-            this.handleChangeCancel();
-          } else {
-            ElMessage.error("提交失败：" + res.msg);
-          }
-        })
-        .catch((err) => {
-          ElMessage.error("提交失败：" + err.message);
-        });
+        .catch(() => {});
     },
   },
 };
@@ -340,5 +384,87 @@ export default {
 .cancel-btn {
   background-color: #fff;
   margin-right: 5%;
+}
+</style>
+
+<style>
+.change-confirm-box {
+  width: 760px;
+  max-width: 90vw;
+}
+
+.change-confirm-box .el-message-box__header {
+  padding: 20px 28px 0;
+}
+
+.change-confirm-box .el-message-box__content {
+  padding: 18px 28px 20px;
+}
+
+.change-confirm-box .el-message-box__status {
+  display: none;
+}
+
+.change-confirm-box .el-message-box__message {
+  padding: 0;
+}
+
+.change-confirm-box .el-message-box__btns {
+  padding: 8px 28px 20px;
+}
+
+.change-confirm-box .el-button {
+  padding: 6px 16px;
+  font-size: 14px;
+  height: auto;
+}
+
+.confirm-body {
+  font-size: 15px;
+  color: #555;
+}
+
+.confirm-body .confirm-title {
+  font-weight: 600;
+  color: #333;
+  font-size: 17px;
+  margin-bottom: 14px;
+}
+
+.confirm-body .confirm-section {
+  background: #f7f9fc;
+  border-radius: 6px;
+  padding: 10px 14px;
+  margin-bottom: 10px;
+}
+
+.confirm-body .section-title {
+  font-weight: 600;
+  color: #666;
+  font-size: 13px;
+  margin-bottom: 6px;
+  border-bottom: 1px solid #e2e8f0;
+  padding-bottom: 4px;
+}
+
+.confirm-body .section-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 24px;
+}
+
+.confirm-body .field {
+  white-space: nowrap;
+}
+
+.confirm-body .field label {
+  color: #999;
+}
+
+.confirm-body .confirm-warning {
+  margin-top: 12px;
+  color: #e74c3c;
+  font-weight: 600;
+  font-size: 14px;
 }
 </style>

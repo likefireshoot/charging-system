@@ -4,19 +4,13 @@
       <div class="info-side">
         <div class="info-card user-info-card">
           <div class="card-title">用户信息</div>
-          <div class="balance-section">
-            <div class="yellow-circle">¥</div>
-            <div class="balance-text">
-              <div class="num">{{ currentUser.balance || 0 }}</div>
-              <div class="unit">可用余额 (元)</div>
-            </div>
-          </div>
-          <!-- 新增消费总额区域，仅在账单记录tab时显示 -->
-          <div v-if="activeTab === 'bill'" class="total-consume-section">
-            <div class="total-consume-circle">¥</div>
-            <div class="total-consume-text">
-              <div class="num">{{ totalMoney }}</div>
-              <div class="unit">消费总额 (元)</div>
+          <div class="stats-row">
+            <div class="stat-item">
+              <div class="stat-circle yellow-circle">¥</div>
+              <div class="stat-text">
+                <div class="num">{{ currentUser.balance || 0 }}</div>
+                <div class="unit">可用余额 (元)</div>
+              </div>
             </div>
           </div>
           <div class="data-list">
@@ -26,17 +20,46 @@
             <div class="data-item"><span>开户时间：</span>{{ currentUser.createTime || '-' }}</div>
             <div class="data-item"><span>用户地址：</span>{{ currentUser.userAddr || '-' }}</div>
             <div class="data-item"><span>价格类型：</span>{{ currentUser.userType || '-' }}</div>
+            <div class="data-item"><span>所属水厂：</span>{{ currentUser.companyName || '-' }}</div>
           </div>
         </div>
 
         <div class="info-card meter-info-card">
           <div class="card-title">表信息</div>
+
+          <!-- 水表选择器 -->
+          <div v-if="userMeters.length > 0" class="meter-selector">
+            <div
+              v-for="meter in userMeters"
+              :key="meter.meterCode"
+              :class="['meter-chip', { active: selectedMeterCode === meter.meterCode }]"
+              @click="switchMeter(meter.meterCode)"
+            >
+              <span class="chip-code">{{ meter.meterCode }}</span>
+              <span :class="['chip-status', getStatusClass(meter.status)]">
+                {{ getStatusLabel(meter.status) }}
+              </span>
+            </div>
+          </div>
+
+          <div class="stats-row">
+            <div class="stat-item">
+              <div class="stat-circle blue-circle">T</div>
+              <div class="stat-text">
+                <div class="num">{{ meterReading }}</div>
+                <div class="unit">当前吨数 (吨)</div>
+              </div>
+            </div>
+          </div>
+
           <div class="data-list">
-            <div class="data-item"><span>表号：</span>{{ currentUser.meterCode || '-' }}</div>
-            <div class="data-item"><span>表具类型：</span>{{ currentUser.meterType || 'NB-IoT表' }}</div>
-            <div class="data-item"><span>品牌类型：</span>{{ currentUser.meterVendor || '-' }}</div>
-            <div class="data-item"><span>结算日期：</span>{{ currentUser.settleDate || '20260305' }}</div>
-            <div class="data-item"><span>阀门状态：</span>{{ currentUser.valveStatus || '-' }}</div>
+            <div class="data-item"><span>表号：</span>{{ selectedMeter.meterCode || currentUser.meterCode || '-' }}</div>
+            <div class="data-item"><span>表具类型：</span>{{ selectedMeter.meterType || currentUser.meterType || 'NB-IoT表' }}</div>
+            <div class="data-item"><span>品牌类型：</span>{{ selectedMeter.meterVendor || currentUser.meterVendor || '-' }}</div>
+            <div class="data-item"><span>结算日期：</span>{{ formatDate(selectedMeter.updateTime) || '-' }}</div>
+            <div class="data-item"><span>阀门状态：</span>{{ selectedMeter.valveStatus || currentUser.valveStatus || '-' }}</div>
+            <!-- 解绑时间不再展示 -->
+            <!-- <div v-if="selectedMeter.removeDate" class="data-item"><span>解绑时间：</span>{{ selectedMeter.removeDate }}</div> -->
           </div>
         </div>
       </div>
@@ -54,7 +77,7 @@
           <div class="back-button-wrapper">
             <button class="back-btn" @click="goBack">
               <img src="@/assets/yonghu/icon27.png" alt="back" />
-              <span>返回用户列表</span>
+              <span>{{ source === 'warningManage' ? '返回警告管理' : '返回用户列表' }}</span>
             </button>
           </div>
         </div>
@@ -64,6 +87,7 @@
             <component
               :is="currentTabComponent"
               :user="currentUser"
+              :user-meters="userMeters"
               @update-total-money="handleTotalMoneyUpdate"
             />
           </keep-alive>
@@ -75,11 +99,15 @@
 
 <script>
 import { ElMessage } from "element-plus";
+import service from "@/api/request";
 import BillTable from "./userRecordTabs/BillTable.vue";
 import TransactionTable from "./userRecordTabs/TransactionTable.vue";
 import MeterTable from "./userRecordTabs/MeterTable.vue";
-import OperationTable from "./userRecordTabs/OperationTable.vue";
 import CommandLogTable from "./userRecordTabs/CommandLogTable.vue";
+import CommandTab from "./userRecordTabs/CommandTab.vue";
+import BillDetailTable from "@/components/userManage/userRecordTabs/BillDetailTable.vue";
+import RechargeCancelTable from "@/components/userManage/userRecordTabs/RechargeCancelTable.vue";
+import { useDetailNavigation } from "@/composables/useDetailNavigation";
 
 export default {
   name: "UserBillDetail",
@@ -87,49 +115,65 @@ export default {
     BillTable,
     TransactionTable: TransactionTable,
     MeterTable,
-    OperationTable,
-    CommandLogTable
+    CommandLogTable,
+    CommandTab,
+    BillDetailTable,
+    RechargeCancelTable,
+  },
+  //小范围内optionApi中混入compositionApi,为了优化可以忍受
+  setup() {
+    const { navigateBack } = useDetailNavigation();
+    return { navigateBack };
   },
   data() {
     return {
       currentUser: {},
+      userMeters: [],
+      selectedMeterCode: '',
       totalMoney: 0,
+      meterReading: 0,
+      source: "",
       activeTab: "bill",
       tabs: [
-        { name: "账单记录", type: "bill" },
+        { name: "扣费记录", type: "bill" },
         { name: "充值记录", type: "transaction" },
-        { name: "指令通讯记录", type: "command" },
-        // { name: "抄表记录", type: "meter" },
+        { name: "充值撤销记录", type: "rechargeCancel" },
+        { name: "抄表记录", type: "meter" },
+        { name: "命令下发记录", type: "command" },
+        { name: "命令下发", type: "commandDispatch" },
+        { name: "扣费明细表", type: "billDetail"},
         // { name: "操作历史", type: "operation" }
       ]
     };
   },
   computed: {
+    selectedMeter() {
+      return this.userMeters.find(m => m.meterCode === this.selectedMeterCode) || {};
+    },
     currentTabComponent() {
       const componentMap = {
         bill: "BillTable",
         transaction: "TransactionTable",
         command: "CommandLogTable",
         meter: "MeterTable",
-        operation: "OperationTable"
+        commandDispatch: "CommandTab",
+        billDetail: "BillDetailTable",
+        rechargeCancel: "RechargeCancelTable",
       };
       return componentMap[this.activeTab] || "BillTable";
     }
   },
   mounted() {
+    this.source = this.$route.query.source || "userManage";
+
+    if (this.$route.query.tab) {
+      this.activeTab = this.$route.query.tab;
+    }
+
     const userId = this.$route.query.userId;
     const meterCode = this.$route.query.meterCode;
-    const companyId = this.$route.query.companyId;
     if (userId && meterCode) {
-      this.currentUser = {
-        userId,
-        meterCode,
-        companyId: companyId || "",
-        userName: this.$route.query.userName || "",
-        userAddr: this.$route.query.userAddr || "",
-        phone: this.$route.query.userPhone || "",
-        balance: this.$route.query.userBalance || ""
-      };
+      Promise.all([this.fetchUserInfo(), this.fetchUserMeters()]);
     } else {
       ElMessage.error("缺少用户参数");
     }
@@ -138,33 +182,83 @@ export default {
     switchTab(type) {
       this.activeTab = type;
     },
-    goBack() {
-      // 尝试恢复之前保存的页面状态
-      const savedState = sessionStorage.getItem('userManagePageState');
-      if (savedState) {
-        try {
-          const pageState = JSON.parse(savedState);
-          // 将页面状态存储到 query 参数中，让 userManage 页面可以读取并恢复
-          this.$router.push({
-            path: '/userManage',
-            query: {
-              restore: 'true',
-              currentPage: pageState.currentPage,
-              pageSize: pageState.pageSize,
-              sortField: pageState.sortField,
-              sortOrder: pageState.sortOrder,
-              // 将搜索参数编码后传递
-              param: JSON.stringify(pageState.param),
-              quyu_selected: pageState.quyu_selected ? JSON.stringify(pageState.quyu_selected) : null
-            }
-          });
-        } catch (e) {
-          // 解析失败，直接返回
-          this.$router.back();
+    async fetchUserInfo() {
+      try {
+        const response = await service.post("/userManage/userCharge/showUsers", {
+          page: 1,
+          pageSize: 1,
+          userId: this.$route.query.userId,
+          companyId: this.$route.query.companyId || "",
+        });
+        if (response.code !== 200) {
+          ElMessage.error(response.msg || "获取用户信息失败");
+          return;
         }
-      } else {
-        this.$router.back();
+        const list = response.data?.list;
+        if (!list || list.length !== 1) {
+          ElMessage.error(`用户信息查询异常：期望1条记录，实际${list?.length ?? 0}条`);
+          return;
+        }
+        const r = list[0];
+        this.currentUser = {
+          userId: r.userId || "",
+          meterCode: this.$route.query.meterCode || r.meterCode || "",
+          companyId: r.companyId || this.$route.query.companyId || "",
+          userName: r.userName || "",
+          userAddr: r.userAddr || "",
+          phone: r.userPhone || "",
+          userType: r.priceName || "",
+          createTime: r.createTime || "",
+          meterType: r.meterType || "",
+          balance: r.balance ?? 0,
+          companyName: r.companyName || "",
+        };
+      } catch (error) {
+        console.error("获取用户信息失败", error);
+        ElMessage.error("获取用户信息失败");
       }
+    },
+    async fetchUserMeters() {
+      try {
+        const userId = this.currentUser.userId || this.$route.query.userId;
+        const companyId = this.currentUser.companyId || this.$route.query.companyId || "";
+        const params = `?userId=${encodeURIComponent(userId)}&companyId=${encodeURIComponent(companyId)}`;
+        const response = await service.get(`/userManage/meter/getUserMeters${params}`);
+        if (response.code === 200 && response.data) {
+          this.userMeters = response.data;
+          this.selectedMeterCode = this.$route.query.meterCode || (response.data[0]?.meterCode || '');
+          const meter = this.userMeters.find(m => m.meterCode === this.selectedMeterCode);
+          if (meter) {
+            this.meterReading = meter.newReading || 0;
+          }
+        }
+      } catch (error) {
+        console.error("获取用户水表列表失败", error);
+      }
+    },
+    switchMeter(meterCode) {
+      if (this.selectedMeterCode === meterCode) return;
+      this.selectedMeterCode = meterCode;
+      this.currentUser.meterCode = meterCode;
+      const meter = this.userMeters.find(m => m.meterCode === meterCode);
+      if (meter) {
+        this.meterReading = meter.newReading || 0;
+      }
+    },
+    getStatusLabel(status) {
+      const map = { '0': '当前表', '1': '历史表', '2': '历史表' };
+      return map[status] || '-';
+    },
+    getStatusClass(status) {
+      const map = { '0': 'status-current', '1': 'status-history', '2': 'status-history' };
+      return map[status] || '';
+    },
+    goBack() {
+      this.navigateBack(this.source);
+    },
+    formatDate(datetime) {
+      if (!datetime) return '';
+      return datetime.substring(0, 10);
     },
     handleTotalMoneyUpdate(value) {
       this.totalMoney = value || 0;
@@ -231,68 +325,73 @@ export default {
   margin-bottom: 20px;
 }
 
-.balance-section {
+/* ========== 统计数值区域（按 tab 切换） ========== */
+.stats-row {
   display: flex;
   align-items: center;
-  margin-bottom: 25px;
+  justify-content: center;        /* 内容居中，更紧凑 */
+  gap: 0;
+  margin-bottom: 20px;
+  background: #f7f9fc;           /* 浅色背景提升层次 */
+  border: 1px solid #e2e8f0;     /* 浅色边框 */
+  border-radius: 10px;
+  padding: 12px 10px;            /* 减小内边距 */
 }
 
-.yellow-circle {
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 16px;
+}
+
+/* 两个 stat-item 之间自动添加分隔线 */
+.stat-item + .stat-item {
+  border-left: 1px solid #d5dce6;
+  padding-left: 24px;
+}
+
+.stat-circle {
+  width: 40px;                   /* 从50px缩小 */
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;               /* 从24px缩小 */
+  font-weight: bold;
+  flex-shrink: 0;
+}
+
+.stat-circle.yellow-circle {
   background: #fbc02d;
   color: #fff;
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 24px;
-  font-weight: bold;
-  margin-right: 15px;
 }
 
-.balance-text .num {
-  font-size: 35px;
-  font-weight: bold;
-  color: #f56c6c;
-}
-
-.balance-text .unit {
-  font-size: 18px;
-  color: #999;
-}
-
-/* 消费总额样式 - 与可用余额样式类似但稍有区别 */
-.total-consume-section {
-  display: flex;
-  align-items: center;
-  margin-bottom: 25px;
-  border-top: 1px solid #f0f0f0;
-  padding-top: 20px;
-}
-
-.total-consume-circle {
+.stat-circle.green-circle {
   background: #46B97E;
   color: #fff;
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 24px;
-  font-weight: bold;
-  margin-right: 15px;
 }
 
-.total-consume-text .num {
-  font-size: 35px;
+.stat-circle.blue-circle {
+  background: #409EFF;
+  color: #fff;
+}
+
+.stat-circle.teal-circle {
+  background: #20a0b9;
+  color: #fff;
+}
+
+.stat-text .num {
+  font-size: 24px;               /* 从35px缩小，更精致 */
   font-weight: bold;
   color: #f56c6c;
+  line-height: 1.2;
 }
 
-.total-consume-text .unit {
-  font-size: 18px;
+.stat-text .unit {
+  font-size: 16px;               /* 从18px缩小 */
   color: #999;
 }
 
@@ -355,14 +454,14 @@ export default {
   align-items: center;
   gap: 8px;
   padding: 10px 20px;
-  background: linear-gradient(135deg, #29aa00 0%, #29aa00 100%);
+  background: linear-gradient(135deg, #66b1ff 0%, #409EFF 55%, #2589f5 100%);
   color: #fff;
   border: none;
   border-radius: 6px;
   cursor: pointer;
   font-size: 20px;
   font-weight: bold;
-  box-shadow: 0 3px 10px rgba(238, 90, 111, 0.3);
+  box-shadow: 0 6px 16px rgba(64, 158, 255, 0.28);
   transition: all 0.3s;
 }
 
@@ -373,9 +472,9 @@ export default {
 }
 
 .back-btn:hover {
-  background: linear-gradient(135deg, #6FBF4C 0%, #6FBF4C 100%);
+  background: linear-gradient(135deg, #79bbff 0%, #53a8ff 55%, #409EFF 100%);
   transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(238, 90, 111, 0.4);
+  box-shadow: 0 8px 20px rgba(64, 158, 255, 0.36);
 }
 
 .back-btn:active {
@@ -383,6 +482,7 @@ export default {
 }
 
 .table-box {
+  position: relative;
   padding: 20px;
   flex: 1;
   display: flex;
@@ -391,7 +491,7 @@ export default {
   overflow: hidden;
 }
 
-/* 账单记录容器样式 */
+/* 扣费记录容器样式 */
 .bill-table-container {
   display: flex;
   flex-direction: column;
@@ -594,5 +694,70 @@ export default {
 .data-list {
   margin-top: 20px;
   margin-left: 30px;
+}
+
+/* ========== 水表选择器 ========== */
+.meter-selector {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+  padding: 0 2px;
+}
+
+.meter-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 20px;
+  background: #f0f2f5;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: all 0.25s;
+  user-select: none;
+}
+
+.meter-chip:hover {
+  background: #e6f3ed;
+  border-color: #b3d9c5;
+}
+
+.meter-chip.active {
+  background: #eef9f2;
+  border-color: #46B97E;
+  box-shadow: 0 0 0 2px rgba(70, 185, 126, 0.15);
+}
+
+.chip-code {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+}
+
+.chip-status {
+  font-size: 14px;
+  padding: 1px 8px;
+  border-radius: 10px;
+  line-height: 20px;
+  white-space: nowrap;
+}
+
+.chip-status.status-current {
+  color: #2f9e63;
+  background-color: #d9f2e2;
+  border: 1px solid #a3d9b7;
+}
+
+.chip-status.status-history {
+  color: #8a8f99;
+  background-color: #e8e9eb;
+  border: 1px solid #ccd0d5;
+}
+
+.chip-status.status-replaced {
+  color: #d48920;
+  background-color: #fef3e4;
+  border: 1px solid #f5d499;
 }
 </style>

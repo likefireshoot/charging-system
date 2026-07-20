@@ -3,35 +3,39 @@
     <div class="search-box">
       <div class="search-content">
         <!-- 当companyId为1时，代表是荆州的水厂，所以能查询company -->
-        <!-- <div class="search-input" style="margin-left: 10px" v-if="companyId === 1">
+        <div class="search-input" style="margin-left: 10px" v-if="companyId === 1">
           <span>所属水厂</span>
-          <el-select v-model="params.company" placeholder="请选择所属水厂">
+          <el-select class="big-font-el-select" v-model="params.company" placeholder="请选择所属水厂">
             <el-option v-for="item in companyList" :key="item.id" :value="item.id" :label="item.name"></el-option>
           </el-select>
-        </div> -->
-        <div class="search-input" style="margin-left: 10px">
+        </div>
+        <div class="search-input" style="margin-left: 10px; width: 16%">
           <span>所属厂商</span>
-          <el-select v-model="params.meterVendor" placeholder="请选择">
+          <el-select class="big-font-el-select" v-model="params.meterVendor" placeholder="请选择">
             <el-option v-for="item in changshang_list" :key="item.id" :label="item.label" :value="item.label"></el-option>
           </el-select>
         </div>
-        <div class="search-input" style="margin-left: 10px">
+        <div class="search-input" style="margin-left: 10px; width: 16%">
+          <span>用户号</span>
+          <el-input v-model="params.userId" placeholder="请输入..." />
+        </div>
+        <div class="search-input" style="margin-left: 10px; width: 16%">
           <span>表号</span>
           <el-input v-model="params.meterCode" placeholder="请输入..." />
         </div>
-        <div class="search-input" style="margin-left: 10px">
+        <div class="search-input" style="margin-left: 10px; width: 16%">
           <span>通讯类别</span>
-          <el-select v-model="params.commandType" placeholder="请选择">
+          <el-select v-model="params.commandType" class="big-font-el-select" placeholder="请选择">
             <el-option v-for="item in commandTypeList" :key="item.value" :label="item.label" :value="item.label"></el-option>
           </el-select>
         </div>
-        <div class="search-input" style="margin-left: 10px">
+        <div class="search-input" style="margin-left: 10px; width: 16%">
           <span>通讯状态</span>
-          <el-select v-model="params.commandStatus" placeholder="请选择">
+          <el-select v-model="params.commandStatus" class="big-font-el-select" placeholder="请选择">
             <el-option v-for="item in commandStatusList" :key="item.value" :label="item.label" :value="item.label"></el-option>
           </el-select>
         </div>
-        <div class="search-input" style="margin-left: 10px">
+        <div class="search-input" style="margin-left: 10px; width: 30%">
           <span>通讯下发时间</span>
           <el-date-picker
               v-model="params.time"
@@ -49,11 +53,11 @@
       <div class="buttons">
         <div class="sercah-btn" @click="search">
           <img src="@/assets/yonghu/icon16.png" alt="" style="margin-left: 8px" />
-          <span style="font-size: 20px; margin-left: 15%">搜索</span>
+          <span style="font-size: 20px; margin-left: 5%">搜索</span>
         </div>
         <div class="clear-btn" @click="clear">
           <img src="@/assets/rizhi/icon4.png" alt="" style="margin-left: 10px" />
-          <span style="font-size: 20px; margin-left: 15%; color: #5a5a5a">清空</span>
+          <span style="font-size: 20px; margin-left: 5%; color: #5a5a5a">清空</span>
         </div>
       </div>
     </div>
@@ -76,12 +80,15 @@
         >
           <el-table-column type="selection" :selectable="selectable" :width="selectionWidth" align="center" />
           <el-table-column property="theId" label="序号" :width="indexWidth" align="center" />
+          <el-table-column property="displayUserId" label="用户号" :width="userIdWidth" align="center" />
+          <el-table-column property="userName" label="用户名" :width="userNameWidth" align="center" />
           <el-table-column property="meterCode" label="表号" :width="biaohaoWidth" align="center" />
           <el-table-column property="commandType" label="通讯类别" :width="tongxunleibieWidth" align="center" />
           <el-table-column property="commandStatus" label="通讯状态" :width="tongxunzhaungtaiWidth" align="center" />
           <el-table-column property="createTime" label="通讯下发时间" :width="timeWidth" align="center" />
           <el-table-column property="finishTime" label="通讯完成时间" :width="timeWidth" align="center" />
           <el-table-column property="meterVendor" label="厂商" :width="changshangWidth" align="center" />
+          <el-table-column property="displayStaffName" label="下发员工" :width="staffNameWidth" align="center" />
           <el-table-column property="description" label="描述" :width="descriptionWidth" align="center" />
         </el-table>
       </div>
@@ -110,6 +117,9 @@ export default {
         meterCode: null, // 表号
         time: null, // 通讯下发时间
         meterVendor: null, // 所属厂商
+        userId: null, // 用户号
+        company: null, // 所属水厂
+        companyId: null, // 所属水厂ID
       },
       companyId: JSON.parse(sessionStorage.getItem("userData")).companyId, // 所属水厂ID
       companyList: [],
@@ -129,11 +139,13 @@ export default {
       changshang_list: [
         { id: 1, label: "信驰", value: 1 },
         { id: 2, label: "集万讯", value: 2 },
-        { id: 3, label: "太阳能", value: 3 },
-        { id: 4, label: "圣鑫", value: 4 },
-        { id: 5, label: "旧信驰", value: 5 },
-        { id: 6, label: "4G信驰", value: 6 },
-        { id: 7, label: "旧圣鑫", value: 7 },
+        { id: 3, label: "千宝通", value: 3 },
+        { id: 4, label: "太阳能", value: 4 },
+        { id: 5, label: "圣鑫", value: 5 },
+        { id: 6, label: "旧信驰", value: 6 },
+        { id: 7, label: "4G信驰", value: 7 },
+        { id: 8, label: "旧圣鑫", value: 8 },
+        { id: 9, label: "旧信驰KF01", value: 9 },
       ],
 
       total: 100,
@@ -142,10 +154,13 @@ export default {
       selectionWidth: 0,
       indexWidth: 0,
       biaohaoWidth: 0,
+      userIdWidth: 0,
+      staffNameWidth: 0,
       tongxunleibieWidth: 0,
       tongxunzhaungtaiWidth: 0,
       timeWidth: 0,
       changshangWidth: 0,
+      userNameWidth: 0,
       descriptionWidth: 0,
 
       // 父容器元素
@@ -169,13 +184,16 @@ export default {
     columnPercentages() {
       return {
         selection: 3,
-        index: 5,
-        biao_hao: 10,
+        index: 4,
+        biao_hao: 9,
+        userId: 6,
+        staffName: 8,
         tongxunleibie: 7,
-        tongxunzhaungtai: 8,
+        tongxunzhaungtai: 5.6,
         time: 10,
-        changshang: 7,
-        description: 40,
+        changshang: 5,
+        userName: 7,
+        description: 25,
       };
     },
   },
@@ -191,7 +209,7 @@ export default {
       this.resizeObserver.observe(this.parentContainer);
     }
     this.getCommandLogsData();
-    // this.getCompanyList();
+    this.getCompanyList();
   },
   beforeUnmount() {
     // 组件卸载时取消监听
@@ -213,10 +231,13 @@ export default {
         this.selectionWidth = (this.columnPercentages.selection / 100) * parentWidth;
         this.indexWidth = (this.columnPercentages.index / 100) * parentWidth;
         this.biaohaoWidth = (this.columnPercentages.biao_hao / 100) * parentWidth;
+        this.userIdWidth = (this.columnPercentages.userId / 100) * parentWidth;
+        this.staffNameWidth = (this.columnPercentages.staffName / 100) * parentWidth;
         this.tongxunleibieWidth = (this.columnPercentages.tongxunleibie / 100) * parentWidth;
         this.tongxunzhaungtaiWidth = (this.columnPercentages.tongxunzhaungtai / 100) * parentWidth;
         this.timeWidth = (this.columnPercentages.time / 100) * parentWidth;
         this.changshangWidth = (this.columnPercentages.changshang / 100) * parentWidth;
+        this.userNameWidth = (this.columnPercentages.userName / 100) * parentWidth;
         this.descriptionWidth = (this.columnPercentages.description / 100) * parentWidth;
       }
     },
@@ -239,6 +260,22 @@ export default {
             console.error(error);
           });
     },
+    getEffectiveCompanyId() {
+      if (this.companyId === 1) {
+        return this.params.company || null;
+      }
+      return this.companyId;
+    },
+    formatUserId(userId) {
+      if (userId === null || userId === undefined || userId === "") {
+        return "";
+      }
+      const numericUserId = Number(userId);
+      if (Number.isNaN(numericUserId)) {
+        return userId;
+      }
+      return numericUserId % 10000000;
+    },
     getCommandLogsData() {
       let params = {
         pageNum: this.params.pageNum,
@@ -246,7 +283,9 @@ export default {
         commandStatus: this.params.commandStatus,
         commandType: this.params.commandType,
         meterCode: this.params.meterCode,
+        userId: this.params.userId,
         meterVendor: this.params.meterVendor,
+        companyId: this.getEffectiveCompanyId(),
         sendTimeStartAt: this.params.time ? this.params.time[0] : null,
         sendTimeEndAt: this.params.time ? this.params.time[1] : null,
       };
@@ -272,6 +311,8 @@ export default {
             if (response.code === 200) {
               response.data.records.map((v, i) => {
                 v.theId = this.params.pageSize * (response.data.current - 1) + i + 1;
+                v.displayUserId = this.formatUserId(v.userId);
+                v.displayStaffName = v.sendStaffName || "";
               });
               this.total = response.data.total;
               this.commandLogData = response.data.records;
@@ -285,6 +326,10 @@ export default {
           });
     },
     search() {
+      if (this.params.pageNum !== 1) {
+        this.params.pageNum = 1;
+        return;
+      }
       this.getCommandLogsData();
     },
     clear() {
@@ -293,30 +338,17 @@ export default {
       this.params.commandType = null;
       this.params.time = null;
       this.params.meterVendor = null;
+      this.params.userId = null;
+      this.params.company = null;
+      this.params.companyId = null;
     },
     reflush() {
       this.clear();
-      let params = {
-        pageNum: 1,
-        pageSize: 50,
-      };
-      service
-          .post("/command/queryCommandRecord", params)
-          .then((response) => {
-            if (response.code === 200) {
-              response.data.records.map((v, i) => {
-                v.theId = this.params.pageSize * (response.data.current - 1) + i + 1;
-              });
-              this.total = response.data.total;
-              this.params.pageNum = 1;
-              this.commandLogData = response.data.records;
-            } else {
-              ElMessage.error(response.msg);
-            }
-          })
-          .catch((error) => {
-            ElMessage.error(error);
-          });
+      if (this.params.pageNum !== 1) {
+        this.params.pageNum = 1;
+        return;
+      }
+      this.getCommandLogsData();
     },
   },
 };
@@ -496,7 +528,7 @@ export default {
 .clear-btn {
   background-color: #fff;
   border: 2px solid #f2f2f2;
-  margin-right: 10px;
+  margin-right: 40px;
 }
 
 .log-info {

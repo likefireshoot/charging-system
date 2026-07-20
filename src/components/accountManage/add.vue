@@ -16,8 +16,8 @@
           <el-input v-model="addData.userName" class="input-item" />
         </div>
         <div class="edit-input" style="margin-right: 1%">
-          <span>用户号（选填）</span>
-          <el-input v-model="addData.userId" class="input-item" placeholder="选填" />
+          <span>用户号（选填，不填则自动生成）</span>
+          <el-input v-model="addData.userId" class="input-item" placeholder="选填，不填则自动生成" />
         </div>
         <div class="edit-input" style="margin-right: 1%">
           <span>用户住址</span>

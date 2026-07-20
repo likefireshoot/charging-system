@@ -2,6 +2,9 @@ import axios from "axios";
 import { closeToast, showLoadingToast } from "vant";
 import { ElMessage } from "element-plus";
 
+const UNAUTHORIZED_MESSAGE = "登录过期，请重新登录";
+let isHandlingUnauthorized = false;
+
 if (process.env.NODE_ENV == "development") {
   axios.defaults.baseURL = "/api";
   // axios.defaults.baseURL = "http://jingzhoudb.mynatapp.cc";
@@ -17,6 +20,31 @@ axios.defaults.headers.post["Content-Type"] = "application/json;charset=utf-8";
 axios.defaults.headers.put["Content-Type"] = "application/json;charset=utf-8";
 axios.defaults.headers.get["Content-Type"] = "application/x-www-form-urlencoded";
 
+function isUnauthorizedResponse(response) {
+  return response?.status === 401 || response?.data?.code == 401;
+}
+
+function handleUnauthorized() {
+  if (isHandlingUnauthorized) return;
+
+  isHandlingUnauthorized = true;
+  closeToast();
+  sessionStorage.removeItem("userData");
+  ElMessage.error(UNAUTHORIZED_MESSAGE);
+
+  import("@/router")
+    .then(({ default: router }) => {
+      if (router.currentRoute.value.name !== "login") {
+        router.replace({ name: "login" });
+      }
+    })
+    .finally(() => {
+      setTimeout(() => {
+        isHandlingUnauthorized = false;
+      }, 1500);
+    });
+}
+
 // 给默认实例加拦截器
 axios.interceptors.request.use(
   (config) => {
@@ -28,6 +56,22 @@ axios.interceptors.request.use(
     return config;
   },
   (error) => {
+    return Promise.reject(error);
+  }
+);
+
+axios.interceptors.response.use(
+  (response) => {
+    if (isUnauthorizedResponse(response)) {
+      handleUnauthorized();
+      return Promise.reject(new Error(UNAUTHORIZED_MESSAGE));
+    }
+    return response;
+  },
+  (error) => {
+    if (error.response?.status === 401) {
+      handleUnauthorized();
+    }
     return Promise.reject(error);
   }
 );
@@ -78,6 +122,11 @@ service.interceptors.response.use(
   (response) => {
     closeToast();
 
+    if (isUnauthorizedResponse(response)) {
+      handleUnauthorized();
+      return Promise.reject(new Error(UNAUTHORIZED_MESSAGE));
+    }
+
     console.log(response, "response");
     const res = response.data;
     if (res.code == 500) {
@@ -100,6 +149,12 @@ service.interceptors.response.use(
   },
   (error) => {
     closeToast();
+
+    if (error.response?.status === 401) {
+      handleUnauthorized();
+      return Promise.reject(error);
+    }
+
     if (error.message == "Network Error") {
       ElMessage.error("网络错误");
       return Promise.reject(error);

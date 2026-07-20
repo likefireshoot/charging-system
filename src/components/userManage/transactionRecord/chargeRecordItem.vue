@@ -59,7 +59,7 @@
               <input ref="fileInput" type="file" accept=".xls,.xlsx" style="display: none" @change="exportIn" />
             </div> -->
         <div class="export-out-btn" style="margin-right: 10px" @click="exportExcel">
-          <img src="@/assets/yonghu/icon2.png" alt="" style="margin-left: 7px" />
+          <img src="@/assets/yonghu/icon1.3.png" alt="" style="margin-left: 7px" />
           <span style="font-size: 20px; margin-left: 10px; color: #5a5a5a">导出</span>
         </div>
         <div class="reflush" style="margin-right: 10px" @click="reflush">
@@ -135,8 +135,7 @@ export default {
         createTime: "", // 用于存储选择的时间
         meterCode: "",
         userId: "",
-        companyId: "",
-        pageSizeV2: 30
+        companyId: ""
       },
       startData: {
         meterCode: "",

@@ -49,7 +49,7 @@
           <input ref="fileInput" type="file" accept=".xls,.xlsx" style="display: none" @change="exportIn" />
         </div> -->
         <div class="export-out-btn" style="margin-left: 10px" @click="exportExcel">
-          <img src="@/assets/jiage/icon2.png" alt="" style="margin-left: 7px" />
+          <img src="@/assets/yonghu/icon1.3.png" alt="" style="margin-left: 7px" />
           <span style="font-size: 20px; margin-left: 10px; color: #5a5a5a">导出</span>
         </div>
         <div class="reflush" style="margin-left: 10px" @click="reflush">
@@ -128,11 +128,15 @@
               <span>附加费用/元</span>
               <el-input v-model="addData.additionPrice" />
             </div>
+            <div class="test-input">
+              <span>此日期后开户，开户当月不收保底费</span>
+              <el-input v-model="addData.firstMonthNoBaseFeeDay" placeholder="请输入1-31" />
+            </div>
           </div>
           <div class="test-item-jieti">
             <span style="font-size: 16px; color: #47b97e; margin-bottom: 10px">第一阶梯</span>
             <div class="jieti-content">
-              <div class="jieti-item" style="width: 60%">
+              <div class="jieti-item" style="width: 38%">
                 <span>水量范围</span>
                 <div class="jieti-range">
                   <el-input v-model="addData.amountFirstStart" :disabled="true" />
@@ -140,16 +144,24 @@
                   <el-input v-model="addData.amountFirstEnd" />
                 </div>
               </div>
-              <div class="jieti-item" style="width: 35%">
-                <span>价格（元/吨）</span>
-                <el-input v-model="addData.priceFirst" />
+              <div class="jieti-item" style="width: 20%">
+                <span>单位水价(元/吨)</span>
+                <el-input v-model="addData.priceWaterFirst" />
+              </div>
+              <div class="jieti-item" style="width: 20%">
+                <span>单位污水处理费(元/吨)</span>
+                <el-input v-model="addData.priceSewageFirst" />
+              </div>
+              <div class="jieti-item" style="width: 17%">
+                <span>汇总单价(元/吨)</span>
+                <el-input v-model="addData.priceFirst" :disabled="true" />
               </div>
             </div>
           </div>
           <div class="test-item-jieti">
             <span style="font-size: 16px; color: #47b97e; margin-bottom: 10px">第二阶梯</span>
             <div class="jieti-content">
-              <div class="jieti-item" style="width: 60%">
+              <div class="jieti-item" style="width: 38%">
                 <span>水量范围</span>
                 <div class="jieti-range">
                   <!-- :disabled="addData.stepNumber === '1'" -->
@@ -158,16 +170,24 @@
                   <el-input v-model="addData.amountSecondEnd" :disabled="addData.stepNumber === '1'" />
                 </div>
               </div>
-              <div class="jieti-item" style="width: 35%">
-                <span>价格（元/吨）</span>
-                <el-input v-model="addData.priceSecond" :disabled="addData.stepNumber === '1'" />
+              <div class="jieti-item" style="width: 20%">
+                <span>单位水价(元/吨)</span>
+                <el-input v-model="addData.priceWaterSecond" :disabled="addData.stepNumber === '1'" />
+              </div>
+              <div class="jieti-item" style="width: 20%">
+                <span>单位污水处理费(元/吨)</span>
+                <el-input v-model="addData.priceSewageSecond" :disabled="addData.stepNumber === '1'" />
+              </div>
+              <div class="jieti-item" style="width: 17%">
+                <span>汇总单价(元/吨)</span>
+                <el-input v-model="addData.priceSecond" :disabled="true" />
               </div>
             </div>
           </div>
           <div class="test-item-jieti">
             <span style="font-size: 16px; color: #47b97e; margin-bottom: 10px">第三阶梯</span>
             <div class="jieti-content">
-              <div class="jieti-item" style="width: 60%">
+              <div class="jieti-item" style="width: 38%">
                 <span>水量范围</span>
                 <div class="jieti-range">
                   <!-- :disabled="addData.stepNumber === '1' || addData.stepNumber === '2'" -->
@@ -177,10 +197,19 @@
                     :disabled="addData.stepNumber === '1' || addData.stepNumber === '2'" />
                 </div>
               </div>
-              <div class="jieti-item" style="width: 35%">
-                <span>价格（元/吨）</span>
-                <el-input v-model="addData.priceThird"
+              <div class="jieti-item" style="width: 20%">
+                <span>单位水价(元/吨)</span>
+                <el-input v-model="addData.priceWaterThird"
                   :disabled="addData.stepNumber === '1' || addData.stepNumber === '2'" />
+              </div>
+              <div class="jieti-item" style="width: 20%">
+                <span>单位污水处理费(元/吨)</span>
+                <el-input v-model="addData.priceSewageThird"
+                  :disabled="addData.stepNumber === '1' || addData.stepNumber === '2'" />
+              </div>
+              <div class="jieti-item" style="width: 17%">
+                <span>汇总单价(元/吨)</span>
+                <el-input v-model="addData.priceThird" :disabled="true" />
               </div>
             </div>
           </div>
@@ -239,6 +268,10 @@
               <span>附加费用/元</span>
               <el-input v-model="editData.additionPrice" />
             </div>
+            <div class="test-input">
+              <span>此日期后开户，开户当月不收保底费</span>
+              <el-input v-model="editData.firstMonthNoBaseFeeDay" placeholder="请输入1-31" />
+            </div>
             <!-- <div class="test-input" style="margin-right: 0">
               <span>所属水厂</span>
               <el-select v-model="editData.company" placeholder="请选择所属水厂">
@@ -249,7 +282,7 @@
           <div class="test-item-jieti">
             <span style="font-size: 16px; color: #47b97e; margin-bottom: 10px">第一阶梯</span>
             <div class="jieti-content">
-              <div class="jieti-item" style="width: 60%">
+              <div class="jieti-item" style="width: 38%">
                 <span>水量范围</span>
                 <div class="jieti-range">
                   <el-input v-model="editData.amountFirstStart" />
@@ -257,16 +290,24 @@
                   <el-input v-model="editData.amountFirstEnd" />
                 </div>
               </div>
-              <div class="jieti-item" style="width: 35%">
-                <span>价格（元/吨）</span>
-                <el-input v-model="editData.priceFirst" />
+              <div class="jieti-item" style="width: 20%">
+                <span>单位水价(元/吨)</span>
+                <el-input v-model="editData.priceWaterFirst" />
+              </div>
+              <div class="jieti-item" style="width: 20%">
+                <span>单位污水处理费(元/吨)</span>
+                <el-input v-model="editData.priceSewageFirst" />
+              </div>
+              <div class="jieti-item" style="width: 17%">
+                <span>汇总单价(元/吨)</span>
+                <el-input v-model="editData.priceFirst" :disabled="true" />
               </div>
             </div>
           </div>
           <div class="test-item-jieti">
             <span style="font-size: 16px; color: #47b97e; margin-bottom: 10px">第二阶梯</span>
             <div class="jieti-content">
-              <div class="jieti-item" style="width: 60%">
+              <div class="jieti-item" style="width: 38%">
                 <span>水量范围</span>
                 <div class="jieti-range">
                   <el-input v-model="editData.amountSecondStart" :disabled="editData.stepNumber === '1'" />
@@ -274,16 +315,24 @@
                   <el-input v-model="editData.amountSecondEnd" :disabled="editData.stepNumber === '1'" />
                 </div>
               </div>
-              <div class="jieti-item" style="width: 35%">
-                <span>价格（元/吨）</span>
-                <el-input v-model="editData.priceSecond" :disabled="editData.stepNumber === '1'" />
+              <div class="jieti-item" style="width: 20%">
+                <span>单位水价(元/吨)</span>
+                <el-input v-model="editData.priceWaterSecond" :disabled="editData.stepNumber === '1'" />
+              </div>
+              <div class="jieti-item" style="width: 20%">
+                <span>单位污水处理费(元/吨)</span>
+                <el-input v-model="editData.priceSewageSecond" :disabled="editData.stepNumber === '1'" />
+              </div>
+              <div class="jieti-item" style="width: 17%">
+                <span>汇总单价(元/吨)</span>
+                <el-input v-model="editData.priceSecond" :disabled="true" />
               </div>
             </div>
           </div>
           <div class="test-item-jieti">
             <span style="font-size: 16px; color: #47b97e; margin-bottom: 10px">第三阶梯</span>
             <div class="jieti-content">
-              <div class="jieti-item" style="width: 60%">
+              <div class="jieti-item" style="width: 38%">
                 <span>水量范围</span>
                 <div class="jieti-range">
                   <el-input v-model="editData.amountThirdStart"
@@ -293,10 +342,19 @@
                     :disabled="editData.stepNumber === '1' || editData.stepNumber === '2'" />
                 </div>
               </div>
-              <div class="jieti-item" style="width: 35%">
-                <span>价格（元/吨）</span>
-                <el-input v-model="editData.priceThird"
+              <div class="jieti-item" style="width: 20%">
+                <span>单位水价(元/吨)</span>
+                <el-input v-model="editData.priceWaterThird"
                   :disabled="editData.stepNumber === '1' || editData.stepNumber === '2'" />
+              </div>
+              <div class="jieti-item" style="width: 20%">
+                <span>单位污水处理费(元/吨)</span>
+                <el-input v-model="editData.priceSewageThird"
+                  :disabled="editData.stepNumber === '1' || editData.stepNumber === '2'" />
+              </div>
+              <div class="jieti-item" style="width: 17%">
+                <span>汇总单价(元/吨)</span>
+                <el-input v-model="editData.priceThird" :disabled="true" />
               </div>
             </div>
           </div>
@@ -363,7 +421,7 @@
             <img src="@/assets/close.png" alt="" />
           </div>
         </div>
-        <div class="test-content" style="min-height: 450px">
+        <div class="test-content" style="min-height: 450px;max-height: 85vh ">
           <div class="test-item">
             <div class="test-input" style="margin-right: 1%">
               <span>价格名称</span>
@@ -385,6 +443,10 @@
               <span>附加费用/元</span>
               <el-input v-model="viewData.additionPrice" disabled />
             </div>
+            <div class="test-input">
+              <span>此日期后开户，开户当月不收保底费</span>
+              <el-input v-model="viewData.firstMonthNoBaseFeeDay" disabled />
+            </div>
             <!-- <div class="test-input" style="margin-right: 0">
               <span>所属水厂</span>
               <el-input v-model="viewData.company" disabled />
@@ -393,7 +455,7 @@
           <div class="test-item-jieti" v-if="viewData.stepNumber >= 1">
             <span style="font-size: 16px; color: #47b97e; margin-bottom: 10px">第一阶梯</span>
             <div class="jieti-content">
-              <div class="jieti-item" style="width: 60%">
+              <div class="jieti-item" style="width: 38%">
                 <span>水量范围</span>
                 <div class="jieti-range">
                   <el-input v-model="viewData.amountFirstStart" disabled />
@@ -401,8 +463,16 @@
                   <el-input v-model="viewData.amountFirstEnd" disabled />
                 </div>
               </div>
-              <div class="jieti-item" style="width: 35%">
-                <span>价格（元/吨）</span>
+              <div class="jieti-item" style="width: 20%">
+                <span>单位水价(元/吨)</span>
+                <el-input v-model="viewData.priceWaterFirst" disabled />
+              </div>
+              <div class="jieti-item" style="width: 20%">
+                <span>单位污水处理费(元/吨)</span>
+                <el-input v-model="viewData.priceSewageFirst" disabled />
+              </div>
+              <div class="jieti-item" style="width: 17%">
+                <span>汇总单价(元/吨)</span>
                 <el-input v-model="viewData.priceFirst" disabled />
               </div>
             </div>
@@ -410,7 +480,7 @@
           <div class="test-item-jieti" v-if="viewData.stepNumber >= 2">
             <span style="font-size: 16px; color: #47b97e; margin-bottom: 10px">第二阶梯</span>
             <div class="jieti-content">
-              <div class="jieti-item" style="width: 60%">
+              <div class="jieti-item" style="width: 38%">
                 <span>水量范围</span>
                 <div class="jieti-range">
                   <el-input v-model="viewData.amountSecondStart" disabled />
@@ -418,8 +488,16 @@
                   <el-input v-model="viewData.amountSecondEnd" disabled />
                 </div>
               </div>
-              <div class="jieti-item" style="width: 35%">
-                <span>价格（元/吨）</span>
+              <div class="jieti-item" style="width: 20%">
+                <span>单位水价(元/吨)</span>
+                <el-input v-model="viewData.priceWaterSecond" disabled />
+              </div>
+              <div class="jieti-item" style="width: 20%">
+                <span>单位污水处理费(元/吨)</span>
+                <el-input v-model="viewData.priceSewageSecond" disabled />
+              </div>
+              <div class="jieti-item" style="width: 17%">
+                <span>汇总单价(元/吨)</span>
                 <el-input v-model="viewData.priceSecond" disabled />
               </div>
             </div>
@@ -427,7 +505,7 @@
           <div class="test-item-jieti" v-if="viewData.stepNumber >= 3">
             <span style="font-size: 16px; color: #47b97e; margin-bottom: 10px">第三阶梯</span>
             <div class="jieti-content">
-              <div class="jieti-item" style="width: 60%">
+              <div class="jieti-item" style="width: 38%">
                 <span>水量范围</span>
                 <div class="jieti-range">
                   <el-input v-model="viewData.amountThirdStart" disabled />
@@ -435,8 +513,16 @@
                   <el-input v-model="viewData.amountThirdEnd" disabled />
                 </div>
               </div>
-              <div class="jieti-item" style="width: 35%">
-                <span>价格（元/吨）</span>
+              <div class="jieti-item" style="width: 20%">
+                <span>单位水价(元/吨)</span>
+                <el-input v-model="viewData.priceWaterThird" disabled />
+              </div>
+              <div class="jieti-item" style="width: 20%">
+                <span>单位污水处理费(元/吨)</span>
+                <el-input v-model="viewData.priceSewageThird" disabled />
+              </div>
+              <div class="jieti-item" style="width: 17%">
+                <span>汇总单价(元/吨)</span>
                 <el-input v-model="viewData.priceThird" disabled />
               </div>
             </div>
@@ -472,16 +558,23 @@ export default {
         additionPrice: null,
         amountZeroStart: 0,
         amountZeroEnd: null,
+        firstMonthNoBaseFeeDay: 25,
         priceZero: null,
         amountFirstStart: null,
         amountFirstEnd: null,
         priceFirst: null,
+        priceWaterFirst: null,
+        priceSewageFirst: null,
         amountSecondStart: null,
         amountSecondEnd: null,
         priceSecond: null,
+        priceWaterSecond: null,
+        priceSewageSecond: null,
         amountThirdStart: null,
         amountThirdEnd: null,
         priceThird: null,
+        priceWaterThird: null,
+        priceSewageThird: null,
         companyId: null,
       },
       editData: {
@@ -490,16 +583,23 @@ export default {
         additionPrice: null,
         amountZeroStart: 0,
         amountZeroEnd: null,
+        firstMonthNoBaseFeeDay: 25,
         priceZero: null,
         amountFirstStart: null,
         amountFirstEnd: null,
         priceFirst: null,
+        priceWaterFirst: null,
+        priceSewageFirst: null,
         amountSecondStart: null,
         amountSecondEnd: null,
         priceSecond: null,
+        priceWaterSecond: null,
+        priceSewageSecond: null,
         amountThirdStart: null,
         amountThirdEnd: null,
         priceThird: null,
+        priceWaterThird: null,
+        priceSewageThird: null,
         companyId: JSON.parse(sessionStorage.getItem("userData")).companyId,
         priceId: null,
       },
@@ -563,11 +663,20 @@ export default {
       if (parseInt(newVal) === 1) {
         this.addData.amountSecondStart = null;
         this.addData.amountSecondEnd = null;
+        this.addData.priceSecond = null;
+        this.addData.priceWaterSecond = null;
+        this.addData.priceSewageSecond = null;
         this.addData.amountThirdStart = null;
         this.addData.amountThirdEnd = null;
+        this.addData.priceThird = null;
+        this.addData.priceWaterThird = null;
+        this.addData.priceSewageThird = null;
       } else if (parseInt(newVal) === 2) {
         this.addData.amountThirdStart = null;
         this.addData.amountThirdEnd = null;
+        this.addData.priceThird = null;
+        this.addData.priceWaterThird = null;
+        this.addData.priceSewageThird = null;
       }
     },
     "editData.amountZeroEnd": function (newVal) {
@@ -591,20 +700,38 @@ export default {
       }
     },
     "editData.stepNumber": function (newVal) {
-      if (!this.editData) return; // 如果 editData 还未初始化，直接返回
+      if (!this.editData) return;
       if (parseInt(newVal) === 1) {
-        this.editData.amountSecondStart = 0;
-        this.editData.amountSecondEnd = 0;
-        this.editData.priceSecond = 0;
-        this.editData.amountThirdStart = 0;
-        this.editData.amountThirdEnd = 0;
-        this.editData.priceThird = 0;
+        this.editData.amountSecondStart = null;
+        this.editData.amountSecondEnd = null;
+        this.editData.priceSecond = null;
+        this.editData.priceWaterSecond = null;
+        this.editData.priceSewageSecond = null;
+        this.editData.amountThirdStart = null;
+        this.editData.amountThirdEnd = null;
+        this.editData.priceThird = null;
+        this.editData.priceWaterThird = null;
+        this.editData.priceSewageThird = null;
       } else if (parseInt(newVal) === 2) {
-        this.editData.amountThirdStart = 0;
-        this.editData.amountThirdEnd = 0;
-        this.editData.priceThird = 0;
+        this.editData.amountThirdStart = null;
+        this.editData.amountThirdEnd = null;
+        this.editData.priceThird = null;
+        this.editData.priceWaterThird = null;
+        this.editData.priceSewageThird = null;
       }
     },
+    "addData.priceWaterFirst": "computeAddPrices",
+    "addData.priceSewageFirst": "computeAddPrices",
+    "addData.priceWaterSecond": "computeAddPrices",
+    "addData.priceSewageSecond": "computeAddPrices",
+    "addData.priceWaterThird": "computeAddPrices",
+    "addData.priceSewageThird": "computeAddPrices",
+    "editData.priceWaterFirst": "computeEditPrices",
+    "editData.priceSewageFirst": "computeEditPrices",
+    "editData.priceWaterSecond": "computeEditPrices",
+    "editData.priceSewageSecond": "computeEditPrices",
+    "editData.priceWaterThird": "computeEditPrices",
+    "editData.priceSewageThird": "computeEditPrices",
   },
   computed: {
     // 每列的百分比宽度
@@ -684,16 +811,23 @@ export default {
         additionPrice: null,
         amountZeroStart: 0,
         amountZeroEnd: null,
+        firstMonthNoBaseFeeDay: 25,
         priceZero: null,
         amountFirstStart: null,
         amountFirstEnd: null,
         priceFirst: null,
+        priceWaterFirst: null,
+        priceSewageFirst: null,
         amountSecondStart: null,
         amountSecondEnd: null,
         priceSecond: null,
+        priceWaterSecond: null,
+        priceSewageSecond: null,
         amountThirdStart: null,
         amountThirdEnd: null,
         priceThird: null,
+        priceWaterThird: null,
+        priceSewageThird: null,
       };
       this.add_dialogFormVisible = true;
     },
@@ -706,8 +840,13 @@ export default {
     },
     edit_click() {
       if (this.multipleSelection.length > 0) {
+        const row = this.multipleSelection[0];
+        this.editData = {
+          ...row,
+          firstMonthNoBaseFeeDay: row.firstMonthNoBaseFeeDay ?? 25,
+          stepNumber: String(row.stepNumber ?? ''),
+        };
         this.edit_dialogFormVisible = true;
-        this.editData = this.multipleSelection[0];
       } else {
         ElMessage.warning("请选择需要编辑的数据");
       }
@@ -729,25 +868,38 @@ export default {
       }
     },
     viewDetail(row) {
-      let params = {};
-      params.priceId = row.priceId;
-      params.priceName = row.priceName;
-      params.pageNo = this.params.pageNo;
-      params.pageSize = this.params.pageSize;
-      params.companyId = this.params.companyId;
-      service
-        .post("/price/queryPriceMg", params)
-        .then((response) => {
-          if (response.code === 200) {
-            this.viewData = response.data.records[0];
-            this.view_dialogFormVisible = true;
-          } else {
-            ElMessage.error(response.msg);
-          }
-        })
-        .catch((error) => {
-          ElMessage.error(error);
-        });
+      this.viewData = {
+        ...row,
+        firstMonthNoBaseFeeDay: row.firstMonthNoBaseFeeDay ?? 25,
+      };
+      this.view_dialogFormVisible = true;
+    },
+    computeAddPrices() {
+      const toNum = v => parseFloat(v) || 0;
+      const step = parseInt(this.addData.stepNumber) || 0;
+      if (step >= 1) {
+        this.addData.priceFirst = (toNum(this.addData.priceWaterFirst) + toNum(this.addData.priceSewageFirst)).toFixed(2);
+      }
+      if (step >= 2) {
+        this.addData.priceSecond = (toNum(this.addData.priceWaterSecond) + toNum(this.addData.priceSewageSecond)).toFixed(2);
+      }
+      if (step >= 3) {
+        this.addData.priceThird = (toNum(this.addData.priceWaterThird) + toNum(this.addData.priceSewageThird)).toFixed(2);
+      }
+    },
+    computeEditPrices() {
+      if (!this.editData) return;
+      const toNum = v => parseFloat(v) || 0;
+      const step = parseInt(this.editData.stepNumber) || 0;
+      if (step >= 1 && (this.editData.priceWaterFirst != null || this.editData.priceSewageFirst != null)) {
+        this.editData.priceFirst = (toNum(this.editData.priceWaterFirst) + toNum(this.editData.priceSewageFirst)).toFixed(2);
+      }
+      if (step >= 2 && (this.editData.priceWaterSecond != null || this.editData.priceSewageSecond != null)) {
+        this.editData.priceSecond = (toNum(this.editData.priceWaterSecond) + toNum(this.editData.priceSewageSecond)).toFixed(2);
+      }
+      if (step >= 3 && (this.editData.priceWaterThird != null || this.editData.priceSewageThird != null)) {
+        this.editData.priceThird = (toNum(this.editData.priceWaterThird) + toNum(this.editData.priceSewageThird)).toFixed(2);
+      }
     },
     add_cancel() {
       this.add_dialogFormVisible = false;
@@ -757,16 +909,23 @@ export default {
         additionPrice: null,
         amountZeroStart: 0,
         amountZeroEnd: null,
+        firstMonthNoBaseFeeDay: 25,
         priceZero: null,
         amountFirstStart: null,
         amountFirstEnd: null,
         priceFirst: null,
+        priceWaterFirst: null,
+        priceSewageFirst: null,
         amountSecondStart: null,
         amountSecondEnd: null,
         priceSecond: null,
+        priceWaterSecond: null,
+        priceSewageSecond: null,
         amountThirdStart: null,
         amountThirdEnd: null,
         priceThird: null,
+        priceWaterThird: null,
+        priceSewageThird: null,
       };
     },
     getPriceData() {
@@ -821,7 +980,7 @@ export default {
           }
         })
         .catch((error) => {
-          ElMessage.error(error);
+          ElMessage.error(error?.response?.data?.msg || error?.message || "操作失败");
         });
     },
     editPrice() {
@@ -846,7 +1005,7 @@ export default {
           }
         })
         .catch((error) => {
-          ElMessage.error(error);
+          ElMessage.error(error?.response?.data?.msg || error?.message || "操作失败");
         });
     },
     deletePrice() {
@@ -1191,6 +1350,15 @@ export default {
 
     //   return true;
     // },
+    validateFirstMonthNoBaseFeeDay(day) {
+      const dayVal = Number(day);
+      if (!Number.isInteger(dayVal) || dayVal < 1 || dayVal > 31) {
+        ElMessage.error("此日期后开户，开户当月不收保底费必须是1-31之间的整数");
+        return false;
+      }
+      return true;
+    },
+
     // ========== 1. 新增价格配置 - 增强参数校验 ==========
     validateAddData() {
       // 先统一去除所有字符串参数的首尾空格
@@ -1201,10 +1369,10 @@ export default {
       });
 
       const {
-        priceName, amountZeroEnd, priceZero, stepNumber, additionPrice,
-        amountFirstStart, amountFirstEnd, priceFirst,
-        amountSecondStart, amountSecondEnd, priceSecond,
-        amountThirdStart, amountThirdEnd, priceThird
+        priceName, amountZeroEnd, priceZero, stepNumber, additionPrice, firstMonthNoBaseFeeDay,
+        amountFirstStart, amountFirstEnd, priceWaterFirst, priceSewageFirst,
+        amountSecondStart, amountSecondEnd, priceWaterSecond, priceSewageSecond,
+        amountThirdStart, amountThirdEnd, priceWaterThird, priceSewageThird
       } = this.addData;
 
       // ========== 基础非空+格式校验 ==========
@@ -1249,7 +1417,7 @@ export default {
       }
 
       // 阶梯数：非空 + 只能是1/2/3
-      if (!stepNumber || !["1", "2", "3"].includes(stepNumber)) {
+      if (!stepNumber || !["1", "2", "3"].includes(String(stepNumber))) {
         ElMessage.error("阶梯数不能为空且只能选择1、2、3");
         return false;
       }
@@ -1267,6 +1435,10 @@ export default {
       }
       if (additionPriceVal.toString().split(".")[1]?.length > 2) {
         ElMessage.error("附加费用最多保留2位小数");
+        return false;
+      }
+
+      if (!this.validateFirstMonthNoBaseFeeDay(firstMonthNoBaseFeeDay)) {
         return false;
       }
 
@@ -1297,18 +1469,33 @@ export default {
         return false;
       }
 
-      // 第一阶梯价格：非空 + 非负 + 数字 + 最多2位小数
-      if (priceFirst === null || priceFirst === "" || isNaN(parseFloat(priceFirst))) {
-        ElMessage.error("第一阶梯价格不能为空且必须为有效数字");
+      // 第一阶梯单位水价：非空 + 非负 + 数字 + 最多2位小数
+      if (priceWaterFirst === null || priceWaterFirst === "" || isNaN(parseFloat(priceWaterFirst))) {
+        ElMessage.error("第一阶梯单位水价不能为空且必须为有效数字");
         return false;
       }
-      const priceFirstVal = parseFloat(priceFirst);
-      if (priceFirstVal < 0) {
-        ElMessage.error("第一阶梯价格不能小于零");
+      const priceWaterFirstVal = parseFloat(priceWaterFirst);
+      if (priceWaterFirstVal < 0) {
+        ElMessage.error("第一阶梯单位水价不能小于零");
         return false;
       }
-      if (priceFirstVal.toString().split(".")[1]?.length > 2) {
-        ElMessage.error("第一阶梯价格最多保留2位小数");
+      if (priceWaterFirstVal.toString().split(".")[1]?.length > 2) {
+        ElMessage.error("第一阶梯单位水价最多保留2位小数");
+        return false;
+      }
+
+      // 第一阶梯单位污水处理费：非空 + 非负 + 数字 + 最多2位小数
+      if (priceSewageFirst === null || priceSewageFirst === "" || isNaN(parseFloat(priceSewageFirst))) {
+        ElMessage.error("第一阶梯单位污水处理费不能为空且必须为有效数字");
+        return false;
+      }
+      const priceSewageFirstVal = parseFloat(priceSewageFirst);
+      if (priceSewageFirstVal < 0) {
+        ElMessage.error("第一阶梯单位污水处理费不能小于零");
+        return false;
+      }
+      if (priceSewageFirstVal.toString().split(".")[1]?.length > 2) {
+        ElMessage.error("第一阶梯单位污水处理费最多保留2位小数");
         return false;
       }
 
@@ -1340,18 +1527,33 @@ export default {
           return false;
         }
 
-        // 第二阶梯价格：非空 + 非负 + 数字 + 最多2位小数
-        if (priceSecond === null || priceSecond === "" || isNaN(parseFloat(priceSecond))) {
-          ElMessage.error("第二阶梯价格不能为空且必须为有效数字");
+        // 第二阶梯单位水价：非空 + 非负 + 数字 + 最多2位小数
+        if (priceWaterSecond === null || priceWaterSecond === "" || isNaN(parseFloat(priceWaterSecond))) {
+          ElMessage.error("第二阶梯单位水价不能为空且必须为有效数字");
           return false;
         }
-        const priceSecondVal = parseFloat(priceSecond);
-        if (priceSecondVal < 0) {
-          ElMessage.error("第二阶梯价格不能小于零");
+        const priceWaterSecondVal = parseFloat(priceWaterSecond);
+        if (priceWaterSecondVal < 0) {
+          ElMessage.error("第二阶梯单位水价不能小于零");
           return false;
         }
-        if (priceSecondVal.toString().split(".")[1]?.length > 2) {
-          ElMessage.error("第二阶梯价格最多保留2位小数");
+        if (priceWaterSecondVal.toString().split(".")[1]?.length > 2) {
+          ElMessage.error("第二阶梯单位水价最多保留2位小数");
+          return false;
+        }
+
+        // 第二阶梯单位污水处理费：非空 + 非负 + 数字 + 最多2位小数
+        if (priceSewageSecond === null || priceSewageSecond === "" || isNaN(parseFloat(priceSewageSecond))) {
+          ElMessage.error("第二阶梯单位污水处理费不能为空且必须为有效数字");
+          return false;
+        }
+        const priceSewageSecondVal = parseFloat(priceSewageSecond);
+        if (priceSewageSecondVal < 0) {
+          ElMessage.error("第二阶梯单位污水处理费不能小于零");
+          return false;
+        }
+        if (priceSewageSecondVal.toString().split(".")[1]?.length > 2) {
+          ElMessage.error("第二阶梯单位污水处理费最多保留2位小数");
           return false;
         }
       }
@@ -1384,18 +1586,33 @@ export default {
           return false;
         }
 
-        // 第三阶梯价格：非空 + 非负 + 数字 + 最多2位小数
-        if (priceThird === null || priceThird === "" || isNaN(parseFloat(priceThird))) {
-          ElMessage.error("第三阶梯价格不能为空且必须为有效数字");
+        // 第三阶梯单位水价：非空 + 非负 + 数字 + 最多2位小数
+        if (priceWaterThird === null || priceWaterThird === "" || isNaN(parseFloat(priceWaterThird))) {
+          ElMessage.error("第三阶梯单位水价不能为空且必须为有效数字");
           return false;
         }
-        const priceThirdVal = parseFloat(priceThird);
-        if (priceThirdVal < 0) {
-          ElMessage.error("第三阶梯价格不能小于零");
+        const priceWaterThirdVal = parseFloat(priceWaterThird);
+        if (priceWaterThirdVal < 0) {
+          ElMessage.error("第三阶梯单位水价不能小于零");
           return false;
         }
-        if (priceThirdVal.toString().split(".")[1]?.length > 2) {
-          ElMessage.error("第三阶梯价格最多保留2位小数");
+        if (priceWaterThirdVal.toString().split(".")[1]?.length > 2) {
+          ElMessage.error("第三阶梯单位水价最多保留2位小数");
+          return false;
+        }
+
+        // 第三阶梯单位污水处理费：非空 + 非负 + 数字 + 最多2位小数
+        if (priceSewageThird === null || priceSewageThird === "" || isNaN(parseFloat(priceSewageThird))) {
+          ElMessage.error("第三阶梯单位污水处理费不能为空且必须为有效数字");
+          return false;
+        }
+        const priceSewageThirdVal = parseFloat(priceSewageThird);
+        if (priceSewageThirdVal < 0) {
+          ElMessage.error("第三阶梯单位污水处理费不能小于零");
+          return false;
+        }
+        if (priceSewageThirdVal.toString().split(".")[1]?.length > 2) {
+          ElMessage.error("第三阶梯单位污水处理费最多保留2位小数");
           return false;
         }
       }
@@ -1413,10 +1630,10 @@ export default {
       });
 
       const {
-        priceName, amountZeroEnd, priceZero, stepNumber, additionPrice,
-        amountFirstStart, amountFirstEnd, priceFirst,
-        amountSecondStart, amountSecondEnd, priceSecond,
-        amountThirdStart, amountThirdEnd, priceThird
+        priceName, amountZeroEnd, priceZero, stepNumber, additionPrice, firstMonthNoBaseFeeDay,
+        amountFirstStart, amountFirstEnd, priceWaterFirst, priceSewageFirst,
+        amountSecondStart, amountSecondEnd, priceWaterSecond, priceSewageSecond,
+        amountThirdStart, amountThirdEnd, priceWaterThird, priceSewageThird
       } = this.editData;
 
       // ========== 基础非空+格式校验（同新增逻辑） ==========
@@ -1457,7 +1674,7 @@ export default {
         return false;
       }
 
-      if (!stepNumber || !["1", "2", "3"].includes(stepNumber)) {
+      if (!stepNumber || !["1", "2", "3"].includes(String(stepNumber))) {
         ElMessage.error("阶梯数不能为空且只能选择1、2、3");
         return false;
       }
@@ -1474,6 +1691,10 @@ export default {
       }
       if (additionPriceVal.toString().split(".")[1]?.length > 2) {
         ElMessage.error("附加费用最多保留2位小数");
+        return false;
+      }
+
+      if (!this.validateFirstMonthNoBaseFeeDay(firstMonthNoBaseFeeDay)) {
         return false;
       }
 
@@ -1502,17 +1723,33 @@ export default {
         return false;
       }
 
-      if (priceFirst === null || priceFirst === "" || isNaN(parseFloat(priceFirst))) {
-        ElMessage.error("第一阶梯价格不能为空且必须为有效数字");
+      // 第一阶梯单位水价：非空 + 非负 + 数字 + 最多2位小数
+      if (priceWaterFirst === null || priceWaterFirst === "" || isNaN(parseFloat(priceWaterFirst))) {
+        ElMessage.error("第一阶梯单位水价不能为空且必须为有效数字");
         return false;
       }
-      const priceFirstVal = parseFloat(priceFirst);
-      if (priceFirstVal < 0) {
-        ElMessage.error("第一阶梯价格不能小于零");
+      const priceWaterFirstVal = parseFloat(priceWaterFirst);
+      if (priceWaterFirstVal < 0) {
+        ElMessage.error("第一阶梯单位水价不能小于零");
         return false;
       }
-      if (priceFirstVal.toString().split(".")[1]?.length > 2) {
-        ElMessage.error("第一阶梯价格最多保留2位小数");
+      if (priceWaterFirstVal.toString().split(".")[1]?.length > 2) {
+        ElMessage.error("第一阶梯单位水价最多保留2位小数");
+        return false;
+      }
+
+      // 第一阶梯单位污水处理费：非空 + 非负 + 数字 + 最多2位小数
+      if (priceSewageFirst === null || priceSewageFirst === "" || isNaN(parseFloat(priceSewageFirst))) {
+        ElMessage.error("第一阶梯单位污水处理费不能为空且必须为有效数字");
+        return false;
+      }
+      const priceSewageFirstVal = parseFloat(priceSewageFirst);
+      if (priceSewageFirstVal < 0) {
+        ElMessage.error("第一阶梯单位污水处理费不能小于零");
+        return false;
+      }
+      if (priceSewageFirstVal.toString().split(".")[1]?.length > 2) {
+        ElMessage.error("第一阶梯单位污水处理费最多保留2位小数");
         return false;
       }
 
@@ -1542,17 +1779,33 @@ export default {
           return false;
         }
 
-        if (priceSecond === null || priceSecond === "" || isNaN(parseFloat(priceSecond))) {
-          ElMessage.error("第二阶梯价格不能为空且必须为有效数字");
+        // 第二阶梯单位水价：非空 + 非负 + 数字 + 最多2位小数
+        if (priceWaterSecond === null || priceWaterSecond === "" || isNaN(parseFloat(priceWaterSecond))) {
+          ElMessage.error("第二阶梯单位水价不能为空且必须为有效数字");
           return false;
         }
-        const priceSecondVal = parseFloat(priceSecond);
-        if (priceSecondVal < 0) {
-          ElMessage.error("第二阶梯价格不能小于零");
+        const priceWaterSecondVal = parseFloat(priceWaterSecond);
+        if (priceWaterSecondVal < 0) {
+          ElMessage.error("第二阶梯单位水价不能小于零");
           return false;
         }
-        if (priceSecondVal.toString().split(".")[1]?.length > 2) {
-          ElMessage.error("第二阶梯价格最多保留2位小数");
+        if (priceWaterSecondVal.toString().split(".")[1]?.length > 2) {
+          ElMessage.error("第二阶梯单位水价最多保留2位小数");
+          return false;
+        }
+
+        // 第二阶梯单位污水处理费：非空 + 非负 + 数字 + 最多2位小数
+        if (priceSewageSecond === null || priceSewageSecond === "" || isNaN(parseFloat(priceSewageSecond))) {
+          ElMessage.error("第二阶梯单位污水处理费不能为空且必须为有效数字");
+          return false;
+        }
+        const priceSewageSecondVal = parseFloat(priceSewageSecond);
+        if (priceSewageSecondVal < 0) {
+          ElMessage.error("第二阶梯单位污水处理费不能小于零");
+          return false;
+        }
+        if (priceSewageSecondVal.toString().split(".")[1]?.length > 2) {
+          ElMessage.error("第二阶梯单位污水处理费最多保留2位小数");
           return false;
         }
       }
@@ -1583,17 +1836,33 @@ export default {
           return false;
         }
 
-        if (priceThird === null || priceThird === "" || isNaN(parseFloat(priceThird))) {
-          ElMessage.error("第三阶梯价格不能为空且必须为有效数字");
+        // 第三阶梯单位水价：非空 + 非负 + 数字 + 最多2位小数
+        if (priceWaterThird === null || priceWaterThird === "" || isNaN(parseFloat(priceWaterThird))) {
+          ElMessage.error("第三阶梯单位水价不能为空且必须为有效数字");
           return false;
         }
-        const priceThirdVal = parseFloat(priceThird);
-        if (priceThirdVal < 0) {
-          ElMessage.error("第三阶梯价格不能小于零");
+        const priceWaterThirdVal = parseFloat(priceWaterThird);
+        if (priceWaterThirdVal < 0) {
+          ElMessage.error("第三阶梯单位水价不能小于零");
           return false;
         }
-        if (priceThirdVal.toString().split(".")[1]?.length > 2) {
-          ElMessage.error("第三阶梯价格最多保留2位小数");
+        if (priceWaterThirdVal.toString().split(".")[1]?.length > 2) {
+          ElMessage.error("第三阶梯单位水价最多保留2位小数");
+          return false;
+        }
+
+        // 第三阶梯单位污水处理费：非空 + 非负 + 数字 + 最多2位小数
+        if (priceSewageThird === null || priceSewageThird === "" || isNaN(parseFloat(priceSewageThird))) {
+          ElMessage.error("第三阶梯单位污水处理费不能为空且必须为有效数字");
+          return false;
+        }
+        const priceSewageThirdVal = parseFloat(priceSewageThird);
+        if (priceSewageThirdVal < 0) {
+          ElMessage.error("第三阶梯单位污水处理费不能小于零");
+          return false;
+        }
+        if (priceSewageThirdVal.toString().split(".")[1]?.length > 2) {
+          ElMessage.error("第三阶梯单位污水处理费最多保留2位小数");
           return false;
         }
       }

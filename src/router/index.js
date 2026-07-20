@@ -32,6 +32,11 @@ import userRecordDetail from "@/components/userManage/userRecordDetail.vue";
 // 命令日志 + 异常数据
 import commandLog from "../views/commandLog.vue";
 import errorReportRecord from "../views/errorReportRecord.vue";
+import historyDataManage from "@/views/historyDataManage.vue";
+import billDetailReport from "@/components/report/billDetailReport.vue";
+import abnormalChargeReport from "@/components/report/abnormalChargeReport.vue";
+import quickMeterReport from "@/views/quickMeterReport.vue";
+import reviewMeterReport from "@/views/reviewMeterReport.vue";
 
 const routes = [
   {
@@ -70,6 +75,23 @@ const routes = [
         path: "/userRecordDetail",
         name: "userRecordDetail",
         component: userRecordDetail,
+      },
+      {
+        path: "/meterReading",
+        name: "meterReading",
+        redirect: "/meterReading/quickMeterReport",
+        children: [
+          {
+            path: "quickMeterReport",
+            name: "quickMeterReport",
+            component: quickMeterReport,
+          },
+          {
+            path: "reviewMeterReport",
+            name: "reviewMeterReport",
+            component: reviewMeterReport,
+          }
+        ]
       },
       {
         path: "/priceManage",
@@ -131,6 +153,16 @@ const routes = [
             name: "readingCountYearlyReport",
             component: readingCountYearlyReport,
           },
+          {
+            path: "billDetailReport",
+            name: "billDetailReport",
+            component: billDetailReport,
+          },
+          {
+            path: "abnormalChargeReport",
+            name: "abnormalChargeReport",
+            component: abnormalChargeReport,
+          },
         ],
       },
       {
@@ -179,6 +211,11 @@ const routes = [
         path: "/warningManage",
         name: "warningManage",
         component: warningManage,
+      },
+      {
+        path: "/historyDataManage",
+        name: "historyDataManage",
+        component: historyDataManage,
       },
       {
         path: "/field3",

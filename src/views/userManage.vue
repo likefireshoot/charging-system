@@ -1,34 +1,60 @@
 <template>
   <div class="user-container">
     <div class="serach-box">
-      <div class="search-input" v-if="companyId === 1">
-        <span>所属水厂</span>
-        <el-select  class="big-font-el-select" v-model="param.company" placeholder="请选择所属水厂">
-          <el-option v-for="item in companyList" :key="item.id" :label="item.name" :value="item.id"></el-option>
-        </el-select>
-      </div>
-      <!-- <div class="search-input">
-        <span>IMEI号</span>
-        <el-input v-model="param.imei" placeholder="请输入..." />
-      </div> -->
-      <div class="search-input" style="margin-left: 10px">
-        <span>用户号</span>
-        <el-input v-model="param.userId" placeholder="请输入..." />
-      </div>
-      <div class="search-input" style="margin-left: 10px">
-        <span>用户名称</span>
-        <el-input v-model="param.userName" placeholder="请输入..." />
-      </div>
-      <div class="search-input">
-        <span>表号</span>
-        <el-input v-model="param.meterCode" type="number" placeholder="请输入..." />
-      </div>
-      <div class="search-input">
-        <span>水表类型</span>
-        <el-select class="big-font-el-select" v-model="param.meterType" placeholder="请选择水表类型">
-          <el-option v-for="item in shuibiao_list" :key="item.id" :value="item.label"></el-option>
-        </el-select>
-      </div>
+      <template v-for="field in displayedFilterFields" :key="field.key">
+        <div class="search-input">
+          <span>{{ field.label }}</span>
+          <el-select
+            v-if="field.type === 'select'"
+            class="big-font-el-select"
+            v-model="param[field.key]"
+            :placeholder="field.placeholder || '请选择'"
+            :clearable="field.clearable || false"
+          >
+            <el-option
+              v-for="item in getFilterOptions(field.key)"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
+          <el-input
+            v-else
+            v-model="param[field.key]"
+            :type="field.inputType || 'text'"
+            :placeholder="field.placeholder || '请输入...'"
+          />
+        </div>
+      </template>
+
+      <el-popover
+        placement="bottom"
+        :width="220"
+        trigger="click"
+        v-model:visible="moreFiltersVisible"
+        popper-class="filter-popover"
+      >
+        <template #reference>
+          <div class="more-filter-btn">
+            <span>&nbsp;</span>
+            <el-button class="more-filter-trigger">
+              更多筛选
+              <el-icon style="margin-left: 4px"><ArrowDown /></el-icon>
+            </el-button>
+          </div>
+        </template>
+        <div class="filter-popover-content">
+          <el-checkbox
+            v-for="field in availableFilterFields"
+            :key="field.key"
+            :model-value="visibleFilterKeys.includes(field.key)"
+            @change="(val) => toggleFilterField(field.key, val)"
+            :disabled="visibleFilterKeys.length >= maxVisibleFilters && !visibleFilterKeys.includes(field.key)"
+          >
+            {{ field.label }}
+          </el-checkbox>
+        </div>
+      </el-popover>
 
       <div class="buttons">
         <div class="sercah-btn" @click="search">
@@ -43,83 +69,113 @@
     </div>
     <div class="user-info">
       <div class="command-box">
-        <!-- <div class="add-btn" style="margin-left: 10px" @click="add_dialogFormVisible = true">
-          <img src="@/assets/yonghu/icon13.png" alt="" style="margin-left: 8px" />
-          <span style="font-size: 16px; margin-left: 8px; color: #5a5a5a">新增</span>
-        </div> -->
-        <div class="delete-btn" style="margin-left: 5px" @click="delete_btn_click"
-          v-if="staffPermissionIds.includes(6)">
-          <img src="@/assets/yonghu/icon4.png" alt="" style="margin-left: 8px" />
-          <span style="font-size: 20px; margin-left: 8px; color: #5a5a5a">删除</span>
+        <div class="delete-btn"  @click="delete_btn_click"
+          v-if="staffPermissionIds.includes(6)"
+          v-show="isFeatureVisible('delete')">
+          <img src="@/assets/yonghu/icon4.png" alt="" />
+          <span>删除</span>
         </div>
-        <div class="command-btn" style="margin-left: 10px; width: 130px" :class="{ 'btn-single-only-disabled': multipleSelection.length !== 1 }" @click="multipleSelection.length === 1 && handleCommand()">
-          <img src="@/assets/yonghu/icon5.png" alt="" style="margin-left: 8px" />
-          <span style="font-size: 20px; margin-left: 8px; color: #5a5a5a">命令下发</span>
+        <div class="command-btn" :class="{ 'btn-single-only-disabled': multipleSelection.length !== 1 }" @click="multipleSelection.length === 1 && handleCommand()"
+          v-show="isFeatureVisible('command')">
+          <img src="@/assets/yonghu/icon5.png" alt="" />
+          <span>命令下发</span>
         </div>
-        <div class="command-btn" style="margin-left: 5px; width: 120px" @click="valveOpen_dialogFormVisible = true"
-          v-if="staffPermissionIds.includes(7)">
-          <img src="@/assets/yonghu/icon18.png" alt="" style="margin-left: 8px; margin-top: 3px" />
-          <span style="font-size: 20px; margin-left: 8px; color: #5a5a5a">开阀设置</span>
+        <div class="command-btn" @click="valveOpen_dialogFormVisible = true"
+          v-if="staffPermissionIds.includes(7)"
+          v-show="isFeatureVisible('valveOpen')">
+          <img src="@/assets/yonghu/icon18.png" alt="" />
+          <span>开阀设置</span>
         </div>
-        <div class="command-btn" style="margin-left: 5px; width: 120px" @click="valve_dialogFormVisible = true"
-          v-if="staffPermissionIds.includes(8)">
-          <img src="@/assets/yonghu/icon17.png" alt="" style="margin-left: 8px; margin-top: 3px" />
-          <span style="font-size: 20px; margin-left: 8px; color: #5a5a5a">关阀设置</span>
+        <div class="command-btn" @click="valve_dialogFormVisible = true"
+          v-if="staffPermissionIds.includes(8)"
+          v-show="isFeatureVisible('valveClose')">
+          <img src="@/assets/yonghu/icon17.png" alt="" />
+          <span>关阀设置</span>
         </div>
-        <div class="recharge-btn" style="margin-left: 5px; width: 130px" :class="{ 'btn-single-only-disabled': multipleSelection.length !== 1 }" @click="multipleSelection.length === 1 && change_balance_btn_click()"
-          v-if="staffPermissionIds.includes(9)">
-          <img src="@/assets/yonghu/icon20.png" alt="" style="margin-left: 8px" />
-          <span style="font-size: 20px; margin-left: 8px; color: #5a5a5a">余额调整</span>
+        <div class="recharge-btn" :class="{ 'btn-single-only-disabled': multipleSelection.length !== 1 }" @click="multipleSelection.length === 1 && change_balance_btn_click()"
+          v-if="staffPermissionIds.includes(9)"
+          v-show="isFeatureVisible('balance')">
+          <img src="@/assets/yonghu/icon20.png" alt="" />
+          <span>余额调整</span>
         </div>
-        <div class="recharge-btn" style="margin-left: 5px" :class="{ 'btn-single-only-disabled': multipleSelection.length !== 1 }" @click="multipleSelection.length === 1 && recharge_btn_click()"
-          v-if="staffPermissionIds.includes(10)">
-          <img src="@/assets/yonghu/icon6.png" alt="" style="margin-left: 8px" />
-          <span style="font-size: 20px; margin-left: 8px; color: #5a5a5a">充值</span>
+        <div class="recharge-btn" :class="{ 'btn-single-only-disabled': multipleSelection.length !== 1 }" @click="multipleSelection.length === 1 && recharge_btn_click()"
+          v-if="staffPermissionIds.includes(10)"
+          v-show="isFeatureVisible('recharge')">
+          <img src="@/assets/yonghu/icon6.png" alt="" />
+          <span>充值</span>
         </div>
-        <div class="recharge-record-btn" style="margin-left: 5px; width: 160px" @click="recharge_record_btn_click"
-          v-if="staffPermissionIds.includes(11)">
-          <img src="@/assets/yonghu/icon7.png" alt="" style="margin-left: 8px" />
-          <span style="font-size: 20px; margin-left: 8px; color: #5a5a5a">充值记录查询</span>
+        <div class="water-meter-btn" :class="{ 'btn-single-only-disabled': multipleSelection.length !== 1 }" @click="multipleSelection.length === 1 && change_btn_click()"
+          v-if="staffPermissionIds.includes(13)"
+          v-show="isFeatureVisible('changeMeter')">
+          <img src="@/assets/yonghu/icon8.png" alt="" />
+          <span>换表</span>
         </div>
-        <div class="water-meter-btn" style="margin-left: 5px" :class="{ 'btn-single-only-disabled': multipleSelection.length !== 1 }" @click="multipleSelection.length === 1 && change_btn_click()"
-          v-if="staffPermissionIds.includes(13)">
-          <img src="@/assets/yonghu/icon8.png" alt="" style="margin-left: 8px" />
-          <span style="font-size: 20px; margin-left: 8px; color: #5a5a5a">换表</span>
+        <div class="recharge-record-btn" @click="recharge_record_btn_click"
+          v-if="staffPermissionIds.includes(11)"
+          v-show="isFeatureVisible('rechargeRecord')">
+          <img src="@/assets/yonghu/icon7.png" alt="" />
+          <span>充值记录查询</span>
         </div>
-        <div class="water-meter-record-btn" style="margin-left: 5px; width: 160px" @click="change_record_btn_click"
-          v-if="staffPermissionIds.includes(14)">
-          <img src="@/assets/yonghu/icon9.png" alt="" style="margin-left: 8px" />
-          <span style="font-size: 20px; margin-left: 8px; color: #5a5a5a">换表记录查询</span>
+        <div class="recharge-record-btn" @click="recharge_cancel_record_btn_click"
+             v-if="staffPermissionIds.includes(11)"
+             v-show="isFeatureVisible('rechargeCancelRecord')">
+          <img src="@/assets/yonghu/icon7.png" alt="" />
+          <span>充值撤销记录查询</span>
         </div>
-        <!-- <div class="export-out-btn" style="margin-left: 5px; width: 110px" @click="download">
-          <img src="@/assets/yonghu/icon1.png" alt="" style="margin-left: 7px" />
-          <span style="font-size: 16px; margin-left: 10px; color: #5a5a5a">模板下载</span>
+        <div class="water-meter-record-btn" @click="change_record_btn_click"
+          v-if="staffPermissionIds.includes(14)"
+          v-show="isFeatureVisible('changeRecord')">
+          <img src="@/assets/yonghu/icon9.png" alt="" />
+          <span>换表记录查询</span>
         </div>
-        <div class="export-in-btn" style="margin-left: 5px" @click="triggerFileInput">
-          <img src="@/assets/yonghu/icon1.png" alt="" style="margin-left: 7px" />
-          <span style="font-size: 16px; margin-left: 5px; color: #5a5a5a">导入</span>
-          <input ref="fileInput" type="file" accept=".xls,.xlsx" style="display: none" @change="exportIn" />
-        </div> -->
-        <div class="export-out-btn" style="margin-left: 5px" @click="exportExcel">
-          <img src="@/assets/yonghu/icon2.png" alt="" style="margin-left: 7px" />
-          <span style="font-size: 20px; margin-left: 10px; color: #5a5a5a">导出</span>
+        <div class="export-in-btn" @click="multi_edit_meter_price" v-show="isFeatureVisible('batchPrice')">
+          <img src="@/assets/jiage/icon3.png" alt="" />
+          <span>批量修改水价类型</span>
         </div>
-        <div class="export-out-btn" style="margin-left: 5px; width: 220px" @click="common_meter_template_click">
-          <img src="@/assets/yonghu/icon1.png" alt="" style="margin-left: 7px" />
-          <span style="font-size: 20px; margin-left: 10px; color: #5a5a5a">普表用水量模板下载</span>
+        <div class="export-out-btn" @click="exportExcel" v-show="isFeatureVisible('export')">
+          <img src="@/assets/yonghu/icon1.3.png" alt="" />
+          <span>导出</span>
         </div>
-        <div class="export-in-btn" style="margin-left: 5px; width: 220px" @click="triggerCommonMeterImport">
-          <img src="@/assets/yonghu/icon2.png" alt="" style="margin-left: 7px" />
-          <span style="font-size: 20px; margin-left: 5px; color: #5a5a5a">普表用水量信息导入</span>
+        <div class="export-out-btn" @click="common_meter_template_click" v-show="isFeatureVisible('commonMeterTemplate')">
+          <img src="@/assets/yonghu/icon1.png" alt="" />
+          <span>普表用水量模板下载</span>
+        </div>
+        <div class="export-in-btn" @click="triggerCommonMeterImport" v-show="isFeatureVisible('commonMeterImport')">
+          <img src="@/assets/yonghu/icon2.png" alt="" />
+          <span>普表用水量信息导入</span>
           <input ref="commonMeterInput" type="file" accept=".xls,.xlsx" style="display: none"
             @change="common_meter_click" />
         </div>
-        <div class="export-in-btn" style="margin-left: 5px; width: 220px" @click="multi_edit_meter_price">
-          <img src="@/assets/jiage/icon3.png" alt="" style="margin-left: 7px" />
-          <span style="font-size: 20px; margin-left: 5px; color: #5a5a5a">批量修改水价类型</span>
-        </div>
 
-        <div class="reflush" style="margin-left: 5px" @click="reflush">
+        <el-popover
+          placement="bottom"
+          :width="220"
+          trigger="click"
+          v-model:visible="moreFeaturesVisible"
+          popper-class="feature-popover"
+        >
+          <template #reference>
+            <div class="more-feature-btn">
+              <el-button class="more-feature-trigger">
+                更多功能
+                <el-icon style="margin-left: 4px"><ArrowDown /></el-icon>
+              </el-button>
+            </div>
+          </template>
+          <div class="feature-popover-content">
+            <el-checkbox
+              v-for="btn in availableFeatureButtons"
+              :key="btn.key"
+              :model-value="visibleFeatureKeys.includes(btn.key)"
+              @change="(val) => toggleFeatureButton(btn.key, val)"
+              :disabled="visibleFeatureKeys.length >= maxVisibleFeatures && !visibleFeatureKeys.includes(btn.key)"
+            >
+              {{ btn.label }}
+            </el-checkbox>
+          </div>
+        </el-popover>
+
+        <div class="reflush" @click="reflush">
           <img src="@/assets/yonghu/icon15.png" alt="" />
         </div>
       </div>
@@ -182,14 +238,36 @@
               </template>
             </el-table-column>
             <!-- <el-table-column property="imei" label="IMEI号" width="280" align="center" /> -->
-            <el-table-column property="meterType" label="表类型" min-width="70" align="center" />
-            <el-table-column property="priceName" label="价格类型" min-width="100" align="center" />
-            <el-table-column property="smsConfigName" label="短信" min-width="70" align="center"></el-table-column>
+<!--            <el-table-column property="meterType" label="表类型" min-width="70" align="center" />-->
+            <el-table-column property="meterVendor" label="厂商" min-width="70" align="center" />
+            <el-table-column property="priceName" label="价格类型" min-width="100" align="center">
+              <template #default="scope">
+    <span
+      v-if="scope.row.priceId"
+      @click="showPriceDetail(scope.row)"
+      style="color: #46b97e; cursor: pointer;display: inline-block;">
+      {{ scope.row.priceName }}
+    </span>
+                <span v-else>{{ scope.row.priceName }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column property="smsConfigName" label="短信" min-width="70" align="center">
+              <template #default="scope">
+    <span
+      v-if="scope.row.smsConfigId"
+      @click="showSmsDetail(scope.row)"
+      style="color: #46b97e; cursor: pointer;display: inline-block;">
+      {{ scope.row.smsConfigName }}
+    </span>
+                <span v-else>{{ scope.row.smsConfigName }}</span>
+              </template>
+            </el-table-column>
 
             <el-table-column property="userAddr" label="用户地址" min-width="100" align="center" />
             <!-- <el-table-column property="companyName" label="所属水厂" width="280" align="center" /> -->
             <el-table-column property="regionName" label="区域" min-width="70" align="center" />
             <el-table-column property="phone" label="联系电话" min-width="100" align="center" />
+<!--            <el-table-column property="meterVendor" label="水表品牌" min-width="100" align="center" />-->
             <!-- <el-table-column property="approver1" label="开户审批人1" width="180" align="center" />
             <el-table-column property="approver2" label="开户审批人2" width="180" align="center" />
             <el-table-column property="approver3" label="开户审批人3" width="180" align="center" /> -->
@@ -207,10 +285,6 @@
     <!-- 点击用户名称弹出框 -->
     <userInfoVue v-if="user_info_dialogFormVisible" :user_info_dialogFormVisible="user_info_dialogFormVisible"
       :quyu_data="quyu_data" :data="multipleSelection[0]" @close="closeUserInfoDialog"></userInfoVue>
-
-    <!-- 抄表记录弹出框 -->
-    <chabiaoRecord v-if="chaobiao_dialogFormVisible" :chaobiao_dialogFormVisible="chaobiao_dialogFormVisible"
-      :data="multipleSelection[0]" @close="chaobiao_dialogFormVisible = false"></chabiaoRecord>
 
     <!-- 交易记录弹出框 -->
     <transactionRecord v-if="transaction_dialogFormVisible"
@@ -256,6 +330,11 @@
       :recharge_record_dialogFormVisible="recharge_record_dialogFormVisible" :quyu_data="quyu_data"
       :data="multipleSelection[0]" @close="closeRechargeRecordDialog"></rechargeRecordVue>
 
+    <!-- 充值撤销记录弹窗 -->
+    <rechargeCancelRecordVue v-if="recharge_cancel_record_dialogFormVisible"
+                             :recharge_cancel_record_dialogFormVisible="recharge_cancel_record_dialogFormVisible" :quyu_data="quyu_data"
+                             :data="multipleSelection[0]" @close="closeRechargeCancelRecordDialog"></rechargeCancelRecordVue>
+
     <!-- 命令下发弹出框-太阳能 -->
     <commandTaiYangNengVue v-if="command_dialogFormVisible_taiyangneng"
       :command_dialogFormVisible="command_dialogFormVisible_taiyangneng" :commandType="commandType"
@@ -266,7 +345,7 @@
       :command_dialogFormVisible="command_dialogFormVisible_xinchi" :commandType="commandType"
       :data="multipleSelection[0]" @close="closeCommandDialog"></commandXinchiVue>
 
-    <!-- 命令下发弹出框-旧信驰 -->
+    <!-- 命令下发弹出框-旧信驰/旧信驰KF01 -->
     <commandOldXinchi v-if="command_dialogFormVisible_old_xinchi"
       :command_dialogFormVisible="command_dialogFormVisible_old_xinchi" :commandType="commandType"
       :data="multipleSelection[0]" @close="closeCommandDialog"></commandOldXinchi>
@@ -333,20 +412,149 @@
       </div>
     </div>
   </div>
+  <!-- 价格详情弹窗 -->
+  <div class="test-dialog" v-if="view_dialogFormVisible">
+    <div class="test-dialog-content" style="min-height: 500px">
+      <div class="title">
+        <div style="margin-left: 10px; display: flex; align-items: center">
+          <img src="@/assets/jiage/icon5.png" alt="" style="margin-right: 10px" />
+          <span style="font-size: 20px">价格详情</span>
+        </div>
+        <div style="margin-right: 10px; cursor: pointer" @click="view_dialogFormVisible = false">
+          <img src="@/assets/close.png" alt="" />
+        </div>
+      </div>
+      <div class="test-content" style="min-height: 500px">
+        <div class="test-item">
+          <div class="test-input" style="margin-right: 1%">
+            <span>价格名称</span>
+            <el-input v-model="viewData.priceName" disabled />
+          </div>
+          <div class="test-input" style="margin-right: 1%">
+            <span>保底数值/吨</span>
+            <el-input v-model="viewData.amountZeroEnd" disabled />
+          </div>
+          <div class="test-input">
+            <span>保底价格/元</span>
+            <el-input v-model="viewData.priceZero" disabled />
+          </div>
+          <div class="test-input" style="margin-right: 1%">
+            <span>阶梯数</span>
+            <el-input v-model="viewData.stepNumber" disabled />
+          </div>
+          <div class="test-input" style="margin-right: 1%">
+            <span>附加费用/元</span>
+            <el-input v-model="viewData.additionPrice" disabled />
+          </div>
+        </div>
+        <div class="test-item-jieti" v-if="viewData.stepNumber >= 1">
+          <span style="font-size: 16px; color: #47b97e; margin-bottom: 10px">第一阶梯</span>
+          <div class="jieti-content">
+            <div class="jieti-item" style="width: 60%">
+              <span>水量范围</span>
+              <div class="jieti-range">
+                <el-input v-model="viewData.amountFirstStart" disabled />
+                <span style="font-size: 20px; margin-bottom: 5px; align-self: center; margin: 0 5px">至</span>
+                <el-input v-model="viewData.amountFirstEnd" disabled />
+              </div>
+            </div>
+            <div class="jieti-item" style="width: 35%">
+              <span>价格（元/吨）</span>
+              <el-input v-model="viewData.priceFirst" disabled />
+            </div>
+          </div>
+        </div>
+        <div class="test-item-jieti" v-if="viewData.stepNumber >= 2">
+          <span style="font-size: 16px; color: #47b97e; margin-bottom: 10px">第二阶梯</span>
+          <div class="jieti-content">
+            <div class="jieti-item" style="width: 60%">
+              <span>水量范围</span>
+              <div class="jieti-range">
+                <el-input v-model="viewData.amountSecondStart" disabled />
+                <span style="font-size: 20px; margin-bottom: 5px; align-self: center; margin: 0 5px">至</span>
+                <el-input v-model="viewData.amountSecondEnd" disabled />
+              </div>
+            </div>
+            <div class="jieti-item" style="width: 35%">
+              <span>价格（元/吨）</span>
+              <el-input v-model="viewData.priceSecond" disabled />
+            </div>
+          </div>
+        </div>
+        <div class="test-item-jieti" v-if="viewData.stepNumber >= 3">
+          <span style="font-size: 16px; color: #47b97e; margin-bottom: 10px">第三阶梯</span>
+          <div class="jieti-content">
+            <div class="jieti-item" style="width: 60%">
+              <span>水量范围</span>
+              <div class="jieti-range">
+                <el-input v-model="viewData.amountThirdStart" disabled />
+                <span style="font-size: 20px; margin-bottom: 5px; align-self: center; margin: 0 5px">至</span>
+                <el-input v-model="viewData.amountThirdEnd" disabled />
+              </div>
+            </div>
+            <div class="jieti-item" style="width: 35%">
+              <span>价格（元/吨）</span>
+              <el-input v-model="viewData.priceThird" disabled />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 短信配置详情弹窗 -->
+  <div class="test-dialog" v-if="smsView_dialogFormVisible">
+    <div class="test-dialog-content" style="min-height: 400px">
+      <div class="title">
+        <div style="margin-left: 10px; display: flex; align-items: center">
+          <img src="@/assets/jiage/icon5.png" alt="" style="margin-right: 10px" />
+          <span style="font-size: 20px">短信配置详情</span>
+        </div>
+        <div style="margin-right: 10px; cursor: pointer" @click="smsView_dialogFormVisible = false">
+          <img src="@/assets/close.png" alt="" />
+        </div>
+      </div>
+      <div class="test-content" style="min-height: 400px">
+        <div class="test-item">
+          <div class="test-input" style="margin-right: 1%; width: 100%">
+            <span>短信配置名称</span>
+            <el-input v-model="smsViewData.smsConfigName" disabled />
+          </div>
+          <div class="test-input" style="margin-right: 1%; width: 100%">
+            <span>发送方式</span>
+            <el-input :value="smsViewData.smsSendType || ''" disabled />
+          </div>
+          <div class="test-input" style="margin-right: 1%; width: 100%" v-if="smsViewData.smsSendType === '定时发送' && smsViewData.smsSendTime != null">
+            <span>短信定时发送时间</span>
+            <el-input :value="smsViewData.smsSendTime + ':00'" disabled />
+          </div>
+          <div class="test-input" style="margin-right: 1%; width: 100%">
+            <span>余额不足发送预警值（元）</span>
+            <el-input :value="smsViewData.minimumBalanceThreshold !== null && smsViewData.minimumBalanceThreshold !== undefined ? smsViewData.minimumBalanceThreshold : ''" disabled />
+          </div>
+          <div class="test-input" style="margin-right: 1%; width: 100%">
+            <span>所属水厂</span>
+            <el-input :value="smsViewData.companyName || ''" disabled />
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script>
-import { queryPriceMg } from "@/api/price/price";
+import { queryPriceMg, getPriceDetail } from "@/api/price/price";
+import { getSmsConfigDetail } from "@/api/sms/sms";
 import { multiEditUserBindMeterInfo } from "@/api/userMeterBind/userMeterBind";
-import commandTaiYangNengVue from "@/components/userManage/command_taiyangneng.vue";
-import commandXinchiVue from "@/components/userManage/command_xinchi.vue";
-import commandQianBaoTong from "@/components/userManage/command_qianbaotong.vue";
-import commandZhuoZheng from "@/components/userManage/command_zhuozheng.vue";
-import commandJiWanXun from "@/components/userManage/command_jiwanxun.vue";
-import commandShengXin from "@/components/userManage/command_shengxin.vue";
-import commandOldXinchi from "@/components/userManage/command_old_xinchi.vue";
-import command4GXinchi from "@/components/userManage/command_4g_xinchi.vue";
-import commandOldShengXin from "@/components/userManage/command_oldshengxin.vue";
+import commandTaiYangNengVue from "@/components/userManage/commandDialog/command_taiyangneng.vue";
+import commandXinchiVue from "@/components/userManage/commandDialog/command_xinchi.vue";
+import commandQianBaoTong from "@/components/userManage/commandDialog/command_qianbaotong.vue";
+import commandZhuoZheng from "@/components/userManage/commandDialog/command_zhuozheng.vue";
+import commandJiWanXun from "@/components/userManage/commandDialog/command_jiwanxun.vue";
+import commandShengXin from "@/components/userManage/commandDialog/command_shengxin.vue";
+import commandOldXinchi from "@/components/userManage/commandDialog/command_old_xinchi.vue";
+import command4GXinchi from "@/components/userManage/commandDialog/command_4g_xinchi.vue";
+import commandOldShengXin from "@/components/userManage/commandDialog/command_oldshengxin.vue";
 import rechargeVue from "@/components/userManage/recharge.vue";
 import rechargeRecordVue from "@/components/userManage/rechargeRecord.vue";
 import changeVue from "@/components/userManage/change.vue";
@@ -356,14 +564,15 @@ import valveVue from "@/components/userManage/valve.vue";
 import valueOpenVue from "@/components/userManage/valveOpen.vue";
 import changeRecord from "@/components/userManage/changeRecord.vue";
 import userInfoVue from "@/components/userManage/userInfo.vue";
-import chabiaoRecord from "@/components/userManage/chaobiaoRecord.vue";
 import transactionRecord from "@/components/userManage/transactionRecord.vue";
 import changeBalanceVue from "@/components/userManage/changeBalance.vue";
+import rechargeCancelRecordVue from "@/components/userManage/RechargeCancelRecord.vue";
 
 import service from "@/api/request";
 import { ElMessage } from "element-plus";
 import { Check, Close } from "@element-plus/icons-vue";
 import axios from "axios";
+import { useDetailNavigation } from "@/composables/useDetailNavigation";
 
 export default {
   components: {
@@ -376,7 +585,6 @@ export default {
     addVue,
     deleteVue,
     userInfoVue,
-    chabiaoRecord,
     transactionRecord,
     valveVue,
     valueOpenVue,
@@ -390,6 +598,12 @@ export default {
     commandOldXinchi,
     command4GXinchi,
     commandOldShengXin,
+    // 充值撤销记录
+    rechargeCancelRecordVue,
+  },
+  setup() {
+    const { navigateToDetail } = useDetailNavigation();
+    return { navigateToDetail };
   },
   data() {
     return {
@@ -399,12 +613,16 @@ export default {
         imei: "",
         meterCode: null,
         meterType: "", // 水表类型
+        meterVendor: "", // 厂商
+        battery: "", // 电量
+        valveStatus: "", // 阀门状态
         time: {
           type: "",
           accurateTime: "",
         },
         company: null, // 新增所属水厂参数
         companyId: null, // 所属水厂ID
+        userPhone: "", // 联系电话
         order: 0,   // ****** 默认按照时间顺序倒叙排列表格 ******
       },
       price_list: [],
@@ -447,9 +665,10 @@ export default {
       sortField: "time",
       sortOrder: "desc",
 
+      // 标记是否需要自动点击抄表时间（从异常数据页面跳转时使用）
+      autoClickNextTime: false,
       //弹出框显示与否
       user_info_dialogFormVisible: false,
-      chaobiao_dialogFormVisible: false,
       transaction_dialogFormVisible: false,
       add_dialogFormVisible: false,
       delete_dialogFormVisible: false,
@@ -469,9 +688,79 @@ export default {
       valve_dialogFormVisible: false,
       valveOpen_dialogFormVisible: false,
       changeBalance_dialogFormVisible: false,
+      // 充值撤销记录
+      recharge_cancel_record_dialogFormVisible: false,
 
+      // 价格详情弹窗
+      view_dialogFormVisible: false,
+      viewData: {
+        priceName: null,
+        amountZeroEnd: null,
+        priceZero: null,
+        stepNumber: null,
+        additionPrice: null,
+        amountFirstStart: null,
+        amountFirstEnd: null,
+        priceFirst: null,
+        amountSecondStart: null,
+        amountSecondEnd: null,
+        priceSecond: null,
+        amountThirdStart: null,
+        amountThirdEnd: null,
+        priceThird: null,
+      },
+
+      // 短信配置详情弹窗
+      smsView_dialogFormVisible: false,
+      smsViewData: {
+        smsConfigName: null,
+        smsSendType: null,
+        smsSendTime: null,
+        minimumBalanceThreshold: null,
+        balanceWarningDays: null,
+        companyId: null,
+        companyName: null,
+      },
       // ****** 请求锁，避免重复请求 ******
       isLoading: false,
+      listRequestSeq: 0,
+
+      // ****** 功能按钮配置 ******
+      featureButtonConfigs: [
+        { key: 'delete', label: '删除', permission: 6 },
+        { key: 'command', label: '命令下发', permission: null },
+        { key: 'valveOpen', label: '开阀设置', permission: 7 },
+        { key: 'valveClose', label: '关阀设置', permission: 8 },
+        { key: 'balance', label: '余额调整', permission: 9 },
+        { key: 'recharge', label: '充值', permission: 10 },
+        { key: 'changeMeter', label: '换表', permission: 13 },
+        { key: 'rechargeRecord', label: '充值记录查询', permission: 11 },
+        { key: 'rechargeCancelRecord', label: '充值撤销记录查询', permission: 11 },
+        { key: 'changeRecord', label: '换表记录查询', permission: 14 },
+        { key: 'batchPrice', label: '批量修改水价类型', permission: null },
+        { key: 'export', label: '导出', permission: null },
+        { key: 'commonMeterTemplate', label: '普表用水量模板下载', permission: null, defaultVisible: false },
+        { key: 'commonMeterImport', label: '普表用水量信息导入', permission: null, defaultVisible: false },
+      ],
+      visibleFeatureKeys: [],
+      maxVisibleFeatures: 12,
+      moreFeaturesVisible: false,
+
+      // ****** 筛选栏配置 ******
+      filterFieldConfigs: [
+        { key: "company", label: "所属水厂", type: "select", placeholder: "请选择所属水厂", optionsKey: "companyList" },
+        { key: "userId", label: "用户号", type: "input" },
+        { key: "userName", label: "用户名称", type: "input" },
+        { key: "meterCode", label: "表号", type: "input", inputType: "number" },
+        { key: "userPhone", label: "联系电话", type: "input" },
+        { key: "meterVendor", label: "厂商", type: "input" },
+        { key: "meterType", label: "水表类型", type: "select", optionsKey: "shuibiao_list", defaultVisible: false },
+        { key: "battery", label: "电量", type: "select", clearable: true, options: [{ label: "正常", value: "正常" }, { label: "异常", value: "异常" }] },
+        { key: "valveStatus", label: "阀门状态", type: "select", clearable: true, options: [{ label: "开阀", value: "开阀" }, { label: "关阀", value: "关阀" }, { label: "故障", value: "故障" }] },
+      ],
+      visibleFilterKeys: [],
+      maxVisibleFilters: 7,
+      moreFiltersVisible: false,
     };
   },
   watch: {
@@ -493,6 +782,59 @@ export default {
       this.$refs.treeRef.setCurrentKey(null);
       this.getRegionData();
     },
+    // 监听 yonghuData 变化，处理从异常页面跳转后的自动点击抄表时间
+    yonghuData: {
+      handler(newData) {
+        if (this.autoClickNextTime && newData && newData.length > 0) {
+          // 清除标记，避免重复点击
+          this.autoClickNextTime = false;
+          // 等待 DOM 更新
+          this.$nextTick(() => {
+            // 再次等待表格渲染完成
+            setTimeout(() => {
+              this.handleChaoBiaoTime(newData[0]);
+            }, 300);
+          });
+        }
+      },
+      immediate: false,
+      deep: false,
+    },
+  },
+  computed: {
+    availableFeatureButtons() {
+      return this.featureButtonConfigs.filter((btn) => {
+        if (btn.permission === null) return true;
+        return this.staffPermissionIds.includes(btn.permission);
+      });
+    },
+    availableFilterFields() {
+      return this.filterFieldConfigs.filter((f) => {
+        if (f.key === "company") return this.companyId === 1;
+        return true;
+      });
+    },
+    displayedFilterFields() {
+      return this.availableFilterFields
+        .filter((f) => this.visibleFilterKeys.includes(f.key))
+        .slice(0, this.maxVisibleFilters);
+    },
+  },
+  created() {
+    const allKeys = this.filterFieldConfigs
+      .filter((f) => f.key !== "company" || this.companyId === 1)
+      .filter((f) => f.defaultVisible !== false)
+      .filter((f) => !(this.companyId === 1 && f.key === "battery"))
+      .map((f) => f.key);
+    this.visibleFilterKeys = [...allKeys];
+
+    this.visibleFeatureKeys = this.featureButtonConfigs
+      .filter((btn) => btn.defaultVisible !== false)
+      .filter((btn) => {
+        if (btn.permission === null) return true;
+        return this.staffPermissionIds.includes(btn.permission);
+      })
+      .map((btn) => btn.key);
   },
   mounted() {
     this.$nextTick(() => {
@@ -501,7 +843,50 @@ export default {
 
     // 检查是否需要恢复页面状态（从 userRecordDetail 返回时）
     const restore = this.$route.query.restore;
-    if (restore === 'true') {
+
+    const searchUserAndMeter = this.$route.query.searchUserAndMeter === 'true';
+    const userIdFromQuery = this.$route.query.userId;
+    const meterCodeFromQuery = this.$route.query.meterCode;
+    const searchUserName = this.$route.query.searchUserName === 'true';
+    const userNameFromQuery = this.$route.query.userName;
+
+
+    // 标记是否需要自动点击抄表时间
+    this.autoClickNextTime = false;
+    if (searchUserAndMeter && (userIdFromQuery || meterCodeFromQuery)) {
+      // 设置搜索参数
+      if (userIdFromQuery) {
+        this.param.userId = userIdFromQuery;
+      }
+      if (meterCodeFromQuery) {
+        this.param.meterCode = meterCodeFromQuery;
+      }
+      // 设置标记，等待数据加载完成后自动点击
+      this.autoClickNextTime = true;
+      // 获取区域数据后执行搜索
+      this.getRegionData();
+      this.$nextTick(() => {
+        this.fetchUserList(1, { force: true });
+        // 搜索完成后，查找第一行数据并自动点击抄表时间
+        this.$nextTick(() => {
+          if (this.yonghuData && this.yonghuData.length > 0) {
+            const firstRow = this.yonghuData[0];
+            // 自动调用抄表时间点击事件
+            this.handleChaoBiaoTime(firstRow);
+          }
+        });
+      });
+    }
+    // 检查是否从异常数据页面跳转过来，需要自动搜索特定用户
+    else if (searchUserName && userNameFromQuery) {
+      // 设置搜索参数中的 userName
+      this.param.userName = userNameFromQuery;
+      // 获取区域数据后执行搜索
+      this.getRegionData();
+      this.$nextTick(() => {
+        this.fetchUserList(1, { force: true });
+      });
+    } else if (restore === 'true') {
       // 恢复页面状态
       this.currentPage = parseInt(this.$route.query.currentPage) || 1;
       this.pageSize = parseInt(this.$route.query.pageSize) || 30;
@@ -559,6 +944,43 @@ export default {
     this.getCompanyList();
   },
   methods: {
+    getFilterOptions(key) {
+      const field = this.filterFieldConfigs.find((f) => f.key === key);
+      if (!field) return [];
+      if (field.options) return field.options;
+      if (field.optionsKey === "companyList") {
+        return (this.companyList || []).map((item) => ({ label: item.name, value: item.id }));
+      }
+      if (field.optionsKey === "shuibiao_list") {
+        return (this.shuibiao_list || []).map((item) => ({ label: item.label, value: item.label }));
+      }
+      return [];
+    },
+    toggleFilterField(key, checked) {
+      if (checked) {
+        if (this.visibleFilterKeys.length >= this.maxVisibleFilters) return;
+        const configKeys = this.availableFilterFields.map((f) => f.key);
+        const newKeys = [...this.visibleFilterKeys, key];
+        newKeys.sort((a, b) => configKeys.indexOf(a) - configKeys.indexOf(b));
+        this.visibleFilterKeys = newKeys;
+      } else {
+        this.visibleFilterKeys = this.visibleFilterKeys.filter((k) => k !== key);
+      }
+    },
+    isFeatureVisible(key) {
+      return this.visibleFeatureKeys.includes(key);
+    },
+    toggleFeatureButton(key, checked) {
+      if (checked) {
+        if (this.visibleFeatureKeys.length >= this.maxVisibleFeatures) return;
+        const configKeys = this.availableFeatureButtons.map((btn) => btn.key);
+        const newKeys = [...this.visibleFeatureKeys, key];
+        newKeys.sort((a, b) => configKeys.indexOf(a) - configKeys.indexOf(b));
+        this.visibleFeatureKeys = newKeys;
+      } else {
+        this.visibleFeatureKeys = this.visibleFeatureKeys.filter((k) => k !== key);
+      }
+    },
     // ****** 手动处理分页变化，避免 watch 循环 ******
     handlePageChange(page) {
       // 防抖：如果当前正在请求，直接返回，避免重复点击
@@ -589,8 +1011,9 @@ export default {
       }
       return queryString;
     },
-    fetchUserList(page = this.currentPage || 1) {
-      if (this.isLoading) return;
+    fetchUserList(page = this.currentPage || 1, options = {}) {
+      if (this.isLoading && !options.force) return;
+      const requestSeq = ++this.listRequestSeq;
       this.isLoading = true;
       this.syncCompanyIdParam();
       const nonEmptyParams = this.filterNonEmptyParams(this.param);
@@ -606,6 +1029,7 @@ export default {
           },
         })
         .then((response) => {
+          if (requestSeq !== this.listRequestSeq) return;
           if (response.code === 200) {
             this.yonghuData = response.data.userInfoData;
             this.yonghuData.forEach((item) => {
@@ -620,11 +1044,14 @@ export default {
           }
         })
         .catch((error) => {
-          const errorMessage = error.response?.data?.msg || "璇锋眰鍙戠敓閿欒";
+          if (requestSeq !== this.listRequestSeq) return;
+          const errorMessage = error.response?.data?.msg || "请求发生错误!!";
           ElMessage.error(errorMessage);
         }).finally(() => {
           // ✅ finally 放在最后，无论成功/失败，都会执行
-          this.isLoading = false;
+          if (requestSeq === this.listRequestSeq) {
+            this.isLoading = false;
+          }
         });
     },
     multi_edit_meter_price() {
@@ -851,33 +1278,30 @@ export default {
       }
     },
     handleChaoBiaoTime(row) {
-      this.chaobiao_dialogFormVisible = true;
-      this.multipleSelection[0] = row;
+      this.navigateToDetail(row, {
+        source: 'userManage',
+        tab: 'meter',
+        pageState: {
+          currentPage: this.currentPage,
+          pageSize: this.pageSize,
+          param: this.param,
+          quyu_selected: this.quyu_selected,
+          sortField: this.sortField,
+          sortOrder: this.sortOrder,
+        },
+      });
     },
     handleYue(row) {
-      // 保存当前页面状态到 sessionStorage，方便返回后恢复
-      const pageState = {
-        currentPage: this.currentPage,
-        pageSize: this.pageSize,
-        param: this.param,
-        quyu_selected: this.quyu_selected,
-        sortField: this.sortField,
-        sortOrder: this.sortOrder
-      };
-      sessionStorage.setItem('userManagePageState', JSON.stringify(pageState));
-
-      // 跳转到 userRecordDetail 页面
-      this.$router.push({
-        path: '/userRecordDetail',
-        query: {
-          userId: row.userId,
-          meterCode: row.meterCode,
-          userName: row.userName,
-          userAddr: row.userAddr,
-          userPhone: row.phone,
-          userBalance: row.balance,
-          companyId: row.companyId
-        }
+      this.navigateToDetail(row, {
+        source: 'userManage',
+        pageState: {
+          currentPage: this.currentPage,
+          pageSize: this.pageSize,
+          param: this.param,
+          quyu_selected: this.quyu_selected,
+          sortField: this.sortField,
+          sortOrder: this.sortOrder,
+        },
       });
     },
     delete_btn_click() {
@@ -903,6 +1327,10 @@ export default {
     },
     recharge_record_btn_click() {
       this.recharge_record_dialogFormVisible = true;
+    },
+    // 充值撤销记录
+    recharge_cancel_record_btn_click() {
+      this.recharge_cancel_record_dialogFormVisible = true;
     },
     change_btn_click() {
       if (this.multipleSelection.length > 0) {
@@ -933,6 +1361,7 @@ export default {
           this.command_dialogFormVisible_xinchi = true;
           break;
         case "旧信驰":
+        case "旧信驰KF01":
           this.command_dialogFormVisible_old_xinchi = true;
           break;
         case "4G信驰":
@@ -1018,6 +1447,11 @@ export default {
     },
     closeRechargeRecordDialog() {
       this.recharge_record_dialogFormVisible = false;
+      this.multipleSelection = [];
+      this.reflush();
+    },
+    closeRechargeCancelRecordDialog() {
+      this.recharge_cancel_record_dialogFormVisible = false;
       this.multipleSelection = [];
       this.reflush();
     },
@@ -1474,11 +1908,8 @@ export default {
     handleNodeClick(data) {
       this.quyu_selected = data;
       console.log(this.quyu_selected);
-      if (this.currentPage !== 1) {
-        this.currentPage = 1;
-        return;
-      }
-      this.fetchUserList(1);
+      this.currentPage = 1;
+      this.fetchUserList(1, { force: true });
     },
     getUserInfo() {
       this.param.order = this.getOrderValue(this.sortField, this.sortOrder);
@@ -1494,12 +1925,16 @@ export default {
         imei: "",
         meterCode: null,
         meterType: "",
+        meterVendor: "",
+        battery: "",
+        valveStatus: "",
         time: {
           type: "",
           accurateTime: "",
         },
         company: null,
         companyId: null,
+        userPhone: "",
         order: 0,
       };
       this.sortField = "time";
@@ -1510,19 +1945,64 @@ export default {
           this.$refs.treeRef.setCurrentKey(null);
         }
         this.quyu_selected = null;
-        if (this.currentPage !== 1) {
-          this.currentPage = 1;
-          return;
-        }
-        this.fetchUserList(1);
+        this.currentPage = 1;
+        this.fetchUserList(1, { force: true });
       }
     },
     search() {
-      if (this.currentPage !== 1) {
-        this.currentPage = 1;
-        return;
+      this.currentPage = 1;
+      this.fetchUserList(1, { force: true });
+    },
+    // 显示价格详情
+    showPriceDetail(row) {
+      if (!row.priceId) {
+        return ElMessage.warning("该用户未设置价格类型");
       }
-      this.fetchUserList(1);
+
+      getPriceDetail(row.priceId)
+        .then((res) => {
+          if (res.code === 200) {
+            this.viewData = res.data;
+            this.view_dialogFormVisible = true;
+          } else {
+            ElMessage.error(res.msg || "获取价格详情失败");
+          }
+        })
+        .catch((error) => {
+          console.error("获取价格详情失败:", error);
+          ElMessage.error("获取价格详情失败");
+        });
+    },
+
+
+    // 显示短信配置详情
+    showSmsDetail(row) {
+      if (!row.smsConfigId) {
+        return ElMessage.warning("该用户未设置短信配置");
+      }
+
+      console.log('查询短信配置ID:', row.smsConfigId);
+
+      getSmsConfigDetail(row.smsConfigId)
+        .then((res) => {
+          console.log('API完整响应:', res);
+          console.log('响应data:', res.data);
+
+          if (res.code === 200) {
+            this.smsViewData = res.data;
+            console.log('smsViewData赋值后:', this.smsViewData);
+            console.log('minimumBalanceThreshold值:', this.smsViewData.minimumBalanceThreshold);
+            console.log('smsSendTime值:', this.smsViewData.smsSendTime);
+
+            this.smsView_dialogFormVisible = true;
+          } else {
+            ElMessage.error(res.msg || "获取短信配置详情失败");
+          }
+        })
+        .catch((error) => {
+          console.error("获取短信配置详情失败:", error);
+          ElMessage.error("获取短信配置详情失败");
+        });
     },
   },
 };
@@ -1650,9 +2130,9 @@ export default {
   justify-content: center;
   /* 确保子元素在父容器中垂直居中 */
   flex-direction: column;
-  width: 14%;
+  width: 11%;
   height: 100%;
-  margin-right: 20px;
+  margin-right: 10px;
 }
 
 .search-input>span {
@@ -1682,6 +2162,48 @@ export default {
 .buttons>* {
   width: 120px;
   margin-right: 30px;
+}
+
+.more-filter-btn {
+  display: flex;
+  justify-content: flex-start;
+  justify-content: center;
+  flex-direction: column;
+  margin-right: 10px;
+  flex-shrink: 0;
+}
+
+.more-filter-btn > span {
+  font-size: 18px;
+  margin-bottom: 5px;
+}
+
+.more-filter-trigger {
+  font-size: 18px !important;
+  font-weight: 550 !important;
+  padding: 10px 20px !important;
+  height: auto !important;
+}
+
+.filter-popover-content .el-checkbox {
+  display: flex;
+  margin: 6px 0;
+}
+
+.more-feature-btn {
+  flex-shrink: 0;
+}
+
+.more-feature-trigger {
+  font-size: 18px !important;
+  font-weight: 550 !important;
+  padding: 10px 20px !important;
+  height: auto !important;
+}
+
+.feature-popover-content .el-checkbox {
+  display: flex;
+  margin: 6px 0;
 }
 
 .sercah-btn,
@@ -1719,17 +2241,13 @@ export default {
   display: flex;
   align-items: center;
   width: 100%;
-  height: 80px;
-  /* margin-top: 20px; */
-  margin-bottom: 20px;
+  height: auto;
+  margin-bottom: 0px;
   position: absolute;
-  top: 20px;
+  top: 18px;
+  padding-left: 20px;
+  gap: 10px;
   flex-wrap: wrap;
-  /* 允许换行 */
-}
-
-.command-box>* {
-  margin-right: 15px;
 }
 
 .add-btn,
@@ -1743,17 +2261,44 @@ export default {
 .export-out-btn {
   display: flex;
   align-items: center;
-  width: 80px;
-  /* 设置按钮的宽度 */
-  height: 40px;
-  /* 设置按钮的高度 */
-  color: white;
+  justify-content: center;
+  width: auto;
+  min-width: 60px;
+  height: 38px;
+  padding: 0 12px;
+  color: #5a5a5a;
   border-radius: 5px;
   cursor: pointer;
   transition: all 0.3s;
   font-size: 18px;
   background-color: #fff;
   border: 2px solid #f2f2f2;
+}
+
+.add-btn img,
+.delete-btn img,
+.command-btn img,
+.recharge-btn img,
+.recharge-record-btn img,
+.water-meter-btn img,
+.water-meter-record-btn img,
+.export-in-btn img,
+.export-out-btn img {
+  margin-right: 6px;
+  flex-shrink: 0;
+}
+
+.add-btn span,
+.delete-btn span,
+.command-btn span,
+.recharge-btn span,
+.recharge-record-btn span,
+.water-meter-btn span,
+.water-meter-record-btn span,
+.export-in-btn span,
+.export-out-btn span {
+  color: #5a5a5a;
+  white-space: nowrap;
 }
 
 .reflush {
@@ -1761,23 +2306,20 @@ export default {
   align-items: center;
   justify-content: center;
   width: 35px;
-  /* 设置按钮的宽度 */
-  height: 32px;
-  /* 设置按钮的高度 */
-  color: white;
+  height: 35px;
   border-radius: 5px;
   cursor: pointer;
   transition: all 0.3s;
-  font-size: 18px;
   background-color: #fff;
   border: 2px solid #f2f2f2;
+  flex-shrink: 0;
 }
 
 .user-list {
   width: 100%;
-  height: calc(100% - 190px);
+  height: calc(100% - 150px);
   display: flex;
-  margin-top: 15px;
+  margin-top: 8px;
 }
 
 .quyu-box {
@@ -1948,7 +2490,144 @@ export default {
   z-index: 199;
   background-color: rgb(31 33 38 / 15%);
 }
+
+/* 价格详情和短信配置详情弹窗样式 */
+.test-dialog {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 1999;
+  background-color: rgb(31 33 38 / 15%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.test-dialog-content {
+  width: 500px;
+  border: 1px solid #fafafa;
+  background-color: #fafafa;
+  border-radius: 5px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-bottom: 20px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.test-dialog-content .test-content {
+  border: 1px solid #fff;
+  background-color: #fff;
+  border-radius: 5px;
+  width: 90%;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  margin-top: 20px;
+  padding: 15px 3%;
+  flex-wrap: wrap;
+  min-height: 200px;
+}
+
+.test-item {
+  display: flex;
+  flex-wrap: wrap;
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+.test-item-jieti {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+.jieti-content {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.jieti-item {
+  display: flex;
+  width: 100%;
+  gap: 10px;
+}
+
+.jieti-range {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+}
+
+.test-input {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.test-input > span {
+  font-size: 18px;
+  margin-bottom: 5px;
+  color: #575556;
+}
+
+.test-input .el-input {
+  width: 100%;
+}
+
+.title {
+  width: 100%;
+  background-color: #fff;
+  border-radius: 5px 5px 0 0;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+  height: 45px;
+  line-height: 45px;
+  text-align: center;
+  display: flex;
+  justify-content: space-between;
+}
+
+.btn {
+  width: 100%;
+  height: 40px;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  margin-top: 15px;
+}
+
+.confirm-btn,
+.cancel-btn {
+  height: 35px;
+  width: 90px;
+  cursor: pointer;
+  border: 1px solid #f2f2f2;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+}
+
+.confirm-btn {
+  background-color: #45ba7e;
+  margin-right: 15px;
+  color: #fff;
+}
+
+.cancel-btn {
+  background-color: #fff;
+  margin-right: 5%;
+}
 </style>
+
+// ... existing code ...
+
 
 <style lang="scss" scoped>
 :deep(.el-tree) {

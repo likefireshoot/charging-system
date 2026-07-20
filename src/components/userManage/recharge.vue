@@ -24,6 +24,16 @@
           <span>当前可用余额</span>
           <el-input v-model="rechargeData.balance" disabled />
         </div>
+        <div class="recharge-input" style="margin-right: 1%; width: 100%;">
+          <span style="display: flex; align-items: center;">
+<!--            <span style="color:red; margin-right:4px;">*</span>-->
+            交易方式
+          </span>
+          <el-radio-group v-model="rechargeData.rechargeType">
+            <el-radio label="现金">现金</el-radio>
+            <el-radio label="免费赠送">免费赠送</el-radio>
+          </el-radio-group>
+        </div>
         <div class="recharge-input" style="margin-right: 1%; width: 100%">
           <span>快捷充值金额</span>
           <el-radio-group v-model="rechargeData.quickmoney">
@@ -104,12 +114,34 @@
 
   <!-- 隐藏的 PDF 容器，用于打印 -->
   <div id="print-container" style="position: absolute; left: -9999px; top: 0;"></div>
+
+  <!-- 充值确认提示弹窗 -->
+  <el-dialog
+    v-model="rechargeConfirmDialogVisible"
+    title="充值确认"
+    width="480px"
+    :close-on-click-modal="false"
+    custom-class="print-confirm-dialog"
+    :lock-scroll="false"
+  >
+    <div class="confirm-text" style="font-size: 20px; text-align: center; padding: 20px 0; line-height: 2;">
+      {{ confirmTipText }}
+    </div>
+    <template #footer>
+      <div style="display: flex; justify-content: center; gap: 20px;">
+        <el-button type="success" @click="submitRechargeApi" size="large">确认充值</el-button>
+        <el-button @click="rechargeConfirmDialogVisible = false" size="large">取消</el-button>
+      </div>
+    </template>
+  </el-dialog>
+
 </template>
 
 <script>
 import { ElMessage } from "element-plus";
 import service from "@/api/request";
 import axios from "axios";
+import { compileString } from "sass";
 
 export default {
   props: {
@@ -136,9 +168,15 @@ export default {
       printDialogVisible: false,
       receiptPDFBlob: null,
       receiptData: null,
-      autoDownload: true,
+      autoDownload: false,
       moneyError: "", // 添加金额错误提示
       isCharging: false, // 添加充值中状态
+
+      // 新增充值确认弹窗
+      rechargeConfirmDialogVisible: false,
+      confirmTipText: "",
+      // 缓存请求参数，弹窗确认后使用
+      tempDataParams: null,
     };
   },
   mounted() {
@@ -258,6 +296,7 @@ export default {
         balance: "余额",
         quickmoney: "快捷充值金额",
         money: "充值金额",
+        rechargeType: "交易方式", // 新增
       };
 
       if (formData.quickmoney && formData.money) {
@@ -309,25 +348,93 @@ export default {
         ElMessage.error(message);
         return;
       }
-      let dataParams = {
+
+      // 计算充值金额
+      let rechargeAmount = "";
+      if (formData.quickmoney) {
+        rechargeAmount = parseFloat(formData.quickmoney).toFixed(2);
+      } else if (formData.money) {
+        rechargeAmount = parseFloat(formData.money).toFixed(2);
+      }
+
+      // 组装确认提示为文字
+      if (formData.rechargeType === "现金") {
+        this.confirmTipText = `确认给用户【${formData.userName}】现金充值 ${rechargeAmount} 元余额吗？`;
+      } else {
+        this.confirmTipText = `确认给用户【${formData.userName}】免费赠送 ${rechargeAmount} 元余额吗？`;
+      }
+
+      // 缓存接口参数，弹窗确认后使用
+      this.tempDataParams = {
         meterCode: formData.meterCode,
-        rechargeType: "现金",
-        rechargeAmount: null,
+        rechargeType: formData.rechargeType,
+        rechargeAmount: rechargeAmount,
         region: formData.region
       };
-      if (formData.quickmoney) {
-        dataParams.rechargeAmount = parseFloat(formData.quickmoney).toFixed(2);
-      } else if (formData.money) {
-        dataParams.rechargeAmount = parseFloat(formData.money).toFixed(2);
+
+      // 弹出确认提示框，不再直接请求接口
+      this.rechargeConfirmDialogVisible = true;
+
+      // let dataParams = {
+      //   meterCode: formData.meterCode,
+      //   // rechargeType: "现金",
+      //   rechargeType: formData.rechargeType, // 替换原来写死的"现金"，取用户选择值
+      //   rechargeAmount: null,
+      //   region: formData.region
+      // };
+      // if (formData.quickmoney) {
+      //   dataParams.rechargeAmount = parseFloat(formData.quickmoney).toFixed(2);
+      // } else if (formData.money) {
+      //   dataParams.rechargeAmount = parseFloat(formData.money).toFixed(2);
+      // }
+      // console.log(dataParams);
+      // this.isCharging = true;
+      // service
+      //   .post("/userManage/userCharge/rechargeUserMeter", dataParams)
+      //   .then((response) => {
+      //     if (response.code === 200) {
+      //       // 保存收据数据
+      //       const rechargeAmount = parseFloat(formData.quickmoney || formData.money);
+      //       // this.receiptData=response.data;
+      //       this.receiptData = {
+      //         rechargeRecordId: response.data.rechargeRecordId,
+      //         userId: this.data.userId || "",
+      //         date: new Date().toISOString().replace("T", " ").substring(0, 19),
+      //         userName: this.rechargeData.userName,
+      //         userAddress: this.data.userAddr || "",
+      //         operator: JSON.parse(sessionStorage.getItem("userData")).staffName,
+      //         beforeAmount: parseFloat(this.rechargeData.balance) || 0,
+      //         amount: rechargeAmount.toFixed(2),
+      //         afterAmount: ((parseFloat(this.rechargeData.balance) || 0) + rechargeAmount).toFixed(2),
+      //       };
+      //
+      //       // 显示打印确认对话框
+      //       this.printDialogVisible = true;
+      //     }
+      //   })
+      //   .catch((error) => {
+      //     ElMessage.error(error);
+      //   }).finally(() => {
+      //   this.isCharging = false;
+      // });
+    },
+
+    // 充值确认弹窗点击【确认充值】，发起后端请求
+    async submitRechargeApi(){
+      this.rechargeConfirmDialogVisible = false;
+      if (this.isCharging) {
+        ElMessage.warning('正在处理中，请勿重复操作');
+        return;
       }
-      console.log(dataParams);
       this.isCharging = true;
       service
-        .post("/userManage/userCharge/rechargeUserMeter", dataParams)
+        .post("/userManage/userCharge/rechargeUserMeter", this.tempDataParams)
         .then((response) => {
           if (response.code === 200) {
+            console.log('充值成功，即将打开打印确认提示框');
+
             // 保存收据数据
-            const rechargeAmount = parseFloat(formData.quickmoney || formData.money);
+            const rechargeAmount = parseFloat(this.tempDataParams.rechargeAmount);
             // this.receiptData=response.data;
             this.receiptData = {
               rechargeRecordId: response.data.rechargeRecordId,
@@ -341,6 +448,14 @@ export default {
               afterAmount: ((parseFloat(this.rechargeData.balance) || 0) + rechargeAmount).toFixed(2),
             };
 
+            // 免费赠送不打印收据
+            if (this.tempDataParams.rechargeType === "免费赠送") {
+              ElMessage.success("赠送成功");
+              this.receiptData = null;
+              this.handleRechargeClose();
+              return;
+            }
+
             // 显示打印确认对话框
             this.printDialogVisible = true;
           }
@@ -349,8 +464,12 @@ export default {
           ElMessage.error(error);
         }).finally(() => {
         this.isCharging = false;
+        this.tempDataParams = null;
       });
+
+
     },
+
     handleSkipPrint() {
       this.printDialogVisible = false;
 
@@ -497,7 +616,7 @@ export default {
 
 .recharge-dialog-content {
   width: 60%;
-  height: 420px;
+  height: 500px;
   border: 1px solid #fafafa;
   background-color: #fafafa;
   border-radius: 5px;
