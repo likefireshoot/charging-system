@@ -153,10 +153,25 @@
             <el-table-column property="warningType" label="警告类型" :width="warningTypeWidth" align="center" />
             <el-table-column property="createTime" :label="warningTimeLabel" :width="warningTimeWidth" align="center" :formatter="formatDateByType" />
             <el-table-column v-if="showOweAmountColumn" property="oweAmount" label="欠费金额" :width="oweAmountWidth" align="center">
-<!--              <template #default="{ row }">-->
-<!--                {{ formatOweAmount(row.oweAmount) }}-->
-<!--              </template>-->
-<!--            </el-table-column>-->
+              <template #header>
+                <div class="sortable-header">
+                  <span>欠费金额</span>
+                  <div class="sort-icons">
+                    <!-- 升序 ▲ -->
+                    <span
+                      class="asc-icon"
+                      :class="{ active: params.sortType === 1 }"
+                      @click="setSortType(1)"
+                    >▲</span>
+                    <!-- 降序 ▼ -->
+                    <span
+                      class="desc-icon"
+                      :class="{ active: params.sortType === 0 }"
+                      @click="setSortType(0)"
+                    >▼</span>
+                  </div>
+                </div>
+              </template>
               <template #default="scope">
                 <span @click="handleDetail(scope.row)"
                       style="color: #46b97e; display: block; width: 100%; text-align: center">{{ formatOweAmount(scope.row.oweAmount)}}</span>
@@ -238,6 +253,7 @@ export default {
         // 新增电量、厂商
         meterVendor: "",
         battery: "",
+        sortType: null // 新增：0=欠费降序，1=欠费升序，null=默认时间
       },
       companyId: JSON.parse(sessionStorage.getItem("userData")).companyId,
       staffPermissionIds: JSON.parse(sessionStorage.getItem("userData")).staffPermissionIds,
@@ -389,8 +405,8 @@ export default {
           warningType: 4,
           totalWater: 7,
           amount: 6,
-          oweAmount: 7,
-          qianfeiDays: 7,
+          oweAmount: 8,
+          qianfeiDays: 5,
         };
       }
       // 水表0用量用户 — sum: 4+5+7+10+13+11+10+13+9+7+11 = 100
@@ -617,6 +633,13 @@ export default {
     }
   },
   methods: {
+    // 设置欠费金额排序：0降序，1升序，再次点击同一切回null默认
+    setSortType(type) {
+      // 重复点击同一按钮则取消排序（恢复默认按时间）
+      this.params.sortType = this.params.sortType === type ? null : type;
+      this.params.pageNo = 1;
+      this.getWaringData();
+    },
     // ****** 欠费金额点击 → 跳转至用户详情页（默认 tab：扣费记录）
     handleDetail(row) {
       this.navigateToDetail(row, {
@@ -651,6 +674,7 @@ export default {
       }
       this.warningTypeDebounceTimer = setTimeout(() => {
         this.params.pageNo = 1;
+        this.params.sortType = null; // 重置排序
         this.getWaringData();
       }, 300);
     },
@@ -909,6 +933,7 @@ export default {
     reflush() {
       this.warningDataCache = {};
       this.clear(1);
+      this.params.sortType = null; // 重置排序
       this.filterText = "";
       this.$refs.treeRef.setCurrentKey(null);
       this.region = "";
@@ -964,6 +989,7 @@ export default {
         }
         this.region = "";
         this.params.pageNo = 1;
+        this.params.sortType = null; // 重置排序
         this.getWaringData();
       }
     },
@@ -1567,6 +1593,27 @@ export default {
 /* 确保el-dialog弹出框本身不被覆盖 */
 .el-dialog__wrapper {
   background: transparent !important;
+}
+
+.sortable-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+.sort-icons {
+  display: flex;
+  flex-direction: column;
+  line-height: 1;
+  font-size: 12px;
+  gap: 2px;
+}
+.asc-icon, .desc-icon {
+  cursor: pointer;
+  color: #cccccc;
+}
+.asc-icon.active, .desc-icon.active {
+  color: #ffffff;
 }
 
 </style>

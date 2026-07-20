@@ -128,6 +128,22 @@
           <img src="@/assets/yonghu/icon9.png" alt="" />
           <span>换表记录</span>
         </div>
+        <!-- ========== 新增：暂停记录按钮 ========== -->
+        <div class="water-meter-record-btn" @click="pause_record_btn_click"
+             v-if="staffPermissionIds.includes(11)"
+             v-show="isFeatureVisible('pauseRecord')">
+          <img src="@/assets/menu/icon19.png" alt="" />
+          <span>停户记录</span>
+        </div>
+
+        <!-- ========== 新增：销户记录按钮 ========== -->
+        <div class="water-meter-record-btn" @click="close_record_btn_click"
+             v-if="staffPermissionIds.includes(11)"
+             v-show="isFeatureVisible('closeRecord')">
+          <img src="@/assets/menu/icon3.png" alt="" />
+          <span>销户记录</span>
+        </div>
+
         <div class="export-in-btn" @click="multi_edit_meter_price" v-show="isFeatureVisible('batchPrice')">
           <img src="@/assets/jiage/icon3.png" alt="" />
           <span>批量修改水价类型</span>
@@ -319,6 +335,16 @@
     <changeRecord v-if="change_record_dialogFormVisible"
       :change_record_dialogFormVisible="change_record_dialogFormVisible" :quyu_data="quyu_data"
       :data="multipleSelection[0]" @close="closeChangeRecordDialog"></changeRecord>
+
+    <!-- ========== 新增 暂停记录弹窗 ========== -->
+    <pauseRecord v-if="pause_record_dialogFormVisible"
+                 :pause_record_dialogFormVisible="pause_record_dialogFormVisible" :quyu_data="quyu_data"
+                 :data="multipleSelection[0]" @close="closePauseRecordDialog"></pauseRecord>
+
+    <!-- ========== 新增 销户记录弹窗 ========== -->
+    <closeRecord v-if="close_record_dialogFormVisible"
+                 :close_record_dialogFormVisible="close_record_dialogFormVisible" :quyu_data="quyu_data"
+                 :data="multipleSelection[0]" @close="closeCloseRecordDialog"></closeRecord>
 
     <!-- 余额调整弹出框 -->
     <changeBalanceVue v-if="changeBalance_dialogFormVisible"
@@ -571,6 +597,8 @@ import userInfoVue from "@/components/userManage/userInfo.vue";
 import transactionRecord from "@/components/userManage/transactionRecord.vue";
 import changeBalanceVue from "@/components/userManage/changeBalance.vue";
 import rechargeCancelRecordVue from "@/components/userManage/RechargeCancelRecord.vue";
+import pauseRecord from "@/components/userManage/pauseRecord.vue";
+import closeRecord from "@/components/userManage/closeRecord.vue";
 
 import service from "@/api/request";
 import { ElMessage } from "element-plus";
@@ -604,6 +632,9 @@ export default {
     commandOldShengXin,
     // 充值撤销记录
     rechargeCancelRecordVue,
+    // 新增
+    pauseRecord,
+    closeRecord,
   },
   setup() {
     const { navigateToDetail } = useDetailNavigation();
@@ -695,6 +726,9 @@ export default {
       changeBalance_dialogFormVisible: false,
       // 充值撤销记录
       recharge_cancel_record_dialogFormVisible: false,
+      // 新增暂停、销户弹窗标记
+      pause_record_dialogFormVisible: false,
+      close_record_dialogFormVisible: false,
 
       // 价格详情弹窗
       view_dialogFormVisible: false,
@@ -742,13 +776,17 @@ export default {
         { key: 'rechargeRecord', label: '充值记录', permission: 11 },
         { key: 'rechargeCancelRecord', label: '充值撤销记录', permission: 11 },
         { key: 'changeRecord', label: '换表记录', permission: 14 },
-        { key: 'batchPrice', label: '批量修改水价类型', permission: null },
+        // 新增暂停记录
+        { key: 'pauseRecord', label: '停户记录', permission: 11 },
+        // 新增销户记录
+        { key: 'closeRecord', label: '销户记录', permission: 11 },
         { key: 'export', label: '导出', permission: null },
+        { key: 'batchPrice', label: '批量修改水价类型', permission: null, defaultVisible: false },
         { key: 'commonMeterTemplate', label: '普表用水量模板下载', permission: null, defaultVisible: false },
         { key: 'commonMeterImport', label: '普表用水量信息导入', permission: null, defaultVisible: false },
       ],
       visibleFeatureKeys: [],
-      maxVisibleFeatures: 12,
+      maxVisibleFeatures: 13,
       moreFeaturesVisible: false,
 
       // ****** 筛选栏配置 ******
@@ -2030,6 +2068,27 @@ export default {
           console.error("获取短信配置详情失败:", error);
           ElMessage.error("获取短信配置详情失败");
         });
+    },
+    // 打开暂停记录弹窗
+    pause_record_btn_click() {
+      this.pause_record_dialogFormVisible = true;
+    },
+    // 关闭暂停记录弹窗
+    closePauseRecordDialog() {
+      this.pause_record_dialogFormVisible = false;
+      this.multipleSelection = [];
+      this.reflush();
+    },
+
+    // 打开销户记录弹窗
+    close_record_btn_click() {
+      this.close_record_dialogFormVisible = true;
+    },
+    // 关闭销户记录弹窗
+    closeCloseRecordDialog() {
+      this.close_record_dialogFormVisible = false;
+      this.multipleSelection = [];
+      this.reflush();
     },
   },
 };
