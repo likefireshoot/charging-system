@@ -35,6 +35,11 @@
       </div>
 
       <div class="dialog-footer">
+        <!-- 新增批量操作按钮 -->
+        <div class="batch-btn-group" v-if="quyu_data.length > 0">
+          <div class="batch-auto-btn" @click="batchSetAll('自动关阀')">全部自动关阀</div>
+          <div class="batch-manual-btn" @click="batchSetAll('手动关阀')">全部手动关阀</div>
+        </div>
         <div class="cancel-btn" @click="handleClose">关闭</div>
       </div>
     </div>
@@ -68,7 +73,7 @@
 
 <script>
 import service from "@/api/request";
-import { ElMessage } from "element-plus";
+import {ElMessage, ElMessageBox} from "element-plus";
 
 export default {
   name: "Valve",
@@ -198,7 +203,55 @@ export default {
     cancelChange() {
       this.confirmVisible = false;
       this.pendingChange = { region: null, regionName: "", oldVal: "", newVal: "" };
-    }
+    },
+    // 批量设置所有区域统一方式
+    async batchSetAll(targetVal) {
+      // 弹出确认
+      const confirmRes = await ElMessageBox.confirm(
+          `确定将当前所有区域统一设置为【${targetVal}】吗？该操作不可批量撤销`,
+          "批量修改确认",
+          {
+            confirmButtonText: "确认批量修改",
+            cancelButtonText: "取消",
+            type: "warning",
+            customClass: "batch-valve-message-box", // 新增自定义class
+            lockScroll: false // ✅关键新增，消除页面收缩抖动
+          }
+      );
+      if (!confirmRes) return;
+
+      // 循环逐个调用接口更新
+      let failCount = 0;
+      let successCount = 0;
+      for (const region of this.quyu_data) {
+        const oldVal = this.committedMethods[region.regionId];
+        if (oldVal === targetVal) {
+          successCount++;
+          continue;
+        }
+        try {
+          const res = await service.get(
+              `/userManage/meterRead/valveShutMethodUpdate?valveShutMethod=${encodeURIComponent(targetVal)}&regionId=${region.regionId}`
+          );
+          if (res.code === 200) {
+            this.regionMethods[region.regionId] = targetVal;
+            this.committedMethods[region.regionId] = targetVal;
+            successCount++;
+          } else {
+            failCount++;
+          }
+        } catch (err) {
+          failCount++;
+        }
+      }
+
+      // 结果提示
+      if (failCount === 0) {
+        ElMessage.success(`批量设置完成，共${successCount}个区域已改为${targetVal}`);
+      } else {
+        ElMessage.warning(`批量完成：成功${successCount}个，失败${failCount}个，请检查异常区域`);
+      }
+    },
   }
 };
 </script>
@@ -344,7 +397,7 @@ export default {
 
 .dialog-footer {
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
   align-items: center;
   padding: 15px 28px;
   border-top: 1px solid #e9eef2;
@@ -509,5 +562,51 @@ export default {
 
 .confirm-btn-ok:hover {
   background: #3aa06b;
+}
+
+/* 批量按钮组 */
+.batch-btn-group {
+  display: flex;
+  gap: 16px;
+}
+.batch-auto-btn,
+.batch-manual-btn {
+  height: 44px;
+  padding: 0 26px;
+  border-radius: 6px;
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: 0.3s;
+}
+.batch-auto-btn {
+  background: #46B97E;
+  color: #fff;
+  border: 1px solid #46B97E;
+}
+.batch-auto-btn:hover {
+  background: #3aa06b;
+}
+.batch-manual-btn {
+  background: #fff;
+  color: #46B97E;
+  border: 1px solid #46B97E;
+}
+.batch-manual-btn:hover {
+  background: #f0faf5;
+}
+</style>
+
+<style>
+.batch-valve-message-box .el-message-box__title {
+  font-size: 16px !important;
+}
+.batch-valve-message-box .el-message-box__message {
+  font-size: 16px !important;
+}
+.batch-valve-message-box .el-button {
+  font-size: 14px !important;
 }
 </style>
