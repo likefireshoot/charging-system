@@ -132,7 +132,14 @@
             <el-table-column type="selection" :width="selectionWidth" align="center" fixed="left" />
             <el-table-column property="theId" label="序号" :width="idWidth" align="center" fixed="left"> </el-table-column>
             <el-table-column property="userId" label="用户号" :width="userIdWidth" align="center" />
-            <el-table-column property="userName" label="用户名" :width="userNameWidth" align="center" />
+            <el-table-column property="userName" label="用户名" :width="userNameWidth" align="center" >
+              <template #default="scope">
+                <span @click="handleUserInfo(scope.row)"
+                      style="color: #46b97e; display: block; width: 100%; text-align: center">
+                  {{ scope.row.userName }}
+                </span>
+              </template>
+            </el-table-column>
             <el-table-column property="meterCode" label="表号" :width="biaohaoWidth" align="center" />
             <el-table-column property="userAddr" label="地址" :width="addressWidth" align="center" />
 <!--            <el-table-column property="regionName" label="所属区域" :width="quyuWidth" align="center" />-->
@@ -149,7 +156,7 @@
                       style="color: #46b97e; cursor: pointer; display: block; width: 100%; text-align: center">{{ scope.row.totalWater }}</span>
               </template>
             </el-table-column>
-            <el-table-column property="balance" label="余额/元" :width="amountWidth" align="center" />
+            <el-table-column property="balance" label="余额" :width="amountWidth" align="center" />
             <el-table-column property="warningType" label="警告类型" :width="warningTypeWidth" align="center" />
             <el-table-column property="createTime" :label="warningTimeLabel" :width="warningTimeWidth" align="center" :formatter="formatDateByType" />
             <el-table-column v-if="showOweAmountColumn" property="oweAmount" label="欠费金额" :width="oweAmountWidth" align="center">
@@ -221,6 +228,11 @@
     </div>
 
   </div>
+
+  <!-- 点击用户名称弹出框 -->
+  <userInfoVue v-if="user_info_dialogFormVisible" :user_info_dialogFormVisible="user_info_dialogFormVisible"
+               :quyu_data="quyu_data" :data="multipleSelection[0]" @close="closeUserInfoDialog"></userInfoVue>
+
 </template>
 
 <script>
@@ -230,8 +242,9 @@ import axios from "axios";
 import { useWarningStore } from "@/store/warningStore.js";
 import { mapState } from "pinia";
 import { useDetailNavigation } from "@/composables/useDetailNavigation";
+import userInfoVue from "@/components/userManage/userInfo.vue";
 export default {
-  components: {},
+  components: {userInfoVue},
   setup() {
     const { navigateToDetail } = useDetailNavigation();
     return { navigateToDetail };
@@ -321,6 +334,8 @@ export default {
       //存储当前勾选的行的数据信息
       multipleSelection: [],
 
+      user_info_dialogFormVisible: false,
+
     };
   },
   watch: {
@@ -399,13 +414,13 @@ export default {
           biaohao: 6,
           deviceVendor: 5,
           company: 7,
-          deviceValve: 4,
-          deviceBattery: 4,
+          deviceValve: 5,
+          deviceBattery: 5,
           warningTime: 9,
-          warningType: 4,
+          warningType: 5,
           totalWater: 7,
-          amount: 6,
-          oweAmount: 8,
+          amount: 7,
+          oweAmount: 6,
           qianfeiDays: 5,
         };
       }
@@ -419,15 +434,15 @@ export default {
           address: 8,
           phone: 7,
           biaohao: 6,
-          deviceVendor: 4,
+          deviceVendor: 5,
           company: 8,
-          deviceValve: 4,
-          deviceBattery: 4,
-          warningTime: 10,
+          deviceValve: 5,
+          deviceBattery: 5,
+          warningTime: 8,
           warningType: 7,
           totalWater: 7,
-          amount: 6,
-          durationDays: 8,
+          amount: 7,
+          durationDays: 6,
         };
       }
       // 设备异常 — sum: 4+5+6+9+11+9+8+10+7+6+6+6+6+7 = 100
@@ -438,16 +453,16 @@ export default {
           userId: 6,
           userName: 8,
           address: 8,
-          phone: 6,
+          phone: 5,
           biaohao: 7,
           deviceVendor: 6,
           company: 8,
-          deviceValve: 4,
-          deviceBattery: 4,
-          warningTime: 9,
+          deviceValve: 5,
+          deviceBattery: 5,
+          warningTime: 8,
           warningType: 7,
           totalWater: 7,
-          amount: 6,
+          amount: 7,
           deviceSignal: 6,
         };
       }
@@ -457,19 +472,19 @@ export default {
           selection: 2,
           id: 5,
           userId: 6,
-          userName: 11,
-          address: 6,
-          phone: 6,
+          userName: 10,
+          address: 7,
+          phone: 5,
           biaohao: 6,
-          deviceVendor: 4,
+          deviceVendor: 5,
           company: 7,
-          deviceValve: 4,
-          deviceBattery: 4,
-          warningTime: 10,
+          deviceValve: 5,
+          deviceBattery: 5,
+          warningTime: 8,
           warningType: 7,
-          totalWater: 6,
-          amount: 8,
-          largeUsageAmount: 8,
+          totalWater: 7,
+          amount: 9,
+          largeUsageAmount: 6,
         };
       }
       // 数据长时间未上报 — sum: 4+5+7+9+11+11+9+10+8+5+9+6+6 = 100
@@ -479,14 +494,14 @@ export default {
           id: 5,
           userId: 6,
           userName: 7,
-          address: 7,
+          address: 6,
           phone: 6,
           biaohao: 6,
-          deviceVendor: 4,
+          deviceVendor: 5,
           company: 7,
-          deviceValve: 4,
-          deviceBattery: 4,
-          warningTime: 10,
+          deviceValve: 5,
+          deviceBattery: 5,
+          warningTime: 8,
           warningType: 7,
           totalWater: 7,
           amount: 6,
@@ -502,16 +517,16 @@ export default {
           userId: 6,
           userName: 8,
           address: 8,
-          phone: 6,
+          phone: 5,
           biaohao: 7,
           deviceVendor: 6,
           company: 8,
-          deviceValve: 4,
-          deviceBattery: 4,
-          warningTime: 9,
+          deviceValve: 5,
+          deviceBattery: 5,
+          warningTime: 8,
           warningType: 7,
           totalWater: 7,
-          amount: 6,
+          amount: 7,
           reportCount: 6,
         };
       }
@@ -523,15 +538,15 @@ export default {
           userId: 6,
           userName: 8,
           address: 6,
-          phone: 6,
+          phone: 5,
           biaohao: 6,
-          deviceVendor: 4,
+          deviceVendor: 5,
           company: 7,
           deviceValve: 4,
           deviceBattery: 4,
-          warningTime: 9,
+          warningTime: 8,
           warningType: 7,
-          totalWater: 6,
+          totalWater: 7,
           amount: 7,
           lastReading: 7,
           abnormalIncrease: 6,
@@ -764,8 +779,8 @@ export default {
     formatOweAmount(val) {
       if (val === null || val === undefined || val === "") return "--";
       const num = Number(val);
-      if (Number.isFinite(num)) return `${num.toFixed(2)} 元`;
-      return `${val} 元`;
+      if (Number.isFinite(num)) return `${num.toFixed(2)}`;
+      return `${val}`;
     },
     formatDateByType(row){
       if (!row.createTime) return "";
@@ -1134,6 +1149,22 @@ export default {
           ElMessage.error(error);
         });
     },
+    // 点击用户名打开用户详情
+    handleUserInfo(row) {
+      // 校验权限17（和用户管理页一致）
+      if (this.staffPermissionIds.includes(17)) {
+        this.multipleSelection[0] = row;
+        this.user_info_dialogFormVisible = true;
+      } else {
+        ElMessage.warning("暂无用户详情查看权限");
+      }
+    },
+    // 关闭用户详情弹窗
+    closeUserInfoDialog() {
+      this.user_info_dialogFormVisible = false;
+      this.multipleSelection = [];
+      this.getWaringData(); // 关闭后刷新警告表格数据
+    },
   }
 };
 </script>
@@ -1443,7 +1474,6 @@ export default {
   background-color: #fafafa;
   border-radius: 5px;
   padding: 10px;
-  margin-right: 1%;
 }
 
 .quyu-box > * {
@@ -1461,7 +1491,6 @@ export default {
 
 .jinggao-table {
   flex: 1;
-  margin-left: 1%;
   height: calc(100% - 10px);
   display: flex;
   justify-content: center;

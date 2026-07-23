@@ -10,7 +10,7 @@
           <img src="@/assets/close.png" alt="" />
         </div>
       </div>
-      <div class="user-info-content">
+      <div class="user-info-content" v-loading="pageLoading" element-loading-text="正在加载用户信息...">
         <div class="user-info-input">
           <span>用户名称</span>
           <el-input v-model="userInfoData.userName" />
@@ -74,15 +74,41 @@
           <el-date-picker v-model="userInfoData.createTime" type="date" placeholder="选择日期" style="width: 100%" format="YYYY-MM-DD" value-format="YYYY-MM-DD" />
         </div>
         <div class="user-info-input">
-          <span>结算关阀</span>
+          <span>水表关阀设置（后付费设置）</span>
           <el-select v-model="userInfoData.enableArrearsValve" class="big-font-el-select">
             <el-option label="默认(跟随区域开关阀配置)" value="default"></el-option>
             <el-option label="预付费(欠费自动关阀)" :value="0"></el-option>
             <el-option label="后付费(欠费不关阀)" :value="1"></el-option>
           </el-select>
         </div>
+        <div class="user-info-input">
+          <span>水表开阀设置（不欠费时系统持续开阀）</span>
+          <el-select v-model="userInfoData.enableArrearsValveOpen" class="big-font-el-select">
+            <el-option label="启用" :value="1"></el-option>
+            <el-option label="暂停" :value="0"></el-option>
+          </el-select>
+        </div>
       </div>
       <div class="btn">
+        <div class="left-btn">
+          <div v-if="userInfoData.isPause === 0" class="operate-btn stop-btn" @click="openStopDialog" >
+            <img src="@/assets/menu/icon20.png" alt="" style="margin-left: 8px" />
+            <span style="font-size: 20px; margin-left: 9%;">暂停用户</span>
+          </div>
+          <div v-if="userInfoData.isPause === 1" class="operate-btn stop-btn" @click="openStartDialog" >
+            <img src="@/assets/menu/icon20.png" alt="" style="margin-left: 8px" />
+            <span style="font-size: 20px; margin-left: 9%;">恢复用户</span>
+          </div>
+          <div class="operate-btn refund-btn" @click="openRefundBalanceDialog">
+            <img src="@/assets/menu/icon5.png" alt="" style="margin-left: 10px" />
+            <span style="font-size: 20px; margin-left: 9%; color: #5a5a5a">余额退款</span>
+          </div>
+          <div class="operate-btn close-btn" @click="openCloseAccountDialog">
+            <img src="@/assets/yonghu/icon4.png" alt="" style="margin-left: 8px" />
+            <span style="font-size: 20px; margin-left: 9%; color: #5a5a5a">销户</span>
+          </div>
+        </div>
+        <div class="right-btn">
         <div class="confirm-btn" @click="handleCommit">
           <el-icon style="margin-left: -3%"><Check /></el-icon>
           <span style="font-size: 20px; margin-left: 9%">确认</span>
@@ -91,21 +117,6 @@
           <el-icon style="margin-left: -3%; color: #45ba7e"><Close /></el-icon>
           <span style="font-size: 20px; margin-left: 9%; color: #5a5a5a">取消</span>
         </div>
-        <div v-if="data.isPause === 0" class="operate-btn stop-btn" @click="openStopDialog" >
-          <img src="@/assets/menu/icon20.png" alt="" style="margin-left: 8px" />
-          <span style="font-size: 20px; margin-left: 9%;">暂停使用</span>
-        </div>
-        <div v-if="data.isPause === 1" class="operate-btn stop-btn" @click="openStartDialog" >
-          <img src="@/assets/menu/icon20.png" alt="" style="margin-left: 8px" />
-          <span style="font-size: 20px; margin-left: 9%;">恢复使用</span>
-        </div>
-        <div class="operate-btn refund-btn" @click="openRefundBalanceDialog">
-          <img src="@/assets/menu/icon5.png" alt="" style="margin-left: 10px" />
-          <span style="font-size: 20px; margin-left: 9%; color: #5a5a5a">余额退款</span>
-        </div>
-        <div class="operate-btn close-btn" @click="openCloseAccountDialog">
-          <img src="@/assets/yonghu/icon4.png" alt="" style="margin-left: 8px" />
-          <span style="font-size: 20px; margin-left: 9%; color: #5a5a5a">销户</span>
         </div>
       </div>
     </div>
@@ -114,7 +125,7 @@
   <!-- 新增：暂停使用弹窗 -->
   <el-dialog v-model="stopDialogVisible" title="暂停用户确认" width="600" :lock-scroll="false">
     <div style="font-size: 20px; text-align: center; line-height: 2; padding: 10px 0;">
-      确定要将用户【{{ data.userName }}】暂停使用吗？暂停后将不再收取保底费并下达水表关阀命令
+      确定要将用户【{{ userInfoData.userName }}】暂停使用吗？暂停后将不再收取保底费并下达水表关阀命令
     </div>
     <template #footer>
       <div style="display: flex; justify-content: center; gap: 20px;">
@@ -126,7 +137,7 @@
 
   <el-dialog v-model="startDialogVisible" title="恢复用户确认" width="600" :lock-scroll="false">
     <div style="font-size: 20px; text-align: center; line-height: 2; padding: 10px 0;">
-      确定要将用户【{{ data.userName }}】恢复使用吗？恢复后将开始收取保底费并下达水表开阀命令
+      确定要将用户【{{ userInfoData.userName }}】恢复使用吗？恢复后将开始收取保底费并下达水表开阀命令
     </div>
     <template #footer>
       <div style="display: flex; justify-content: center; gap: 20px;">
@@ -139,14 +150,14 @@
   <!-- 新增：销户退款选择弹窗 -->
   <el-dialog v-model="closeAccountDialogVisible" title="销户退款确认" width="600" :lock-scroll="false">
     <div style="padding: 10px; font-size: 20px; color: #5a5a5a; line-height: 2; text-align: center;">
-      <div v-if="Number(data.balance) > 0" style="color:#5a5a5a;">
-        用户【{{ data.userName }}】当前余额 {{ data.balance }} 元，请注意先执行【余额退款】操作！！！
+      <div v-if="Number(userInfoData.balance) > 0" style="color:#5a5a5a;">
+        用户【{{ userInfoData.userName }}】当前余额 {{ userInfoData.balance }} 元，请注意先执行【余额退款】操作！！！
       </div>
-      <div v-else-if="Number(data.balance) < 0" style="color:#5a5a5a;">
-        用户【{{ data.userName }}】当前欠费 {{ Math.abs(Number(data.balance)) }} 元，用户需结清欠费！
+      <div v-else-if="Number(userInfoData.balance) < 0" style="color:#5a5a5a;">
+        用户【{{ userInfoData.userName }}】当前欠费 {{ Math.abs(Number(userInfoData.balance)) }} 元，用户需结清欠费！
       </div>
       <div v-else style="color:#5a5a5a;">
-        确定要将用户【{{ data.userName }}】永久销户吗？销户后用户绑定关系将全部清除，无法恢复！
+        确定要将用户【{{ userInfoData.userName }}】永久销户吗？销户后用户绑定关系将全部清除，无法恢复！
       </div>
     </div>
     <template #footer>
@@ -161,7 +172,7 @@
   <el-dialog v-model="refundBalanceDialogVisible" title="余额退款确认" width="600" custom-class="big-title-dialog" :lock-scroll="false">
     <div style="padding: 10px;">
       <div style="font-size: 20px; color: #5a5a5a; line-height: 2; text-align: center;">
-        确定要将用户【{{ data.userName }}】账户内 {{ data.balance }} 元余额全部返还？操作后用户账号保留，仅清空账户余额。
+        确定要将用户【{{ userInfoData.userName }}】账户内 {{ userInfoData.balance }} 元余额全部返还？操作后用户账号保留，仅清空账户余额。
       </div>
     </div>
     <template #footer>
@@ -191,6 +202,8 @@ export default {
   data() {
     return {
       userInfoData: {
+        userId: "",
+        imei: "",
         userName: "",
         userAddr: "",
         regionName: "",
@@ -210,6 +223,9 @@ export default {
         companyId: null,
         createTime: "",
         enableArrearsValve: null,
+        enableArrearsValveOpen: 1,
+        isPause: 0,
+        balance: 0,
       },
       flag: 0,
       companyId: JSON.parse(sessionStorage.getItem("userData")).companyId,
@@ -237,10 +253,12 @@ export default {
       // 余额预退款弹窗
       refundBalanceDialogVisible: false,
       loading: false,
+
+      pageLoading: false,
     };
   },
   async mounted() {
-    this.assignmentData();
+    // this.assignmentData();
   },
   watch: {
     "userInfoData.company": function (newVal) {
@@ -268,6 +286,15 @@ export default {
       if (newVal) {
       }
     },
+    data: {
+      handler(newVal) {
+        if (!newVal || !newVal.meterCode) return;
+        // 每次传入行数据（打开弹窗），根据表号查询完整用户信息
+        this.fetchFullUserInfo(newVal.meterCode);
+      },
+      deep: true,
+      immediate: true
+    }
   },
   methods: {
     handleUserInfoClose() {
@@ -276,6 +303,8 @@ export default {
     assignmentData() {
       console.log(this.data);
       // 初始化用户信息数据
+      this.userInfoData.userId = this.data.userId;
+      this.userInfoData.imei = this.data.imei;
       this.userInfoData.userName = this.data.userName;
       this.userInfoData.userAddr = this.data.userAddr;
       this.userInfoData.regionName = this.data.regionName;
@@ -293,6 +322,8 @@ export default {
       this.userInfoData.companyId = this.data.companyId; // 关键：确保companyId先被赋值
       this.userInfoData.createTime = this.data.createTime;
       this.userInfoData.enableArrearsValve = this.data.enableArrearsValve === null ? "default" : this.data.enableArrearsValve;
+      this.userInfoData.isPause = this.data.isPause ?? 0;
+      this.userInfoData.balance = this.data.balance ?? 0;
 
       console.log("初始化数据完成:", this.userInfoData);
 
@@ -471,12 +502,12 @@ export default {
       const approver_3 = !this.userInfoData.approver_3 || this.userInfoData.approver_3.trim() === "" ? null : this.userInfoData.approver_3;
 
       let dataParams = {
-        userId: this.data.userId,
+        userId: this.userInfoData.userId,
         userName: this.userInfoData.userName,
         userAddr: this.userInfoData.userAddr,
         regionName: this.userInfoData.regionName,
         userPhone: userPhone,
-        imei: this.data.imei,
+        imei: this.userInfoData.imei,
         approver_1: this.userInfoData.approver_1,
         approver_2: approver_2,
         approver_3: approver_3,
@@ -516,7 +547,7 @@ export default {
       this.loading = true;
       try {
         const form = {
-          imei: this.data.imei,
+          imei: this.userInfoData.imei,
           staffId: this.$store.state.userData.staffId
         };
         const res = await service.post("/userManage/userCharge/pauseMeter", form);
@@ -545,7 +576,7 @@ export default {
       // 暂停接口预留 resumeMeter
       try {
         const form = {
-          imei: this.data.imei,
+          imei: this.userInfoData.imei,
           staffId: this.$store.state.userData.staffId
         };
         const res = await service.post("/userManage/userCharge/resumeMeter", form);
@@ -573,7 +604,7 @@ export default {
     handleCloseAccount() {
       this.loading = true;
       const form = {
-        imei: this.data.imei,
+        imei: this.userInfoData.imei,
         staffId: this.$store.state.userData.staffId
       };
       service.post("/userManage/userCharge/cancelUserMeter", form).then(res => {
@@ -587,8 +618,9 @@ export default {
       }).catch(err => {
         ElMessage.error("销户请求异常");
         console.error("销户接口报错：", err);
+      }).finally(()=>{
+        this.loading = false; // 请求无论成功失败，最后关闭loading
       });
-      this.loading = false;
     },
     // 打开余额预退款弹窗
     openRefundBalanceDialog() {
@@ -597,7 +629,7 @@ export default {
 // 执行余额预退款（仅退余额，不销户）
     handleRefundBalance() {
       this.loading = true;
-      const balance = Number(this.data.balance);
+      const balance = Number(this.userInfoData.balance);
       if (balance < 0) {
         ElMessage.warning(`当前用户欠费，无法执行退款操作`);
         this.loading = false;
@@ -608,7 +640,7 @@ export default {
         return;
       }
       const form = {
-        imei: this.data.imei,
+        imei: this.userInfoData.imei,
         staffId: this.$store.state.userData.staffId
       };
       service.post("/userManage/userCharge/cancelRefund", form).then(res => {
@@ -622,8 +654,54 @@ export default {
       }).catch(err => {
         ElMessage.error("退款请求异常");
         console.error("退款接口报错：", err);
+      }).finally(()=>{
+        this.loading = false;
       });
-      this.loading = false;
+    },
+    // 根据表号获取完整用户信息
+    async fetchFullUserInfo(meterCode) {
+      this.pageLoading = true;
+      try {
+        // 新接口
+        const res = await service.get(`/userManage/userCharge/user/info/byMeterCode?meterCode=${encodeURIComponent(meterCode)}`, {
+          headers: { Authorization: this.$store.state.userData.token }
+        })
+        if (res.code === 200 && res.data) {
+          const full = res.data;
+          // 完整数据覆盖 userInfoData
+          this.userInfoData.userId = full.userId;
+          this.userInfoData.imei = full.imei;
+          this.userInfoData.userName = full.userName;
+          this.userInfoData.userAddr = full.userAddr;
+          this.userInfoData.company = full.companyName;
+          this.userInfoData.companyId = full.companyId;
+          this.userInfoData.regionName = full.regionName;
+          this.userInfoData.userPhone = full.phone;
+          this.userInfoData.meterCode = full.meterCode;
+          this.userInfoData.meterType = full.meterType;
+          this.userInfoData.priceId = full.priceId;
+          this.userInfoData.smsConfigId = full.smsConfigId;
+          this.userInfoData.approver_1 = full.approver1;
+          this.userInfoData.factoryDate = full.factoryDate || "";
+          this.userInfoData.firstInspectDate = full.firstInspectDate || "";
+          this.userInfoData.createTime = full.createTime ? full.createTime.split(" ")[0] : "";
+          this.userInfoData.enableArrearsValve = full.enableArrearsValve === null ? "default" : full.enableArrearsValve;
+          this.userInfoData.enableArrearsValve = full.enableArrearsValveOpen ?? 1;
+          this.userInfoData.isPause = full.isPause ?? 0;
+          this.userInfoData.balance = full.balance ?? 0;
+          // 重新加载下拉选项（水厂/区域/价格/审批人）
+          Promise.all([this.getCompanyList(), this.getRegionData(), this.getPriceList(), this.getSmsConfigList(), this.getApproverList()]).then(() => {
+            this.flag = 1;
+          })
+        }
+      } catch (err) {
+        console.error("查询完整用户信息失败", err);
+        ElMessage.warning("获取完整用户信息失败，使用表格基础数据");
+        // 查询失败保留原有表格传过来的数据
+        this.assignmentData();
+      } finally {
+        this.pageLoading = false;
+      }
     },
   },
 };
@@ -706,10 +784,19 @@ export default {
   width: 100%;
   height: 40px;
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
   align-items: center;
   margin-top: 15px;
   margin-bottom: 15px;
+}
+
+.left-btn, .right-btn{
+  display: flex;
+  align-items: center;
+}
+
+.left-btn{
+  margin-left: 15px;
 }
 
 .confirm-btn,
