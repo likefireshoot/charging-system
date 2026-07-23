@@ -42,7 +42,7 @@
     </div>
     <div class="yuangong-info">
       <div class="command-box">
-        <div class="add-btn" style="width: 130px; margin-left: 10px" @click="add_dialogFormVisible = true" v-if="staffPermissionIds.includes(30)">
+        <div class="add-btn" style="width: 130px; margin-left: 10px" @click="add_dialogFormVisible = true" v-if="staffPermissionIds.includes(30) && companyId == 1">
           <img src="@/assets/yuangong/icon6.png" alt="" style="margin-left: 8px" />
           <span style="font-size: 20px; margin-left: 10px; color: #5a5a5a">新增水厂</span>
         </div>
