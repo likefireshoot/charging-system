@@ -36,7 +36,7 @@
       </div>
     </div>
 
-    <!-- 主体内容区 --->
+    <!-- 主体内容区 -->
     <div class="main-content">
       <!-- 左侧：用户列表区域 -->
       <div class="user-list-panel">
@@ -81,7 +81,11 @@
                 </el-radio>
               </template>
             </el-table-column>
-            <el-table-column prop="userId" label="用户号" min-width="120" align="center" />
+            <el-table-column prop="userId" label="用户号" min-width="120" align="center">
+              <template #default="{ row }">
+                <span>{{ maskUserId(row.userId) }}</span>
+              </template>
+            </el-table-column>
             <el-table-column prop="userName" label="用户名" min-width="120" align="center" />
             <el-table-column prop="lastReading" label="上月数" min-width="120" align="center" />
             <el-table-column prop="currentReading" label="本月数" min-width="120" align="center">
@@ -131,7 +135,7 @@
               <div class="info-grid">
                 <div class="info-item">
                   <span class="label">用户号</span>
-                  <span class="value">{{ selectedUserDetail.userId }}</span>
+                  <span class="value">{{ maskUserId(selectedUserDetail.userId) }}</span>
                 </div>
                 <div class="info-item">
                   <span class="label">用户名</span>
@@ -377,6 +381,13 @@ const canSubmitSingle = computed(() => {
   return true;
 });
 
+// 用户号脱敏：不展示前三位
+const maskUserId = (userId) => {
+  if (!userId) return '-';
+  const str = userId.toString();
+  return str.length > 3 ? str.slice(3) : str;
+};
+
 // 格式化金额
 const formatMoney = (value) => {
   if (value === null || value === undefined || value === '') return '0.00';
@@ -459,9 +470,7 @@ const handleCompanyChange = async (companyId) => {
       userList.value = [];
       searchParams.region = '';
 
-      if (regionList.value.length > 0) {
-        ElMessage.success(`已加载 ${regionList.value.length} 个普表区域`);
-      } else {
+      if (regionList.value.length === 0) {
         ElMessage.warning('该水厂下暂无普表区域');
       }
     } else {
@@ -502,8 +511,6 @@ const handleRegionChange = async (regionId) => {
         reportStatus: '正常' // 默认选择正常状态
       }));
       
-      ElMessage.success(`已加载 ${userList.value.length} 个用户`);
-
       // 自动选中第一个用户
       if (userList.value.length > 0) {
         const firstUser = userList.value[0];
@@ -712,12 +719,6 @@ const submitSingleUser = async () => {
     const res = await service.post('/manual/charge/submitForReview', submitData);
     
     if (res.code === 200) {
-      let successMsg = `用户 ${selectedUserDetail.value.userName} 已提交审核`;
-      if (selectedUserDetail.value.reportStatus !== '正常') {
-        successMsg += `（状态：${selectedUserDetail.value.reportStatus}）`;
-      }
-      ElMessage.success(successMsg);
-      
       // 更新列表中的本月数和余额（仅正常状态）
       if (selectedUserDetail.value.reportStatus === '正常') {
         const userInList = userList.value.find(u => u.userId === selectedUserDetail.value.userId);
@@ -733,8 +734,6 @@ const submitSingleUser = async () => {
       // 如果开启了自动跳变，选中下一个用户
       if (autoJumpEnabled.value) {
         selectNextUser();
-      } else {
-        ElMessage.success('提交成功');
       }
     } else {
       ElMessage.error(res.msg || '提交失败');
@@ -925,7 +924,7 @@ fetchCompanyList();
 
         h3 {
           margin: 0;
-          font-size: 20px;
+          font-size: 24px;
           font-weight: 600;
           color: #303133;
         }
@@ -941,7 +940,7 @@ fetchCompanyList();
           align-items: center;
 
           :deep(.el-checkbox__label) {
-            font-size: 32px;
+            font-size: 24px;
             font-weight: 500;
             color: #303133;
           }
@@ -1023,7 +1022,7 @@ fetchCompanyList();
 
         h3 {
           margin: 0;
-          font-size: 20px;
+          font-size: 24px;
           font-weight: 600;
           color: #303133;
         }
@@ -1060,7 +1059,7 @@ fetchCompanyList();
         // 基本信息区域
         .info-section {
           .section-title {
-            font-size: 20px;
+            font-size: 24px;
             font-weight: 600;
             color: #303133;
             margin-bottom: 16px;
@@ -1107,7 +1106,7 @@ fetchCompanyList();
         // 抄表信息区域
         .reading-section {
           .section-title {
-            font-size: 20px;
+            font-size: 24px;
             font-weight: 600;
             color: #303133;
             margin-bottom: 16px;
@@ -1163,14 +1162,12 @@ fetchCompanyList();
 
               :deep(.el-input) {
                 flex: 1;
+              }
 
-                &.current-reading-input {
-                  :deep(.el-input__inner) {
-                    height: 48px;
-                    line-height: 48px;
-                    font-size: 20px;
-                  }
-                }
+              :deep(.current-reading-input .el-input__inner) {
+                height: 80px !important;
+                line-height: 80px;
+                font-size: 24px;
               }
               
               :deep(.el-select) {
@@ -1260,7 +1257,7 @@ fetchCompanyList();
             display: flex;
             align-items: center;
             gap: 8px;
-            font-size: 20px;
+            font-size: 24px;
             font-weight: 600;
             color: #303133;
             margin-bottom: 16px;
