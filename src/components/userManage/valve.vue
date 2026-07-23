@@ -208,7 +208,7 @@ export default {
     async batchSetAll(targetVal) {
       // 弹出确认
       const confirmRes = await ElMessageBox.confirm(
-          `确定将当前所有区域统一设置为【${targetVal}】吗？该操作不可批量撤销`,
+          `确定将当前所有区域统一设置为【${targetVal}】吗？`,
           "批量修改确认",
           {
             confirmButtonText: "确认批量修改",
