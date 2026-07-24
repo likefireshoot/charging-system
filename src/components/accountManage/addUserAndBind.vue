@@ -166,6 +166,9 @@ import service from "@/api/request";
 import debounce from "lodash/debounce";
 import { ElMessage } from "element-plus";
 
+/** 需要使用"区域名-地址"拼接方式提交用户地址的水厂companyId */
+const ADDR_PREFIX_COMPANY_IDS = [93];
+
 export default {
   props: {
     dialogVisible: {
@@ -487,7 +490,9 @@ export default {
         userAddDTO: {
           userId: this.form.userId ? Number(this.form.userId) : null,
           userName: this.form.userName,
-          userAddr: this.form.userAddr,
+          userAddr: ADDR_PREFIX_COMPANY_IDS.includes(effectiveCompanyId) && regionName
+            ? `${regionName}-${this.form.userAddr}`
+            : this.form.userAddr,
           regionName,
           regionId: this.form.regionId,
           userPhone: !this.form.userPhone || this.form.userPhone.trim() === "" ? "无" : this.form.userPhone,
