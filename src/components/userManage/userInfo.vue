@@ -686,7 +686,7 @@ export default {
           this.userInfoData.firstInspectDate = full.firstInspectDate || "";
           this.userInfoData.createTime = full.createTime ? full.createTime.split(" ")[0] : "";
           this.userInfoData.enableArrearsValve = full.enableArrearsValve === null ? "default" : full.enableArrearsValve;
-          this.userInfoData.enableArrearsValve = full.enableArrearsValveOpen ?? 1;
+          this.userInfoData.enableArrearsValveOpen = full.enableArrearsValveOpen ?? 1;
           this.userInfoData.isPause = full.isPause ?? 0;
           this.userInfoData.balance = full.balance ?? 0;
           // 重新加载下拉选项（水厂/区域/价格/审批人）
