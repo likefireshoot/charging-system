@@ -1372,7 +1372,7 @@ fetchCompanyList();
     }
 
     .main-content {
-      // 小屏幕保持上下结构
+      // 小屏幕上下结构
       flex-direction: column;
       
       .user-list-panel {
