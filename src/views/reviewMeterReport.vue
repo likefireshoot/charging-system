@@ -126,7 +126,11 @@
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="startReading" label="起码(吨)" min-width="100" align="center" />
+        <el-table-column prop="startReading" label="起码(吨)" min-width="100" align="center">
+          <template #default="{ row }">
+            <span>{{ Math.floor(row.startReading) }}</span>
+          </template>
+        </el-table-column>
         <el-table-column prop="endReading" label="止码(吨)" min-width="100" align="center">
           <template #default="{ row }">
             <span v-if="row.reportStatus !== '正常'">-</span>
@@ -147,7 +151,7 @@
               class="editable-end-reading"
               @click="startEditEndReading(row)"
             >
-              {{ row.endReading }}
+              {{ Math.floor(row.endReading) }}
             </span>
           </template>
         </el-table-column>
@@ -399,7 +403,7 @@ const handleRegionChange = async (regionId) => {
         meterCode: item.meterCode,
         startReading: item.startReading || 0,
         endReading: item.endReading || 0,
-        deltaWater: item.deltaWater || 0,
+        deltaWater: Math.floor(item.endReading || 0) - Math.floor(item.startReading || 0),
         reportStatus: item.reportStatus || '正常',
         createTime: item.createTime,
         balance: item.balance || 0
@@ -594,9 +598,9 @@ const submitEndReading = async (row) => {
       // 更新本地数据
       row.endReading = value;
 
-      // 重新计算本期用量（如果有起码的话）
+      // 重新计算本期用量（止码-起码，按整数算）
       if (row.startReading !== undefined) {
-        row.deltaWater = value - row.startReading;
+        row.deltaWater = Math.floor(value) - Math.floor(row.startReading);
       }
 
       // 退出编辑模式
