@@ -1,10 +1,10 @@
 <template>
-  <div class="recharge-record-dialog" v-if="pause_record_dialogFormVisible">
+  <div class="recharge-record-dialog" v-if="can_close_no_arrears_dialogFormVisible">
     <div class="recharge-record-dialog-content">
       <div class="title">
         <div style="margin-left: 10px; display: flex; align-items: center">
           <img src="@/assets/yonghu/icon7.png" alt="" style="margin-right: 8px" />
-          <span style="font-size: 20px">停户列表</span>
+          <span style="font-size: 20px">不欠费可关阀列表</span>
         </div>
         <div style="margin-right: 10px; cursor: pointer" @click="handleRechargeRecordDialogClose">
           <img src="@/assets/close.png" alt="" />
@@ -66,21 +66,21 @@
               <el-option label="故障" value="故障"></el-option>
             </el-select>
           </div>
-<!--          <div class="search-input" style="width: 25%; margin-right: 10px">-->
-<!--            <span>时间</span>-->
-<!--            <div class="time-input">-->
-<!--              <el-date-picker-->
-<!--                v-model="params.dateRange"-->
-<!--                type="daterange"-->
-<!--                range-separator="至"-->
-<!--                start-placeholder="开始日期"-->
-<!--                end-placeholder="结束日期"-->
-<!--                style="flex-grow: 1; width: 100%; height: 35px"-->
-<!--                format="YYYY-MM-DD"-->
-<!--                value-format="YYYY-MM-DD"-->
-<!--              />-->
-<!--            </div>-->
-<!--          </div>-->
+          <!--          <div class="search-input" style="width: 25%; margin-right: 10px">-->
+          <!--            <span>时间</span>-->
+          <!--            <div class="time-input">-->
+          <!--              <el-date-picker-->
+          <!--                v-model="params.dateRange"-->
+          <!--                type="daterange"-->
+          <!--                range-separator="至"-->
+          <!--                start-placeholder="开始日期"-->
+          <!--                end-placeholder="结束日期"-->
+          <!--                style="flex-grow: 1; width: 100%; height: 35px"-->
+          <!--                format="YYYY-MM-DD"-->
+          <!--                value-format="YYYY-MM-DD"-->
+          <!--              />-->
+          <!--            </div>-->
+          <!--          </div>-->
           <div class="buttons" style="margin-left: 5%; margin-right: 10px">
             <div class="sercah-btn" @click="search">
               <img src="@/assets/yonghu/icon16.png" alt="" style="margin-left: 8px" />
@@ -100,24 +100,31 @@
           </div>
           <div class="recharge-record-table">
             <el-table
-              ref="multipleTableRef"
-              :data="list"
-              row-key="theId"
-              style="width: auto; height: 100%; table-layout: fixed; overflow-x: auto; overflow-y: auto"
-              :max-height="tableMaxHeight"
-              border
-              :header-cell-style="{ background: '#46B97E', color: '#FFFFFF' }"
-              @selection-change="handleSelectionChange"
-              id="recharge-record-table"
-              class="table"
-              v-loading="loading"
+                ref="multipleTableRef"
+                :data="list"
+                row-key="theId"
+                style="width: auto; height: 100%; table-layout: fixed; overflow-x: auto; overflow-y: auto"
+                :max-height="tableMaxHeight"
+                border
+                :header-cell-style="{ background: '#46B97E', color: '#FFFFFF' }"
+                @selection-change="handleSelectionChange"
+                id="recharge-record-table"
+                class="table"
+                v-loading="loading"
             >
               <el-table-column type="selection" :selectable="selectable" min-width="20" align="center" fixed="left" />
               <el-table-column label="序号" width="73" align="center" fixed="left" #default="scope">
                 {{ scope.$index + 1 + (currentPage - 1) * pageSize }}
               </el-table-column>
               <el-table-column property="userId" label="用户号" min-width="80" align="center" fixed="left"></el-table-column>
-              <el-table-column property="userName" label="用户名" min-width="80" align="center"></el-table-column>
+              <el-table-column property="userName" label="用户名" min-width="80" align="center">
+                <template #default="scope">
+                <span @click="handleUserInfo(scope.row)"
+                      style="color: #46b97e; display: block; width: 100%; text-align: center">
+                  {{ scope.row.userName }}
+                </span>
+                </template>
+              </el-table-column>
               <el-table-column property="meterCode" label="表号" min-width="80" align="center" />
               <el-table-column property="balance" label="余额" min-width="70" align="center"></el-table-column>
               <el-table-column property="newReading" label="读数" min-width="70" align="center" />
@@ -131,12 +138,7 @@
               <el-table-column property="userAddr" label="地址" min-width="85" align="center" />
               <el-table-column property="regionName" label="区域" min-width="70" align="center" />
               <el-table-column property="phone" label="联系电话" min-width="80" align="center" />
-              <el-table-column property="pauseTime" label="暂停时间" min-width="100" align="center"></el-table-column>
-              <el-table-column label="操作" min-width="100" align="center" fixed="right">
-                <template #default="scope">
-                  <el-button type="success" size="middle" @click="openStartDialog(scope.row)">恢复用户</el-button>
-                </template>
-              </el-table-column>
+<!--              <el-table-column property="pauseTime" label="生效时间" min-width="100" align="center"></el-table-column>-->
             </el-table>
           </div>
 
@@ -162,15 +164,22 @@
       </div>
     </template>
   </el-dialog>
+
+  <!-- 点击用户名称弹出框 -->
+  <userInfoVue v-if="user_info_dialogFormVisible" :user_info_dialogFormVisible="user_info_dialogFormVisible"
+               :quyu_data="quyu_data" :data="multipleSelection[0]" @close="closeUserInfoDialog"></userInfoVue>
+
 </template>
 
 <script>
 import service from "@/api/request";
 import { ElMessage } from "element-plus";
+import userInfoVue from "@/components/userManage/userInfo.vue";
 
 export default {
+  components: {userInfoVue},
   props: {
-    pause_record_dialogFormVisible: {
+    can_close_no_arrears_dialogFormVisible: {
       type: Boolean,
       default: false,
     },
@@ -202,7 +211,7 @@ export default {
         userPhone: "",
         userAddr: "",
         order: 0,
-        isPause: 1, // 固定筛选暂停用户
+        keepValveOpenFree: 0, // 固定筛选暂停用户
         region: "",
       },
       loading: false,
@@ -221,6 +230,8 @@ export default {
       startDialogVisible: false,
       currentRow: {},
       isloading: false,
+
+      user_info_dialogFormVisible: false,
     };
   },
   computed: {
@@ -247,6 +258,18 @@ export default {
     this.search();
   },
   methods: {
+    // 点击用户名打开用户详情
+    handleUserInfo(row) {
+      this.multipleSelection[0] = row;
+      this.user_info_dialogFormVisible = true;
+    },
+
+    // 关闭用户详情弹窗
+    closeUserInfoDialog() {
+      this.user_info_dialogFormVisible = false;
+      this.multipleSelection = [];
+      this.search();
+    },
     // 修复：正确同步水厂ID，原代码读取params.company不存在
     syncCompanyIdParam() {
       if (this.companyId === 1) {
@@ -285,8 +308,7 @@ export default {
           filteredParams[key] = value;
         }
       }
-      // 强制携带isPause=0，不会被过滤
-      filteredParams.isPause = 1;
+      filteredParams.keepValveOpenFree = 0;
       return filteredParams;
     },
     // 核心查询
@@ -416,7 +438,7 @@ export default {
         userPhone: "",
         userAddr: "",
         order: 0,
-        isPause: 1
+        keepValveOpenFree: 0,
       };
       this.currentPage = 1;
       this.quyu_selected = null;
