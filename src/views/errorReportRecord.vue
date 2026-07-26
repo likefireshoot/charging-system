@@ -79,10 +79,10 @@
     </div>
     <div class="yuangong-info">
       <div class="command-box">
-        <!-- <div class="export-out-btn" style="margin-left: 10px" @click="exportExcel">
+        <div class="export-out-btn" style="margin-left: 10px" @click="exportExcel">
           <img src="@/assets/yonghu/icon1.3.png" alt="" style="margin-left: 7px" />
-          <span style="font-size: 16px; margin-left: 10px; color: #5a5a5a">导出</span>
-        </div> -->
+          <span style="font-size: 20px; margin-left: 10px; color: #5a5a5a">导出</span>
+        </div>
         <div class="reflush" style="margin-left: 10px" @click="reflush">
           <img src="@/assets/yonghu/icon15.png" alt="" />
         </div>
@@ -92,7 +92,7 @@
             ref="multipleTableRef"
             :data="ErrorRecordData"
             row-key="staffId"
-            style="width: 100%; height: 100%; table-layout: fixed; overflow-y: auto; margin-left: 1%"
+            style="width: 100%; height: 100%; table-layout: fixed; overflow-y: auto;"
             border
             :header-cell-style="{ background: '#46B97E', color: '#FFFFFF' }"
             @selection-change="handleSelectionChange"
@@ -110,7 +110,7 @@
                         {{ scope.$index + 1 + (params.pageNo - 1) * params.pageSize }}
                     </el-table-column> -->
           <el-table-column property="userId" label="用户号" :width="workerNameWidth" align="center" />
-          <el-table-column label="用户名" :width="workerNameWidth" align="center">
+          <el-table-column label="用户名" :width="companyWidth" align="center">
             <template #default="scope">
               <span @click="handleUserInfo(scope.row)"
                 style="color: #46b97e; display: block; width: 100%; text-align: center; cursor: pointer">
@@ -119,6 +119,7 @@
             </template>
           </el-table-column>
           <el-table-column property="meterCode" label="表号" :width="accountWidth" align="center" />
+          <el-table-column property="companyName" label="所属水厂" :width="companyWidth" align="center" />
           <el-table-column property="meterVendor" label="厂商" :width="companyWidth" align="center" />
           <el-table-column property="valveStatus" label="阀门" :width="phoneWidth" align="center" />
           <el-table-column property="battery" label="电量" :width="companyWidth" align="center" />
@@ -369,22 +370,22 @@ export default {
     // }
   },
   computed: {
-    // 每列的百分比宽度
+    // 每列的百分比宽度（仅计算实际使用列，总计 100%）
     columnPercentages() {
       return {
-        selection: 5,
-        index: 7,
-        account: 9,
-        worker_name: 8,
+        selection: 0,
+        index: 0,
+        account: 8,
+        worker_name: 7,
         company: 6,
-        address: 14,
+        address: 0,
         phone: 6,
-        post: 7,
+        post: 0,
         role: 8,
-        //password: 10,
+        //password: 0,
         last_login_time: 9,
-        vendor: 8,
-        factory_date: 10,
+        vendor: 0,
+        factory_date: 0,
         operation: 12,
       };
     },
@@ -688,6 +689,52 @@ export default {
         valveStatus: null
       };
     },
+    exportExcel() {
+      const exportParams = { ...this.params };
+      exportParams.pageNo = 1;
+      exportParams.pageSize = 10000000;
+
+      if (this.companyId === 1) {
+        exportParams.companyId = this.params.company || null;
+      } else {
+        exportParams.companyId = this.companyId;
+      }
+      delete exportParams.company;
+
+      const requestParams = Object.fromEntries(
+        Object.entries(exportParams).filter(([_, value]) => value !== null && value !== undefined && value !== '')
+      );
+
+      axios({
+        url: '/meterReportErrorRecord/exportMeterReportErrorRecord',
+        method: 'POST',
+        responseType: 'blob',
+        data: requestParams,
+      })
+        .then((response) => {
+          if (response.status !== 200) {
+            throw new Error('导出失败: ' + response.statusText);
+          }
+          const blob = new Blob([response.data], {
+            type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+          });
+          if (blob.size === 0) {
+            ElMessage.warning('内容为空，无法下载');
+            return;
+          }
+          const link = document.createElement('a');
+          link.href = window.URL.createObjectURL(blob);
+          link.download = '异常数据列表.xlsx';
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          window.URL.revokeObjectURL(link.href);
+        })
+        .catch((error) => {
+          console.error('导出失败:', error);
+          ElMessage.error('导出失败: ' + error.message);
+        });
+    },
     reflush() {
       this.clear();
       this.getErrorReportRecordData();
@@ -799,27 +846,31 @@ export default {
   margin-top: 15px;
   margin-bottom: 20px;
   width: 100%;
-  height: 112px;
+  min-height: 112px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   border: 1px solid #e9e9e9;
   border-radius: 5px;
   background-color: #fff;
+  padding: 8px 0;
 }
 
 .search-content {
   display: flex;
-  width: 75%;
+  flex: 1;
+  flex-wrap: wrap;
   height: 100%;
+  align-items: center;
+  padding: 5px 0;
 }
 
 .search-input {
   display: flex;
   justify-content: center;
-  /* 确保子元素在父容器中垂直居中 */
   flex-direction: column;
-  width: 25%;
+  flex: 1;
+  min-width: 160px;
   height: 100%;
   margin-right: 20px;
 }
@@ -843,11 +894,11 @@ export default {
 
 .buttons {
   display: flex;
-  width: 260px;
+  flex-shrink: 0;
   height: 100%;
   align-items: center;
-  margin-left: 100px;
-  padding-right: 30px;
+  padding-right: 15px;
+  gap: 15px;
 }
 
 .buttons > * {
@@ -862,18 +913,16 @@ export default {
   border-radius: 5px;
   cursor: pointer;
   transition: all 0.3s;
-  color: #fff;
 }
 
 .sercah-btn {
   background-color: #45ba7e;
-  margin-right: 50px;
 }
 
 .clear-btn {
   background-color: #fff;
   border: 2px solid #f2f2f2;
-  margin-right: 10px;
+  color: #5a5a5a;
 }
 
 .yuangong-info {
@@ -882,7 +931,6 @@ export default {
   margin-bottom: 0px;
   display: flex;
   flex-direction: column;
-  align-items: center;
   border: 1px solid #e9e9e9;
   border-radius: 5px;
   background-color: #fff;

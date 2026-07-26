@@ -98,6 +98,13 @@ export function useDetailNavigation() {
       }
     }
 
+    if (source === 'commandLog') {
+      return {
+        ...base,
+        paramsState: JSON.stringify(state.params),
+      }
+    }
+
     // 未知来源：仅带 restore 标记返回
     return base
   }

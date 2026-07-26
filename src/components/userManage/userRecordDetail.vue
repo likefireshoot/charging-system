@@ -85,7 +85,7 @@
           <div class="back-button-wrapper">
             <button class="back-btn" @click="goBack">
               <img src="@/assets/yonghu/icon27.png" alt="back" />
-              <span>{{ { warningManage: '返回警告管理', errorReportRecord: '返回异常上报' }[source] || '返回用户列表' }}</span>
+              <span>{{ { warningManage: '返回警告管理', errorReportRecord: '返回异常上报', commandLog: '返回命令下发记录' }[source] || '返回用户列表' }}</span>
             </button>
           </div>
         </div>
