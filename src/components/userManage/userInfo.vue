@@ -83,7 +83,7 @@
         </div>
         <div class="user-info-input">
           <span>水表开阀设置（不欠费时系统持续开阀）</span>
-          <el-select v-model="userInfoData.enableArrearsValveOpen" class="big-font-el-select">
+          <el-select v-model="userInfoData.keepValveOpenFree" class="big-font-el-select">
             <el-option label="启用" :value="1"></el-option>
             <el-option label="暂停" :value="0"></el-option>
           </el-select>
@@ -223,7 +223,7 @@ export default {
         companyId: null,
         createTime: "",
         enableArrearsValve: null,
-        enableArrearsValveOpen: 1,
+        keepValveOpenFree: 1,
         isPause: 0,
         balance: 0,
       },
@@ -322,6 +322,7 @@ export default {
       this.userInfoData.companyId = this.data.companyId; // 关键：确保companyId先被赋值
       this.userInfoData.createTime = this.data.createTime;
       this.userInfoData.enableArrearsValve = this.data.enableArrearsValve === null ? "default" : this.data.enableArrearsValve;
+      this.userInfoData.keepValveOpenFree = this.data.keepValveOpenFree === null ? 1 : this.data.keepValveOpenFree;
       this.userInfoData.isPause = this.data.isPause ?? 0;
       this.userInfoData.balance = this.data.balance ?? 0;
 
@@ -519,6 +520,7 @@ export default {
         companyId: this.userInfoData.companyId,
         createTime: this.userInfoData.createTime,
         enableArrearsValve: this.userInfoData.enableArrearsValve === "default" ? null : this.userInfoData.enableArrearsValve,
+        keepValveOpenFree: this.userInfoData.keepValveOpenFree,
       };
 
       console.log(dataParams);
@@ -686,7 +688,7 @@ export default {
           this.userInfoData.firstInspectDate = full.firstInspectDate || "";
           this.userInfoData.createTime = full.createTime ? full.createTime.split(" ")[0] : "";
           this.userInfoData.enableArrearsValve = full.enableArrearsValve === null ? "default" : full.enableArrearsValve;
-          this.userInfoData.enableArrearsValveOpen = full.enableArrearsValveOpen ?? 1;
+          this.userInfoData.keepValveOpenFree = full.keepValveOpenFree ?? 1;
           this.userInfoData.isPause = full.isPause ?? 0;
           this.userInfoData.balance = full.balance ?? 0;
           // 重新加载下拉选项（水厂/区域/价格/审批人）

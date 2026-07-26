@@ -123,6 +123,10 @@ export default {
   mounted() {
     this.fetchCommandLogs();
   },
+  activated() {
+    // 新增：被keep-alive缓存，再次激活页面时执行
+    this.fetchCommandLogs();
+  },
   watch: {
     "user.meterCode"(newValue, oldValue) {
       if (newValue && newValue !== oldValue) {

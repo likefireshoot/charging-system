@@ -141,8 +141,8 @@
               </template>
             </el-table-column>
             <el-table-column property="meterCode" label="表号" :width="biaohaoWidth" align="center" />
+            <el-table-column property="regionName" label="区域" :width="quyuWidth" align="center" />
             <el-table-column property="userAddr" label="地址" :width="addressWidth" align="center" />
-<!--            <el-table-column property="regionName" label="所属区域" :width="quyuWidth" align="center" />-->
             <el-table-column property="userPhone" label="电话" :width="phoneWidth" align="center" />
             <el-table-column property="meterVendor" label="厂商" :width="deviceVendorWidth" align="center" />
             <el-table-column property="companyName" label="水厂" :width="companyWidth" align="center" />
@@ -408,20 +408,21 @@ export default {
           selection: 2,
           id: 5,
           userId: 6,
-          userName: 8,
+          userName: 6,
           address: 6,
-          phone: 6,
+          phone: 5,
           biaohao: 6,
           deviceVendor: 5,
-          company: 7,
+          company: 6,
           deviceValve: 5,
           deviceBattery: 5,
-          warningTime: 9,
+          warningTime: 8,
           warningType: 5,
           totalWater: 7,
           amount: 7,
           oweAmount: 6,
           qianfeiDays: 5,
+          quyu: 5,
         };
       }
       // 水表0用量用户 — sum: 4+5+7+10+13+11+10+13+9+7+11 = 100
@@ -430,12 +431,12 @@ export default {
           selection: 2,
           id: 5,
           userId: 6,
-          userName: 8,
+          userName: 7,
           address: 8,
-          phone: 7,
+          phone: 5,
           biaohao: 6,
           deviceVendor: 5,
-          company: 8,
+          company: 6,
           deviceValve: 5,
           deviceBattery: 5,
           warningTime: 8,
@@ -443,6 +444,7 @@ export default {
           totalWater: 7,
           amount: 7,
           durationDays: 6,
+          quyu: 5,
         };
       }
       // 设备异常 — sum: 4+5+6+9+11+9+8+10+7+6+6+6+6+7 = 100
@@ -452,11 +454,11 @@ export default {
           id: 5,
           userId: 6,
           userName: 8,
-          address: 8,
+          address: 6,
           phone: 5,
-          biaohao: 7,
+          biaohao: 6,
           deviceVendor: 6,
-          company: 8,
+          company: 6,
           deviceValve: 5,
           deviceBattery: 5,
           warningTime: 8,
@@ -464,6 +466,7 @@ export default {
           totalWater: 7,
           amount: 7,
           deviceSignal: 6,
+          quyu: 5,
         };
       }
       // 水表大用量用户 — sum: 4+5+7+10+13+11+10+13+9+7+11 = 100
@@ -472,12 +475,12 @@ export default {
           selection: 2,
           id: 5,
           userId: 6,
-          userName: 10,
-          address: 7,
+          userName: 7,
+          address: 6,
           phone: 5,
           biaohao: 6,
           deviceVendor: 5,
-          company: 7,
+          company: 6,
           deviceValve: 5,
           deviceBattery: 5,
           warningTime: 8,
@@ -485,6 +488,7 @@ export default {
           totalWater: 7,
           amount: 9,
           largeUsageAmount: 6,
+          quyu: 5,
         };
       }
       // 数据长时间未上报 — sum: 4+5+7+9+11+11+9+10+8+5+9+6+6 = 100
@@ -495,18 +499,19 @@ export default {
           userId: 6,
           userName: 7,
           address: 6,
-          phone: 6,
-          biaohao: 6,
+          phone: 5,
+          biaohao: 5,
           deviceVendor: 5,
-          company: 7,
-          deviceValve: 5,
-          deviceBattery: 5,
+          company: 6,
+          deviceValve: 4,
+          deviceBattery: 4,
           warningTime: 8,
           warningType: 7,
           totalWater: 7,
           amount: 6,
           durationDays: 6,
           deviceSignal: 6,
+          quyu: 5,
         };
       }
       // 水表频繁上报 — sum: 4+5+7+11+13+11+10+13+10+8+8 = 100
@@ -515,19 +520,20 @@ export default {
           selection: 2,
           id: 5,
           userId: 6,
-          userName: 8,
-          address: 8,
+          userName: 7,
+          address: 7,
           phone: 5,
           biaohao: 7,
           deviceVendor: 6,
-          company: 8,
+          company: 6,
           deviceValve: 5,
           deviceBattery: 5,
-          warningTime: 8,
+          warningTime: 7,
           warningType: 7,
           totalWater: 7,
           amount: 7,
           reportCount: 6,
+          quyu: 5,
         };
       }
       // 关阀状态读数增加 — sum: 4+6+7+10+13+9+9+12+9+6+7+8 = 100
@@ -536,20 +542,21 @@ export default {
           selection: 2,
           id: 5,
           userId: 6,
-          userName: 8,
+          userName: 7,
           address: 6,
           phone: 5,
           biaohao: 6,
           deviceVendor: 5,
           company: 7,
-          deviceValve: 4,
-          deviceBattery: 4,
+          deviceValve: 3,
+          deviceBattery: 3,
           warningTime: 8,
-          warningType: 7,
+          warningType: 5,
           totalWater: 7,
           amount: 7,
           lastReading: 7,
           abnormalIncrease: 6,
+          quyu: 5,
         };
       }
       // 默认（fallback）— sum: 4+6+8+12+14+11+11+15+10+9 = 100
@@ -774,6 +781,7 @@ export default {
         this.alarmReadingWidth = p.alarmReading ? (p.alarmReading / 100) * w : 0;
         this.companyWidth = p.company ? (p.company / 100) * w : 0;
         this.amountWidth = p.amount ? (p.amount / 100) * w : 0;
+        this.quyuWidth = p.quyu ? (p.quyu / 100) * w : 0;
       }
     },
     formatOweAmount(val) {
@@ -1009,6 +1017,13 @@ export default {
       }
     },
     exportExcel() {
+      // 拼接动态文件名
+      const baseName = "警告数据列表";
+      const suffix = ".xlsx";
+      // 如果有选中警告类型就拼接，没有就使用默认
+      const fileName = this.params.warningType
+          ? `${baseName}_${this.params.warningType}${suffix}`
+          : `${baseName}${suffix}`;
       // 复制params并剔除分页参数 pageNo、pageSize
       const tempParams = { ...this.params };
       delete tempParams.pageNo;
@@ -1043,7 +1058,7 @@ export default {
 
           const link = document.createElement("a");
           link.href = window.URL.createObjectURL(blob);
-          link.download = "警告数据列表.xlsx";
+          link.download = fileName;
           document.body.appendChild(link);
           link.click();
           document.body.removeChild(link);

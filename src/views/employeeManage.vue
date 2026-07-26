@@ -46,7 +46,7 @@
           <img src="@/assets/yuangong/icon6.png" alt="" style="margin-left: 8px" />
           <span style="font-size: 20px; margin-left: 10px; color: #5a5a5a">新增水厂</span>
         </div>
-        <div class="add-btn" style="width: 130px; margin-left: 10px" @click="addRegion_dialogFormVisible = true" v-if="staffPermissionIds.includes(31)">
+        <div class="add-btn" style="width: 130px; margin-left: 10px" @click="openAddRegionDialog" v-if="staffPermissionIds.includes(31)">
           <img src="@/assets/yuangong/icon6.png" alt="" style="margin-left: 8px" />
           <span style="font-size: 20px; margin-left: 10px; color: #5a5a5a">新增区域</span>
         </div>
@@ -151,25 +151,43 @@
     </div>
     <!-- 新增区域 -->
     <div class="add-dialog" v-if="addRegion_dialogFormVisible">
-      <div class="add-dialog-content">
+      <div class="add-dialog-content add-region">
         <div class="title">
           <div style="margin-left: 10px; display: flex; align-items: center">
             <img src="@/assets/fapiao/icon8.png" alt="" style="margin-right: 10px" />
             <span style="font-size: 20px">新增区域</span>
           </div>
-          <div style="margin-right: 10px; cursor: pointer" @click="addRegion_dialogFormVisible = false">
+          <div style="margin-right: 10px; cursor: pointer" @click="closeAddRegionDialog">
             <img src="@/assets/close.png" alt="" />
           </div>
         </div>
-        <div class="add-content">
+        <div class="add-content" style="flex-direction: column">
           <div class="add-input" v-if="companyId === 1" style="margin-right: 7%">
             <span>水厂名称</span>
             <el-select v-model="addRegion.companyId">
               <el-option v-for="item in companyList" :key="item.id" :label="item.name" :value="item.id"></el-option>
             </el-select>
           </div>
+
+          <!-- 已有区域列表 -->
+          <!-- 已有区域列表【两列布局】 -->
+          <div class="region-list-box">
+            <span style="color: #575556; font-size: 20px; margin-bottom: 8px; display:block">已有区域列表</span>
+            <div class="region-table-scroll" style="border: 1px solid #e6e6e6; padding: 8px 15px">
+              <div class="region-grid-wrap">
+                <div class="region-item" v-for="item in addRegionQuYuList" :key="item.regionId">
+                  {{ item.regionName }}
+                </div>
+                <!-- 空数据提示 -->
+                <div v-if="addRegionQuYuList.length === 0" class="empty-box">
+                  暂无数据
+                </div>
+              </div>
+            </div>
+          </div>
+
           <div class="add-input">
-            <span>区域名称</span>
+            <span>新增区域名称</span>
             <el-input v-model="addRegion.regionName" placeholder="请输入..." />
           </div>
         </div>
@@ -178,7 +196,7 @@
             <el-icon style="margin-left: 15%"><Check /></el-icon>
             <span style="font-size: 20px; margin-left: 15%">确认</span>
           </div>
-          <div class="cancel-btn" @click="addRegion_dialogFormVisible = false">
+          <div class="cancel-btn" @click="closeAddRegionDialog">
             <el-icon style="margin-left: 15%; color: #45ba7e"><Close /></el-icon>
             <span style="font-size: 20px; margin-left: 15%; color: #5a5a5a">取消</span>
           </div>
@@ -323,7 +341,7 @@
 
         <!-- 编辑水厂停用功能 -->
         <div class="edit-dialog" v-if="edit_company_block">
-          <div class="add-dialog-content">
+          <div class="add-dialog-content company-manage-dialog">
             <div class="title">
               <div style="margin-left: 10px; display: flex; align-items: center">
                 <img src="@/assets/fapiao/icon8.png" alt="" style="margin-right: 10px" />
@@ -337,12 +355,12 @@
                       <el-table-column prop="name" label="水厂名称"  align="center" />
 
 
-                      <el-table-column label="操作">
+                      <el-table-column label="状态" align="center">
                         <template #default="scope">
-                          <el-button :type="scope.row.isBlock === '正常' ? 'danger' : 'primary'" size="large"
-                                                      @click="editCompanyStatus(scope.row.id)">
-                            {{ scope.row.isBlock === '正常' ? '停用' : '启用' }}
-                          </el-button>
+                          <el-select :model-value="scope.row.isBlock" @change="(val) => handleCompanyStatusChange(scope.row)" style="width: 25%;">
+                            <el-option label="启用" value="正常"></el-option>
+                            <el-option label="停用" value="停用"></el-option>
+                          </el-select>
                         </template>
                       </el-table-column>
                     </el-table>
@@ -537,7 +555,9 @@ export default {
         staffPostsId: null, // 职位：1=经理, 0=员工
         staffCharacterId: null, // 权限角色ID
         companyId: null // 所属水厂ID
-      }
+      },
+
+      addRegionQuYuList: [], // 新增：新增区域弹窗内展示的区域列表
     };
   },
   watch: {
@@ -573,6 +593,14 @@ export default {
           this.getRegionData();
         }
       },
+    },
+    "addRegion.companyId": {
+      handler(newVal) {
+        console.log('选中水厂id变化', newVal)
+        // 清空旧列表
+        this.addRegionQuYuList = []
+        this.loadRegionList()
+      }
     },
   },
   computed: {
@@ -622,6 +650,58 @@ export default {
     }
   },
   methods: {
+    // 打开新增区域弹窗
+    openAddRegionDialog() {
+      this.addRegion_dialogFormVisible = true;
+      // 清空旧数据
+      this.addRegion.regionName = "";
+      this.addRegionQuYuList = [];
+
+      // 非超级管理员，自动赋值本厂id，直接加载区域
+      if (this.companyId !== 1) {
+        this.addRegion.companyId = this.companyId;
+        this.loadRegionList();
+      } else {
+        // 超级管理员，清空水厂，等待手动选择
+        this.addRegion.companyId = null;
+      }
+    },
+
+// 关闭弹窗
+    closeAddRegionDialog() {
+      this.addRegion_dialogFormVisible = false;
+      this.addRegion.regionName = "";
+      this.addRegionQuYuList = [];
+    },
+
+// 根据水厂ID加载区域列表（复用你给的接口地址）
+    async loadRegionList() {
+      if (!this.addRegion.companyId) {
+        this.addRegionQuYuList = [];
+        return;
+      }
+
+      let url = `/getRegion?companyId=${this.addRegion.companyId}`;
+      try {
+        const response = await service.get(url);
+        if (response.code === 200) {
+          this.addRegionQuYuList = response.data.map(item => {
+            return {
+              regionId: item.regionId,
+              regionName: item.regionName
+            }
+          })
+        }
+      } catch (error) {
+        ElMessage.error("获取区域数据失败");
+      }
+    },
+
+    handleCompanyStatusChange(row) {
+      // 不管选中正常/停用，直接调用原有接口，后端自动反转状态
+      this.editCompanyStatus(row.id);
+    },
+
     // 新增员工函数
     async addStaffConfirm() {
       if (this.companyId !== 1) {
@@ -1598,8 +1678,8 @@ export default {
   width: 90%;
   height: 100%;
   display: flex;
+  flex-direction: column;
   justify-content: flex-start;
-  align-items: center;
   margin-top: 20px;
   padding: 0 3%;
 }
@@ -1609,7 +1689,6 @@ export default {
   justify-content: center; /* 确保子元素在父容器中垂直居中 */
   flex-direction: column;
   width: 45%;
-  height: 100%;
 }
 
 .add-input > span {
@@ -1659,4 +1738,48 @@ export default {
      cursor: not-allowed !important;
      pointer-events: none;
    }
+
+.company-manage-dialog {
+  height: 100vh !important;
+}
+
+.add-region {
+  height: 100vh;
+}
+
+.region-list-box {
+  width:100%;
+  flex:1;
+  min-height:0;
+  margin:10px 0;
+  display:flex;
+  flex-direction:column;
+  max-height: 60vh;
+}
+
+.region-table-scroll {
+  flex:1;
+  min-height:0;
+  overflow-y:auto;
+}
+
+.region-grid-wrap {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr); /* 固定两列 */
+  gap: 10px 16px; /* 上下间距10，左右间距16 */
+}
+.region-item {
+  padding: 6px 10px;
+  border: 1px solid #e4e7ed;
+  border-radius: 4px;
+  text-align: center;
+  background: #fff;
+}
+
+.empty-box {
+  grid-column: 1 / -1; /* 横跨整行两列 */
+  text-align: center;
+  color: #909399;
+  padding: 20px 0;
+}
 </style>
