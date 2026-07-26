@@ -127,24 +127,29 @@
               <div v-if="scope.row.factoryDate">
                 {{ formatDateTime(scope.row.factoryDate) }}
               </div>
-              <span v-else>无</span>
+              <span v-else>-</span>
             </template>
           </el-table-column>
           <el-table-column label="上次读数" :width="roleWidth" align="center">
             <template #default="scope">
-              <span v-if="scope.row.prevReadingCount !== null && scope.row.prevReadingCount !== undefined" @click="handlePrevReadingClick(scope.row)" style="color: #46b97e; cursor: pointer; display: block; width: 100%; text-align: center;">
-                {{ scope.row.prevReadingCount }}
+              <span @click="handlePrevReadingClick(scope.row)" style="color: #46b97e; cursor: pointer; display: block; width: 100%; text-align: center;">
+                {{ scope.row.prevReadingCount !== null && scope.row.prevReadingCount !== undefined ? scope.row.prevReadingCount : '-' }}
               </span>
-              <span v-else>无</span>
             </template>
           </el-table-column>
           <el-table-column label="上次上报时间" :width="lastLoginTimeWidth" align="center" #default="scope">
             <div v-if="scope.row.prevCreateTime">
               {{ formatDateTime(scope.row.prevCreateTime) }}
             </div>
-            <span v-else>无</span>
+            <span v-else>-</span>
           </el-table-column>
-          <el-table-column property="readingCount" label="本次读数" :width="roleWidth" align="center" />
+          <el-table-column label="本次读数" :width="roleWidth" align="center">
+            <template #default="scope">
+              <span @click="handlePrevReadingClick(scope.row)" style="color: #46b97e; cursor: pointer; display: block; width: 100%; text-align: center;">
+                {{ scope.row.readingCount !== null && scope.row.readingCount !== undefined ? scope.row.readingCount : '-' }}
+              </span>
+            </template>
+          </el-table-column>
           <el-table-column label="本次上报时间" :width="lastLoginTimeWidth" align="center">
             <template #header>
               <div class="sortable-header" @click="toggleSort('time')">
@@ -159,15 +164,18 @@
               <div v-if="scope.row.createTime">
                 {{ formatDateTime(scope.row.createTime) }}
               </div>
-              <span v-else>无</span>
+              <span v-else>-</span>
             </template>
 
           </el-table-column>
           <el-table-column label="操作" :width="operationWidth" align="center" #default="scope">
-            <div v-if="scope.row.status === 0 || scope.row.status === null">
-              <el-button type="danger" size="large" @click="edit(scope.row.id, 1)">忽略</el-button>
+            <div v-if="scope.row._expired">
+              <el-tag type="warning" size="large">已失效</el-tag>
+            </div>
+            <div v-else-if="scope.row.status === 0 || scope.row.status === null">
+              <el-button type="danger" size="large" @click="showIgnoreDialog(scope.row)">忽略</el-button>
 
-              <el-button type="success" size="large" @click="edit(scope.row.id, 2)">有效</el-button>
+              <el-button type="success" size="large" @click="showValidDialog(scope.row)">有效</el-button>
             </div>
             <div v-else>
               <el-tag type="info" size="large" v-if="scope.row.status === 1">忽略</el-tag>
@@ -183,6 +191,72 @@
         </div>
       </div>
     </div>
+
+    <!-- 忽略确认弹窗 -->
+    <div class="confirm-dialog" v-if="confirmDialog.visible && confirmDialog.type === 'ignore'" @click.self="closeConfirmDialog">
+      <div class="confirm-dialog-content">
+        <div class="dialog-title">
+          <span>忽略确认</span>
+          <img src="@/assets/yonghu/icon4.png" alt="close" @click="closeConfirmDialog" class="dialog-close-icon" />
+        </div>
+        <div class="dialog-body">
+          <p class="dialog-text">是否确认忽略此条异常上报？</p>
+          <p class="dialog-subtext">该读数将被视为错误数据，不作计费依据。</p>
+          <div class="dialog-info-row">
+            <span>用户号：{{ confirmDialog.row.userId }}</span>
+            <span>表号：{{ confirmDialog.row.meterCode }}</span>
+          </div>
+          <div class="dialog-info-row">
+            <span>本次读数：{{ confirmDialog.row.readingCount }} 吨</span>
+          </div>
+        </div>
+        <div class="dialog-footer">
+          <div class="dialog-btn-cancel" @click="closeConfirmDialog">取消</div>
+          <div class="dialog-btn-confirm-danger" @click="handleConfirm">确认忽略</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 有效确认弹窗 -->
+    <div class="confirm-dialog" v-if="confirmDialog.visible && confirmDialog.type === 'valid'" @click.self="closeConfirmDialog">
+      <div class="confirm-dialog-content confirm-dialog-content--valid">
+        <div class="dialog-title">
+          <span>有效确认</span>
+          <img src="@/assets/yonghu/icon4.png" alt="close" @click="closeConfirmDialog" class="dialog-close-icon" />
+        </div>
+        <div class="dialog-body">
+          <p class="dialog-text">确认此条上报为有效抄表记录？</p>
+          <p class="dialog-subtext">本次上报所产生的水表倒转 / 读数回退为有效抄表记录，出于某些原因水表的确发生了倒转。</p>
+          <div class="dialog-info-row">
+            <span>用户号：{{ confirmDialog.row.userId }}</span>
+            <span>表号：{{ confirmDialog.row.meterCode }}</span>
+          </div>
+          <div class="dialog-info-row">
+            <span>上次读数：{{ confirmDialog.row.prevReadingCount != null ? confirmDialog.row.prevReadingCount : '-' }} 吨</span>
+            <span>本次读数：{{ confirmDialog.row.readingCount }} 吨</span>
+          </div>
+          <p class="dialog-highlight">确认后将从 <strong>{{ confirmDialog.row.readingCount }}</strong> 吨开始重新计费。</p>
+          <div class="dialog-checkbox-row">
+            <el-checkbox v-model="confirmDialog.checked" class="confirm-checkbox">
+              <span class="checkbox-text">我已明确该水表将从 <strong>{{ confirmDialog.row.readingCount }}</strong> 吨开始重新计费</span>
+            </el-checkbox>
+          </div>
+        </div>
+        <div class="dialog-footer">
+          <div class="dialog-btn-cancel" @click="closeConfirmDialog">取消</div>
+          <div class="dialog-btn-confirm" :class="{ disabled: !confirmDialog.checked }" @click="handleConfirm">确认有效</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 用户信息编辑弹窗 -->
+    <userInfoVue
+      v-if="user_info_dialogFormVisible"
+      :user_info_dialogFormVisible="user_info_dialogFormVisible"
+      :data="currentUserRow"
+      @close="closeUserInfoDialog"
+    />
+
     </template>
   </div>
 </template>
@@ -193,10 +267,12 @@ import { ElMessage } from "element-plus";
 import formatDateTime from "@/api/common/dateConvert.js";
 import axios from "axios";
 import ReceiveExceptionRecord from "@/components/reportManage/ReceiveExceptionRecord.vue";
+import userInfoVue from "@/components/userManage/userInfo.vue";
 import { useDetailNavigation } from "@/composables/useDetailNavigation";
 export default {
   components: {
     ReceiveExceptionRecord,
+    userInfoVue,
   },
   setup() {
     const { navigateToDetail } = useDetailNavigation();
@@ -257,6 +333,18 @@ export default {
       addRegion_dialogFormVisible: false,
       deleteRegion_dialogFormVisible: false,
 
+      // 操作确认弹窗
+      confirmDialog: {
+        visible: false,
+        type: '',      // 'ignore' | 'valid'
+        row: null,
+        checked: false, // 有效确认时的勾选框
+      },
+
+      // 用户信息弹窗
+      user_info_dialogFormVisible: false,
+      currentUserRow: {},
+
       //表格勾选行
       selection: [],
       userData: {
@@ -312,6 +400,21 @@ export default {
     if (this.parentContainer) {
       this.resizeObserver.observe(this.parentContainer);
     }
+    // 检查是否需要恢复页面状态（从 userRecordDetail 返回时）
+    if (this.$route.query.restore === 'true') {
+      if (this.$route.query.paramsState) {
+        try {
+          const savedParams = JSON.parse(this.$route.query.paramsState);
+          this.params = { ...this.params, ...savedParams };
+        } catch (e) {
+          console.error('恢复搜索参数失败', e);
+        }
+      }
+      if (this.$route.query.recordType) {
+        this.recordType = this.$route.query.recordType;
+      }
+    }
+
     this.getCompanyList();
     this.getErrorReportRecordData();
     this.userData = sessionStorage.getItem("userData");
@@ -360,6 +463,34 @@ export default {
       return orderMap[field][direction];
     },
 
+    showIgnoreDialog(row) {
+      this.confirmDialog = {
+        visible: true,
+        type: 'ignore',
+        row: row,
+        checked: false,
+      };
+    },
+    showValidDialog(row) {
+      this.confirmDialog = {
+        visible: true,
+        type: 'valid',
+        row: row,
+        checked: false,
+      };
+    },
+    closeConfirmDialog() {
+      this.confirmDialog.visible = false;
+    },
+    handleConfirm() {
+      if (this.confirmDialog.type === 'valid' && !this.confirmDialog.checked) {
+        ElMessage.warning('请勾选确认后再提交');
+        return;
+      }
+      const { id } = this.confirmDialog.row;
+      const status = this.confirmDialog.type === 'ignore' ? 1 : 2;
+      this.edit(id, status);
+    },
     edit(id, status) {
       service
           .post(`/meterReportErrorRecord/editErrorRecord?id=${id}&status=${status}`, {
@@ -370,8 +501,19 @@ export default {
           })
           .then((response) => {
             if (response.code === 200) {
-              ElMessage.success("修改成功");
-              this.getErrorReportRecordData();
+              if (response.data && response.data.expired) {
+                // 该异常数据已过期，本地标记已失效
+                this.closeConfirmDialog();
+                const target = this.ErrorRecordData.find(r => r.id === id);
+                if (target) {
+                  target._expired = true;
+                }
+                ElMessage.info(response.data.message || "该记录已过期，水表读数已恢复正常");
+              } else {
+                ElMessage.success("修改成功");
+                this.closeConfirmDialog();
+                this.getErrorReportRecordData();
+              }
             } else {
               ElMessage.error(response.msg);
             }
@@ -381,24 +523,32 @@ export default {
           });
     },
     handleUserInfo(row) {
-      // 跳转到用户详情页面，传递 userName 参数并自动搜索
-      this.$router.push({
-        path: '/userManage',
-        query: {
-          userName: row.userName,
-          searchUserName: 'true'  // 添加标记，告诉用户管理页面需要执行搜索
-        }
-      });
+      if (this.staffPermissionIds.includes(17)) {
+        this.currentUserRow = row;
+        this.user_info_dialogFormVisible = true;
+      } else {
+        ElMessage.warning("暂无用户详情查看权限");
+      }
+    },
+    closeUserInfoDialog() {
+      this.user_info_dialogFormVisible = false;
+      this.currentUserRow = {};
     },
     handlePrevReadingClick(row) {
-      this.$router.push({
-        path: '/userManage',
-        query: {
-          userId: row.userId,
-          meterCode: row.meterCode,
-          searchUserAndMeter: 'true'
+      this.navigateToDetail(
+        {
+          ...row,
+          companyId: row.companyId || this.companyId,
+        },
+        {
+          source: 'errorReportRecord',
+          tab: 'meter',
+          pageState: {
+            params: { ...this.params },
+            recordType: this.recordType,
+          },
         }
-      });
+      );
     },
     formatDateTime,
     selectable() {
@@ -805,6 +955,193 @@ export default {
   height: 65px;
   position: absolute;
   bottom: 0;
+}
+
+/* ========== 操作确认弹窗 ========== */
+.confirm-dialog {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 200;
+  background-color: rgb(31 33 38 / 40%);
+}
+
+.confirm-dialog-content {
+  width: 520px;
+  background-color: #fafafa;
+  border-radius: 8px;
+  position: absolute;
+  left: 50%;
+  top: 45%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.confirm-dialog-content--valid {
+  width: 580px;
+}
+
+.dialog-title {
+  width: 100%;
+  height: 45px;
+  line-height: 45px;
+  background-color: #fff;
+  border-radius: 8px 8px 0 0;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+  text-align: center;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 15px;
+  font-size: 20px;
+  font-weight: bold;
+  color: #333;
+}
+
+.dialog-close-icon {
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+  opacity: 0.5;
+  transition: opacity 0.2s;
+}
+
+.dialog-close-icon:hover {
+  opacity: 0.8;
+}
+
+.dialog-body {
+  width: 88%;
+  background-color: #fff;
+  border-radius: 6px;
+  margin-top: 20px;
+  padding: 24px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.dialog-text {
+  font-size: 20px;
+  color: #333;
+  font-weight: 600;
+  margin: 0;
+  text-align: center;
+}
+
+.dialog-subtext {
+  font-size: 17px;
+  color: #888;
+  margin: 4px 0 8px;
+  text-align: center;
+  line-height: 1.6;
+}
+
+.dialog-info-row {
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+  font-size: 17px;
+  color: #555;
+}
+
+.dialog-highlight {
+  font-size: 18px;
+  color: #e6a23c;
+  text-align: center;
+  margin: 8px 0 4px;
+  padding: 10px 16px;
+  background-color: #fef8ee;
+  border-radius: 6px;
+  border: 1px solid #fae0a2;
+}
+
+.dialog-highlight strong {
+  color: #e6920b;
+  font-size: 20px;
+}
+
+.checkbox-text {
+  font-size: 17px;
+  color: #555;
+  white-space: normal;
+  line-height: 1.5;
+}
+
+.checkbox-text strong {
+  color: #e6920b;
+  font-size: 18px;
+}
+
+.dialog-footer {
+  width: 100%;
+  height: 60px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 30px;
+  margin-top: 15px;
+  margin-bottom: 10px;
+}
+
+.dialog-btn-cancel,
+.dialog-btn-confirm,
+.dialog-btn-confirm-danger {
+  height: 38px;
+  width: 120px;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  transition: all 0.2s;
+  border: 1px solid #e0e0e0;
+}
+
+.dialog-btn-cancel {
+  background-color: #fff;
+  color: #666;
+}
+
+.dialog-btn-cancel:hover {
+  background-color: #f5f5f5;
+}
+
+.dialog-btn-confirm {
+  background-color: #45ba7e;
+  color: #fff;
+  border-color: #45ba7e;
+}
+
+.dialog-btn-confirm:hover {
+  background-color: #3aa06b;
+}
+
+.dialog-btn-confirm.disabled {
+  background-color: #c0c4cc;
+  border-color: #c0c4cc;
+  cursor: not-allowed;
+}
+
+.dialog-btn-confirm-danger {
+  background-color: #f56c6c;
+  color: #fff;
+  border-color: #f56c6c;
+}
+
+.dialog-btn-confirm-danger:hover {
+  background-color: #e04545;
+}
+
+.confirm-dialog-content--valid .dialog-body {
+  gap: 10px;
+  padding: 22px 20px 16px;
 }
 
 /* 删除弹出框 */

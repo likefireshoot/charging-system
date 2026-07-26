@@ -90,6 +90,14 @@ export function useDetailNavigation() {
       }
     }
 
+    if (source === 'errorReportRecord') {
+      return {
+        ...base,
+        paramsState: JSON.stringify(state.params),
+        recordType: state.recordType || 'report',
+      }
+    }
+
     // 未知来源：仅带 restore 标记返回
     return base
   }
@@ -101,7 +109,7 @@ export function useDetailNavigation() {
    *
    * @param {object}  row              - 行数据（至少含 userId, meterCode 等字段）
    * @param {object}  options
-   * @param {string}  options.source     - 来源标识，如 'userManage' | 'warningManage'
+   * @param {string}  options.source     - 来源标识，如 'userManage' | 'warningManage' | 'errorReportRecord'
    * @param {string}  [options.tab]      - 目标 tab，如 'bill' | 'meter' | 'transaction' | 'command'；省略则使用详情页默认 tab
    * @param {object}  [options.pageState] - 来源页当前状态（分页、搜索条件、区域选择等），用于返回时还原
    */
