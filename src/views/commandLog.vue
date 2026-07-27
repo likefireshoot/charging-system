@@ -81,12 +81,34 @@
           <el-table-column type="selection" :selectable="selectable" :width="selectionWidth" align="center" />
           <el-table-column property="theId" label="序号" :width="indexWidth" align="center" />
           <el-table-column property="displayUserId" label="用户号" :width="userIdWidth" align="center" />
-          <el-table-column property="userName" label="用户名" :width="userNameWidth" align="center" />
+          <el-table-column label="用户名" :width="userNameWidth" align="center">
+            <template #default="scope">
+              <span @click="handleUserInfo(scope.row)"
+                style="color: #46b97e; display: block; width: 100%; text-align: center; cursor: pointer">
+                {{ scope.row.userName }}
+              </span>
+            </template>
+          </el-table-column>
           <el-table-column property="meterCode" label="表号" :width="biaohaoWidth" align="center" />
+          <el-table-column property="companyName" label="水厂" :width="companyNameWidth" align="center" />
           <el-table-column property="commandType" label="通讯类别" :width="tongxunleibieWidth" align="center" />
           <el-table-column property="commandStatus" label="通讯状态" :width="tongxunzhaungtaiWidth" align="center" />
-          <el-table-column property="createTime" label="通讯下发时间" :width="timeWidth" align="center" />
-          <el-table-column property="finishTime" label="通讯完成时间" :width="timeWidth" align="center" />
+          <el-table-column label="通讯下发时间" :width="timeWidth" align="center">
+            <template #default="scope">
+              <span @click="handleTimeClick(scope.row)"
+                style="color: #46b97e; cursor: pointer;">
+                {{ scope.row.createTime }}
+              </span>
+            </template>
+          </el-table-column>
+          <el-table-column label="通讯完成时间" :width="timeWidth" align="center">
+            <template #default="scope">
+              <span @click="handleTimeClick(scope.row)"
+                style="color: #46b97e; cursor: pointer;">
+                {{ scope.row.finishTime }}
+              </span>
+            </template>
+          </el-table-column>
           <el-table-column property="meterVendor" label="厂商" :width="changshangWidth" align="center" />
           <el-table-column property="displayStaffName" label="下发员工" :width="staffNameWidth" align="center" />
           <el-table-column property="description" label="描述" :width="descriptionWidth" align="center" />
@@ -98,6 +120,14 @@
         </div>
       </div>
     </div>
+
+    <!-- 用户信息编辑弹窗 -->
+    <userInfoVue
+      v-if="user_info_dialogFormVisible"
+      :user_info_dialogFormVisible="user_info_dialogFormVisible"
+      :data="currentUserRow"
+      @close="closeUserInfoDialog"
+    />
   </div>
 </template>
 
@@ -105,8 +135,17 @@
 import service from "@/api/request";
 import axios from "axios";
 import { ElMessage } from "element-plus";
+import userInfoVue from "@/components/userManage/userInfo.vue";
+import { useDetailNavigation } from "@/composables/useDetailNavigation";
 
 export default {
+  components: {
+    userInfoVue,
+  },
+  setup() {
+    const { navigateToDetail } = useDetailNavigation();
+    return { navigateToDetail };
+  },
   data() {
     return {
       params: {
@@ -154,6 +193,7 @@ export default {
       selectionWidth: 0,
       indexWidth: 0,
       biaohaoWidth: 0,
+      companyNameWidth: 0,
       userIdWidth: 0,
       staffNameWidth: 0,
       tongxunleibieWidth: 0,
@@ -170,6 +210,12 @@ export default {
 
       //表格勾选行
       selection: [],
+
+      staffPermissionIds: JSON.parse(sessionStorage.getItem("userData")).staffPermissionIds,
+
+      // 用户信息弹窗
+      user_info_dialogFormVisible: false,
+      currentUserRow: {},
     };
   },
   watch: {
@@ -186,14 +232,15 @@ export default {
         selection: 3,
         index: 4,
         biao_hao: 9,
-        userId: 6,
-        staffName: 8,
+        company_name: 6,
+        userId: 5,
+        staffName: 6,
         tongxunleibie: 7,
-        tongxunzhaungtai: 5.6,
-        time: 10,
+        tongxunzhaungtai: 6,
+        time: 11,
         changshang: 5,
-        userName: 7,
-        description: 25,
+        userName: 5,
+        description: 22,
       };
     },
   },
@@ -208,6 +255,18 @@ export default {
     if (this.parentContainer) {
       this.resizeObserver.observe(this.parentContainer);
     }
+    // 检查是否需要恢复页面状态（从 userRecordDetail 返回时）
+    if (this.$route.query.restore === 'true') {
+      if (this.$route.query.paramsState) {
+        try {
+          const savedParams = JSON.parse(this.$route.query.paramsState);
+          this.params = { ...this.params, ...savedParams };
+        } catch (e) {
+          console.error('恢复搜索参数失败', e);
+        }
+      }
+    }
+
     this.getCommandLogsData();
     this.getCompanyList();
   },
@@ -231,6 +290,7 @@ export default {
         this.selectionWidth = (this.columnPercentages.selection / 100) * parentWidth;
         this.indexWidth = (this.columnPercentages.index / 100) * parentWidth;
         this.biaohaoWidth = (this.columnPercentages.biao_hao / 100) * parentWidth;
+        this.companyNameWidth = (this.columnPercentages.company_name / 100) * parentWidth;
         this.userIdWidth = (this.columnPercentages.userId / 100) * parentWidth;
         this.staffNameWidth = (this.columnPercentages.staffName / 100) * parentWidth;
         this.tongxunleibieWidth = (this.columnPercentages.tongxunleibie / 100) * parentWidth;
@@ -349,6 +409,34 @@ export default {
         return;
       }
       this.getCommandLogsData();
+    },
+    handleUserInfo(row) {
+      if (this.staffPermissionIds.includes(17)) {
+        this.currentUserRow = row;
+        this.user_info_dialogFormVisible = true;
+      } else {
+        ElMessage.warning("暂无用户详情查看权限");
+      }
+    },
+    closeUserInfoDialog() {
+      this.user_info_dialogFormVisible = false;
+      this.currentUserRow = {};
+    },
+    handleTimeClick(row) {
+      this.navigateToDetail(
+        {
+          ...row,
+          userId: this.formatUserId(row.userId),
+          companyId: row.companyId || this.companyId,
+        },
+        {
+          source: 'commandLog',
+          tab: 'command',
+          pageState: {
+            params: { ...this.params },
+          },
+        }
+      );
     },
   },
 };

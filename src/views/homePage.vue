@@ -62,42 +62,42 @@
             <img src="@/assets/shouye/icon1.png" @click="toWarnPath('欠费用户')" alt="" />
             <div class="shebei-warning-item-text">
               <span style="font-size: 22px">欠费用户</span>
-              <span style="font-size: 22px; font-family: 'Microsoft YaHei'; font-weight: bold; margin-top: 5px">{{ shebeiWarning.qianfeiUser }}</span>
+              <span class="warn-num-text" style="font-size: 22px; font-family: 'Microsoft YaHei'; font-weight: bold; margin-top: 5px" @click="toWarnPath('欠费用户')">{{ shebeiWarning.qianfeiUser }}</span>
             </div>
           </div>
           <div class="shebei-warning-item">
             <img src="@/assets/shouye/icon2.png" @click="toWarnPath('水表0用量用户')" alt="" />
             <div class="shebei-warning-item-text">
               <span style="font-size: 22px">近期0用水用户</span>
-              <span style="font-size: 22px; font-family: 'Microsoft YaHei'; font-weight: bold; margin-top: 5px">{{ shebeiWarning.zerouserL }}</span>
+              <span class="warn-num-text" style="font-size: 22px; font-family: 'Microsoft YaHei'; font-weight: bold; margin-top: 5px" @click="toWarnPath('水表0用量用户')">{{ shebeiWarning.zerouserL }}</span>
             </div>
           </div>
           <div class="shebei-warning-item">
             <img src="@/assets/shouye/icon3.png" @click="toWarnPath('水表大用量用户')" alt="" />
             <div class="shebei-warning-item-text">
               <span style="font-size: 22px">大用水量用户</span>
-              <span style="font-size: 22px; font-family: 'Microsoft YaHei'; font-weight: bold; margin-top: 5px">{{ shebeiWarning.dayongliang }}</span>
+              <span class="warn-num-text" style="font-size: 22px; font-family: 'Microsoft YaHei'; font-weight: bold; margin-top: 5px" @click="toWarnPath('水表大用量用户')">{{ shebeiWarning.dayongliang }}</span>
             </div>
           </div>
           <div class="shebei-warning-item">
             <img src="@/assets/shouye/icon4.png" @click="toWarnPath('数据长时间未上报')" alt="" />
             <div class="shebei-warning-item-text">
               <span style="font-size: 22px">数据持续未上报</span>
-              <span style="font-size: 22px; font-family: 'Microsoft YaHei'; font-weight: bold; margin-top: 5px">{{ shebeiWarning.weishangbao }}</span>
+              <span class="warn-num-text" style="font-size: 22px; font-family: 'Microsoft YaHei'; font-weight: bold; margin-top: 5px" @click="toWarnPath('数据长时间未上报')">{{ shebeiWarning.weishangbao }}</span>
             </div>
           </div>
           <div class="shebei-warning-item">
             <img src="@/assets/shouye/icon5.png" @click="toWarnPath('设备异常')" alt="" />
             <div class="shebei-warning-item-text">
               <span style="font-size: 22px">设备异常</span>
-              <span style="font-size: 22px; font-family: 'Microsoft YaHei'; font-weight: bold; margin-top: 5px">{{ shebeiWarning.shebeiyichang }}</span>
+              <span class="warn-num-text" style="font-size: 22px; font-family: 'Microsoft YaHei'; font-weight: bold; margin-top: 5px" @click="toWarnPath('设备异常')">{{ shebeiWarning.shebeiyichang }}</span>
             </div>
           </div>
            <div class="shebei-warning-item">
             <img src="@/assets/shouye/icon8.png" @click="toWarnPath('关阀状态读数增加')" alt="" />
             <div class="shebei-warning-item-text">
               <span style="font-size: 22px">关阀状态读数增加</span>
-              <span style="font-size: 22px; font-family: 'Microsoft YaHei'; font-weight: bold; margin-top: 5px">{{ shebeiWarning.abnormalWaterCount }}</span>
+              <span class="warn-num-text" style="font-size: 22px; font-family: 'Microsoft YaHei'; font-weight: bold; margin-top: 5px" @click="toWarnPath('关阀状态读数增加')">{{ shebeiWarning.abnormalWaterCount }}</span>
               <span style="font-size: 17px; color: #999;">(漏水用户数，非告警数)</span>
             </div>
           </div>
@@ -1027,5 +1027,16 @@ export default {
   height: 100%;
   width: 100%;
   margin-bottom: 10px;
+}
+
+.warn-num-text {
+  cursor: pointer;
+  text-decoration: underline;
+  text-decoration-color: #333;
+  transition: color 0.2s, text-decoration-color 0.2s;
+}
+.warn-num-text:hover {
+  color: #46b97e;
+  text-decoration-color: #46b97e;
 }
 </style>

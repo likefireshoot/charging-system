@@ -4,7 +4,7 @@
       <div class="title">
         <div style="margin-left: 10px; display: flex; align-items: center">
           <img src="@/assets/yonghu/icon7.png" alt="" style="margin-right: 8px" />
-          <span style="font-size: 20px">销户记录</span>
+          <span style="font-size: 20px">销户列表</span>
         </div>
         <div style="margin-right: 10px; cursor: pointer" @click="handleRechargeRecordDialogClose">
           <img src="@/assets/close.png" alt="" />

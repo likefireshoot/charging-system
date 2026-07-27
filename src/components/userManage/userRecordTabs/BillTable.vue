@@ -108,11 +108,11 @@
         <el-table-column property="userId" label="用户号" min-width="120" align="center" />
         <el-table-column property="userName" label="用户名称" min-width="140" align="center" />
         <el-table-column property="meterCode" label="表号" min-width="160" align="center" />
-        <el-table-column property="chargeAmount" label="扣费金额" min-width="110" align="center">
-          <template #default="scope">{{ scope.row.chargeAmount }} 元</template>
-        </el-table-column>
         <el-table-column property="oldBalance" label="原金额" min-width="110" align="center">
           <template #default="scope">{{ scope.row.oldBalance }} 元</template>
+        </el-table-column>
+        <el-table-column property="chargeAmount" label="扣费金额" min-width="110" align="center">
+          <template #default="scope">{{ scope.row.chargeAmount }} 元</template>
         </el-table-column>
         <el-table-column property="newBalance" label="余额" min-width="110" align="center">
           <template #default="scope">{{ scope.row.newBalance }} 元</template>

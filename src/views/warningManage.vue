@@ -132,10 +132,17 @@
             <el-table-column type="selection" :width="selectionWidth" align="center" fixed="left" />
             <el-table-column property="theId" label="序号" :width="idWidth" align="center" fixed="left"> </el-table-column>
             <el-table-column property="userId" label="用户号" :width="userIdWidth" align="center" />
-            <el-table-column property="userName" label="用户名" :width="userNameWidth" align="center" />
+            <el-table-column property="userName" label="用户名" :width="userNameWidth" align="center" >
+              <template #default="scope">
+                <span @click="handleUserInfo(scope.row)"
+                      style="color: #46b97e; display: block; width: 100%; text-align: center">
+                  {{ scope.row.userName }}
+                </span>
+              </template>
+            </el-table-column>
             <el-table-column property="meterCode" label="表号" :width="biaohaoWidth" align="center" />
+            <el-table-column property="regionName" label="区域" :width="quyuWidth" align="center" />
             <el-table-column property="userAddr" label="地址" :width="addressWidth" align="center" />
-<!--            <el-table-column property="regionName" label="所属区域" :width="quyuWidth" align="center" />-->
             <el-table-column property="userPhone" label="电话" :width="phoneWidth" align="center" />
             <el-table-column property="meterVendor" label="厂商" :width="deviceVendorWidth" align="center" />
             <el-table-column property="companyName" label="水厂" :width="companyWidth" align="center" />
@@ -149,7 +156,7 @@
                       style="color: #46b97e; cursor: pointer; display: block; width: 100%; text-align: center">{{ scope.row.totalWater }}</span>
               </template>
             </el-table-column>
-            <el-table-column property="balance" label="余额/元" :width="amountWidth" align="center" />
+            <el-table-column property="balance" label="余额" :width="amountWidth" align="center" />
             <el-table-column property="warningType" label="警告类型" :width="warningTypeWidth" align="center" />
             <el-table-column property="createTime" :label="warningTimeLabel" :width="warningTimeWidth" align="center" :formatter="formatDateByType" />
             <el-table-column v-if="showOweAmountColumn" property="oweAmount" label="欠费金额" :width="oweAmountWidth" align="center">
@@ -221,6 +228,11 @@
     </div>
 
   </div>
+
+  <!-- 点击用户名称弹出框 -->
+  <userInfoVue v-if="user_info_dialogFormVisible" :user_info_dialogFormVisible="user_info_dialogFormVisible"
+               :quyu_data="quyu_data" :data="multipleSelection[0]" @close="closeUserInfoDialog"></userInfoVue>
+
 </template>
 
 <script>
@@ -230,8 +242,9 @@ import axios from "axios";
 import { useWarningStore } from "@/store/warningStore.js";
 import { mapState } from "pinia";
 import { useDetailNavigation } from "@/composables/useDetailNavigation";
+import userInfoVue from "@/components/userManage/userInfo.vue";
 export default {
-  components: {},
+  components: {userInfoVue},
   setup() {
     const { navigateToDetail } = useDetailNavigation();
     return { navigateToDetail };
@@ -321,6 +334,8 @@ export default {
       //存储当前勾选的行的数据信息
       multipleSelection: [],
 
+      user_info_dialogFormVisible: false,
+
     };
   },
   watch: {
@@ -393,20 +408,21 @@ export default {
           selection: 2,
           id: 5,
           userId: 6,
-          userName: 8,
+          userName: 6,
           address: 6,
-          phone: 6,
+          phone: 5,
           biaohao: 6,
           deviceVendor: 5,
-          company: 7,
-          deviceValve: 4,
-          deviceBattery: 4,
-          warningTime: 9,
-          warningType: 4,
+          company: 6,
+          deviceValve: 5,
+          deviceBattery: 5,
+          warningTime: 8,
+          warningType: 5,
           totalWater: 7,
-          amount: 6,
-          oweAmount: 8,
+          amount: 7,
+          oweAmount: 6,
           qianfeiDays: 5,
+          quyu: 5,
         };
       }
       // 水表0用量用户 — sum: 4+5+7+10+13+11+10+13+9+7+11 = 100
@@ -415,19 +431,20 @@ export default {
           selection: 2,
           id: 5,
           userId: 6,
-          userName: 8,
+          userName: 7,
           address: 8,
-          phone: 7,
+          phone: 5,
           biaohao: 6,
-          deviceVendor: 4,
-          company: 8,
-          deviceValve: 4,
-          deviceBattery: 4,
-          warningTime: 10,
+          deviceVendor: 5,
+          company: 6,
+          deviceValve: 5,
+          deviceBattery: 5,
+          warningTime: 8,
           warningType: 7,
           totalWater: 7,
-          amount: 6,
-          durationDays: 8,
+          amount: 7,
+          durationDays: 6,
+          quyu: 5,
         };
       }
       // 设备异常 — sum: 4+5+6+9+11+9+8+10+7+6+6+6+6+7 = 100
@@ -437,18 +454,19 @@ export default {
           id: 5,
           userId: 6,
           userName: 8,
-          address: 8,
-          phone: 6,
-          biaohao: 7,
+          address: 6,
+          phone: 5,
+          biaohao: 6,
           deviceVendor: 6,
-          company: 8,
-          deviceValve: 4,
-          deviceBattery: 4,
-          warningTime: 9,
+          company: 6,
+          deviceValve: 5,
+          deviceBattery: 5,
+          warningTime: 8,
           warningType: 7,
           totalWater: 7,
-          amount: 6,
+          amount: 7,
           deviceSignal: 6,
+          quyu: 5,
         };
       }
       // 水表大用量用户 — sum: 4+5+7+10+13+11+10+13+9+7+11 = 100
@@ -457,19 +475,20 @@ export default {
           selection: 2,
           id: 5,
           userId: 6,
-          userName: 11,
+          userName: 7,
           address: 6,
-          phone: 6,
+          phone: 5,
           biaohao: 6,
-          deviceVendor: 4,
-          company: 7,
-          deviceValve: 4,
-          deviceBattery: 4,
-          warningTime: 10,
+          deviceVendor: 5,
+          company: 6,
+          deviceValve: 5,
+          deviceBattery: 5,
+          warningTime: 8,
           warningType: 7,
-          totalWater: 6,
-          amount: 8,
-          largeUsageAmount: 8,
+          totalWater: 7,
+          amount: 9,
+          largeUsageAmount: 6,
+          quyu: 5,
         };
       }
       // 数据长时间未上报 — sum: 4+5+7+9+11+11+9+10+8+5+9+6+6 = 100
@@ -479,19 +498,20 @@ export default {
           id: 5,
           userId: 6,
           userName: 7,
-          address: 7,
-          phone: 6,
-          biaohao: 6,
-          deviceVendor: 4,
-          company: 7,
+          address: 6,
+          phone: 5,
+          biaohao: 5,
+          deviceVendor: 5,
+          company: 6,
           deviceValve: 4,
           deviceBattery: 4,
-          warningTime: 10,
+          warningTime: 8,
           warningType: 7,
           totalWater: 7,
           amount: 6,
           durationDays: 6,
           deviceSignal: 6,
+          quyu: 5,
         };
       }
       // 水表频繁上报 — sum: 4+5+7+11+13+11+10+13+10+8+8 = 100
@@ -500,19 +520,20 @@ export default {
           selection: 2,
           id: 5,
           userId: 6,
-          userName: 8,
-          address: 8,
-          phone: 6,
+          userName: 7,
+          address: 7,
+          phone: 5,
           biaohao: 7,
           deviceVendor: 6,
-          company: 8,
-          deviceValve: 4,
-          deviceBattery: 4,
-          warningTime: 9,
+          company: 6,
+          deviceValve: 5,
+          deviceBattery: 5,
+          warningTime: 7,
           warningType: 7,
           totalWater: 7,
-          amount: 6,
+          amount: 7,
           reportCount: 6,
+          quyu: 5,
         };
       }
       // 关阀状态读数增加 — sum: 4+6+7+10+13+9+9+12+9+6+7+8 = 100
@@ -521,20 +542,21 @@ export default {
           selection: 2,
           id: 5,
           userId: 6,
-          userName: 8,
+          userName: 7,
           address: 6,
-          phone: 6,
+          phone: 5,
           biaohao: 6,
-          deviceVendor: 4,
+          deviceVendor: 5,
           company: 7,
-          deviceValve: 4,
-          deviceBattery: 4,
-          warningTime: 9,
-          warningType: 7,
-          totalWater: 6,
+          deviceValve: 3,
+          deviceBattery: 3,
+          warningTime: 8,
+          warningType: 5,
+          totalWater: 7,
           amount: 7,
           lastReading: 7,
           abnormalIncrease: 6,
+          quyu: 5,
         };
       }
       // 默认（fallback）— sum: 4+6+8+12+14+11+11+15+10+9 = 100
@@ -759,13 +781,14 @@ export default {
         this.alarmReadingWidth = p.alarmReading ? (p.alarmReading / 100) * w : 0;
         this.companyWidth = p.company ? (p.company / 100) * w : 0;
         this.amountWidth = p.amount ? (p.amount / 100) * w : 0;
+        this.quyuWidth = p.quyu ? (p.quyu / 100) * w : 0;
       }
     },
     formatOweAmount(val) {
       if (val === null || val === undefined || val === "") return "--";
       const num = Number(val);
-      if (Number.isFinite(num)) return `${num.toFixed(2)} 元`;
-      return `${val} 元`;
+      if (Number.isFinite(num)) return `${num.toFixed(2)}`;
+      return `${val}`;
     },
     formatDateByType(row){
       if (!row.createTime) return "";
@@ -994,6 +1017,13 @@ export default {
       }
     },
     exportExcel() {
+      // 拼接动态文件名
+      const baseName = "警告数据列表";
+      const suffix = ".xlsx";
+      // 如果有选中警告类型就拼接，没有就使用默认
+      const fileName = this.params.warningType
+          ? `${baseName}_${this.params.warningType}${suffix}`
+          : `${baseName}${suffix}`;
       // 复制params并剔除分页参数 pageNo、pageSize
       const tempParams = { ...this.params };
       delete tempParams.pageNo;
@@ -1028,7 +1058,7 @@ export default {
 
           const link = document.createElement("a");
           link.href = window.URL.createObjectURL(blob);
-          link.download = "警告数据列表.xlsx";
+          link.download = fileName;
           document.body.appendChild(link);
           link.click();
           document.body.removeChild(link);
@@ -1133,6 +1163,22 @@ export default {
         .catch((error) => {
           ElMessage.error(error);
         });
+    },
+    // 点击用户名打开用户详情
+    handleUserInfo(row) {
+      // 校验权限17（和用户管理页一致）
+      if (this.staffPermissionIds.includes(17)) {
+        this.multipleSelection[0] = row;
+        this.user_info_dialogFormVisible = true;
+      } else {
+        ElMessage.warning("暂无用户详情查看权限");
+      }
+    },
+    // 关闭用户详情弹窗
+    closeUserInfoDialog() {
+      this.user_info_dialogFormVisible = false;
+      this.multipleSelection = [];
+      this.getWaringData(); // 关闭后刷新警告表格数据
     },
   }
 };
@@ -1443,7 +1489,6 @@ export default {
   background-color: #fafafa;
   border-radius: 5px;
   padding: 10px;
-  margin-right: 1%;
 }
 
 .quyu-box > * {
@@ -1461,7 +1506,6 @@ export default {
 
 .jinggao-table {
   flex: 1;
-  margin-left: 1%;
   height: calc(100% - 10px);
   display: flex;
   justify-content: center;

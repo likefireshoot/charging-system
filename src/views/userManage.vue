@@ -70,126 +70,106 @@
     <div class="user-info">
       <div class="command-box">
         <div class="delete-btn"  @click="delete_btn_click"
-          v-if="staffPermissionIds.includes(6)"
-          v-show="isFeatureVisible('delete')">
+          v-if="staffPermissionIds.includes(6)">
           <img src="@/assets/yonghu/icon4.png" alt="" />
           <span>删除</span>
         </div>
-        <div class="command-btn" :class="{ 'btn-single-only-disabled': multipleSelection.length !== 1 }" @click="multipleSelection.length === 1 && handleCommand()"
-          v-show="isFeatureVisible('command')">
-          <img src="@/assets/yonghu/icon5.png" alt="" />
-          <span>命令下发</span>
+        <div class="command-btn"
+             :class="{ 'btn-single-only-disabled': multipleSelection.length === 0 || hasPauseUserSelected }"
+             @click="(multipleSelection.length > 0 && !hasPauseUserSelected) && openBatchPauseDialog()"
+             v-if="staffPermissionIds.includes(11)">
+          <img src="@/assets/menu/icon19.png" alt="" />
+          <span>停户</span>
+        </div>
+        <div class="water-meter-record-btn" @click="pause_record_btn_click"
+             v-if="staffPermissionIds.includes(11)">
+          <img src="@/assets/menu/icon19.png" alt="" />
+          <span>停户列表</span>
+        </div>
+        <div class="command-btn"
+             :class="{ 'btn-single-only-disabled': multipleSelection.length === 0 }"
+             @click="multipleSelection.length > 0 && openBatchCloseDialog()"
+             v-if="staffPermissionIds.includes(11)">
+          <img src="@/assets/menu/icon3.png" alt="" />
+          <span>销户</span>
+        </div>
+        <div class="water-meter-record-btn" @click="close_record_btn_click"
+             v-if="staffPermissionIds.includes(11)">
+          <img src="@/assets/menu/icon3.png" alt="" />
+          <span>销户列表</span>
         </div>
         <div class="command-btn" @click="valveOpen_dialogFormVisible = true"
-          v-if="staffPermissionIds.includes(7)"
-          v-show="isFeatureVisible('valveOpen')">
+             v-if="staffPermissionIds.includes(7)">
           <img src="@/assets/yonghu/icon18.png" alt="" />
           <span>开阀设置</span>
         </div>
         <div class="command-btn" @click="valve_dialogFormVisible = true"
-          v-if="staffPermissionIds.includes(8)"
-          v-show="isFeatureVisible('valveClose')">
+             v-if="staffPermissionIds.includes(8)">
           <img src="@/assets/yonghu/icon17.png" alt="" />
           <span>关阀设置</span>
         </div>
-        <div class="recharge-btn" :class="{ 'btn-single-only-disabled': multipleSelection.length !== 1 }" @click="multipleSelection.length === 1 && change_balance_btn_click()"
-          v-if="staffPermissionIds.includes(9)"
-          v-show="isFeatureVisible('balance')">
+        <div class="water-meter-record-btn" @click="post_pay_list_btn_click"
+             v-if="staffPermissionIds.includes(11)">
+          <img src="@/assets/yonghu/icon7.png" alt="" />
+          <span>后付费列表</span>
+        </div>
+        <div class="water-meter-record-btn" @click="can_close_no_arrears_btn_click"
+             v-if="staffPermissionIds.includes(11)">
+          <img src="@/assets/yonghu/icon7.png" alt="" />
+          <span>不欠费可关阀列表</span>
+        </div>
+        <div class="command-btn" :class="{ 'btn-single-only-disabled': multipleSelection.length !== 1 || hasPauseUserSelected }" @click="(multipleSelection.length === 1 && !hasPauseUserSelected) && handleCommand()">
+          <img src="@/assets/yonghu/icon5.png" alt="" />
+          <span>命令下发</span>
+        </div>
+        <div class="recharge-btn" :class="{ 'btn-single-only-disabled': multipleSelection.length !== 1 || hasPauseUserSelected }" @click="(multipleSelection.length === 1 && !hasPauseUserSelected) && change_balance_btn_click()"
+          v-if="staffPermissionIds.includes(9)">
           <img src="@/assets/yonghu/icon20.png" alt="" />
           <span>余额调整</span>
         </div>
-        <div class="recharge-btn" :class="{ 'btn-single-only-disabled': multipleSelection.length !== 1 }" @click="multipleSelection.length === 1 && recharge_btn_click()"
-          v-if="staffPermissionIds.includes(10)"
-          v-show="isFeatureVisible('recharge')">
+        <div class="recharge-btn" :class="{ 'btn-single-only-disabled': multipleSelection.length !== 1 || hasPauseUserSelected }" @click="(multipleSelection.length === 1 && !hasPauseUserSelected) && recharge_btn_click()"
+          v-if="staffPermissionIds.includes(10)">
           <img src="@/assets/yonghu/icon6.png" alt="" />
           <span>充值</span>
         </div>
-        <div class="water-meter-btn" :class="{ 'btn-single-only-disabled': multipleSelection.length !== 1 }" @click="multipleSelection.length === 1 && change_btn_click()"
-          v-if="staffPermissionIds.includes(13)"
-          v-show="isFeatureVisible('changeMeter')">
-          <img src="@/assets/yonghu/icon8.png" alt="" />
-          <span>换表</span>
-        </div>
         <div class="recharge-record-btn" @click="recharge_record_btn_click"
-          v-if="staffPermissionIds.includes(11)"
-          v-show="isFeatureVisible('rechargeRecord')">
+             v-if="staffPermissionIds.includes(11)">
           <img src="@/assets/yonghu/icon7.png" alt="" />
           <span>充值记录</span>
         </div>
         <div class="recharge-record-btn" @click="recharge_cancel_record_btn_click"
-             v-if="staffPermissionIds.includes(11)"
-             v-show="isFeatureVisible('rechargeCancelRecord')">
+             v-if="staffPermissionIds.includes(11)">
           <img src="@/assets/yonghu/icon7.png" alt="" />
           <span>充值撤销记录</span>
         </div>
+        <div class="water-meter-btn" :class="{ 'btn-single-only-disabled': multipleSelection.length !== 1 || hasPauseUserSelected }" @click="(multipleSelection.length === 1 && !hasPauseUserSelected) && change_btn_click()"
+          v-if="staffPermissionIds.includes(13)">
+          <img src="@/assets/yonghu/icon8.png" alt="" />
+          <span>换表</span>
+        </div>
         <div class="water-meter-record-btn" @click="change_record_btn_click"
-          v-if="staffPermissionIds.includes(14)"
-          v-show="isFeatureVisible('changeRecord')">
+          v-if="staffPermissionIds.includes(14)">
           <img src="@/assets/yonghu/icon9.png" alt="" />
           <span>换表记录</span>
         </div>
-        <!-- ========== 新增：暂停记录按钮 ========== -->
-        <div class="water-meter-record-btn" @click="pause_record_btn_click"
-             v-if="staffPermissionIds.includes(11)"
-             v-show="isFeatureVisible('pauseRecord')">
-          <img src="@/assets/menu/icon19.png" alt="" />
-          <span>停户记录</span>
-        </div>
-
-        <!-- ========== 新增：销户记录按钮 ========== -->
-        <div class="water-meter-record-btn" @click="close_record_btn_click"
-             v-if="staffPermissionIds.includes(11)"
-             v-show="isFeatureVisible('closeRecord')">
-          <img src="@/assets/menu/icon3.png" alt="" />
-          <span>销户记录</span>
-        </div>
-
-        <div class="export-in-btn" @click="multi_edit_meter_price" v-show="isFeatureVisible('batchPrice')">
+        <div class="export-in-btn" @click="multi_edit_meter_price">
           <img src="@/assets/jiage/icon3.png" alt="" />
           <span>批量修改水价类型</span>
         </div>
-        <div class="export-out-btn" @click="exportExcel" v-show="isFeatureVisible('export')">
-          <img src="@/assets/yonghu/icon1.3.png" alt="" />
-          <span>导出</span>
-        </div>
-        <div class="export-out-btn" @click="common_meter_template_click" v-show="isFeatureVisible('commonMeterTemplate')">
+        <div class="export-out-btn" @click="common_meter_template_click">
           <img src="@/assets/yonghu/icon1.png" alt="" />
           <span>普表用水量模板下载</span>
         </div>
-        <div class="export-in-btn" @click="triggerCommonMeterImport" v-show="isFeatureVisible('commonMeterImport')">
+        <div class="export-in-btn" @click="triggerCommonMeterImport">
           <img src="@/assets/yonghu/icon2.png" alt="" />
           <span>普表用水量信息导入</span>
           <input ref="commonMeterInput" type="file" accept=".xls,.xlsx" style="display: none"
             @change="common_meter_click" />
         </div>
-
-        <el-popover
-          placement="bottom"
-          :width="220"
-          trigger="click"
-          v-model:visible="moreFeaturesVisible"
-          popper-class="feature-popover"
-        >
-          <template #reference>
-            <div class="more-feature-btn">
-              <el-button class="more-feature-trigger">
-                更多功能
-                <el-icon style="margin-left: 4px"><ArrowDown /></el-icon>
-              </el-button>
-            </div>
-          </template>
-          <div class="feature-popover-content">
-            <el-checkbox
-              v-for="btn in availableFeatureButtons"
-              :key="btn.key"
-              :model-value="visibleFeatureKeys.includes(btn.key)"
-              @change="(val) => toggleFeatureButton(btn.key, val)"
-              :disabled="visibleFeatureKeys.length >= maxVisibleFeatures && !visibleFeatureKeys.includes(btn.key)"
-            >
-              {{ btn.label }}
-            </el-checkbox>
-          </div>
-        </el-popover>
+        <div class="export-out-btn" @click="exportExcel">
+          <img src="@/assets/yonghu/icon1.3.png" alt="" />
+          <span>导出</span>
+        </div>
 
         <div class="reflush" @click="reflush">
           <img src="@/assets/yonghu/icon15.png" alt="" />
@@ -409,6 +389,16 @@
       :command_dialogFormVisible="command_dialogFormVisible_qianbaotong" :commandType="commandType"
       :data="multipleSelection[0]" @close="closeCommandDialog"></commandQianBaoTong>
 
+    <!-- ========== 新增 后付费列表弹窗 ========== -->
+    <postPayUserList v-if="post_pay_list_dialogFormVisible"
+                     :post_pay_list_dialogFormVisible="post_pay_list_dialogFormVisible" :quyu_data="quyu_data"
+                     :data="multipleSelection[0]" @close="closePostPayListDialog"></postPayUserList>
+
+    <!-- ========== 新增 不欠费可关阀列表弹窗 ========== -->
+    <canCloseNoArrears v-if="can_close_no_arrears_dialogFormVisible"
+                       :can_close_no_arrears_dialogFormVisible="can_close_no_arrears_dialogFormVisible" :quyu_data="quyu_data"
+                       :data="multipleSelection[0]" @close="closeCanCloseNoArrearsDialog"></canCloseNoArrears>
+
     <!-- 批量修改用户水价 弹出框（样式与其他页面统一）-->
     <div class="add-dialog" v-if="priceDialogVisible">
       <div class="add-dialog-content">
@@ -570,6 +560,33 @@
       </div>
     </div>
   </div>
+  <!-- 批量停户确认弹窗 -->
+  <el-dialog v-model="batchPauseDialogVisible" title="批量暂停用户确认" width="620" :lock-scroll="false">
+    <div style="font-size: 20px; text-align: center; line-height: 2.2; padding:10px 0;">
+      确定要将选中 <span style="color:#45ba7e;font-weight:bold">{{ multipleSelection.length }}</span> 户用户暂停使用吗？<br/>
+      暂停后不再收取保底费，并自动下达水表关阀命令。
+    </div>
+    <template #footer>
+      <div style="display:flex;justify-content:center;gap:24px;">
+        <el-button @click="batchPauseDialogVisible = false">取消</el-button>
+        <el-button @click="handleBatchPause" style="background-color:#45ba7e;color:#fff" :loading="batchLoading">确认暂停</el-button>
+      </div>
+    </template>
+  </el-dialog>
+
+  <!-- 批量销户确认弹窗 -->
+  <el-dialog v-model="batchCloseDialogVisible" title="批量销户确认" width="620" :lock-scroll="false">
+    <div style="font-size: 20px; text-align: center; line-height: 2.2; padding:10px 0;">
+      确定永久销户选中 <span style="color:#45ba7e;font-weight:bold">{{ multipleSelection.length }}</span> 户用户？<br/>
+      销户后用户水表绑定关系全部清除，操作无法恢复！<br/>
+    </div>
+    <template #footer>
+      <div style="display:flex;justify-content:center;gap:24px;">
+        <el-button @click="batchCloseDialogVisible = false">取消</el-button>
+        <el-button @click="handleBatchClose" style="background-color:#45ba7e;color:#fff" :loading="batchLoading">确认销户</el-button>
+      </div>
+    </template>
+  </el-dialog>
 </template>
 
 <script>
@@ -599,6 +616,8 @@ import changeBalanceVue from "@/components/userManage/changeBalance.vue";
 import rechargeCancelRecordVue from "@/components/userManage/RechargeCancelRecord.vue";
 import pauseRecord from "@/components/userManage/pauseRecord.vue";
 import closeRecord from "@/components/userManage/closeRecord.vue";
+import postPayUserList from "@/components/userManage/postPayUserList.vue";
+import canCloseNoArrears from "@/components/userManage/canCloseNoArrears.vue";
 
 import service from "@/api/request";
 import { ElMessage } from "element-plus";
@@ -635,6 +654,8 @@ export default {
     // 新增
     pauseRecord,
     closeRecord,
+    postPayUserList,
+    canCloseNoArrears,
   },
   setup() {
     const { navigateToDetail } = useDetailNavigation();
@@ -729,6 +750,8 @@ export default {
       // 新增暂停、销户弹窗标记
       pause_record_dialogFormVisible: false,
       close_record_dialogFormVisible: false,
+      post_pay_list_dialogFormVisible: false,
+      can_close_no_arrears_dialogFormVisible: false,
 
       // 价格详情弹窗
       view_dialogFormVisible: false,
@@ -784,10 +807,11 @@ export default {
         { key: 'batchPrice', label: '批量修改水价类型', permission: null, defaultVisible: false },
         { key: 'commonMeterTemplate', label: '普表用水量模板下载', permission: null, defaultVisible: false },
         { key: 'commonMeterImport', label: '普表用水量信息导入', permission: null, defaultVisible: false },
+        { key: 'batchPause', label: '停户', permission: 11 },
+        { key: 'batchClose', label: '销户', permission: 11 },
+        { key: 'postPayList', label: '后付费列表', permission: 11 },
+        { key: 'canCloseNoArrears', label: '不欠费可关阀列表', permission: 11 },
       ],
-      visibleFeatureKeys: [],
-      maxVisibleFeatures: 13,
-      moreFeaturesVisible: false,
 
       // ****** 筛选栏配置 ******
       filterFieldConfigs: [
@@ -823,6 +847,10 @@ export default {
       visibleFilterKeys: [],
       maxVisibleFilters: 8,
       moreFiltersVisible: false,
+
+      batchPauseDialogVisible: false,
+      batchCloseDialogVisible: false,
+      batchLoading: false,
     };
   },
   watch: {
@@ -864,12 +892,6 @@ export default {
     },
   },
   computed: {
-    availableFeatureButtons() {
-      return this.featureButtonConfigs.filter((btn) => {
-        if (btn.permission === null) return true;
-        return this.staffPermissionIds.includes(btn.permission);
-      });
-    },
     availableFilterFields() {
       return this.filterFieldConfigs.filter((f) => {
         if (f.key === "company") return this.companyId === 1;
@@ -881,6 +903,10 @@ export default {
         .filter((f) => this.visibleFilterKeys.includes(f.key))
         .slice(0, this.maxVisibleFilters);
     },
+    hasPauseUserSelected() {
+      // 判断选中项中是否存在暂停用户 isPause === 1
+      return this.multipleSelection.some(row => row.isPause === 1)
+    },
   },
   created() {
     const allKeys = this.filterFieldConfigs
@@ -889,14 +915,6 @@ export default {
       .filter((f) => !(this.companyId === 1 && f.key === "battery"))
       .map((f) => f.key);
     this.visibleFilterKeys = [...allKeys];
-
-    this.visibleFeatureKeys = this.featureButtonConfigs
-      .filter((btn) => btn.defaultVisible !== false)
-      .filter((btn) => {
-        if (btn.permission === null) return true;
-        return this.staffPermissionIds.includes(btn.permission);
-      })
-      .map((btn) => btn.key);
   },
   mounted() {
     this.$nextTick(() => {
@@ -1006,6 +1024,63 @@ export default {
     this.getCompanyList();
   },
   methods: {
+    // 打开批量停户弹窗
+    openBatchPauseDialog() {
+      this.batchPauseDialogVisible = true;
+    },
+// 执行批量停户
+    async handleBatchPause() {
+      this.batchLoading = true;
+      try {
+        const imeiList = this.multipleSelection.map(item => item.imei);
+        // const params = {
+        //   imeiList,
+        //   staffId: JSON.parse(sessionStorage.getItem("userData")).staffId
+        // };
+        // const res = await service.post("/userManage/userCharge/batchPauseMeter", params);
+        const res = await service.post("/userManage/userCharge/batchPauseMeter", imeiList);
+        if (res.code === 200) {
+          ElMessage.success("批量暂停操作成功");
+          this.batchPauseDialogVisible = false;
+          this.multipleSelection = [];
+          this.reflush();
+        } else {
+          ElMessage.error(res.msg || "批量暂停失败");
+        }
+      } catch (err) {
+        console.error(err);
+        ElMessage.error("请求异常，批量暂停失败");
+      } finally {
+        this.batchLoading = false;
+      }
+    },
+
+// 打开批量销户弹窗
+    openBatchCloseDialog() {
+      this.batchCloseDialogVisible = true;
+    },
+// 执行批量销户
+    async handleBatchClose() {
+      this.batchLoading = true;
+      try {
+        const imeiList = this.multipleSelection.map(item => item.imei);
+        const res = await service.post("/userManage/userCharge/batchCancelMeter", imeiList);
+        if (res.code === 200) {
+          ElMessage.success("批量销户操作成功");
+          this.batchCloseDialogVisible = false;
+          this.multipleSelection = [];
+          this.reflush();
+        } else {
+          ElMessage.error(res.msg || "批量销户失败");
+        }
+      } catch (err) {
+        console.error(err);
+        ElMessage.error("请求异常，批量销户失败");
+      } finally {
+        this.batchLoading = false;
+      }
+    },
+
     getFilterOptions(key) {
       const field = this.filterFieldConfigs.find((f) => f.key === key);
       if (!field) return [];
@@ -1027,20 +1102,6 @@ export default {
         this.visibleFilterKeys = newKeys;
       } else {
         this.visibleFilterKeys = this.visibleFilterKeys.filter((k) => k !== key);
-      }
-    },
-    isFeatureVisible(key) {
-      return this.visibleFeatureKeys.includes(key);
-    },
-    toggleFeatureButton(key, checked) {
-      if (checked) {
-        if (this.visibleFeatureKeys.length >= this.maxVisibleFeatures) return;
-        const configKeys = this.availableFeatureButtons.map((btn) => btn.key);
-        const newKeys = [...this.visibleFeatureKeys, key];
-        newKeys.sort((a, b) => configKeys.indexOf(a) - configKeys.indexOf(b));
-        this.visibleFeatureKeys = newKeys;
-      } else {
-        this.visibleFeatureKeys = this.visibleFeatureKeys.filter((k) => k !== key);
       }
     },
     // ****** 手动处理分页变化，避免 watch 循环 ******
@@ -1328,9 +1389,9 @@ export default {
     //     });
     // },
     selectable(row) {
-      // return true; // 目前允许所有行选择，你可以加上你的业务逻辑
+      return true; // 目前允许所有行选择，你可以加上你的业务逻辑
       // isPause=1 暂停用户，返回false禁止勾选
-      return row.isPause !== 1;
+      // return row.isPause !== 1;
     },
     handleSelectionChange(val) {
       this.multipleSelection = val;
@@ -1516,6 +1577,27 @@ export default {
     },
     closeRechargeCancelRecordDialog() {
       this.recharge_cancel_record_dialogFormVisible = false;
+      this.multipleSelection = [];
+      this.reflush();
+    },
+    // 打开后付费列表弹窗
+    post_pay_list_btn_click() {
+      this.post_pay_list_dialogFormVisible = true;
+    },
+// 关闭后付费列表弹窗
+    closePostPayListDialog() {
+      this.post_pay_list_dialogFormVisible = false;
+      this.multipleSelection = [];
+      this.reflush();
+    },
+
+// 打开不欠费可关阀列表弹窗
+    can_close_no_arrears_btn_click() {
+      this.can_close_no_arrears_dialogFormVisible = true;
+    },
+// 关闭不欠费可关阀列表弹窗
+    closeCanCloseNoArrearsDialog() {
+      this.can_close_no_arrears_dialogFormVisible = false;
       this.multipleSelection = [];
       this.reflush();
     },
@@ -2156,6 +2238,7 @@ export default {
   --el-fill-color-blank: #e8f3ed;
   --el-text-color-primary: #fff;
   overflow-y: auto;
+  padding-bottom: 8px;
 }
 
 :deep(.el-tree-node__content) {
@@ -2329,7 +2412,6 @@ export default {
   width: 100%;
   height: auto;
   margin-bottom: 0px;
-  position: absolute;
   top: 18px;
   padding-left: 20px;
   gap: 10px;
@@ -2426,9 +2508,9 @@ export default {
 }
 
 .quyu-box>.el-tree {
-  height: 100%;
+  flex: 1;
+  min-height: 0;
   width: 100%;
-  align-items: center;
 }
 
 .quyu-box>.el-input ::placeholder {
@@ -2437,7 +2519,7 @@ export default {
 
 .user-table {
   width: 80%;
-  height: calc(100%- 10px);
+  height: calc(100% - 30px);
   flex-grow: 1;
 }
 
@@ -2449,6 +2531,11 @@ export default {
   align-items: center;
   position: absolute;
   bottom: 0;
+  pointer-events: none;
+}
+
+.page-box > * {
+  pointer-events: auto;
 }
 
 .title {
