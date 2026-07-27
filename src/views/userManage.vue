@@ -2238,6 +2238,7 @@ export default {
   --el-fill-color-blank: #e8f3ed;
   --el-text-color-primary: #fff;
   overflow-y: auto;
+  padding-bottom: 8px;
 }
 
 :deep(.el-tree-node__content) {
@@ -2507,9 +2508,9 @@ export default {
 }
 
 .quyu-box>.el-tree {
-  height: 100%;
+  flex: 1;
+  min-height: 0;
   width: 100%;
-  align-items: center;
 }
 
 .quyu-box>.el-input ::placeholder {
@@ -2530,6 +2531,11 @@ export default {
   align-items: center;
   position: absolute;
   bottom: 0;
+  pointer-events: none;
+}
+
+.page-box > * {
+  pointer-events: auto;
 }
 
 .title {
