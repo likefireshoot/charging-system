@@ -210,6 +210,7 @@
                 {{ row.abnormalWaterDelta != null ? row.abnormalWaterDelta : '' }}
               </template>
             </el-table-column>
+            <el-table-column v-if="showValveClosedIncreaseColumn" property="continueDays" label="持续漏水天数" :width="continueDaysWidth" align="center"></el-table-column>
 <!--            <el-table-column v-if="showValveClosedIncreaseColumn" label="告警时读数" :width="alarmReadingWidth" align="center">-->
 <!--              <template #default="scope">-->
 <!--                <span @click="handleWarningMeterJump(scope.row)"-->
@@ -310,6 +311,7 @@ export default {
       alarmReadingWidth: 0,
       companyWidth: 0,
       amountWidth: 0,
+      continueDaysWidth: 0,
       // 父容器元素
       parentContainer: null,
       // ResizeObserver 实例
@@ -321,6 +323,7 @@ export default {
         { label: '最大持续未上报天数（天）', key: 'delayDays', displayValue: '' },
         { label: '最大每日上报次数', key: 'maxDailyReportTimes', displayValue: '' },
         { label: '最大零用量天数', key: 'maxDaysWithoutUsage', displayValue: '' },
+        { label: '关阀读数增加警告天数', key: 'maxDaysAbnormalWater', displayValue: '' },
       ],
       configEditMode: false,
 
@@ -395,6 +398,7 @@ export default {
       if (this.showZeroUsageColumn) return "未用水起始时间";
       if (this.showLongTimeNoReportColumn) return "未上报起始时间";
       if (this.showFrequentReportColumn) return "警告日期";
+      if (this.showValveClosedIncreaseColumn) return "漏水起始时间";
       return "警告时间";
     },
     // 定义每列的百分比宽度
@@ -542,21 +546,22 @@ export default {
           selection: 2,
           id: 5,
           userId: 6,
-          userName: 7,
+          userName: 6,
           address: 6,
           phone: 5,
-          biaohao: 6,
+          biaohao: 5,
           deviceVendor: 5,
-          company: 7,
+          company: 5,
           deviceValve: 3,
           deviceBattery: 3,
-          warningTime: 8,
+          warningTime: 6,
           warningType: 5,
           totalWater: 7,
           amount: 7,
           lastReading: 7,
           abnormalIncrease: 6,
           quyu: 5,
+          continueDays: 6,
         };
       }
       // 默认（fallback）— sum: 4+6+8+12+14+11+11+15+10+9 = 100
@@ -782,6 +787,7 @@ export default {
         this.companyWidth = p.company ? (p.company / 100) * w : 0;
         this.amountWidth = p.amount ? (p.amount / 100) * w : 0;
         this.quyuWidth = p.quyu ? (p.quyu / 100) * w : 0;
+        this.continueDaysWidth = p.continueDays ? (p.continueDays / 100) * w : 0;
       }
     },
     formatOweAmount(val) {
@@ -1123,6 +1129,7 @@ export default {
             this.configItems[1].displayValue = response.data.maxDaysWithoutReport;
             this.configItems[2].displayValue = response.data.maxDailyReportTimes;
             this.configItems[3].displayValue = response.data.maxDaysWithoutUsage;
+            this.configItems[4].displayValue = response.data.maxDaysAbnormalWater;
           } else {
             ElMessage.error(response.msg);
           }
@@ -1149,9 +1156,10 @@ export default {
       const delayDays = this.configItems[1].displayValue;
       const maxDailyReportTimes = this.configItems[2].displayValue;
       const maxDaysWithoutUsage = this.configItems[3].displayValue;
+      const maxDaysAbnormalWater = this.configItems[4].displayValue;
 
       service
-        .get(`/warning/setWarningConfig?amountQuota=${amountQuota}&delayDays=${delayDays}&maxDailyReportTimes=${maxDailyReportTimes}&maxDaysWithoutUsage=${maxDaysWithoutUsage}`)
+        .get(`/warning/setWarningConfig?amountQuota=${amountQuota}&delayDays=${delayDays}&maxDailyReportTimes=${maxDailyReportTimes}&maxDaysWithoutUsage=${maxDaysWithoutUsage}&maxDaysAbnormalWater=${maxDaysAbnormalWater}`)
         .then((response) => {
           if (response.code === 200) {
             ElMessage.success('设置成功');
@@ -1378,7 +1386,7 @@ export default {
 .config-display {
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 15px;
   flex-wrap: wrap;
   padding-left: 30px;
 }
@@ -1396,7 +1404,7 @@ export default {
 }
 
 .config-input {
-  width: 100px;
+  width: 65px;
   font-size: 20px;
 }
 

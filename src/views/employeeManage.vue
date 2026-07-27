@@ -59,7 +59,7 @@
           <img src="@/assets/yuangong/icon6.png" alt="" style="margin-left: 8px" />
           <span style="font-size: 20px; margin-left: 10px; color: #5a5a5a">水厂管理</span>
         </div>
-        <div class="add-btn" style="width: 130px; margin-left: 10px" @click="deleteRegion_dialogFormVisible = true" v-if="staffPermissionIds.includes(32)">
+        <div class="add-btn" style="width: 130px; margin-left: 10px" @click="openDeleteRegionDialog" v-if="staffPermissionIds.includes(32)">
           <img src="@/assets/yuangong/icon4.png" alt="" style="margin-left: 8px" />
           <span style="font-size: 20px; margin-left: 10px; color: #5a5a5a">删除区域</span>
         </div>
@@ -169,7 +169,6 @@
             </el-select>
           </div>
 
-          <!-- 已有区域列表 -->
           <!-- 已有区域列表【两列布局】 -->
           <div class="region-list-box">
             <span style="color: #575556; font-size: 20px; margin-bottom: 8px; display:block">已有区域列表</span>
@@ -205,7 +204,7 @@
     </div>
     <!-- 删除区域 -->
     <div class="add-dialog" v-if="deleteRegion_dialogFormVisible">
-      <div class="add-dialog-content">
+      <div class="add-dialog-content add-region">
         <div class="title">
           <div style="margin-left: 10px; display: flex; align-items: center">
             <img src="@/assets/yuangong/icon4.png" alt="" style="margin-right: 10px" />
@@ -222,14 +221,33 @@
               <el-option v-for="item in companyList" :key="item.id" :label="item.name" :value="item.id"></el-option>
             </el-select>
           </div>
-          <div class="add-input">
-            <span>区域名称</span>
-            <el-select v-model="deleteRegion.regionIds" multiple clearable collapse-tags placeholder="请选择区域" popper-class="custom-header" :max-collapse-tags="1">
-              <template #header>
-                <el-checkbox class="user-checkbox" v-model="checkAll" :indeterminate="indeterminate" @change="handleCheckAll"> 全选 </el-checkbox>
-              </template>
-              <el-option v-for="item in regionList" :key="item.id" :label="item.label" :value="item.id" />
-            </el-select>
+
+          <!-- 已有区域列表【两列布局】 -->
+          <div class="region-list-box-delete">
+            <div style="display: flex;justify-content: space-between;align-items: center;margin-bottom: 8px">
+              <span style="color: #575556; font-size: 20px;">已有区域列表</span>
+              <div>
+              <el-checkbox v-model="checkAll" :indeterminate="indeterminate" @change="handleCheckAll"></el-checkbox>
+                <span style="font-size: 20px; color: #575556; margin-left: 5px">全选</span>
+              </div>
+            </div>
+            <div class="region-table-scroll" style="border: 1px solid #e6e6e6; padding: 8px 15px">
+              <div class="region-grid-wrap">
+                <div
+                    class="region-item"
+                    :class="{active: deleteRegion.regionIds.includes(item.id)}"
+                    v-for="item in regionList"
+                    :key="item.id"
+                    @click="toggleRegionItem(item.id)"
+                >
+                  {{ item.label }}
+                </div>
+                <!-- 空数据提示 -->
+                <div v-if="regionList.length === 0" class="empty-box">
+                  暂无数据
+                </div>
+              </div>
+            </div>
           </div>
         </div>
         <div class="btn">
@@ -566,14 +584,14 @@ export default {
     //     this.getEmployeeData();
     //   },
     // },
-    deleteRegion_dialogFormVisible: {
-      handler() {
-        if (this.companyId !== 1) {
-          this.deleteRegion.companyId = this.companyId;
-          this.getRegionData();
-        }
-      },
-    },
+    // deleteRegion_dialogFormVisible: {
+    //   handler() {
+    //     if (this.companyId !== 1) {
+    //       this.deleteRegion.companyId = this.companyId;
+    //       this.getRegionData();
+    //     }
+    //   },
+    // },
     "deleteRegion.regionIds": {
       handler(val) {
         if (val.length === 0) {
@@ -590,6 +608,11 @@ export default {
     "deleteRegion.companyId": {
       handler() {
         if (this.flag == 0) {
+          // 切换水厂，清空所有选中区域
+          this.deleteRegion.regionIds = [];
+          this.checkAll = false;
+          this.indeterminate = false;
+          this.regionList = [];
           this.getRegionData();
         }
       },
@@ -650,6 +673,34 @@ export default {
     }
   },
   methods: {
+    openDeleteRegionDialog(){
+      this.deleteRegion_dialogFormVisible = true;
+      // 清空上次选中
+      this.deleteRegion.regionIds = [];
+      this.checkAll = false;
+      this.indeterminate = false;
+      this.regionList = [];
+
+      if (this.companyId !== 1) {
+        // 非管理员自动赋值水厂
+        this.deleteRegion.companyId = this.companyId;
+        this.getRegionData();
+      }else{
+        // 超级管理员清空，手动选择
+        this.deleteRegion.companyId = null;
+      }
+    },
+    // 点击单个区域方块 选中/取消选中
+    toggleRegionItem(regionId) {
+      const index = this.deleteRegion.regionIds.indexOf(regionId)
+      if (index > -1) {
+        // 已存在 → 删除
+        this.deleteRegion.regionIds.splice(index, 1)
+      } else {
+        // 不存在 → 添加
+        this.deleteRegion.regionIds.push(regionId)
+      }
+    },
     // 打开新增区域弹窗
     openAddRegionDialog() {
       this.addRegion_dialogFormVisible = true;
@@ -856,6 +907,12 @@ export default {
         });
     },
     getRegionData() {
+      // 关键判断：没有水厂ID，直接终止，不发起请求！
+      if (!this.deleteRegion.companyId) {
+        this.regionList = [];
+        return;
+      }
+
       let url = `/getRegion?companyId=${this.deleteRegion.companyId}`;
       service
         .get(`${url}`, {
@@ -1055,6 +1112,7 @@ export default {
       }
       if (this.addRegion.regionName == null || this.addRegion.regionName == "") {
         ElMessage.error("区域名称不能为空！");
+        return;
       }
       this.addRegion.regionName = this.addRegion.regionName ? this.addRegion.regionName.trim() : this.addRegion.regionName;
       service
@@ -1072,7 +1130,7 @@ export default {
     deleteRegion_confirm() {
       this.flag = 1;
       if (!this.deleteRegion.regionIds || this.deleteRegion.regionIds.length === 0) {
-        ElMessage.error("区域名称不能为空！");
+        ElMessage.error("请选择要删除的区域！");
         this.flag = 1;
         return;
       }
@@ -1099,6 +1157,9 @@ export default {
       this.deleteRegion_dialogFormVisible = false;
       this.deleteRegion.companyId = null;
       this.deleteRegion.regionIds = [];
+      this.regionList = [];
+      this.checkAll = false;
+      this.indeterminate = false;
       this.$nextTick(() => {
         this.flag = 0;
       });
@@ -1757,6 +1818,16 @@ export default {
   max-height: 60vh;
 }
 
+.region-list-box-delete {
+  width:100%;
+  flex:1;
+  min-height:0;
+  margin:10px 0;
+  display:flex;
+  flex-direction:column;
+  max-height: 70vh;
+}
+
 .region-table-scroll {
   flex:1;
   min-height:0;
@@ -1774,6 +1845,17 @@ export default {
   border-radius: 4px;
   text-align: center;
   background: #fff;
+  color: #575556;
+  transition: all 0.2s;
+}
+
+.region-item.active {
+  background-color: #45ba7e;
+  color: #ffffff;
+  border-color: #45ba7e;
+}
+.region-item:hover:not(.active) {
+  background: #f0f0f0;
 }
 
 .empty-box {
