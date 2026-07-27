@@ -32,7 +32,7 @@
         <div class="search-input" style="margin-left: 10px; width: 16%">
           <span>通讯状态</span>
           <el-select v-model="params.commandStatus" class="big-font-el-select" placeholder="请选择">
-            <el-option v-for="item in commandStatusList" :key="item.value" :label="item.label" :value="item.label"></el-option>
+            <el-option v-for="item in commandStatusList" :key="item.value" :label="item.label" :value="item.value"></el-option>
           </el-select>
         </div>
         <div class="search-input" style="margin-left: 10px; width: 30%">
@@ -63,6 +63,10 @@
     </div>
     <div class="log-info">
       <div class="command-box">
+        <div class="export-out-btn" style="margin-left: 10px" @click="exportExcel">
+          <img src="@/assets/yonghu/icon1.3.png" alt="" style="margin-left: 7px" />
+          <span style="font-size: 20px; margin-left: 10px; color: #5a5a5a">导出</span>
+        </div>
         <div class="reflush" style="margin-left: 10px" @click="reflush">
           <img src="@/assets/yonghu/icon15.png" alt="" />
         </div>
@@ -163,9 +167,10 @@ export default {
       companyId: JSON.parse(sessionStorage.getItem("userData")).companyId, // 所属水厂ID
       companyList: [],
       commandStatusList: [
-        { value: 1, label: "等待通讯" },
-        { value: 2, label: "成功" },
-        { value: 3, label: "失败" },
+        { value: "等待通讯", label: "待设备上线下发" },
+        { value: "命令已经下发，等待设备回复", label: "已下发待确认" },
+        { value: "成功", label: "成功" },
+        { value: "失败", label: "失败" },
       ],
       commandTypeList: [
         { value: 1, label: "开启阀门" },
@@ -369,10 +374,15 @@ export default {
           })
           .then((response) => {
             if (response.code === 200) {
+              const statusMap = {
+                '等待通讯': '待设备上线下发',
+                '命令已经下发，等待设备回复': '已下发待确认',
+              };
               response.data.records.map((v, i) => {
                 v.theId = this.params.pageSize * (response.data.current - 1) + i + 1;
                 v.displayUserId = this.formatUserId(v.userId);
                 v.displayStaffName = v.sendStaffName || "";
+                v.commandStatus = statusMap[v.commandStatus] || v.commandStatus;
               });
               this.total = response.data.total;
               this.commandLogData = response.data.records;
@@ -409,6 +419,63 @@ export default {
         return;
       }
       this.getCommandLogsData();
+    },
+    exportExcel() {
+      const params = {
+        commandStatus: this.params.commandStatus,
+        commandType: this.params.commandType,
+        meterCode: this.params.meterCode,
+        userId: this.params.userId,
+        meterVendor: this.params.meterVendor,
+        companyId: this.getEffectiveCompanyId(),
+        sendTimeStartAt: this.params.time ? this.params.time[0] : null,
+        sendTimeEndAt: this.params.time ? this.params.time[1] : null,
+      };
+      const requestParams = Object.fromEntries(
+        Object.entries(params).filter(([_, value]) => value !== null && value !== "")
+      );
+      let token = "";
+      const userData = sessionStorage.getItem("userData");
+      if (userData) {
+        try {
+          token = JSON.parse(userData).token;
+        } catch (e) {
+          console.error("解析userData失败", e);
+        }
+      }
+      axios({
+        url: "/command/exportCommandRecord",
+        method: "POST",
+        responseType: "blob",
+        data: requestParams,
+        headers: {
+          Authorization: token,
+          token: token,
+        },
+      })
+        .then((response) => {
+          if (response.status !== 200) {
+            throw new Error("导出失败: " + response.statusText);
+          }
+          const blob = new Blob([response.data], {
+            type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+          });
+          if (blob.size === 0) {
+            ElMessage.warning("内容为空，无法下载");
+            return;
+          }
+          const link = document.createElement("a");
+          link.href = window.URL.createObjectURL(blob);
+          link.download = "命令记录列表.xlsx";
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          window.URL.revokeObjectURL(link.href);
+        })
+        .catch((error) => {
+          console.error("导出失败:", error);
+          ElMessage.error("导出失败: " + error.message);
+        });
     },
     handleUserInfo(row) {
       if (this.staffPermissionIds.includes(17)) {

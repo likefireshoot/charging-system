@@ -319,11 +319,11 @@ export default {
 
       // 警告配置参数展示
       configItems: [
-        { label: '大用量额度（吨）', key: 'amountQuota', displayValue: '' },
-        { label: '最大持续未上报天数（天）', key: 'delayDays', displayValue: '' },
-        { label: '最大每日上报次数', key: 'maxDailyReportTimes', displayValue: '' },
-        { label: '最大零用量天数', key: 'maxDaysWithoutUsage', displayValue: '' },
-        { label: '关阀读数增加警告天数', key: 'maxDaysAbnormalWater', displayValue: '' },
+        { label: '大用量预警吨数', key: 'amountQuota', displayValue: '' },
+        { label: '持续未上报预警天数', key: 'delayDays', displayValue: '' },
+        { label: '每日频繁上报预警次数', key: 'maxDailyReportTimes', displayValue: '' },
+        { label: '零用量预警天数', key: 'maxDaysWithoutUsage', displayValue: '' },
+        { label: '关阀读数增加预警天数', key: 'maxDaysAbnormalWater', displayValue: '' },
       ],
       configEditMode: false,
 

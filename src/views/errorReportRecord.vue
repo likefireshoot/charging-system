@@ -53,8 +53,7 @@
           <span>电量</span>
           <el-select v-model="params.battery" placeholder="请选择电量状态" clearable>
             <el-option label="正常" value="正常" />
-            <el-option label="低电" value="低电" />
-            <el-option label="无" value="无" />
+            <el-option label="异常" value="异常" />
           </el-select>
         </div>
         <div class="search-input" style="margin-left: 10px">

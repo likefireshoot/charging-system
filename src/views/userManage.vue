@@ -1,7 +1,7 @@
 <template>
   <div class="user-container">
     <div class="serach-box">
-      <template v-for="field in displayedFilterFields" :key="field.key">
+      <template v-for="field in availableFilterFields" :key="field.key">
         <div class="search-input">
           <span>{{ field.label }}</span>
           <el-select
@@ -26,35 +26,6 @@
           />
         </div>
       </template>
-
-      <el-popover
-        placement="bottom"
-        :width="220"
-        trigger="click"
-        v-model:visible="moreFiltersVisible"
-        popper-class="filter-popover"
-      >
-        <template #reference>
-          <div class="more-filter-btn">
-            <span>&nbsp;</span>
-            <el-button class="more-filter-trigger">
-              更多搜索项
-              <el-icon style="margin-left: 4px"><ArrowDown /></el-icon>
-            </el-button>
-          </div>
-        </template>
-        <div class="filter-popover-content">
-          <el-checkbox
-            v-for="field in availableFilterFields"
-            :key="field.key"
-            :model-value="visibleFilterKeys.includes(field.key)"
-            @change="(val) => toggleFilterField(field.key, val)"
-            :disabled="visibleFilterKeys.length >= maxVisibleFilters && !visibleFilterKeys.includes(field.key)"
-          >
-            {{ field.label }}
-          </el-checkbox>
-        </div>
-      </el-popover>
 
       <div class="buttons">
         <div class="sercah-btn" @click="search">
@@ -101,17 +72,17 @@
         <div class="command-btn" @click="valveOpen_dialogFormVisible = true"
              v-if="staffPermissionIds.includes(7)">
           <img src="@/assets/yonghu/icon18.png" alt="" />
-          <span>开阀设置</span>
+          <span>区域开阀设置</span>
         </div>
         <div class="command-btn" @click="valve_dialogFormVisible = true"
              v-if="staffPermissionIds.includes(8)">
           <img src="@/assets/yonghu/icon17.png" alt="" />
-          <span>关阀设置</span>
+          <span>区域关阀设置</span>
         </div>
         <div class="water-meter-record-btn" @click="post_pay_list_btn_click"
              v-if="staffPermissionIds.includes(11)">
           <img src="@/assets/yonghu/icon7.png" alt="" />
-          <span>后付费列表</span>
+          <span>欠费不关阀 (后付费) 列表</span>
         </div>
         <div class="water-meter-record-btn" @click="can_close_no_arrears_btn_click"
              v-if="staffPermissionIds.includes(11)">
@@ -187,10 +158,10 @@
             :header-cell-style="{ background: '#46B97E', color: '#FFFFFF' }" @selection-change="handleSelectionChange"
             id="yonghu-table">
             <el-table-column type="selection" :selectable="selectable" min-width="40" align="center" fixed="left" />
-            <el-table-column label="序号" width="73" align="center" fixed="left" #default="scope">
+            <el-table-column label="序号" width="65" align="center" fixed="left" #default="scope">
               {{ scope.$index + 1 + (currentPage - 1) * pageSize }}
             </el-table-column>
-            <el-table-column property="userId" label="用户号" min-width="95" align="center" fixed="left">
+            <el-table-column property="userId" label="用户号" min-width="115" align="center" fixed="left">
               <template #header="scope">
                 <div class="sortable-header" @click="toggleSort('userId')">
                   <span>{{ scope.column.label }}</span>
@@ -212,16 +183,16 @@
                 </span>
               </template>
             </el-table-column>
-            <el-table-column property="meterCode" label="表号" min-width="100" align="center" />
-            <el-table-column label="余额" min-width="70" align="center">
+            <el-table-column property="meterCode" label="表号" min-width="85" align="center" />
+            <el-table-column label="余额" min-width="90" align="center">
               <template #default="scope">
                 <span @click="handleYue(scope.row)"
                   style="color: #46b97e; display: block; width: 100%; text-align: center">{{ scope.row.balance }}</span>
               </template></el-table-column>
-            <el-table-column property="newReading" label="读数" min-width="70" align="center" />
-            <el-table-column property="valveStatus" label="阀门" min-width="70" align="center" />
-            <el-table-column property="battery" label="电量" min-width="70" align="center" />
-            <el-table-column label="抄表时间" min-width="100" align="center">
+            <el-table-column property="newReading" label="读数" min-width="90" align="center" />
+            <el-table-column property="valveStatus" label="阀门" min-width="45" align="center" />
+            <el-table-column property="battery" label="电量" min-width="45" align="center" />
+            <el-table-column label="抄表" min-width="105" align="center">
               <template #header="scope">
                 <div class="sortable-header" @click="toggleSort('time')">
                   <span>{{ scope.column.label }}</span>
@@ -239,7 +210,7 @@
             </el-table-column>
             <!-- <el-table-column property="imei" label="IMEI号" width="280" align="center" /> -->
 <!--            <el-table-column property="meterType" label="表类型" min-width="70" align="center" />-->
-            <el-table-column property="meterVendor" label="厂商" min-width="70" align="center" />
+            <el-table-column property="meterVendor" label="厂商" min-width="65" align="center" />
             <el-table-column property="priceName" label="价格" min-width="90" align="center">
               <template #default="scope">
     <span
@@ -262,11 +233,11 @@
                 <span v-else>{{ scope.row.smsConfigName }}</span>
               </template>
             </el-table-column>
-             <el-table-column property="companyName" label="水厂" width="90" align="center" />
+             <el-table-column property="companyName" label="水厂" width="85" align="center" />
             <el-table-column property="userAddr" label="地址" min-width="90" align="center" />
             <!-- <el-table-column property="companyName" label="所属水厂" width="280" align="center" /> -->
-            <el-table-column property="regionName" label="区域" min-width="70" align="center" />
-            <el-table-column property="phone" label="联系电话" min-width="100" align="center" />
+            <el-table-column property="regionName" label="区域" min-width="65" align="center" />
+            <el-table-column property="phone" label="电话" min-width="70" align="center" />
 <!--            <el-table-column property="meterVendor" label="水表品牌" min-width="100" align="center" />-->
             <!-- <el-table-column property="approver1" label="开户审批人1" width="180" align="center" />
             <el-table-column property="approver2" label="开户审批人2" width="180" align="center" />
@@ -791,8 +762,8 @@ export default {
       featureButtonConfigs: [
         { key: 'delete', label: '删除', permission: 6 },
         { key: 'command', label: '命令下发', permission: null },
-        { key: 'valveOpen', label: '开阀设置', permission: 7 },
-        { key: 'valveClose', label: '关阀设置', permission: 8 },
+        { key: 'valveOpen', label: '区域开阀设置', permission: 7 },
+        { key: 'valveClose', label: '区域关阀设置', permission: 8 },
         { key: 'balance', label: '余额调整', permission: 9 },
         { key: 'recharge', label: '充值', permission: 10 },
         { key: 'changeMeter', label: '换表', permission: 13 },
@@ -809,7 +780,7 @@ export default {
         { key: 'commonMeterImport', label: '普表用水量信息导入', permission: null, defaultVisible: false },
         { key: 'batchPause', label: '停户', permission: 11 },
         { key: 'batchClose', label: '销户', permission: 11 },
-        { key: 'postPayList', label: '后付费列表', permission: 11 },
+        { key: 'postPayList', label: '欠费不关阀 (后付费) 列表', permission: 11 },
         { key: 'canCloseNoArrears', label: '不欠费可关阀列表', permission: 11 },
       ],
 
@@ -844,10 +815,6 @@ export default {
         { key: "battery", label: "电量", type: "select", clearable: true, options: [{ label: "正常", value: "正常" }, { label: "异常", value: "异常" }] },
         { key: "valveStatus", label: "阀门", type: "select", clearable: true, options: [{ label: "开阀", value: "开阀" }, { label: "关阀", value: "关阀" }, { label: "故障", value: "故障" }] },
       ],
-      visibleFilterKeys: [],
-      maxVisibleFilters: 8,
-      moreFiltersVisible: false,
-
       batchPauseDialogVisible: false,
       batchCloseDialogVisible: false,
       batchLoading: false,
@@ -898,23 +865,10 @@ export default {
         return true;
       });
     },
-    displayedFilterFields() {
-      return this.availableFilterFields
-        .filter((f) => this.visibleFilterKeys.includes(f.key))
-        .slice(0, this.maxVisibleFilters);
-    },
     hasPauseUserSelected() {
       // 判断选中项中是否存在暂停用户 isPause === 1
       return this.multipleSelection.some(row => row.isPause === 1)
     },
-  },
-  created() {
-    const allKeys = this.filterFieldConfigs
-      .filter((f) => f.key !== "company" || this.companyId === 1)
-      .filter((f) => f.defaultVisible !== false)
-      .filter((f) => !(this.companyId === 1 && f.key === "battery"))
-      .map((f) => f.key);
-    this.visibleFilterKeys = [...allKeys];
   },
   mounted() {
     this.$nextTick(() => {
@@ -1092,17 +1046,6 @@ export default {
         return (this.shuibiao_list || []).map((item) => ({ label: item.label, value: item.label }));
       }
       return [];
-    },
-    toggleFilterField(key, checked) {
-      if (checked) {
-        if (this.visibleFilterKeys.length >= this.maxVisibleFilters) return;
-        const configKeys = this.availableFilterFields.map((f) => f.key);
-        const newKeys = [...this.visibleFilterKeys, key];
-        newKeys.sort((a, b) => configKeys.indexOf(a) - configKeys.indexOf(b));
-        this.visibleFilterKeys = newKeys;
-      } else {
-        this.visibleFilterKeys = this.visibleFilterKeys.filter((k) => k !== key);
-      }
     },
     // ****** 手动处理分页变化，避免 watch 循环 ******
     handlePageChange(page) {
