@@ -662,7 +662,7 @@ const slide = ref(true);
   flex-direction: column;
   box-sizing: border-box;
   .inBox {
-    width: 250px;
+    width: 240px;
   }
   .inBox2 {
     width: 100px;
@@ -734,7 +734,7 @@ const slide = ref(true);
       margin-right: 8px;
     }
     p {
-      font-size: 16px;
+      font-size: 15px;
       color: #585657;
     }
   }
