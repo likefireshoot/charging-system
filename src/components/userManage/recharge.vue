@@ -379,7 +379,10 @@ export default {
         meterCode: formData.meterCode,
         rechargeType: formData.rechargeType,
         rechargeAmount: rechargeAmount,
-        region: formData.region
+        region: formData.region,
+        userId: this.data.userId,
+        imei: this.data.imei,
+        companyId: this.data.companyId,
       };
 
       // 弹出确认提示框，不再直接请求接口

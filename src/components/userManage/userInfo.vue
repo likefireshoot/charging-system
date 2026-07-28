@@ -550,6 +550,9 @@ export default {
       try {
         const form = {
           imei: this.userInfoData.imei,
+          userId: this.userInfoData.userId,
+          companyId: this.userInfoData.companyId,
+          meterCode: this.userInfoData.meterCode,
           staffId: this.$store.state.userData.staffId
         };
         const res = await service.post("/userManage/userCharge/pauseMeter", form);
@@ -579,6 +582,9 @@ export default {
       try {
         const form = {
           imei: this.userInfoData.imei,
+          userId: this.userInfoData.userId,
+          companyId: this.userInfoData.companyId,
+          meterCode: this.userInfoData.meterCode,
           staffId: this.$store.state.userData.staffId
         };
         const res = await service.post("/userManage/userCharge/resumeMeter", form);
@@ -607,6 +613,9 @@ export default {
       this.loading = true;
       const form = {
         imei: this.userInfoData.imei,
+        userId: this.userInfoData.userId,
+        companyId: this.userInfoData.companyId,
+        meterCode: this.userInfoData.meterCode,
         staffId: this.$store.state.userData.staffId
       };
       service.post("/userManage/userCharge/cancelUserMeter", form).then(res => {
@@ -643,6 +652,9 @@ export default {
       }
       const form = {
         imei: this.userInfoData.imei,
+        userId: this.userInfoData.userId,
+        companyId: this.userInfoData.companyId,
+        meterCode: this.userInfoData.meterCode,
         staffId: this.$store.state.userData.staffId
       };
       service.post("/userManage/userCharge/cancelRefund", form).then(res => {
