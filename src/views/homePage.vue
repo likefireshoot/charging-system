@@ -66,24 +66,17 @@
             </div>
           </div>
           <div class="shebei-warning-item">
-            <img src="@/assets/shouye/icon2.png" @click="toWarnPath('水表0用量用户')" alt="" />
-            <div class="shebei-warning-item-text">
-              <span style="font-size: 20px">近期0用水用户</span>
-              <span class="warn-num-text" style="font-size: 20px; font-family: 'Microsoft YaHei'; font-weight: bold; margin-top: 5px" @click="toWarnPath('水表0用量用户')">{{ shebeiWarning.zerouserL }}</span>
-            </div>
-          </div>
-          <div class="shebei-warning-item">
-            <img src="@/assets/shouye/icon3.png" @click="toWarnPath('水表大用量用户')" alt="" />
-            <div class="shebei-warning-item-text">
-              <span style="font-size: 20px">大用水量用户</span>
-              <span class="warn-num-text" style="font-size: 20px; font-family: 'Microsoft YaHei'; font-weight: bold; margin-top: 5px" @click="toWarnPath('水表大用量用户')">{{ shebeiWarning.dayongliang }}</span>
-            </div>
-          </div>
-          <div class="shebei-warning-item">
             <img src="@/assets/shouye/icon4.png" @click="toWarnPath('数据长时间未上报')" alt="" />
             <div class="shebei-warning-item-text">
               <span style="font-size: 20px">数据持续未上报</span>
               <span class="warn-num-text" style="font-size: 20px; font-family: 'Microsoft YaHei'; font-weight: bold; margin-top: 5px" @click="toWarnPath('数据长时间未上报')">{{ shebeiWarning.weishangbao }}</span>
+            </div>
+          </div>
+          <div class="shebei-warning-item">
+            <img src="@/assets/shouye/icon8.png" @click="toWarnPath('关阀状态读数增加')" alt="" />
+            <div class="shebei-warning-item-text">
+              <span style="font-size: 20px">关阀状态读数增加</span>
+              <span class="warn-num-text" style="font-size: 20px; font-family: 'Microsoft YaHei'; font-weight: bold; margin-top: 5px" @click="toWarnPath('关阀状态读数增加')">{{ shebeiWarning.abnormalWaterCount }}</span>
             </div>
           </div>
           <div class="shebei-warning-item">
@@ -93,12 +86,20 @@
               <span class="warn-num-text" style="font-size: 20px; font-family: 'Microsoft YaHei'; font-weight: bold; margin-top: 5px" @click="toWarnPath('设备异常')">{{ shebeiWarning.shebeiyichang }}</span>
             </div>
           </div>
-           <div class="shebei-warning-item">
-            <img src="@/assets/shouye/icon8.png" @click="toWarnPath('关阀状态读数增加')" alt="" />
+          <div class="shebei-warning-item">
+            <img src="@/assets/shouye/icon2.png" @click="toWarnPath('水表0用量用户')" alt="" />
             <div class="shebei-warning-item-text">
-              <span style="font-size: 20px">关阀状态读数增加</span>
-              <span class="warn-num-text" style="font-size: 20px; font-family: 'Microsoft YaHei'; font-weight: bold; margin-top: 5px" @click="toWarnPath('关阀状态读数增加')">{{ shebeiWarning.abnormalWaterCount }}</span>
-              <span style="font-size: 16px; color: #999;">(漏水用户数，非告警数)</span>
+              <span style="font-size: 20px">近期0用水用户</span>
+              <span class="warn-num-text" style="font-size: 20px; font-family: 'Microsoft YaHei'; font-weight: bold; margin-top: 5px" @click="toWarnPath('水表0用量用户')">{{ shebeiWarning.zerouserL }}</span>
+              <span style="font-size: 16px; color: #999;">（该类型不计入预警表数）</span>
+            </div>
+          </div>
+          <div class="shebei-warning-item">
+            <img src="@/assets/shouye/icon3.png" @click="toWarnPath('水表大用量用户')" alt="" />
+            <div class="shebei-warning-item-text">
+              <span style="font-size: 20px">大用水量用户</span>
+              <span class="warn-num-text" style="font-size: 20px; font-family: 'Microsoft YaHei'; font-weight: bold; margin-top: 5px" @click="toWarnPath('水表大用量用户')">{{ shebeiWarning.dayongliang }}</span>
+              <span style="font-size: 16px; color: #999;">（该类型不计入预警表数）</span>
             </div>
           </div>
         </div>
@@ -993,7 +994,7 @@ export default {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  margin-left: 15%;
+  margin-left: 10%;
 }
 
 .month-year-report {
