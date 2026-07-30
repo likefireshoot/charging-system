@@ -2,13 +2,13 @@
 <template>
   <div class="jinggao-container">
     <div class="serach-box">
-      <div class="search-input" style="margin-left: 10px" v-if="companyId === 1">
+      <div class="search-input" v-if="companyId === 1">
         <span>所属水厂</span>
         <el-select  class="big-font-el-select" v-model="params.company" placeholder="请选择所属水厂">
           <el-option v-for="item in companyList" :key="item.id" :value="item.id" :label="item.name"></el-option>
         </el-select>
       </div>
-      <div class="search-input" style="margin-left: 10px">
+      <div class="search-input">
         <span>警告类型</span>
         <el-select class="big-font-el-select" v-model="params.warningType" @change="onWarningTypeChange">
           <el-option label="欠费用户" value="欠费用户"></el-option>
@@ -24,7 +24,7 @@
         <span>用户号</span>
         <el-input v-model="params.userId" placeholder="请输入..." />
       </div>
-      <div class="search-input" style="margin-left: 10px">
+      <div class="search-input">
         <span>用户名称</span>
         <el-input v-model="params.userName" placeholder="请输入..." />
       </div>
@@ -41,6 +41,7 @@
         <el-select class="big-font-el-select" v-model="params.valveStatus">
           <el-option label="开阀" value="开阀"></el-option>
           <el-option label="关阀" value="关阀"></el-option>
+          <el-option label="故障" value="故障"></el-option>
         </el-select>
       </div>
       <div class="search-input">
@@ -51,7 +52,7 @@
         </el-select>
       </div>
       <div class="search-input">
-        <span>厂商</span>
+        <span>品牌</span>
         <el-select class="big-font-el-select" v-model="params.meterVendor" clearable placeholder="请选择">
           <el-option label="圣鑫" value="圣鑫"></el-option>
           <el-option label="旧圣鑫" value="旧圣鑫"></el-option>
@@ -67,11 +68,11 @@
       <div class="buttons">
         <div class="sercah-btn" @click="getWaringData">
           <img src="@/assets/yonghu/icon16.png" alt="" style="margin-left: 12px" />
-          <span style="font-size: 20px; margin-left: 10px">搜索</span>
+          <span style="font-size: 18px; margin-left: 10%">搜索</span>
         </div>
         <div class="clear-btn" @click="clear">
           <img src="@/assets/yonghu/icon4.png" alt="" style="margin-left: 12px" />
-          <span style="font-size: 20px; margin-left: 10px; color: #5a5a5a">清空</span>
+          <span style="font-size: 18px; margin-left: 10%; color: #5a5a5a">清空</span>
         </div>
       </div>
     </div>
@@ -96,7 +97,7 @@
         </div>
         <div class="export-out-btn" style="margin-left: 10px" @click="exportExcel">
           <img src="@/assets/yonghu/icon1.3.png" alt="" style="margin-left: 7px" />
-          <span style="font-size: 20px; margin-left: 10px; color: #5a5a5a">导出</span>
+          <span style="font-size: 18px; margin-left: 10px; color: #5a5a5a">导出</span>
         </div>
         <div class="reflush" style="margin-left: 10px" @click="reflush">
           <img src="@/assets/yonghu/icon15.png" alt="" />
@@ -104,7 +105,7 @@
       </div>
       <div class="jinggao-list">
         <div class="quyu-box">
-          <el-input v-model="filterText" placeholder="请输入关键字进行过滤" style="height: 32px; margin-bottom: 10px" />
+          <el-input v-model="filterText" placeholder="请输入关键字检索" style="height: 32px; margin-bottom: 10px" />
           <el-tree
             ref="treeRef"
             style="max-width: 600px"
@@ -144,7 +145,7 @@
             <el-table-column property="regionName" label="区域" :width="quyuWidth" align="center" />
             <el-table-column property="userAddr" label="地址" :width="addressWidth" align="center" />
             <el-table-column property="userPhone" label="电话" :width="phoneWidth" align="center" />
-            <el-table-column property="meterVendor" label="厂商" :width="deviceVendorWidth" align="center" />
+            <el-table-column property="meterVendor" label="品牌" :width="deviceVendorWidth" align="center" />
             <el-table-column property="companyName" label="水厂" :width="companyWidth" align="center" />
 <!--            <el-table-column property="meterCode" label="表号" :width="biaohaoWidth" align="center" />-->
             <!-- <el-table-column property="imei" label="IMEI号" :width="imeihaoWidth" align="center" /> -->
@@ -507,9 +508,9 @@ export default {
           biaohao: 5,
           deviceVendor: 5,
           company: 6,
-          deviceValve: 4,
-          deviceBattery: 4,
-          warningTime: 8,
+          deviceValve: 4.5,
+          deviceBattery: 4.5,
+          warningTime: 7,
           warningType: 7,
           totalWater: 7,
           amount: 6,
@@ -1264,7 +1265,6 @@ export default {
   height: 40px;
   line-height: 40px;
   border-radius: 5px;
-  margin: 0 10px;
 }
 
 /* 设置鼠标滑过选项时的字体颜色 */
@@ -1277,9 +1277,9 @@ export default {
   flex-direction: column;
   align-content: center;
   justify-content: center;
-  width: 100%;
-  height: 98%;
-  padding: 0px 20px;
+  min-width: 94%;
+  height: 100%;
+  padding: 0px 15px;
 }
 
 .jinggao-container > * {
@@ -1291,7 +1291,7 @@ export default {
 }
 
 .serach-box {
-  margin-top: 10px;
+  margin-top: 5px;
   margin-bottom: 10px;
   height: 98px;
   display: flex;
@@ -1306,11 +1306,11 @@ export default {
   flex-direction: column;
   width: 9%;
   height: 100%;
-  margin-right: 20px;
+  margin-right: 10px;
 }
 
 .search-input > span {
-  font-size: 20px;
+  font-size: 18px;
   margin-bottom: 5px;
 }
 
@@ -1326,17 +1326,16 @@ export default {
 
 .buttons {
   display: flex;
-  width: 240px;
+  width: 220px;
   height: 100%;
   align-items: center;
   position: absolute;
-  right: 20px;
-  margin-right: 30px;
+  right: 10px;
 }
 
 .buttons > * {
-  width: 120px;
-  margin-right: 50px;
+  width: 100px;
+  margin-right: 10px;
 }
 
 .sercah-btn,
@@ -1361,7 +1360,6 @@ export default {
 
 .jinggao-info {
   height: calc(100% - 120px);
-  margin-bottom: 0px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1369,18 +1367,26 @@ export default {
   position: relative;
 }
 
+
+.jinggao-info {
+  padding: 0px 10px;
+  border: 1px solid #e9e9e9;
+  border-radius: 5px;
+  width: 99.3%;
+  background-color: #fff;
+}
+
 .command-box {
   display: flex;
   align-items: center;
-  width: 100%;
+  width: 99%;
   height: 40px;
-  margin-bottom: 20px;
   position: absolute;
-  top: 15px;
+  top: 10px;
 }
 
 .command-box > * {
-  margin-right: 20px;
+  margin-right: 10px;
 }
 
 .config-display {
@@ -1388,7 +1394,7 @@ export default {
   align-items: center;
   gap: 15px;
   flex-wrap: wrap;
-  padding-left: 30px;
+  padding-left: 15px;
 }
 
 .config-item {
@@ -1398,14 +1404,14 @@ export default {
 }
 
 .config-label {
-  font-size: 20px;
+  font-size: 18px;
   color: #575556;
   white-space: nowrap;
 }
 
 .config-input {
   width: 65px;
-  font-size: 20px;
+  font-size: 18px;
 }
 
 .config-input-editable :deep(.el-input__inner) {
@@ -1417,11 +1423,11 @@ export default {
 
 .config-checkbox {
   white-space: nowrap;
-  font-size: 20px;
+  font-size: 18px;
 }
 
 :deep(.config-checkbox .el-checkbox__label) {
-  font-size: 20px;
+  font-size: 18px;
 }
 
 .config-confirm-btn {
@@ -1429,12 +1435,12 @@ export default {
   align-items: center;
   justify-content: center;
   height: 35px;
-  padding: 0 20px;
+  padding: 0 15px;
   background-color: #45ba7e;
   color: #fff;
   border-radius: 5px;
   cursor: pointer;
-  font-size: 20px;
+  font-size: 18px;
   white-space: nowrap;
   transition: all 0.3s;
 }
@@ -1470,7 +1476,7 @@ export default {
   align-items: center;
   justify-content: center;
   width: 35px; /* 设置按钮的宽度 */
-  height: 32px; /* 设置按钮的高度 */
+  height: 35px; /* 设置按钮的高度 */
   color: white;
   border-radius: 5px;
   cursor: pointer;
@@ -1482,14 +1488,13 @@ export default {
 
 .jinggao-list {
   width: 100%;
-  height: calc(100% - 150px);
+  height: calc(100% - 110px);
   display: flex;
-  margin-top: 10px;
-  margin-bottom: 5px;
+  margin-top: 8px;
 }
 
 .quyu-box {
-  width: 220px;
+  width: 170px;
   height: 100%;
   display: flex;
   flex-direction: column;
@@ -1497,6 +1502,7 @@ export default {
   background-color: #fafafa;
   border-radius: 5px;
   padding: 10px;
+  margin-right: 10px;
 }
 
 .quyu-box > * {
@@ -1514,7 +1520,7 @@ export default {
 
 .jinggao-table {
   flex: 1;
-  height: calc(100% - 10px);
+  height: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -1523,13 +1529,16 @@ export default {
 
 .page-box {
   width: 100%;
-  height: 65px;
+  height: 40px;
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-top: 5px;
   position: absolute;
   bottom: 0;
+  pointer-events: none;
+}
+.page-box > * {
+  pointer-events: auto;
 }
 
 .add-dialog {
@@ -1678,5 +1687,17 @@ export default {
       color: white;
     }
   }
+}
+</style>
+
+<style scoped>
+:deep(.el-input__inner) {
+  font-size: 16px !important;
+}
+:deep(.el-select__wrapper .el-select__placeholder) {
+  font-size: 16px !important;
+}
+:deep(.el-select__wrapper .el-select__selected-item) {
+  font-size: 16px !important;
 }
 </style>

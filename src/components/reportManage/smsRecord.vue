@@ -2,27 +2,27 @@
   <div class="tongzhi-container">
     <div class="search-box">
       <div class="search-content">
-        <div class="search-input" style="margin-left: 10px" v-if="companyId === 1">
+        <div class="search-input" v-if="companyId === 1">
           <span>所属水厂</span>
           <el-select v-model="params.company" placeholder="请选择所属水厂">
             <el-option v-for="item in companyList" :key="item.id" :value="item.id" :label="item.name"></el-option>
           </el-select>
         </div>
-        <div class="search-input" style="margin-left: 10px">
+        <div class="search-input">
           <span>所属区域</span>
           <el-select v-model="params.regionName" placeholder="请选择...">
             <el-option v-for="item in quyu_data" :key="item.id" :label="item.label" :value="item.label"> </el-option>
           </el-select>
         </div>
-        <div class="search-input" style="margin-left: 10px">
+        <div class="search-input">
           <span>用户号</span>
           <el-input v-model="params.userId" placeholder="请输入..." />
         </div>
-        <div class="search-input" style="margin-left: 10px">
+        <div class="search-input">
           <span>用户名称</span>
           <el-input v-model="params.userName" placeholder="请输入..." />
         </div>
-        <div class="search-input" style="margin-left: 10px">
+        <div class="search-input">
           <span>表号</span>
           <el-input v-model="params.meterCode" type="number" placeholder="请输入..." />
         </div>
@@ -30,7 +30,7 @@
           <span>IMEI号</span>
           <el-input v-model="params.imei" placeholder="请输入..." />
         </div> -->
-        <div class="search-input" style="width: 37%; margin-left: 10px">
+        <div class="search-input" style="width: 28%;">
           <span>时间</span>
           <div class="time-input">
             <el-date-picker
@@ -55,12 +55,12 @@
       </div>
       <div class="buttons">
         <div class="sercah-btn" @click="search">
-          <img src="@/assets/yonghu/icon16.png" alt="" style="margin-left: 8px" />
-          <span style="font-size: 20px; margin-left: 15%">搜索</span>
+          <img src="@/assets/yonghu/icon16.png" alt="" style="margin-left: 10px" />
+          <span style="margin-left: 10%">搜索</span>
         </div>
         <div class="clear-btn" @click="clear">
           <img src="@/assets/tongzhi/icon4.png" alt="" style="margin-left: 10px" />
-          <span style="font-size: 20px; margin-left: 15%; color: #5a5a5a">清空</span>
+          <span style="margin-left: 10%; color: #5a5a5a">清空</span>
         </div>
       </div>
     </div>
@@ -71,11 +71,11 @@
           <span style="font-size: 16px; margin-left: 10px; color: #5a5a5a">导入</span>
           <input ref="fileInput" type="file" accept=".xls,.xlsx" style="display: none" @change="exportIn" />
         </div> -->
-        <div class="export-out-btn" style="margin-left: 10px" @click="exportExcel">
-          <img src="@/assets/yonghu/icon1.3.png" alt="" style="margin-left: 7px" />
-          <span style="font-size: 20px; margin-left: 10px; color: #5a5a5a">导出</span>
+        <div class="export-out-btn" @click="exportExcel">
+          <img src="@/assets/yonghu/icon1.3.png" alt="" />
+          <span style="margin-left: 6px; color: #5a5a5a">导出</span>
         </div>
-        <div class="reflush" style="margin-left: 10px" @click="reflush">
+        <div class="reflush" @click="reflush">
           <img src="@/assets/yonghu/icon15.png" alt="" />
         </div>
       </div>
@@ -84,7 +84,7 @@
           ref="multipleTableRef"
           :data="smsData"
           row-key="smsRecordId"
-          style="width: 98%; height: 100%; table-layout: fixed; overflow-x: auto; overflow-y: auto"
+          style="height: 100%; table-layout: fixed; overflow-x: auto; overflow-y: auto"
           border
           :header-cell-style="{ background: '#46B97E', color: '#FFFFFF' }"
           @selection-change="handleSelectionChange"
@@ -95,16 +95,16 @@
           <!-- <el-table-column label="序号" width="120" align="center" fixed="left" #default="scope">
             {{ scope.$index + 1 + (params.pageNo - 1) * params.pageSize }}
           </el-table-column> -->
-          <el-table-column property="userId" label="用户号" min-width="50" align="center" fixed="left" />
+          <el-table-column property="userId" label="用户号" min-width="60" align="center" fixed="left" />
           <el-table-column property="userName" label="用户名称" min-width="70" align="center" />
           <el-table-column property="userPhone" label="联系电话" min-width="70" align="center" />
           <el-table-column property="meterCode" label="表号" min-width="100" align="center" />
           <!-- <el-table-column property="imei" label="IMEI号" width="240" align="center" /> -->
-          <el-table-column property="balance" label="当前余额/元" min-width="70" align="center" />
-          <el-table-column property="monthlyWaterCosts" label="本月用水量/吨" min-width="70" align="center" />
-          <el-table-column property="monthlyMoneyCosts" label="本月消费金额/元" min-width="70" align="center" />
-          <el-table-column property="arrears" label="欠费金额/元" min-width="70" align="center" />
-          <el-table-column property="minimumBalanceThreshold" label="余额不足触发值/元" min-width="70" align="center" />
+          <el-table-column property="balance" label="当前余额" min-width="70" align="center" />
+          <el-table-column property="monthlyWaterCosts" label="本月用水量" min-width="70" align="center" />
+          <el-table-column property="monthlyMoneyCosts" label="本月消费金额" min-width="70" align="center" />
+          <el-table-column property="arrears" label="欠费金额" min-width="70" align="center" />
+          <el-table-column property="minimumBalanceThreshold" label="余额不足触发值" min-width="70" align="center" />
           <el-table-column property="createTime" label="短信发送时间" min-width="120" align="center" />
           <el-table-column property="regionName" label="所属区域" min-width="80" align="center" />
           <el-table-column property="companyName" label="所属水厂" min-width="70" align="center" />
@@ -535,15 +535,15 @@ export default {
   flex-direction: column;
   align-content: center;
   justify-content: center;
-  width: 100%;
-  height: 98%;
-  padding: 0px 20px;
+  min-width: 94%;
+  height: 100%;
+  padding: 0px 15px;
 }
 
 .search-box {
-  margin-top: 15px;
-  margin-bottom: 20px;
-  width: 100%;
+  margin-top: 5px;
+  margin-bottom: 10px;
+  width: 99.3%;
   height: 98px;
   display: flex;
   align-items: center;
@@ -551,6 +551,7 @@ export default {
   border: 1px solid #e9e9e9;
   border-radius: 5px;
   background-color: #fff;
+  padding: 0 10px;
 }
 
 .search-content {
@@ -569,7 +570,7 @@ export default {
 }
 
 .search-input > span {
-  font-size: 20px;
+  font-size: 18px;
   margin-bottom: 5px;
 }
 
@@ -578,27 +579,26 @@ export default {
 }
 
 .time-input > span {
-  font-size: 14px;
+  font-size: 18px;
   margin-bottom: 5px;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 20px;
+  width: 18px;
   height: 100%;
   margin-right: 5px;
 }
 
 .buttons {
   display: flex;
-  width: 240px;
+  width: 220px;
   height: 100%;
   align-items: center;
-  margin-left: 100px;
-  margin-right: 30px;
 }
 
 .buttons > * {
-  width: 120px;
+  width: 100px;
+  margin-right: 10px;
 }
 
 .sercah-btn,
@@ -610,21 +610,21 @@ export default {
   cursor: pointer;
   transition: all 0.3s;
   color: #fff;
+  font-size: 18px;
 }
 
 .sercah-btn {
   background-color: #45ba7e;
-  margin-right: 30px;
 }
 .clear-btn {
   background-color: #fff;
   border: 2px solid #f2f2f2;
-  margin-right: 10px;
+  margin-right: 0;
 }
 
 .tongzhi-info {
-  width: 100%;
-  height: calc(100% - 135px);
+  width: 99.3%;
+  height: calc(100% - 120px);
   margin-bottom: 0px;
   display: flex;
   flex-direction: column;
@@ -633,34 +633,35 @@ export default {
   border-radius: 5px;
   background-color: #fff;
   position: relative;
+  padding: 0 10px;
 }
 
 .command-box {
   display: flex;
   align-items: center;
   width: 100%;
-  height: 40px;
-  margin-top: 15px;
-  margin-bottom: 15px;
+  height: auto;
+  margin-top: 10px;
 }
 
 .command-box > * {
-  margin-right: 20px;
+  margin-right: 10px;
 }
 
 .export-in-btn,
 .export-out-btn {
   display: flex;
   align-items: center;
-  width: 90px; /* 设置按钮的宽度 */
+  width: 70px; /* 设置按钮的宽度 */
   height: 35px; /* 设置按钮的高度 */
   color: white;
   border-radius: 5px;
   cursor: pointer;
   transition: all 0.3s;
-  font-size: 14px;
+  font-size: 18px;
   background-color: #fff;
   border: 2px solid #f2f2f2;
+  padding: 0 8px;
 }
 
 .reflush {
@@ -668,12 +669,12 @@ export default {
   align-items: center;
   justify-content: center;
   width: 35px; /* 设置按钮的宽度 */
-  height: 32px; /* 设置按钮的高度 */
+  height: 35px; /* 设置按钮的高度 */
   color: white;
   border-radius: 5px;
   cursor: pointer;
   transition: all 0.3s;
-  font-size: 14px;
+  font-size: 18px;
   background-color: #fff;
   border: 2px solid #f2f2f2;
 }
@@ -687,11 +688,12 @@ export default {
 }
 
 .tongzhi-table {
-  height: calc(98% - 110px);
+  height: calc(100% - 100px);
+  margin-top: 8px;
 }
 
 .page-box {
-  height: 65px;
+  height: 40px;
   position: absolute;
   bottom: 0;
 }
@@ -725,5 +727,17 @@ export default {
 .cancel-btn {
   background-color: #fff;
   margin-right: 5%;
+}
+</style>
+
+<style scoped>
+:deep(.el-input__inner) {
+  font-size: 16px !important;
+}
+:deep(.el-select__wrapper .el-select__placeholder) {
+  font-size: 16px !important;
+}
+:deep(.el-select__wrapper .el-select__selected-item) {
+  font-size: 16px !important;
 }
 </style>

@@ -2,19 +2,19 @@
   <div class="yuangong-container">
     <div class="search-box">
       <div class="search-content">
-        <div class="search-input" style="margin-left: 20px">
+        <div class="search-input">
           <span>历史数据日期</span>
           <el-date-picker v-model="params.queryDate" type="date" placeholder="选择日期" style="flex-grow: 0; width: 100%; height: 35px" format="YYYY-MM-DD" value-format="YYYY-MM-DD" />
         </div>
       </div>
       <div class="buttons" >
         <div class="sercah-btn" @click="search">
-          <img src="@/assets/yonghu/icon16.png" alt="" style="margin-left: 8px" />
-          <span style="font-size: 20px; margin-left: 15%">搜索</span>
+          <img src="@/assets/yonghu/icon16.png" alt="" style="margin-left: 10px" />
+          <span style="margin-left: 10%">搜索</span>
         </div>
         <div class="clear-btn" @click="clear">
           <img src="@/assets/yuangong/icon4.png" alt="" style="margin-left: 10px" />
-          <span style="font-size: 20px; margin-left: 15%; color: #5a5a5a">清空</span>
+          <span style="margin-left: 10%; color: #5a5a5a">清空</span>
         </div>
       </div>
     </div>
@@ -104,7 +104,7 @@ export default {
       return {
         index: 8,
         meterCode: 16,
-        userName: 13,
+        userName: 15,
         userId: 16,
         rechargeRecord: 15,
         chargeRecord: 15,
@@ -123,7 +123,7 @@ export default {
     if (this.parentContainer) {
       this.resizeObserver.observe(this.parentContainer);
     }
-    this.getHistoryData();
+    // this.getHistoryData();
     this.userData = sessionStorage.getItem("userData");
     console.log(this.userData);
   },
@@ -358,22 +358,23 @@ export default {
   flex-direction: column;
   align-content: center;
   justify-content: center;
-  width: 100%;
-  height: 98%;
-  padding: 0px 20px;
+  min-width: 94%;
+  height: 100%;
+  padding: 0px 15px;
 }
 
 .search-box {
-  margin-top: 15px;
-  margin-bottom: 20px;
-  width: 100%;
-  height: 112px;
+  margin-top: 5px;
+  margin-bottom: 10px;
+  width: 99.3%;
+  height: 98px;
   display: flex;
   align-items: center;
   justify-content: space-around; /* 每个元素两侧的间隔相等 */
   border: 1px solid #e9e9e9;
   border-radius: 5px;
   background-color: #fff;
+  padding: 0 10px;
 }
 
 .search-content {
@@ -386,9 +387,9 @@ export default {
   display: flex;
   justify-content: center; /* 确保子元素在父容器中垂直居中 */
   flex-direction: column;
-  width: 25%;
+  width: 18%;
   height: 100%;
-  margin-right: 20px;
+  margin-right: 10px;
 }
 
 .search-input > span {
@@ -410,14 +411,14 @@ export default {
 
 .buttons {
   display: flex;
-  width: 260px;
+  width: 220px;
   height: 100%;
   align-items: center;
-  margin-left: 100px;
 }
 
 .buttons > * {
-  width: 120px;
+  width: 100px;
+  margin-right: 10px;
 }
 
 .sercah-btn,
@@ -429,21 +430,21 @@ export default {
   cursor: pointer;
   transition: all 0.3s;
   color: #fff;
+  font-size: 18px;
 }
 
 .sercah-btn {
   background-color: #45ba7e;
-  margin-right: 50px;
 }
 .clear-btn {
   background-color: #fff;
   border: 2px solid #f2f2f2;
-  margin-right: 10px;
+  margin-right: 0;
 }
 
 .yuangong-info {
-  width: 100%;
-  height: calc(100% - 150px);
+  width: 99.3%;
+  height: calc(100% - 120px);
   margin-bottom: 0px;
   display: flex;
   flex-direction: column;
@@ -452,19 +453,19 @@ export default {
   border-radius: 5px;
   background-color: #fff;
   position: relative;
+  padding: 0 10px;
 }
 
 .command-box {
   display: flex;
   align-items: center;
   width: 100%;
-  height: 40px;
-  margin-top: 15px;
-  margin-bottom: 10px;
+  height: auto;
+  margin-top: 10px;
 }
 
 .command-box > * {
-  margin-right: 20px;
+  margin-right: 10px;
 }
 
 .yuangong-table,
@@ -476,14 +477,26 @@ export default {
 }
 
 .yuangong-table {
-  margin-top: 15px;
-  height: calc(98% - 60px);
+  margin-top: 8px;
+  height: calc(100% - 60px);
 }
 
 .page-box {
-  height: 65px;
+  height: 40px;
   position: absolute;
   bottom: 0;
 }
 
+</style>
+
+<style scoped>
+:deep(.el-input__inner) {
+  font-size: 16px !important;
+}
+:deep(.el-select__wrapper .el-select__placeholder) {
+  font-size: 16px !important;
+}
+:deep(.el-select__wrapper .el-select__selected-item) {
+  font-size: 16px !important;
+}
 </style>

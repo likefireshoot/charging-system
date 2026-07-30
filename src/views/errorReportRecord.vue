@@ -8,27 +8,27 @@
     <template v-else>
     <div class="search-box">
       <div class="search-content">
-        <div class="search-input" style="margin-left: 10px">
+        <div class="search-input">
           <span>异常类型</span>
           <el-select v-model="recordType" placeholder="请选择异常类型">
             <el-option label="读数异常" value="report" />
           </el-select>
         </div>
-        <div class="search-input" style="margin-left: 10px" v-if="companyId === 1">
+        <div class="search-input" v-if="companyId === 1">
           <span>所属水厂</span>
           <el-select v-model="params.company" placeholder="请选择所属水厂">
             <el-option v-for="item in companyList" :key="item.id" :label="item.name" :value="item.id"></el-option>
           </el-select>
         </div>
-        <div class="search-input" style="margin-left: 10px">
+        <div class="search-input">
           <span>表号</span>
           <el-input v-model="params.meterCode" placeholder="请输入..." />
         </div>
-        <div class="search-input" style="margin-left: 10px">
+        <div class="search-input">
           <span>用户号</span>
           <el-input v-model="params.userId" placeholder="请输入..." />
         </div>
-        <div class="search-input" style="margin-left: 10px">
+        <div class="search-input">
           <span>选择状态</span>
           <el-select v-model="params.status" placeholder="选择状态">
             <el-option label="未处理" :value="0" />
@@ -36,9 +36,9 @@
             <el-option label="有效" :value="2" />
           </el-select>
         </div>
-        <div class="search-input" style="margin-left: 10px">
-          <span>厂商</span>
-          <el-select v-model="params.meterVendor" placeholder="请选择厂商" clearable>
+        <div class="search-input">
+          <span>品牌</span>
+          <el-select v-model="params.meterVendor" placeholder="请选择品牌" clearable>
             <el-option label="信驰" value="信驰" />
             <el-option label="圣鑫" value="圣鑫" />
             <el-option label="旧信驰" value="旧信驰" />
@@ -49,14 +49,14 @@
             <el-option label="太阳能" value="太阳能" />
           </el-select>
         </div>
-        <div class="search-input" style="margin-left: 10px">
+        <div class="search-input">
           <span>电量</span>
           <el-select v-model="params.battery" placeholder="请选择电量状态" clearable>
             <el-option label="正常" value="正常" />
             <el-option label="异常" value="异常" />
           </el-select>
         </div>
-        <div class="search-input" style="margin-left: 10px">
+        <div class="search-input">
           <span>阀门</span>
           <el-select v-model="params.valveStatus" placeholder="请选择阀门状态" clearable>
             <el-option label="开阀" value="开阀" />
@@ -67,22 +67,22 @@
       </div>
       <div class="buttons">
         <div class="sercah-btn" @click="search">
-          <img src="@/assets/yonghu/icon16.png" alt="" style="margin-left: 8px" />
-          <span style="font-size: 20px; margin-left: 15%">搜索</span>
+          <img src="@/assets/yonghu/icon16.png" alt="" style="margin-left: 10px" />
+          <span style="margin-left: 10%">搜索</span>
         </div>
         <div class="clear-btn" @click="clear">
           <img src="@/assets/yuangong/icon4.png" alt="" style="margin-left: 10px" />
-          <span style="font-size: 20px; margin-left: 15%; color: #5a5a5a">清空</span>
+          <span style="margin-left: 10%; color: #5a5a5a">清空</span>
         </div>
       </div>
     </div>
     <div class="yuangong-info">
       <div class="command-box">
-        <div class="export-out-btn" style="margin-left: 10px" @click="exportExcel">
-          <img src="@/assets/yonghu/icon1.3.png" alt="" style="margin-left: 7px" />
-          <span style="font-size: 20px; margin-left: 10px; color: #5a5a5a">导出</span>
+        <div class="export-out-btn" @click="exportExcel">
+          <img src="@/assets/yonghu/icon1.3.png" alt="" />
+          <span style="margin-left: 6px; color: #5a5a5a">导出</span>
         </div>
-        <div class="reflush" style="margin-left: 10px" @click="reflush">
+        <div class="reflush" @click="reflush">
           <img src="@/assets/yonghu/icon15.png" alt="" />
         </div>
       </div>
@@ -109,7 +109,7 @@
                         {{ scope.$index + 1 + (params.pageNo - 1) * params.pageSize }}
                     </el-table-column> -->
           <el-table-column property="userId" label="用户号" :width="workerNameWidth" align="center" />
-          <el-table-column label="用户名" :width="companyWidth" align="center">
+          <el-table-column label="用户名" :width="workerNameWidth" align="center">
             <template #default="scope">
               <span @click="handleUserInfo(scope.row)"
                 style="color: #46b97e; display: block; width: 100%; text-align: center; cursor: pointer">
@@ -117,12 +117,12 @@
               </span>
             </template>
           </el-table-column>
-          <el-table-column property="meterCode" label="表号" :width="accountWidth" align="center" />
-          <el-table-column property="companyName" label="所属水厂" :width="companyWidth" align="center" />
-          <el-table-column property="meterVendor" label="厂商" :width="companyWidth" align="center" />
+          <el-table-column property="meterCode" label="表号" :width="lastLoginTimeWidth" align="center" />
+          <el-table-column property="companyName" label="水厂" :width="roleWidth" align="center" />
+          <el-table-column property="meterVendor" label="品牌" :width="companyWidth" align="center" />
           <el-table-column property="valveStatus" label="阀门" :width="phoneWidth" align="center" />
-          <el-table-column property="battery" label="电量" :width="companyWidth" align="center" />
-          <el-table-column label="最近换表时间" :width="lastLoginTimeWidth" align="center">
+          <el-table-column property="battery" label="电量" :width="phoneWidth" align="center" />
+          <el-table-column label="最近换表" :width="lastLoginTimeWidth" align="center">
             <template #default="scope">
               <div v-if="scope.row.factoryDate">
                 {{ formatDateTime(scope.row.factoryDate) }}
@@ -137,7 +137,7 @@
               </span>
             </template>
           </el-table-column>
-          <el-table-column label="上次上报时间" :width="lastLoginTimeWidth" align="center" #default="scope">
+          <el-table-column label="上次上报" :width="lastLoginTimeWidth" align="center" #default="scope">
             <div v-if="scope.row.prevCreateTime">
               {{ formatDateTime(scope.row.prevCreateTime) }}
             </div>
@@ -150,10 +150,10 @@
               </span>
             </template>
           </el-table-column>
-          <el-table-column label="本次上报时间" :width="lastLoginTimeWidth" align="center">
+          <el-table-column label="本次上报" :width="lastLoginTimeWidth" align="center">
             <template #header>
               <div class="sortable-header" @click="toggleSort('time')">
-                <span>本次上报时间</span>
+                <span>本次上报</span>
                 <div class="sort-icons">
                   <div :class="['asc-icon', { active: isSortActive('time', 'asc') }]" />
                   <div :class="['desc-icon', { active: isSortActive('time', 'desc') }]" />
@@ -378,7 +378,7 @@ export default {
         worker_name: 7,
         company: 6,
         address: 0,
-        phone: 6,
+        phone: 4,
         post: 0,
         role: 8,
         //password: 0,
@@ -836,23 +836,22 @@ export default {
   flex-direction: column;
   align-content: center;
   justify-content: flex-start;
-  width: 100%;
-  height: 98%;
-  padding: 0px 20px;
+  min-width: 94%;
+  height: 100%;
+  padding: 0px 15px;
 }
 
 .search-box {
-  margin-top: 15px;
-  margin-bottom: 20px;
-  width: 100%;
-  min-height: 112px;
+  margin-top: 5px;
+  margin-bottom: 10px;
+  width: 99.3%;
+  height: 98px;
   display: flex;
   align-items: center;
-  justify-content: space-between;
   border: 1px solid #e9e9e9;
   border-radius: 5px;
   background-color: #fff;
-  padding: 8px 0;
+  padding: 0 10px;
 }
 
 .search-content {
@@ -861,17 +860,15 @@ export default {
   flex-wrap: wrap;
   height: 100%;
   align-items: center;
-  padding: 5px 0;
 }
 
 .search-input {
   display: flex;
   justify-content: center;
   flex-direction: column;
-  flex: 1;
-  min-width: 160px;
+  width: 11%;
   height: 100%;
-  margin-right: 20px;
+  margin-right: 10px;
 }
 
 .search-input > span {
@@ -893,15 +890,14 @@ export default {
 
 .buttons {
   display: flex;
-  flex-shrink: 0;
+  width: 220px;
   height: 100%;
   align-items: center;
-  padding-right: 15px;
-  gap: 15px;
+  margin-left: 10px;
 }
 
 .buttons > * {
-  width: 120px;
+  width: 100px;
 }
 
 .sercah-btn,
@@ -912,6 +908,8 @@ export default {
   border-radius: 5px;
   cursor: pointer;
   transition: all 0.3s;
+  margin-right: 0;
+  font-size: 18px;
 }
 
 .sercah-btn {
@@ -922,11 +920,12 @@ export default {
   background-color: #fff;
   border: 2px solid #f2f2f2;
   color: #5a5a5a;
+  margin-left: 10px;
 }
 
 .yuangong-info {
-  width: 100%;
-  height: calc(100% - 150px);
+  width: 99.3%;
+  height: calc(100% - 120px);
   margin-bottom: 0px;
   display: flex;
   flex-direction: column;
@@ -934,19 +933,19 @@ export default {
   border-radius: 5px;
   background-color: #fff;
   position: relative;
+  padding: 0 10px;
 }
 
 .command-box {
   display: flex;
   align-items: center;
   width: 100%;
-  height: 40px;
-  margin-top: 15px;
-  margin-bottom: 10px;
+  height: auto;
+  margin-top: 10px;
 }
 
 .command-box > * {
-  margin-right: 20px;
+  margin-right: 10px;
 }
 
 .add-btn,
@@ -956,17 +955,18 @@ export default {
 .export-out-btn {
   display: flex;
   align-items: center;
-  width: 80px;
+  width: auto;
   /* 设置按钮的宽度 */
-  height: 32px;
+  height: 35px;
   /* 设置按钮的高度 */
   color: white;
   border-radius: 5px;
   cursor: pointer;
   transition: all 0.3s;
-  font-size: 20px;
+  font-size: 18px;
   background-color: #fff;
   border: 2px solid #f2f2f2;
+  padding: 0 8px;
 }
 
 .reflush {
@@ -995,11 +995,12 @@ export default {
 }
 
 .yuangong-table {
-  height: calc(98% - 110px);
+  height: calc(100% - 100px);
+  margin-top: 8px;
 }
 
 .page-box {
-  height: 65px;
+  height: 40px;
   position: absolute;
   bottom: 0;
 }
@@ -1360,5 +1361,17 @@ export default {
 .cancel-btn {
   background-color: #fff;
   margin-right: 5%;
+}
+</style>
+
+<style scoped>
+:deep(.el-input__inner) {
+  font-size: 16px !important;
+}
+:deep(.el-select__wrapper .el-select__placeholder) {
+  font-size: 16px !important;
+}
+:deep(.el-select__wrapper .el-select__selected-item) {
+  font-size: 16px !important;
 }
 </style>

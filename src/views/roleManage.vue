@@ -2,39 +2,39 @@
   <div class="yuangong-container">
     <div class="search-box">
       <div class="search-content">
-        <div class="search-input" style="margin-left: 10px">
+        <div class="search-input">
           <span>角色编号</span>
           <el-input v-model="params.roleId" placeholder="请输入..." />
         </div>
-        <div class="search-input" style="margin-left: 10px">
+        <div class="search-input">
           <span>角色名称</span>
           <el-input v-model="params.roleName" placeholder="请输入..." />
         </div>
       </div>
       <div class="buttons">
         <div class="sercah-btn" @click="search">
-          <img src="@/assets/yonghu/icon16.png" alt="" style="margin-left: 8px" />
-          <span style="font-size: 20px; margin-left: 15%">搜索</span>
+          <img src="@/assets/yonghu/icon16.png" alt="" style="margin-left: 10px" />
+          <span style="margin-left: 10%">搜索</span>
         </div>
         <div class="clear-btn" @click="clear">
           <img src="@/assets/yuangong/icon4.png" alt="" style="margin-left: 10px" />
-          <span style="font-size: 20px; margin-left: 15%; color: #5a5a5a">清空</span>
+          <span style="margin-left: 10%; color: #5a5a5a">清空</span>
         </div>
       </div>
     </div>
     <div class="yuangong-info">
       <div class="command-box">
-        <div class="add-btn" style="margin-left: 10px" @click="add_dialogFormVisible = true" v-if="staffPermissionIds.includes(36)">
-          <img src="@/assets/yuangong/icon6.png" alt="" style="margin-left: 8px" />
-          <span style="font-size: 20px; margin-left: 10px; color: #5a5a5a">新增</span>
+        <div class="add-btn" @click="add_dialogFormVisible = true" v-if="staffPermissionIds.includes(36)">
+          <img src="@/assets/yuangong/icon6.png" alt="" />
+          <span style="margin-left: 6px; color: #5a5a5a">新增</span>
         </div>
-        <div class="delete-btn" style="margin-left: 10px" @click="delete_click" v-if="staffPermissionIds.includes(37)">
-          <img src="@/assets/yuangong/icon4.png" alt="" style="margin-left: 8px" />
-          <span style="font-size: 20px; margin-left: 10px; color: #5a5a5a">删除</span>
+        <div class="delete-btn" @click="delete_click" v-if="staffPermissionIds.includes(37)">
+          <img src="@/assets/yuangong/icon4.png" alt=""/>
+          <span style="margin-left: 6px; color: #5a5a5a">删除</span>
         </div>
-        <div class="edit-btn" style="margin-left: 10px" :class="{ 'btn-single-only-disabled': multipleSelection.length !== 1 }" @click="multipleSelection.length === 1 && edit_click()" v-if="staffPermissionIds.includes(38)">
-          <img src="@/assets/yuangong/icon3.png" alt="" style="margin-left: 8px" />
-          <span style="font-size: 20px; margin-left: 10px; color: #5a5a5a">编辑</span>
+        <div class="edit-btn" :class="{ 'btn-single-only-disabled': multipleSelection.length !== 1 }" @click="multipleSelection.length === 1 && edit_click()" v-if="staffPermissionIds.includes(38)">
+          <img src="@/assets/yuangong/icon3.png" alt=""/>
+          <span style="margin-left: 6px; color: #5a5a5a">编辑</span>
         </div>
         <!-- <div class="export-in-btn" style="margin-left: 10px; width: 110px">
           <img src="@/assets/yuangong/icon1.png" alt="" style="margin-left: 7px" />
@@ -50,7 +50,7 @@
           <img src="@/assets/yonghu/icon1.3.png" alt="" style="margin-left: 7px" />
           <span style="font-size: 16px; margin-left: 10px; color: #5a5a5a">导出</span>
         </div> -->
-        <div class="reflush" style="margin-left: 10px" @click="reflush">
+        <div class="reflush" @click="reflush">
           <img src="@/assets/yonghu/icon15.png" alt="" />
         </div>
       </div>
@@ -423,10 +423,10 @@ export default {
     // 每列的百分比宽度
     columnPercentages() {
       return {
-        selection: 5,
-        index: 5,
+        selection: 4,
+        index: 6,
         roleId: 7,
-        roleName: 7,
+        roleName: 9,
         permissions: 74,
       };
     },
@@ -874,22 +874,22 @@ export default {
   flex-direction: column;
   align-content: center;
   justify-content: center;
-  width: 100%;
-  height: 98%;
-  padding: 0px 20px;
+  min-width: 94%;
+  height: 100%;
+  padding: 0px 15px;
 }
 
 .search-box {
-  margin-top: 15px;
-  margin-bottom: 20px;
-  width: 100%;
-  height: 112px;
+  margin-top: 5px;
+  margin-bottom: 10px;
+  width: 99.3%;
+  height: 98px;
   display: flex;
   align-items: center;
-  justify-content: space-between;
   border: 1px solid #e9e9e9;
   border-radius: 5px;
   background-color: #fff;
+  padding: 0 10px;
 }
 
 .search-content {
@@ -902,13 +902,13 @@ export default {
   display: flex;
   justify-content: center; /* 确保子元素在父容器中垂直居中 */
   flex-direction: column;
-  width: 25%;
+  width: 15%;
   height: 100%;
-  margin-right: 20px;
+  margin-right: 10px;
 }
 
 .search-input > span {
-  font-size: 20px;
+  font-size: 18px;
   margin-bottom: 5px;
 }
 
@@ -917,7 +917,7 @@ export default {
 }
 
 .time-input > span {
-  font-size: 20px;
+  font-size: 18px;
   margin-bottom: 5px;
   align-self: center;
   margin-left: 5px;
@@ -926,15 +926,14 @@ export default {
 
 .buttons {
   display: flex;
-  width: 260px;
+  width: 220px;
   height: 100%;
   align-items: center;
-  margin-left: 100px;
-  margin-right: 30px;
 }
 
 .buttons > * {
-  width: 120px;
+  width: 100px;
+  margin-right: 10px;
 }
 
 .sercah-btn,
@@ -946,21 +945,21 @@ export default {
   cursor: pointer;
   transition: all 0.3s;
   color: #fff;
+  font-size: 18px;
 }
 
 .sercah-btn {
   background-color: #45ba7e;
-  margin-right: 50px;
 }
 .clear-btn {
   background-color: #fff;
   border: 2px solid #f2f2f2;
-  margin-right: 10px;
+  margin-right: 0;
 }
 
 .yuangong-info {
-  width: 100%;
-  height: calc(100% - 150px);
+  width: 99.3%;
+  height: calc(100% - 120px);
   margin-bottom: 0px;
   display: flex;
   flex-direction: column;
@@ -969,19 +968,19 @@ export default {
   border-radius: 5px;
   background-color: #fff;
   position: relative;
+  padding: 0 10px;
 }
 
 .command-box {
   display: flex;
   align-items: center;
   width: 100%;
-  height: 40px;
-  margin-top: 15px;
-  margin-bottom: 10px;
+  height: auto;
+  margin-top: 10px;
 }
 
 .command-box > * {
-  margin-right: 20px;
+  margin-right: 10px;
 }
 
 .add-btn,
@@ -991,15 +990,16 @@ export default {
 .export-out-btn {
   display: flex;
   align-items: center;
-  width: 90px; /* 设置按钮的宽度 */
+  min-width: 50px; /* 设置按钮的宽度 */
   height: 35px; /* 设置按钮的高度 */
   color: white;
   border-radius: 5px;
   cursor: pointer;
   transition: all 0.3s;
-  font-size: 20px;
+  font-size: 18px;
   background-color: #fff;
   border: 2px solid #f2f2f2;
+  padding: 0 8px;
 }
 
 .reflush {
@@ -1007,7 +1007,7 @@ export default {
   align-items: center;
   justify-content: center;
   width: 35px; /* 设置按钮的宽度 */
-  height: 32px; /* 设置按钮的高度 */
+  height: 35px; /* 设置按钮的高度 */
   color: white;
   border-radius: 5px;
   cursor: pointer;
@@ -1026,11 +1026,12 @@ export default {
 }
 
 .yuangong-table {
-  height: calc(98% - 110px);
+  height: calc(100% - 100px);
+  margin-top: 8px;
 }
 
 .page-box {
-  height: 65px;
+  height: 40px;
   position: absolute;
   bottom: 0;
 }
@@ -1217,28 +1218,25 @@ export default {
 .table-permission-list {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px 14px;
+  gap: 8px 10px;
   justify-content: center;
-  padding: 6px 4px;
+  padding: 5px 0px;
 }
 
 /* 序号、角色编号、角色名称列加粗 */
 .table-bold-text {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", "PingFang SC", "Hiragino Sans GB", "Helvetica Neue", Helvetica, Arial, sans-serif;
-  font-size: 22px;
+  font-size: 20px;
   /*font-weight: 600;*/
 }
 
 .table-permission-tag {
   display: inline-block;
-  padding: 6px 16px;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", "PingFang SC", "Hiragino Sans GB", "Helvetica Neue", Helvetica, Arial, sans-serif;
-  font-size: 19px;
+  padding: 5px 10px;
+  font-size: 18px;
   background-color: #e8f5e9;
   color: #676767;
   border: 2px solid #66bb6a;
   border-radius: 6px;
-  line-height: 1.5;
   white-space: nowrap;
 }
 
@@ -1425,5 +1423,17 @@ export default {
   opacity: 0.5;
   cursor: not-allowed !important;
   pointer-events: none;
+}
+</style>
+
+<style scoped>
+:deep(.el-input__inner) {
+  font-size: 16px !important;
+}
+:deep(.el-select__wrapper .el-select__placeholder) {
+  font-size: 16px !important;
+}
+:deep(.el-select__wrapper .el-select__selected-item) {
+  font-size: 16px !important;
 }
 </style>
