@@ -146,9 +146,9 @@ function nextPage() {
 <style lang="scss" scoped>
 .popCard {
   position: absolute;
-  right: 20px;
+  right: 180px;
   bottom: 20px;
-  top: 68px;
+  top: 20px;
   width: 430px;
   background: #fff;
   z-index: 200;
@@ -173,7 +173,7 @@ function nextPage() {
     padding: 0 20px;
     position: relative;
     p {
-      font-size: 18px;
+      font-size: 22px;
       color: #585657;
     }
     a {
@@ -284,7 +284,7 @@ function nextPage() {
         z-index: 2;
       }
       h2 {
-        font-size: 18px;
+        font-size: 20px;
         color: #585657;
         font-weight: bold;
         overflow: hidden;
@@ -300,7 +300,7 @@ function nextPage() {
         height: 30px;
         border-radius: 4px;
         background: #feeae9;
-        font-size: 16px;
+        font-size: 20px;
         color: #f33225;
         line-height: 30px;
         text-align: center;
@@ -316,13 +316,13 @@ function nextPage() {
         display: flex;
         h2 {
           line-height: 28px;
-          font-size: 16px;
+          font-size: 20px;
           color: #9aa8b1;
         }
         p {
           flex: 1;
           line-height: 28px;
-          font-size: 16px;
+          font-size: 20px;
           color: #585657;
         }
       }
@@ -346,7 +346,7 @@ function nextPage() {
     align-items: center;
     justify-content: center;
     transition: all 0.2s;
-    font-size: 16px;
+    font-size: 20px;
     color: #fff;
   }
 }
@@ -355,6 +355,6 @@ function nextPage() {
   margin: 20px auto;
   text-align: center;
   color: #666;
-  font-size: 16px;
+  font-size: 20px;
 }
 </style>
