@@ -3,39 +3,39 @@
     <div class="search-box">
       <div class="search-content">
         <!-- 当companyId为1时，代表是荆州的水厂，所以能查询company -->
-        <div class="search-input" style="margin-left: 10px" v-if="companyId === 1">
+        <div class="search-input" v-if="companyId === 1">
           <span>所属水厂</span>
           <el-select class="big-font-el-select" v-model="params.company" placeholder="请选择所属水厂">
             <el-option v-for="item in companyList" :key="item.id" :value="item.id" :label="item.name"></el-option>
           </el-select>
         </div>
-        <div class="search-input" style="margin-left: 10px; width: 16%">
-          <span>所属厂商</span>
+        <div class="search-input">
+          <span>品牌</span>
           <el-select class="big-font-el-select" v-model="params.meterVendor" placeholder="请选择">
             <el-option v-for="item in changshang_list" :key="item.id" :label="item.label" :value="item.label"></el-option>
           </el-select>
         </div>
-        <div class="search-input" style="margin-left: 10px; width: 16%">
+        <div class="search-input">
           <span>用户号</span>
           <el-input v-model="params.userId" placeholder="请输入..." />
         </div>
-        <div class="search-input" style="margin-left: 10px; width: 16%">
+        <div class="search-input">
           <span>表号</span>
           <el-input v-model="params.meterCode" placeholder="请输入..." />
         </div>
-        <div class="search-input" style="margin-left: 10px; width: 16%">
+        <div class="search-input">
           <span>通讯类别</span>
           <el-select v-model="params.commandType" class="big-font-el-select" placeholder="请选择">
             <el-option v-for="item in commandTypeList" :key="item.value" :label="item.label" :value="item.label"></el-option>
           </el-select>
         </div>
-        <div class="search-input" style="margin-left: 10px; width: 16%">
+        <div class="search-input">
           <span>通讯状态</span>
           <el-select v-model="params.commandStatus" class="big-font-el-select" placeholder="请选择">
-            <el-option v-for="item in commandStatusList" :key="item.value" :label="item.label" :value="item.label"></el-option>
+            <el-option v-for="item in commandStatusList" :key="item.value" :label="item.label" :value="item.value"></el-option>
           </el-select>
         </div>
-        <div class="search-input" style="margin-left: 10px; width: 30%">
+        <div class="search-input" style="width: 18%">
           <span>通讯下发时间</span>
           <el-date-picker
               v-model="params.time"
@@ -52,18 +52,22 @@
       </div>
       <div class="buttons">
         <div class="sercah-btn" @click="search">
-          <img src="@/assets/yonghu/icon16.png" alt="" style="margin-left: 8px" />
-          <span style="font-size: 20px; margin-left: 5%">搜索</span>
+          <img src="@/assets/yonghu/icon16.png" alt="" style="margin-left: 10px" />
+          <span style="margin-left: 10%">搜索</span>
         </div>
         <div class="clear-btn" @click="clear">
           <img src="@/assets/rizhi/icon4.png" alt="" style="margin-left: 10px" />
-          <span style="font-size: 20px; margin-left: 5%; color: #5a5a5a">清空</span>
+          <span style="margin-left: 10%; color: #5a5a5a">清空</span>
         </div>
       </div>
     </div>
     <div class="log-info">
       <div class="command-box">
-        <div class="reflush" style="margin-left: 10px" @click="reflush">
+        <div class="export-out-btn" @click="exportExcel">
+          <img src="@/assets/yonghu/icon1.3.png" alt="" />
+          <span style="margin-left: 6px; color: #5a5a5a">导出</span>
+        </div>
+        <div class="reflush" @click="reflush">
           <img src="@/assets/yonghu/icon15.png" alt="" />
         </div>
       </div>
@@ -93,7 +97,7 @@
           <el-table-column property="companyName" label="水厂" :width="companyNameWidth" align="center" />
           <el-table-column property="commandType" label="通讯类别" :width="tongxunleibieWidth" align="center" />
           <el-table-column property="commandStatus" label="通讯状态" :width="tongxunzhaungtaiWidth" align="center" />
-          <el-table-column label="通讯下发时间" :width="timeWidth" align="center">
+          <el-table-column label="下发时间" :width="timeWidth" align="center">
             <template #default="scope">
               <span @click="handleTimeClick(scope.row)"
                 style="color: #46b97e; cursor: pointer;">
@@ -101,7 +105,7 @@
               </span>
             </template>
           </el-table-column>
-          <el-table-column label="通讯完成时间" :width="timeWidth" align="center">
+          <el-table-column label="完成时间" :width="timeWidth" align="center">
             <template #default="scope">
               <span @click="handleTimeClick(scope.row)"
                 style="color: #46b97e; cursor: pointer;">
@@ -109,7 +113,7 @@
               </span>
             </template>
           </el-table-column>
-          <el-table-column property="meterVendor" label="厂商" :width="changshangWidth" align="center" />
+          <el-table-column property="meterVendor" label="品牌" :width="changshangWidth" align="center" />
           <el-table-column property="displayStaffName" label="下发员工" :width="staffNameWidth" align="center" />
           <el-table-column property="description" label="描述" :width="descriptionWidth" align="center" />
         </el-table>
@@ -163,9 +167,10 @@ export default {
       companyId: JSON.parse(sessionStorage.getItem("userData")).companyId, // 所属水厂ID
       companyList: [],
       commandStatusList: [
-        { value: 1, label: "等待通讯" },
-        { value: 2, label: "成功" },
-        { value: 3, label: "失败" },
+        { value: "等待通讯", label: "待设备上线下发" },
+        { value: "命令已经下发，等待设备回复", label: "已下发待确认" },
+        { value: "成功", label: "成功" },
+        { value: "失败", label: "失败" },
       ],
       commandTypeList: [
         { value: 1, label: "开启阀门" },
@@ -231,15 +236,15 @@ export default {
       return {
         selection: 3,
         index: 4,
-        biao_hao: 9,
+        biao_hao: 7,
         company_name: 6,
         userId: 5,
         staffName: 6,
         tongxunleibie: 7,
         tongxunzhaungtai: 6,
-        time: 11,
-        changshang: 5,
-        userName: 5,
+        time: 10,
+        changshang: 7,
+        userName: 7,
         description: 22,
       };
     },
@@ -369,10 +374,15 @@ export default {
           })
           .then((response) => {
             if (response.code === 200) {
+              const statusMap = {
+                '等待通讯': '待设备上线下发',
+                '命令已经下发，等待设备回复': '已下发待确认',
+              };
               response.data.records.map((v, i) => {
                 v.theId = this.params.pageSize * (response.data.current - 1) + i + 1;
                 v.displayUserId = this.formatUserId(v.userId);
                 v.displayStaffName = v.sendStaffName || "";
+                v.commandStatus = statusMap[v.commandStatus] || v.commandStatus;
               });
               this.total = response.data.total;
               this.commandLogData = response.data.records;
@@ -409,6 +419,63 @@ export default {
         return;
       }
       this.getCommandLogsData();
+    },
+    exportExcel() {
+      const params = {
+        commandStatus: this.params.commandStatus,
+        commandType: this.params.commandType,
+        meterCode: this.params.meterCode,
+        userId: this.params.userId,
+        meterVendor: this.params.meterVendor,
+        companyId: this.getEffectiveCompanyId(),
+        sendTimeStartAt: this.params.time ? this.params.time[0] : null,
+        sendTimeEndAt: this.params.time ? this.params.time[1] : null,
+      };
+      const requestParams = Object.fromEntries(
+        Object.entries(params).filter(([_, value]) => value !== null && value !== "")
+      );
+      let token = "";
+      const userData = sessionStorage.getItem("userData");
+      if (userData) {
+        try {
+          token = JSON.parse(userData).token;
+        } catch (e) {
+          console.error("解析userData失败", e);
+        }
+      }
+      axios({
+        url: "/command/exportCommandRecord",
+        method: "POST",
+        responseType: "blob",
+        data: requestParams,
+        headers: {
+          Authorization: token,
+          token: token,
+        },
+      })
+        .then((response) => {
+          if (response.status !== 200) {
+            throw new Error("导出失败: " + response.statusText);
+          }
+          const blob = new Blob([response.data], {
+            type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+          });
+          if (blob.size === 0) {
+            ElMessage.warning("内容为空，无法下载");
+            return;
+          }
+          const link = document.createElement("a");
+          link.href = window.URL.createObjectURL(blob);
+          link.download = "命令记录列表.xlsx";
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          window.URL.revokeObjectURL(link.href);
+        })
+        .catch((error) => {
+          console.error("导出失败:", error);
+          ElMessage.error("导出失败: " + error.message);
+        });
     },
     handleUserInfo(row) {
       if (this.staffPermissionIds.includes(17)) {
@@ -536,22 +603,23 @@ export default {
   flex-direction: column;
   align-content: center;
   justify-content: center;
-  width: 100%;
-  height: 98%;
-  padding: 0px 20px;
+  min-width: 94%;
+  height: 100%;
+  padding: 0px 15px;
 }
 
 .search-box {
-  margin-top: 15px;
-  margin-bottom: 20px;
-  width: 100%;
-  height: 112px;
+  margin-top: 5px;
+  margin-bottom: 10px;
+  width: 99.3%;
+  height: 98px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   border: 1px solid #e9e9e9;
   border-radius: 5px;
   background-color: #fff;
+  padding: 0 10px;
 }
 
 .search-content {
@@ -564,9 +632,9 @@ export default {
   display: flex;
   justify-content: center; /* 确保子元素在父容器中垂直居中 */
   flex-direction: column;
-  width: 20%;
+  width: 14%;
   height: 100%;
-  margin-right: 20px;
+  margin-right: 10px;
 }
 
 .search-input > span {
@@ -588,14 +656,15 @@ export default {
 
 .buttons {
   display: flex;
-  width: 240px;
+  width: 220px;
   height: 100%;
   align-items: center;
-  margin-left: 50px;
+  margin-left: 0px;
 }
 
 .buttons > * {
-  width: 120px;
+  width: 100px;
+  margin-right: 10px;
 }
 
 .sercah-btn,
@@ -607,21 +676,21 @@ export default {
   cursor: pointer;
   transition: all 0.3s;
   color: #fff;
+  font-size: 18px;
 }
 
 .sercah-btn {
   background-color: #45ba7e;
-  margin-right: 30px;
 }
 .clear-btn {
   background-color: #fff;
   border: 2px solid #f2f2f2;
-  margin-right: 40px;
+  margin-right: 0;
 }
 
 .log-info {
-  width: 100%;
-  height: calc(100% - 150px);
+  width: 99.3%;
+  height: calc(100% - 120px);
   margin-bottom: 0px;
   display: flex;
   flex-direction: column;
@@ -630,34 +699,35 @@ export default {
   border-radius: 5px;
   background-color: #fff;
   position: relative;
+  padding: 0 10px;
 }
 
 .command-box {
   display: flex;
   align-items: center;
   width: 100%;
-  height: 40px;
-  margin-top: 15px;
-  margin-bottom: 10px;
+  height: auto;
+  margin-top: 10px;
 }
 
 .command-box > * {
-  margin-right: 20px;
+  margin-right: 10px;
 }
 .add-btn,
 .export-in-btn,
 .export-out-btn {
   display: flex;
   align-items: center;
-  width: 80px; /* 设置按钮的宽度 */
-  height: 32px; /* 设置按钮的高度 */
+  width: auto; /* 设置按钮的宽度 */
+  height: 35px; /* 设置按钮的高度 */
   color: white;
   border-radius: 5px;
   cursor: pointer;
   transition: all 0.3s;
-  font-size: 20px;
+  font-size: 18px;
   background-color: #fff;
   border: 2px solid #f2f2f2;
+  padding: 0 8px;
 }
 
 .reflush {
@@ -665,12 +735,12 @@ export default {
   align-items: center;
   justify-content: center;
   width: 35px; /* 设置按钮的宽度 */
-  height: 32px; /* 设置按钮的高度 */
+  height: 35px; /* 设置按钮的高度 */
   color: white;
   border-radius: 5px;
   cursor: pointer;
   transition: all 0.3s;
-  font-size: 20px;
+  font-size: 18px;
   background-color: #fff;
   border: 2px solid #f2f2f2;
 }
@@ -681,15 +751,16 @@ export default {
   display: flex;
   justify-content: center;
   align-items: center;
+  margin-top: 8px;
 }
 
 .commandLog-table {
-  height: calc(98% - 110px);
-  width: 98%;
+  height: calc(100% - 100px);
+  width: 100%;
 }
 
 .page-box {
-  height: 65px;
+  height: 40px;
   position: absolute;
   bottom: 0;
 }
@@ -723,5 +794,17 @@ export default {
 .cancel-btn {
   background-color: #fff;
   margin-right: 5%;
+}
+</style>
+
+<style scoped>
+:deep(.el-input__inner) {
+  font-size: 16px !important;
+}
+:deep(.el-select__wrapper .el-select__placeholder) {
+  font-size: 16px !important;
+}
+:deep(.el-select__wrapper .el-select__selected-item) {
+  font-size: 16px !important;
 }
 </style>

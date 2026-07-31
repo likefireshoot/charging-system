@@ -829,22 +829,22 @@ export default {
         this.forceCancelDialogVisible = true;
         return;
       }
-      this.doCancelRecharge(this.multipleSelection[0].rechargeRecordId);
+      this.doCancelRecharge(row);
     },
     confirmForceCancel() {
       const row = this.forceCancelRow;
       if (!row) return;
       this.forceCancelDialogVisible = false;
-      this.doCancelRecharge(row.rechargeRecordId);
+      this.doCancelRecharge(row);
     },
-    doCancelRecharge(id) {
+    doCancelRecharge(row) {
       const userInfo = JSON.parse(sessionStorage.getItem("userData") || "{}");
       const cancelStaffId = userInfo.staffId;
       if (!cancelStaffId) {
         ElMessage.error("获取当前操作员信息失败，请重新登录");
         return;
       }
-      let url = `/userManage/userCharge/cancelRecharge/${id}?cancelStaffId=${cancelStaffId}`;
+      let url = `/userManage/userCharge/cancelRecharge/${row.rechargeRecordId}?cancelStaffId=${cancelStaffId}&meterCode=${row.meterCode}`;
       axios
         .post(`${url}`)
         .then((response) => {

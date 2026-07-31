@@ -2,7 +2,7 @@
   <div class="shouye">
     <div class="container1">
       <div class="shebei-status">
-        <span style="font-size: 25px; margin-top: 10px; margin-bottom: 5px">设备状态</span>
+        <span style="font-size: 22px; margin-top: 10px; margin-bottom: 5px">设备状态</span>
         <div class="flex-container">
           <div style="width: 4px; height: 4px; background-color: #46b87d; margin-right: 5px"></div>
           <div style="width: 4px; height: 4px; background-color: #90d5b2; margin-right: 5px"></div>
@@ -17,7 +17,7 @@
               <span style="font-size: 20px">正常表数</span>
               <div>
                 <span style="font-size: 18px; font-family: 'Microsoft YaHei'; font-weight: bold">{{ shebeiStatus.normal }}</span>
-                <span style="margin-left: 5px">-{{ shebeiStatus.normal_percent }}</span>
+                <span style="margin-left: 5px; font-size: 18px">-{{ shebeiStatus.normal_percent }}</span>
               </div>
             </div>
             <div class="abnormal-num">
@@ -25,7 +25,7 @@
               <span style="font-size: 20px">预警表数</span>
               <div>
                 <span style="font-size: 18px; font-family: 'Microsoft YaHei'; font-weight: bold">{{ shebeiStatus.abnormal }}</span>
-                <span style="margin-left: 5px">-{{ shebeiStatus.abnormal_percent }}</span>
+                <span style="margin-left: 5px; font-size: 18px">-{{ shebeiStatus.abnormal_percent }}</span>
               </div>
             </div>
           </div>
@@ -33,10 +33,10 @@
       </div>
       <div class="week-report">
         <div class="week-report-title">
-          <span style="font-size: 22px; margin-top: 10px; margin-bottom: 5px"
+          <span style="font-size: 20px; margin-top: 10px; margin-bottom: 5px"
             >近7天缴费总额
 
-            <a href="javascript:;" style="font-size: 22px; margin-left: 0px; color: #46b97e" @click="exportChartExcel(weekchart, '近7天缴费总额')">(导出)</a>
+            <a href="javascript:;" style="font-size: 20px; margin-left: 0px; color: #46b97e" @click="exportChartExcel(weekchart, '近7天缴费总额')">(导出)</a>
           </span>
           <div class="flex-container">
             <div style="width: 4px; height: 4px; background-color: #46b87d; margin-right: 5px"></div>
@@ -50,7 +50,7 @@
     </div>
     <div class="container2">
       <div class="shebei-warning" style="width: 320px">
-        <span style="font-size: 25px; margin-top: 10px; margin-bottom: 5px">设备预警</span>
+        <span style="font-size: 22px; margin-top: 10px; margin-bottom: 5px">设备预警</span>
         <div class="flex-container">
           <div style="width: 4px; height: 4px; background-color: #46b87d; margin-right: 5px"></div>
           <div style="width: 4px; height: 4px; background-color: #90d5b2; margin-right: 5px"></div>
@@ -61,55 +61,56 @@
           <div class="shebei-warning-item">
             <img src="@/assets/shouye/icon1.png" @click="toWarnPath('欠费用户')" alt="" />
             <div class="shebei-warning-item-text">
-              <span style="font-size: 22px">欠费用户</span>
-              <span class="warn-num-text" style="font-size: 22px; font-family: 'Microsoft YaHei'; font-weight: bold; margin-top: 5px" @click="toWarnPath('欠费用户')">{{ shebeiWarning.qianfeiUser }}</span>
-            </div>
-          </div>
-          <div class="shebei-warning-item">
-            <img src="@/assets/shouye/icon2.png" @click="toWarnPath('水表0用量用户')" alt="" />
-            <div class="shebei-warning-item-text">
-              <span style="font-size: 22px">近期0用水用户</span>
-              <span class="warn-num-text" style="font-size: 22px; font-family: 'Microsoft YaHei'; font-weight: bold; margin-top: 5px" @click="toWarnPath('水表0用量用户')">{{ shebeiWarning.zerouserL }}</span>
-            </div>
-          </div>
-          <div class="shebei-warning-item">
-            <img src="@/assets/shouye/icon3.png" @click="toWarnPath('水表大用量用户')" alt="" />
-            <div class="shebei-warning-item-text">
-              <span style="font-size: 22px">大用水量用户</span>
-              <span class="warn-num-text" style="font-size: 22px; font-family: 'Microsoft YaHei'; font-weight: bold; margin-top: 5px" @click="toWarnPath('水表大用量用户')">{{ shebeiWarning.dayongliang }}</span>
+              <span style="font-size: 20px">欠费用户</span>
+              <span class="warn-num-text" style="font-size: 20px; font-family: 'Microsoft YaHei'; font-weight: bold; margin-top: 5px" @click="toWarnPath('欠费用户')">{{ shebeiWarning.qianfeiUser }}</span>
             </div>
           </div>
           <div class="shebei-warning-item">
             <img src="@/assets/shouye/icon4.png" @click="toWarnPath('数据长时间未上报')" alt="" />
             <div class="shebei-warning-item-text">
-              <span style="font-size: 22px">数据持续未上报</span>
-              <span class="warn-num-text" style="font-size: 22px; font-family: 'Microsoft YaHei'; font-weight: bold; margin-top: 5px" @click="toWarnPath('数据长时间未上报')">{{ shebeiWarning.weishangbao }}</span>
+              <span style="font-size: 20px">数据持续未上报</span>
+              <span class="warn-num-text" style="font-size: 20px; font-family: 'Microsoft YaHei'; font-weight: bold; margin-top: 5px" @click="toWarnPath('数据长时间未上报')">{{ shebeiWarning.weishangbao }}</span>
+            </div>
+          </div>
+          <div class="shebei-warning-item">
+            <img src="@/assets/shouye/icon8.png" @click="toWarnPath('关阀状态读数增加')" alt="" />
+            <div class="shebei-warning-item-text">
+              <span style="font-size: 20px">关阀状态读数增加</span>
+              <span class="warn-num-text" style="font-size: 20px; font-family: 'Microsoft YaHei'; font-weight: bold; margin-top: 5px" @click="toWarnPath('关阀状态读数增加')">{{ shebeiWarning.abnormalWaterCount }}</span>
             </div>
           </div>
           <div class="shebei-warning-item">
             <img src="@/assets/shouye/icon5.png" @click="toWarnPath('设备异常')" alt="" />
             <div class="shebei-warning-item-text">
-              <span style="font-size: 22px">设备异常</span>
-              <span class="warn-num-text" style="font-size: 22px; font-family: 'Microsoft YaHei'; font-weight: bold; margin-top: 5px" @click="toWarnPath('设备异常')">{{ shebeiWarning.shebeiyichang }}</span>
+              <span style="font-size: 20px">设备异常</span>
+              <span class="warn-num-text" style="font-size: 20px; font-family: 'Microsoft YaHei'; font-weight: bold; margin-top: 5px" @click="toWarnPath('设备异常')">{{ shebeiWarning.shebeiyichang }}</span>
             </div>
           </div>
-           <div class="shebei-warning-item">
-            <img src="@/assets/shouye/icon8.png" @click="toWarnPath('关阀状态读数增加')" alt="" />
+          <div class="shebei-warning-item">
+            <img src="@/assets/shouye/icon2.png" @click="toWarnPath('水表0用量用户')" alt="" />
             <div class="shebei-warning-item-text">
-              <span style="font-size: 22px">关阀状态读数增加</span>
-              <span class="warn-num-text" style="font-size: 22px; font-family: 'Microsoft YaHei'; font-weight: bold; margin-top: 5px" @click="toWarnPath('关阀状态读数增加')">{{ shebeiWarning.abnormalWaterCount }}</span>
-              <span style="font-size: 17px; color: #999;">(漏水用户数，非告警数)</span>
+              <span style="font-size: 20px">近期0用水用户</span>
+              <span class="warn-num-text" style="font-size: 20px; font-family: 'Microsoft YaHei'; font-weight: bold; margin-top: 5px" @click="toWarnPath('水表0用量用户')">{{ shebeiWarning.zerouserL }}</span>
+              <span style="font-size: 16px; color: #999;">（该类型不计入预警表数）</span>
+            </div>
+          </div>
+          <div class="shebei-warning-item">
+            <img src="@/assets/shouye/icon3.png" @click="toWarnPath('水表大用量用户')" alt="" />
+            <div class="shebei-warning-item-text">
+              <span style="font-size: 20px">大用水量用户</span>
+              <span class="warn-num-text" style="font-size: 20px; font-family: 'Microsoft YaHei'; font-weight: bold; margin-top: 5px" @click="toWarnPath('水表大用量用户')">{{ shebeiWarning.dayongliang }}</span>
+              <span style="font-size: 16px; color: #999;">（该类型不计入预警表数）</span>
             </div>
           </div>
         </div>
       </div>
       <div class="month-year-report">
         <div class="month-report">
-          <span style="font-size: 22px; margin-top: 10px; margin-bottom: 5px"
+          <span style="font-size: 20px; margin-top: 10px; margin-bottom: 5px"
             >本月缴费情况
 
             <!-- <a href="javascript:;" style="font-size: 14px; margin-left: 20px;color: #1a73e8;" @click="exportChartExcel(monthchart,'图表数据')">导出PNG</a> -->
-            <a href="javascript:;" style="font-size: 22px; margin-left: 0px; color: #46b97e" @click="exportChartExcel(monthchart, '本月缴费情况')">(导出)</a>
+            <a href="javascript:;" style="font-size: 20px; margin-left: 0px; color: #46b97e" @click="exportChartExcel(monthchart, '本月缴费情况')">(导出)</a>
           </span>
           <div class="flex-container">
             <div style="width: 4px; height: 4px; background-color: #46b87d; margin-right: 5px"></div>
@@ -120,10 +121,10 @@
           <div class="month-report-chart" id="month"></div>
         </div>
         <div class="year-report">
-          <span style="font-size: 22px; margin-top: 10px; margin-bottom: 5px"
+          <span style="font-size: 20px; margin-top: 10px; margin-bottom: 5px"
             >本年度结算总额情况
             <!-- <a href="javascript:;" style="font-size: 14px; margin-left: 20px;color: #1a73e8;" @click="exportChartExcel(yearchart,'图表数据')">导出PNG</a> -->
-            <a href="javascript:;" style="font-size: 22px; margin-left: 0px; color: #46b97e" @click="exportChartExcel(yearchart, '本年度结算总额情况')">(导出)</a>
+            <a href="javascript:;" style="font-size: 20px; margin-left: 0px; color: #46b97e" @click="exportChartExcel(yearchart, '本年度结算总额情况')">(导出)</a>
           </span>
 
           <div class="flex-container">
@@ -248,7 +249,7 @@ export default {
           boundaryGap: false,
           data: [],
           axisLabel: {
-            fontSize: 18,       // 设置 X 轴字体大小
+            fontSize: 16,       // 设置 X 轴字体大小
             color: "#666",      // 可选：设置字体颜色
             fontWeight: "normal" // 可选：设置是否加粗
           }
@@ -303,7 +304,7 @@ export default {
           show: true,
           position: "top",
           color: "#333",
-          fontSize: 20,
+          fontSize: 16,
           // ⭐ 核心逻辑：判断是否为第一个点, 如果是, 向右顶开
           formatter: function (params) {
             if (params.dataIndex === 0) {
@@ -314,8 +315,8 @@ export default {
           },
           rich: {
             first: {
-              fontSize: 20,
-              padding: [0, 0, 0, 40], // ⭐ 关键：通过 padding-left (第四个值) 将文字向右顶开
+              fontSize: 16,
+              padding: [0, 0, 0, 80], // ⭐ 关键：通过 padding-left (第四个值) 将文字向右顶开
               color: "#333"           // 保持颜色一致
             }
           }
@@ -333,7 +334,7 @@ export default {
         xAxis: {
           type: "category",
           axisLabel: {
-            fontSize: 18,       // 设置 X 轴字体大小
+            fontSize: 16,       // 设置 X 轴字体大小
             color: "#666"
           },
           // [底部留白百分比, 顶部留白百分比]
@@ -390,7 +391,7 @@ export default {
           show: true,
           position: "top",
           color: "#333",
-          fontSize: 20,
+          fontSize: 16,
           // ⭐ 核心逻辑：判断是否为第一个点, 如果是, 向右顶开
           formatter: function (params) {
             if (params.dataIndex === 0) {
@@ -401,7 +402,7 @@ export default {
           },
           rich: {
             first: {
-              fontSize: 20,
+              fontSize: 16,
               padding: [0, 0, 0, 80], // ⭐ 关键：通过 padding-left (第四个值) 将文字向右顶开
               color: "#333"           // 保持颜色一致
             }
@@ -435,7 +436,7 @@ export default {
             type: "category",
             data: ["01月", "02月", "03月", "04月", "05月", "06月", "07月", "08月", "09月", "10月", "11月", "12月"],
             axisLabel: {
-              fontSize: 18,       // 设置 X 轴字体大小
+              fontSize: 16,       // 设置 X 轴字体大小
               color: "#666"
             },
             axisTick: {
@@ -469,7 +470,7 @@ export default {
           show: true,
           position: "top",
           color: "#333",
-          fontSize: 20,
+          fontSize: 16,
         },
       },
       yearchartResizeObserver: null,
@@ -878,7 +879,7 @@ export default {
 }
 
 .shebei-status {
-  width: 320px !important;
+  width: 290px !important;
   margin-right: 20px;
 }
 
@@ -953,7 +954,7 @@ export default {
   justify-content: flex-start;
   flex-direction: column;
   height: 100%;
-  width: 320px !important;
+  width: 290px !important;
   margin-right: 20px;
 }
 
@@ -993,7 +994,7 @@ export default {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  margin-left: 15%;
+  margin-left: 10%;
 }
 
 .month-year-report {

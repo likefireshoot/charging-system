@@ -3,13 +3,13 @@
     <div class="search-box">
       <div class="search-content">
         <!-- 当companyId为1时，代表是荆州的水厂，所以能查询company -->
-        <div class="search-input" style="margin-left: 10px" v-if="companyId === 1">
+        <div class="search-input" v-if="companyId === 1">
           <span>所属水厂</span>
           <el-select v-model="params.company" placeholder="请选择所属水厂">
             <el-option v-for="item in companyList" :key="item.id" :value="item.id" :label="item.name"></el-option>
           </el-select>
         </div>
-        <div class="search-input" style="margin-left: 10px">
+        <div class="search-input">
           <span>操作类别</span>
           <el-select v-model="params.operationId" placeholder="请选择">
             <el-option v-for="item in operateType" :key="item.value" :label="item.label" :value="item.value"></el-option>
@@ -19,31 +19,31 @@
           <span>用户号</span>
           <el-input v-model="params.userNum" placeholder="请输入..." />
         </div> -->
-        <div class="search-input" style="margin-left: 10px">
+        <div class="search-input">
           <span>员工名称</span>
           <el-input v-model="params.staffName" placeholder="请输入..." />
         </div>
-        <div class="search-input" style="margin-left: 10px">
+        <div class="search-input">
           <span>用户号</span>
           <el-input v-model="params.userId" placeholder="请输入..." />
         </div>
-        <div class="search-input" style="margin-left: 10px">
+        <div class="search-input">
           <span>用户名称</span>
           <el-input v-model="params.userName" placeholder="请输入..." />
         </div>
-        <div class="search-input" style="margin-left: 10px">
+        <div class="search-input">
           <span>表号</span>
           <el-input v-model="params.meterCode" placeholder="请输入..." />
         </div>
       </div>
       <div class="buttons">
         <div class="sercah-btn" @click="search">
-          <img src="@/assets/yonghu/icon16.png" alt="" style="margin-left: 8px" />
-          <span style="font-size: 20px; margin-left: 15%">搜索</span>
+          <img src="@/assets/yonghu/icon16.png" alt="" style="margin-left: 10px" />
+          <span style="margin-left: 10%">搜索</span>
         </div>
         <div class="clear-btn" @click="clear">
           <img src="@/assets/rizhi/icon4.png" alt="" style="margin-left: 10px" />
-          <span style="font-size: 20px; margin-left: 15%; color: #5a5a5a">清空</span>
+          <span style="margin-left: 10%; color: #5a5a5a">清空</span>
         </div>
       </div>
     </div>
@@ -54,11 +54,11 @@
           <span style="font-size: 16px; margin-left: 10px; color: #5a5a5a">导入</span>
           <input ref="fileInput" type="file" accept=".xls,.xlsx" style="display: none" />
         </div> -->
-        <div class="export-out-btn" style="margin-left: 10px" @click="exportExcel">
-          <img src="@/assets/yonghu/icon1.3.png" alt="" style="margin-left: 7px" />
-          <span style="font-size: 20px; margin-left: 10px; color: #5a5a5a">导出</span>
+        <div class="export-out-btn" @click="exportExcel">
+          <img src="@/assets/yonghu/icon1.3.png" alt="" />
+          <span style="margin-left: 6px; color: #5a5a5a">导出</span>
         </div>
-        <div class="reflush" style="margin-left: 10px" @click="reflush">
+        <div class="reflush" @click="reflush">
           <img src="@/assets/yonghu/icon15.png" alt="" />
         </div>
       </div>
@@ -79,7 +79,7 @@
             {{ scope.$index + 1 + (params.pageNo - 1) * params.pageSize }}
           </el-table-column>
           <el-table-column property="staffName" label="员工名称" :width="workerNameWidth" align="center" />
-          <el-table-column property="userId" label="用户号" :width="userNameWidth" align="center" />
+          <el-table-column property="userId" label="用户号" :width="userNumWidth" align="center" />
           <el-table-column property="userName" label="用户名称" :width="userNameWidth" align="center" />
           <el-table-column property="meterCode" label="表号" :width="biaohaoWidth" align="center" />
           <el-table-column property="imei" label="IMEI号" :width="imeiWidth" align="center" />
@@ -165,10 +165,11 @@ export default {
       return {
         selection: 3,
         index: 4,
-        worker_name: 6,
+        worker_name: 8,
         operate_type: 9,
-        operate_time: 12,
-        user_name: 6,
+        operate_time: 10,
+        user_name: 7,
+        user_num: 6,
         biao_hao: 10,
         imei: 12,
         operate_content: 22,
@@ -226,7 +227,7 @@ export default {
         this.workerNameWidth = (this.columnPercentages.worker_name / 100) * parentWidth;
         this.operateTypeWidth = (this.columnPercentages.operate_type / 100) * parentWidth;
         this.operateTimeWidth = (this.columnPercentages.operate_time / 100) * parentWidth;
-        // this.userNumWidth = (this.columnPercentages.user_num / 100) * parentWidth;
+        this.userNumWidth = (this.columnPercentages.user_num / 100) * parentWidth;
         this.userNameWidth = (this.columnPercentages.user_name / 100) * parentWidth;
         this.biaohaoWidth = (this.columnPercentages.biao_hao / 100) * parentWidth;
         this.imeiWidth = (this.columnPercentages.imei / 100) * parentWidth;
@@ -591,22 +592,23 @@ export default {
   flex-direction: column;
   align-content: center;
   justify-content: center;
-  width: 100%;
-  height: 98%;
-  padding: 0px 20px;
+  min-width: 94%;
+  height: 100%;
+  padding: 0px 15px;
 }
 
 .search-box {
-  margin-top: 15px;
-  margin-bottom: 20px;
-  width: 100%;
-  height: 112px;
+  margin-top: 5px;
+  margin-bottom: 10px;
+  width: 99.3%;
+  height: 98px;
   display: flex;
   align-items: center;
   justify-content:  space-around; /* 每个元素两侧的间隔相等 */
   border: 1px solid #e9e9e9;
   border-radius: 5px;
   background-color: #fff;
+  padding: 0 10px;
 }
 
 .search-content {
@@ -619,9 +621,9 @@ export default {
   display: flex;
   justify-content: center; /* 确保子元素在父容器中垂直居中 */
   flex-direction: column;
-  width: 20%;
+  width: 18%;
   height: 100%;
-  margin-right: 20px;
+  margin-right: 10px;
 }
 
 .search-input > span {
@@ -643,14 +645,14 @@ export default {
 
 .buttons {
   display: flex;
-  width: 240px;
+  width: 220px;
   height: 100%;
   align-items: center;
-  margin-left: 50px;
 }
 
 .buttons > * {
-  width: 120px;
+  width: 100px;
+  margin-right: 10px;
 }
 
 .sercah-btn,
@@ -662,21 +664,21 @@ export default {
   cursor: pointer;
   transition: all 0.3s;
   color: #fff;
+  font-size: 18px;
 }
 
 .sercah-btn {
   background-color: #45ba7e;
-  margin-right: 30px;
 }
 .clear-btn {
   background-color: #fff;
   border: 2px solid #f2f2f2;
-  margin-right: 10px;
+  margin-right: 0;
 }
 
 .log-info {
-  width: 100%;
-  height: calc(100% - 150px);
+  width: 99.3%;
+  height: calc(100% - 120px);
   margin-bottom: 0px;
   display: flex;
   flex-direction: column;
@@ -685,34 +687,35 @@ export default {
   border-radius: 5px;
   background-color: #fff;
   position: relative;
+  padding: 0 10px;
 }
 
 .command-box {
   display: flex;
   align-items: center;
   width: 100%;
-  height: 40px;
-  margin-top: 15px;
-  margin-bottom: 10px;
+  height: auto;
+  margin-top: 10px;
 }
 
 .command-box > * {
-  margin-right: 20px;
+  margin-right: 10px;
 }
 .add-btn,
 .export-in-btn,
 .export-out-btn {
   display: flex;
   align-items: center;
-  width: 90px; /* 设置按钮的宽度 */
+  width: 70px; /* 设置按钮的宽度 */
   height: 35px; /* 设置按钮的高度 */
   color: white;
   border-radius: 5px;
   cursor: pointer;
   transition: all 0.3s;
-  font-size: 20px;
+  font-size: 18px;
   background-color: #fff;
   border: 2px solid #f2f2f2;
+  padding: 0 8px;
 }
 
 .reflush {
@@ -720,12 +723,12 @@ export default {
   align-items: center;
   justify-content: center;
   width: 35px; /* 设置按钮的宽度 */
-  height: 32px; /* 设置按钮的高度 */
+  height: 35px; /* 设置按钮的高度 */
   color: white;
   border-radius: 5px;
   cursor: pointer;
   transition: all 0.3s;
-  font-size: 20px;
+  font-size: 18px;
   background-color: #fff;
   border: 2px solid #f2f2f2;
 }
@@ -739,12 +742,12 @@ export default {
 }
 
 .log-table {
-  height: calc(98% - 110px);
-  width: 98%;
+  height: calc(100% - 100px);
+  margin-top: 8px;
 }
 
 .page-box {
-  height: 65px;
+  height: 40px;
   position: absolute;
   bottom: 0;
 }
@@ -780,3 +783,16 @@ export default {
   margin-right: 5%;
 }
 </style>
+
+<style scoped>
+:deep(.el-input__inner) {
+  font-size: 16px !important;
+}
+:deep(.el-select__wrapper .el-select__placeholder) {
+  font-size: 16px !important;
+}
+:deep(.el-select__wrapper .el-select__selected-item) {
+  font-size: 16px !important;
+}
+</style>
+

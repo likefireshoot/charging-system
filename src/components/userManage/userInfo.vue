@@ -84,8 +84,8 @@
         <div class="user-info-input">
           <span>水表开阀设置（不欠费时系统持续开阀）</span>
           <el-select v-model="userInfoData.keepValveOpenFree" class="big-font-el-select">
-            <el-option label="启用" :value="1"></el-option>
-            <el-option label="暂停" :value="0"></el-option>
+            <el-option label="启用（不欠费不可关阀）" :value="1"></el-option>
+            <el-option label="暂停（不欠费可关阀）" :value="0"></el-option>
           </el-select>
         </div>
       </div>
@@ -550,6 +550,9 @@ export default {
       try {
         const form = {
           imei: this.userInfoData.imei,
+          userId: this.userInfoData.userId,
+          companyId: this.userInfoData.companyId,
+          meterCode: this.userInfoData.meterCode,
           staffId: this.$store.state.userData.staffId
         };
         const res = await service.post("/userManage/userCharge/pauseMeter", form);
@@ -579,6 +582,9 @@ export default {
       try {
         const form = {
           imei: this.userInfoData.imei,
+          userId: this.userInfoData.userId,
+          companyId: this.userInfoData.companyId,
+          meterCode: this.userInfoData.meterCode,
           staffId: this.$store.state.userData.staffId
         };
         const res = await service.post("/userManage/userCharge/resumeMeter", form);
@@ -607,6 +613,9 @@ export default {
       this.loading = true;
       const form = {
         imei: this.userInfoData.imei,
+        userId: this.userInfoData.userId,
+        companyId: this.userInfoData.companyId,
+        meterCode: this.userInfoData.meterCode,
         staffId: this.$store.state.userData.staffId
       };
       service.post("/userManage/userCharge/cancelUserMeter", form).then(res => {
@@ -643,6 +652,9 @@ export default {
       }
       const form = {
         imei: this.userInfoData.imei,
+        userId: this.userInfoData.userId,
+        companyId: this.userInfoData.companyId,
+        meterCode: this.userInfoData.meterCode,
         staffId: this.$store.state.userData.staffId
       };
       service.post("/userManage/userCharge/cancelRefund", form).then(res => {
