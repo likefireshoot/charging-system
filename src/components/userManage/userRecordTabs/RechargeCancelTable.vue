@@ -422,11 +422,11 @@ export default {
 .search-bar {
   display: flex;
   align-items: center;
-  gap: 20px;
-  margin-bottom: 15px;
+  gap: 15px;
+  margin-bottom: 10px;
   flex-wrap: wrap;
   background: #ffffff;
-  padding: 12px 20px;
+  padding: 10px 15px;
   border-radius: 8px;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
   border: 1px solid #e9eef2;
@@ -435,7 +435,7 @@ export default {
 .search-input-item {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
 }
 
 .search-input-item > span {
@@ -447,45 +447,31 @@ export default {
 .time-input {
   display: flex;
   align-items: center;
-  gap: 10px;
 }
 
-/* 时间选择器字体调大 */
 .time-input :deep(.el-input__inner) {
   font-size: 18px;
-  height: 40px;
-  line-height: 40px;
 }
-
 .time-input :deep(.el-date-editor .el-input__inner) {
   font-size: 18px;
 }
-
-/* 下拉选项字体调大 */
+.time-input :deep(.el-input__inner::placeholder) {
+  font-size: 18px;
+}
+.time-input :deep(.el-range-input__inner) {
+  font-size: 18px;
+}
+.time-input :deep(.el-range-input__inner::placeholder) {
+  font-size: 18px;
+}
 .time-input :deep(.el-select-dropdown__item) {
-  font-size: 18px;
-}
-
-.time-input :deep(.el-date-table td) {
-  font-size: 18px;
-}
-
-.time-input :deep(.el-date-table td span) {
-  font-size: 18px;
-}
-
-.time-input :deep(.el-month-table td .cell) {
-  font-size: 18px;
-}
-
-.time-input :deep(.el-year-table td .cell) {
   font-size: 18px;
 }
 
 .search-buttons {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   margin-left: auto;
 }
 
@@ -493,11 +479,12 @@ export default {
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 6px 16px;
+  padding: 5px 15px;
   border-radius: 4px;
   cursor: pointer;
   transition: all 0.3s;
   font-size: 18px;
+  height: auto;
 }
 
 .search-btn {
@@ -532,15 +519,15 @@ export default {
 .tool-bar {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin-bottom: 15px;
+  gap: 10px;
+  margin-bottom: 8px;
 }
 
 .tool-btn, .refresh-btn,.export-btn {
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 6px 16px;
+  padding: 5px 8px;
   border-radius: 4px;
   cursor: pointer;
   background-color: #fff;
@@ -603,7 +590,7 @@ export default {
 }
 
 .refresh-btn {
-  padding: 6px 12px;
+  padding: 5px 8px;
 }
 
 .table-wrapper {
@@ -613,46 +600,10 @@ export default {
 }
 
 .pagination-container {
-  margin-top: 20px;
+  margin-top: 5px;
   display: flex;
   justify-content: center;
   flex-shrink: 0;
-}
-
-.pagination-container :deep(.el-pagination) {
-  font-size: 20px;
-}
-
-.pagination-container :deep(.el-pagination .btn-prev),
-.pagination-container :deep(.el-pagination .btn-next) {
-  min-width: 44px;
-  height: 44px;
-  line-height: 44px;
   font-size: 18px;
-}
-
-.pagination-container :deep(.el-pager li) {
-  min-width: 44px;
-  height: 44px;
-  line-height: 44px;
-  font-size: 18px;
-  margin: 0 4px;
-}
-
-.pagination-container :deep(.el-pagination__total) {
-  font-size: 18px;
-  line-height: 44px;
-  margin-right: 20px;
-}
-
-.pagination-container :deep(.el-pagination__jump) {
-  font-size: 18px;
-  line-height: 44px;
-  margin-left: 20px;
-}
-
-.pagination-container :deep(.el-pagination__jump input) {
-  height: 36px;
-  line-height: 36px;
 }
 </style>

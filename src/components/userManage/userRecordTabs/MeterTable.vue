@@ -2,9 +2,9 @@
   <div class="meter-table-container">
     <div class="search-bar">
       <div class="search-input-item">
-        <span style="margin-right: 20px">时间</span>
+        <span>时间</span>
         <div class="time-input">
-          <el-select v-model="meterData.timeType" placeholder="请选择" style="width: 100px; font-size: 20px;">
+          <el-select v-model="meterData.timeType" placeholder="请选择" style="width: 100px;">
             <el-option label="年" value="year" />
             <el-option label="月" value="month" />
             <el-option label="日" value="day" />
@@ -16,7 +16,7 @@
             type="year"
             placeholder="选择年份"
             value-format="YYYY"
-            style="width: 180px; font-size: 20px;"
+            style="width: 180px;"
           />
           <el-date-picker
             v-else-if="meterData.timeType === 'month'"
@@ -24,7 +24,7 @@
             type="month"
             placeholder="选择月份"
             value-format="YYYY-MM"
-            style="width: 180px; font-size: 20px;"
+            style="width: 180px; "
           />
           <el-date-picker
             v-else-if="meterData.timeType === 'day'"
@@ -33,7 +33,7 @@
             placeholder="选择日期"
             format="YYYY-MM-DD"
             value-format="YYYY-MM-DD"
-            style="width: 200px; font-size: 20px;"
+            style="width: 200px;"
           />
           <el-date-picker
             v-else-if="meterData.timeType === 'custom'"
@@ -44,7 +44,7 @@
             end-placeholder="结束日期"
             format="YYYY-MM-DD"
             value-format="YYYY-MM-DD"
-            style="width: 300px; font-size: 20px;"
+            style="width: 300px;"
           />
         </div>
       </div>
@@ -70,7 +70,7 @@
         <span>历史数据导⼊模版下载</span>
       </div>
       <div class="tool-btn" @click="triggerFileInput" v-if="staffPermissionIds.includes(16)">
-        <img src="@/assets/yonghu/icon1.png" alt="" />
+        <img src="@/assets/yonghu/icon2.png" alt="" />
         <span>历史数据导⼊</span>
         <input ref="fileInput" type="file" accept=".xls,.xlsx" style="display: none" @change="handleImport" />
       </div>
@@ -558,11 +558,11 @@ export default {
 .search-bar {
   display: flex;
   align-items: center;
-  gap: 20px;
-  margin-bottom: 15px;
+  gap: 10px;
+  margin-bottom: 10px;
   flex-wrap: wrap;
   background: #ffffff;
-  padding: 12px 20px;
+  padding: 10px 15px;
   border-radius: 8px;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
   border: 1px solid #e9eef2;
@@ -571,11 +571,11 @@ export default {
 .search-input-item {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
 }
 
 .search-input-item > span {
-  font-size: 20px;
+  font-size: 18px;
   color: #606266;
   white-space: nowrap;
 }
@@ -583,44 +583,32 @@ export default {
 .time-input {
   display: flex;
   align-items: center;
-  gap: 10px;
 }
 
 .time-input :deep(.el-input__inner) {
-  font-size: 20px;
-  height: 40px;
-  line-height: 40px;
+  font-size: 18px;
 }
-
 .time-input :deep(.el-date-editor .el-input__inner) {
-  font-size: 20px;
+  font-size: 18px;
 }
-
+.time-input :deep(.el-input__inner::placeholder) {
+  font-size: 18px;
+}
+.time-input :deep(.el-range-input__inner) {
+  font-size: 18px;
+}
+.time-input :deep(.el-range-input__inner::placeholder) {
+  font-size: 18px;
+}
 .time-input :deep(.el-select-dropdown__item) {
-  font-size: 20px;
-}
-
-.time-input :deep(.el-date-table td) {
-  font-size: 20px;
-}
-
-.time-input :deep(.el-date-table td span) {
-  font-size: 20px;
-}
-
-.time-input :deep(.el-month-table td .cell) {
-  font-size: 20px;
-}
-
-.time-input :deep(.el-year-table td .cell) {
-  font-size: 20px;
+  font-size: 18px;
 }
 
 .total-summary {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 6px 16px;
+  padding: 5px 16px;
   background: #f7fbf8;
   border: 1px solid #d9efe2;
   border-radius: 6px;
@@ -629,13 +617,13 @@ export default {
 }
 
 .total-summary .summary-label {
-  font-size: 20px;
+  font-size: 18px;
   letter-spacing: 2px;
   color: #5a5a5a;
 }
 
 .total-summary .summary-value {
-  font-size: 22px;
+  font-size: 20px;
   color: #f56c6c;
   font-weight: bold;
 }
@@ -643,18 +631,19 @@ export default {
 .search-buttons {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
 }
 
 .search-btn, .clear-btn {
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 6px 16px;
+  padding: 5px 15px;
   border-radius: 4px;
   cursor: pointer;
   transition: all 0.3s;
-  font-size: 20px;
+  font-size: 18px;
+  height: auto;
 }
 
 .search-btn {
@@ -689,21 +678,21 @@ export default {
 .tool-bar {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin-bottom: 15px;
+  gap: 10px;
+  margin-bottom: 8px;
 }
 
 .tool-btn, .refresh-btn {
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 6px 16px;
+  padding: 5px 8px;
   border-radius: 4px;
   cursor: pointer;
   background-color: #fff;
   border: 1px solid #dcdfe6;
   transition: all 0.3s;
-  font-size: 20px;
+  font-size: 18px;
   color: #606266;
 }
 
@@ -718,7 +707,7 @@ export default {
 }
 
 .refresh-btn {
-  padding: 6px 12px;
+  padding: 5px 8px;
 }
 
 .meter-code-cell {
@@ -775,46 +764,11 @@ export default {
 }
 
 .pagination-container {
-  margin-top: 20px;
+  margin-top: 5px;
   display: flex;
   justify-content: center;
   flex-shrink: 0;
-}
-
-.pagination-container :deep(.el-pagination) {
-  font-size: 20px;
-}
-
-.pagination-container :deep(.el-pagination .btn-prev),
-.pagination-container :deep(.el-pagination .btn-next) {
-  min-width: 44px;
-  height: 44px;
-  line-height: 44px;
   font-size: 18px;
 }
 
-.pagination-container :deep(.el-pager li) {
-  min-width: 44px;
-  height: 44px;
-  line-height: 44px;
-  font-size: 18px;
-  margin: 0 4px;
-}
-
-.pagination-container :deep(.el-pagination__total) {
-  font-size: 18px;
-  line-height: 44px;
-  margin-right: 20px;
-}
-
-.pagination-container :deep(.el-pagination__jump) {
-  font-size: 18px;
-  line-height: 44px;
-  margin-left: 20px;
-}
-
-.pagination-container :deep(.el-pagination__jump input) {
-  height: 36px;
-  line-height: 36px;
-}
 </style>
