@@ -82,11 +82,11 @@
               <img src="@/assets/yonghu/icon26.png" alt="" style="margin-left: 7px" />
               <span style="font-size: 20px; margin-left: 10px; color: #5a5a5a">开收据</span>
             </div>
-            <div class="export-out-btn" style="margin-right: 10px; width: 130px" :class="{ 'btn-single-only-disabled': multipleSelection.length !== 1 }" @click="multipleSelection.length === 1 && openCancelDialog()">
+            <div v-if="staffPermissionIds.includes(71)" class="export-out-btn" style="margin-right: 10px; width: 130px" :class="{ 'btn-single-only-disabled': multipleSelection.length !== 1 }" @click="multipleSelection.length === 1 && openCancelDialog()">
               <img src="@/assets/yonghu/icon27.png" alt="" style="margin-left: 7px" />
               <span style="font-size: 20px; margin-left: 10px; color: #5a5a5a">撤销充值</span>
             </div>
-            <div class="export-out-btn" style="margin-right: 10px; width: 130px" :class="{ 'btn-disabled': !canWechatRefund }" @click="canWechatRefund && handleWechatRefund()">
+            <div v-if="staffPermissionIds.includes(72)" class="export-out-btn" style="margin-right: 10px; width: 130px" :class="{ 'btn-disabled': !canWechatRefund }" @click="canWechatRefund && handleWechatRefund()">
               <img src="@/assets/yonghu/icon1.3.png" alt="" style="margin-left: 7px" />
               <span style="font-size: 20px; margin-left: 10px; color: #5a5a5a">微信退款</span>
             </div>
@@ -346,6 +346,7 @@ export default {
         rechargeType: "",
       },
       companyId: JSON.parse(sessionStorage.getItem("userData")).companyId,
+      staffPermissionIds: JSON.parse(sessionStorage.getItem("userData")).staffPermissionIds,
       rechargeRecordTableData: [],
       tableData: [],
       currentPage: 1,

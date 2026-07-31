@@ -14,20 +14,20 @@
             </div>
           </div>
           <div class="data-list">
-            <div class="data-item"><span>用户号：</span>{{ currentUser.userId || '-' }}</div>
-            <div class="data-item"><span>用户名称：</span>{{ currentUser.userName || '-' }}</div>
+            <div class="data-item"><span>户号：</span>{{ currentUser.userId || '-' }}</div>
+            <div class="data-item"><span>户名：</span>{{ currentUser.userName || '-' }}</div>
             <div class="data-item" v-if="currentUser.isPause === 1">
-              <span>用户状态：</span>
+              <span>状态：</span>
               <span style="max-width: 80px;font-size: 18px;padding: 1px 8px; border-radius: 10px; line-height: 25px; white-space: nowrap;color: #b47500;background-color: #fff7cc;border: 1px solid #ffdd80;">
               暂停使用
               </span>
             </div>
-            <div class="data-item"><span>联系电话：</span>{{ currentUser.phone || '-' }}</div>
-            <div class="data-item"><span>开户时间：</span>{{ currentUser.createTime || '-' }}</div>
-            <div class="data-item"><span>用户地址：</span>{{ currentUser.userAddr || '-' }}</div>
-            <div class="data-item"><span>所属区域：</span>{{ currentUser.regionName || '-' }}</div>
-            <div class="data-item"><span>价格类型：</span>{{ currentUser.userType || '-' }}</div>
-            <div class="data-item"><span>所属水厂：</span>{{ currentUser.companyName || '-' }}</div>
+            <div class="data-item"><span>电话：</span>{{ currentUser.phone || '-' }}</div>
+            <div class="data-item"><span>开户：</span>{{ currentUser.createTime || '-' }}</div>
+            <div class="data-item"><span>地址：</span>{{ currentUser.userAddr || '-' }}</div>
+            <div class="data-item"><span>区域：</span>{{ currentUser.regionName || '-' }}</div>
+            <div class="data-item"><span>价格：</span>{{ currentUser.userType || '-' }}</div>
+            <div class="data-item"><span>水厂：</span>{{ currentUser.companyName || '-' }}</div>
           </div>
         </div>
 
@@ -61,10 +61,10 @@
 
           <div class="data-list">
             <div class="data-item"><span>表号：</span>{{ selectedMeter.meterCode || currentUser.meterCode || '-' }}</div>
-            <div class="data-item"><span>表具类型：</span>{{ selectedMeter.meterType || currentUser.meterType || 'NB-IoT表' }}</div>
-            <div class="data-item"><span>品牌类型：</span>{{ selectedMeter.meterVendor || currentUser.meterVendor || '-' }}</div>
-            <div class="data-item"><span>结算日期：</span>{{ formatDate(selectedMeter.updateTime) || '-' }}</div>
-            <div class="data-item"><span>阀门状态：</span>{{ selectedMeter.valveStatus || currentUser.valveStatus || '-' }}</div>
+            <div class="data-item"><span>类型：</span>{{ selectedMeter.meterType || currentUser.meterType || 'NB-IoT表' }}</div>
+            <div class="data-item"><span>品牌：</span>{{ selectedMeter.meterVendor || currentUser.meterVendor || '-' }}</div>
+            <div class="data-item"><span>结算：</span>{{ formatDate(selectedMeter.updateTime) || '-' }}</div>
+            <div class="data-item"><span>阀门：</span>{{ selectedMeter.valveStatus || currentUser.valveStatus || '-' }}</div>
             <!-- 解绑时间不再展示 -->
             <!-- <div v-if="selectedMeter.removeDate" class="data-item"><span>解绑时间：</span>{{ selectedMeter.removeDate }}</div> -->
           </div>
@@ -289,7 +289,7 @@ export default {
 .user-detail-container {
   background-color: #f4f7f9;
   height: 100%;
-  padding: 15px;
+  padding: 10px 15px;
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
@@ -306,7 +306,7 @@ export default {
 }
 
 .info-side {
-  width: 420px;
+  width: 280px;
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
@@ -317,11 +317,12 @@ export default {
 .info-card {
   background: #fff;
   border-radius: 4px;
-  padding: 20px;
+  padding: 15px;
   box-shadow: 0 2px 12px rgba(0,0,0,0.04);
   overflow-y: auto;
   display: flex;
   flex-direction: column;
+  scrollbar-width: none;
 }
 
 .user-info-card {
@@ -335,12 +336,12 @@ export default {
 }
 
 .card-title {
-  font-size: 28px;
+  font-size: 24px;
   font-weight: bold;
   color: #333;
   border-left: 4px solid #46B97E;
   padding-left: 10px;
-  margin-bottom: 20px;
+  margin-bottom: 15px;
 }
 
 /* ========== 统计数值区域（按 tab 切换） ========== */
@@ -349,7 +350,7 @@ export default {
   align-items: center;
   justify-content: center;        /* 内容居中，更紧凑 */
   gap: 0;
-  margin-bottom: 20px;
+  margin-bottom: 15px;
   background: #f7f9fc;           /* 浅色背景提升层次 */
   border: 1px solid #e2e8f0;     /* 浅色边框 */
   border-radius: 10px;
@@ -414,15 +415,15 @@ export default {
 }
 
 .data-item {
-  font-size: 22px;
-  margin-bottom: 12px;
+  font-size: 20px;
+  margin-bottom: 10px;
   color: #333;
 }
 
 .data-item span {
   color: #777;
   display: inline-block;
-  width: 160px;
+  min-width: 60px;
 }
 
 /* 右侧表格 */
@@ -501,7 +502,7 @@ export default {
 
 .table-box {
   position: relative;
-  padding: 20px;
+  padding: 10px;
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -710,8 +711,7 @@ export default {
 }
 
 .data-list {
-  margin-top: 20px;
-  margin-left: 30px;
+  padding-left: 10px;
 }
 
 /* ========== 水表选择器 ========== */
@@ -719,7 +719,7 @@ export default {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  margin-bottom: 16px;
+  margin-bottom: 15px;
   padding: 0 2px;
 }
 

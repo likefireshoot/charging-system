@@ -74,13 +74,13 @@
         <img src="@/assets/yonghu/icon26.png" alt="" />
         <span>开收据</span>
       </div>
-      <div v-if="this.userIsPause === 0" class="tool-btn" style="margin-right: 10px; width: 130px" :class="{ 'disabled-btn': multipleSelection.length !== 1 }" @click="multipleSelection.length === 1 && openCancelDialog()">
-        <img src="@/assets/yonghu/icon27.png" alt="" style="margin-left: 7px" />
-        <span style="font-size: 20px; margin-left: 10px; color: #5a5a5a">撤销充值</span>
+      <div v-if="this.userIsPause === 0 && staffPermissionIds.includes(71)" class="tool-btn" :class="{ 'disabled-btn': multipleSelection.length !== 1 }" @click="multipleSelection.length === 1 && openCancelDialog()">
+        <img src="@/assets/yonghu/icon27.png" alt="" />
+        <span style="margin-left: 6px; color: #5a5a5a">撤销充值</span>
       </div>
-      <div v-if="this.userIsPause === 0" class="export-out-btn" style="margin-right: 10px; width: 130px" :class="{ 'btn-disabled': !canWechatRefund }" @click="canWechatRefund && handleWechatRefund()">
-        <img src="@/assets/yonghu/icon1.3.png" alt="" style="margin-left: 7px" />
-        <span style="font-size: 20px; margin-left: 10px; color: #5a5a5a">微信退款</span>
+      <div v-if="this.userIsPause === 0 && staffPermissionIds.includes(72)" class="tool-btn" :class="{ 'btn-disabled': !canWechatRefund }" @click="canWechatRefund && handleWechatRefund()">
+        <img src="@/assets/yonghu/icon1.3.png" alt="" />
+        <span style="margin-left: 6px; color: #5a5a5a">微信退款</span>
       </div>
       <div class="tool-btn" @click="downloadTemplate" v-if="staffPermissionIds.includes(53)">
         <img src="@/assets/yonghu/icon1.png" alt="" />
@@ -132,13 +132,13 @@
 <!--        <el-table-column property="payerPhone" label="缴费人手机号" min-width="140" align="center" />-->
         <el-table-column property="rechargeType" label="交易方式" min-width="70" align="center" />
         <el-table-column property="oldBalance" label="充值前余额" min-width="120" align="center">
-          <template #default="scope">{{ scope.row.oldBalance }} 元</template>
+          <template #default="scope">{{ scope.row.oldBalance }}</template>
         </el-table-column>
         <el-table-column property="rechargeAmount" label="交易金额" min-width="110" align="center">
-          <template #default="scope">{{ scope.row.rechargeAmount }} 元</template>
+          <template #default="scope">{{ scope.row.rechargeAmount }}</template>
         </el-table-column>
         <el-table-column property="newBalance" label="充值后余额" min-width="120" align="center">
-          <template #default="scope">{{ scope.row.newBalance }} 元</template>
+          <template #default="scope">{{ scope.row.newBalance }}</template>
         </el-table-column>
         <el-table-column property="createTime" label="交易时间" min-width="170" align="center" />
         <el-table-column property="rechargeUser" label="收费人" min-width="100" align="center" />
@@ -996,11 +996,11 @@ export default {
 .search-bar {
   display: flex;
   align-items: center;
-  gap: 20px;
-  margin-bottom: 15px;
+  gap: 15px;
+  margin-bottom: 10px;
   flex-wrap: wrap;
   background: #ffffff;
-  padding: 12px 20px;
+  padding: 10px 15px;
   border-radius: 8px;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
   border: 1px solid #e9eef2;
@@ -1009,7 +1009,7 @@ export default {
 .search-input-item {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
 }
 
 .search-input-item > span {
@@ -1021,45 +1021,31 @@ export default {
 .time-input {
   display: flex;
   align-items: center;
-  gap: 10px;
 }
 
-/* 时间选择器字体调大 */
 .time-input :deep(.el-input__inner) {
   font-size: 18px;
-  height: 40px;
-  line-height: 40px;
 }
-
 .time-input :deep(.el-date-editor .el-input__inner) {
   font-size: 18px;
 }
-
-/* 下拉选项字体调大 */
+.time-input :deep(.el-input__inner::placeholder) {
+  font-size: 18px;
+}
+.time-input :deep(.el-range-input__inner) {
+  font-size: 18px;
+}
+.time-input :deep(.el-range-input__inner::placeholder) {
+  font-size: 18px;
+}
 .time-input :deep(.el-select-dropdown__item) {
-  font-size: 18px;
-}
-
-.time-input :deep(.el-date-table td) {
-  font-size: 18px;
-}
-
-.time-input :deep(.el-date-table td span) {
-  font-size: 18px;
-}
-
-.time-input :deep(.el-month-table td .cell) {
-  font-size: 18px;
-}
-
-.time-input :deep(.el-year-table td .cell) {
   font-size: 18px;
 }
 
 .search-buttons {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   margin-left: auto;
 }
 
@@ -1067,11 +1053,12 @@ export default {
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 6px 16px;
+  padding: 5px 15px;
   border-radius: 4px;
   cursor: pointer;
   transition: all 0.3s;
   font-size: 18px;
+  height: auto;
 }
 
 .search-btn {
@@ -1106,15 +1093,15 @@ export default {
 .tool-bar {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin-bottom: 15px;
+  gap: 10px;
+  margin-bottom: 8px;
 }
 
 .tool-btn, .refresh-btn {
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 6px 16px;
+  padding: 5px 8px;
   border-radius: 4px;
   cursor: pointer;
   background-color: #fff;
@@ -1373,46 +1360,11 @@ export default {
 }
 
 .pagination-container {
-  margin-top: 20px;
+  margin-top: 5px;
   display: flex;
   justify-content: center;
   flex-shrink: 0;
-}
-
-.pagination-container :deep(.el-pagination) {
-  font-size: 20px;
-}
-
-.pagination-container :deep(.el-pagination .btn-prev),
-.pagination-container :deep(.el-pagination .btn-next) {
-  min-width: 44px;
-  height: 44px;
-  line-height: 44px;
   font-size: 18px;
 }
 
-.pagination-container :deep(.el-pager li) {
-  min-width: 44px;
-  height: 44px;
-  line-height: 44px;
-  font-size: 18px;
-  margin: 0 4px;
-}
-
-.pagination-container :deep(.el-pagination__total) {
-  font-size: 18px;
-  line-height: 44px;
-  margin-right: 20px;
-}
-
-.pagination-container :deep(.el-pagination__jump) {
-  font-size: 18px;
-  line-height: 44px;
-  margin-left: 20px;
-}
-
-.pagination-container :deep(.el-pagination__jump input) {
-  height: 36px;
-  line-height: 36px;
-}
 </style>

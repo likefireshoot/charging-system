@@ -1252,7 +1252,7 @@ export default {
 }
 
 .add-confirm-dialog-content {
-  width: 45%;
+  width: 70%;
   min-height: 320px;
   border: 1px solid #fafafa;
   background-color: #fafafa;

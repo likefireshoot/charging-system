@@ -92,8 +92,8 @@
               class="config-input"
             />
           </div>
-          <el-checkbox v-model="configEditMode" class="config-checkbox">编辑</el-checkbox>
-          <div class="config-confirm-btn" v-if="configEditMode" @click="confirmEditConfig">确认</div>
+          <el-checkbox v-model="configEditMode" class="config-checkbox" v-if="staffPermissionIds.includes(28)">编辑</el-checkbox>
+          <div class="config-confirm-btn" v-if="configEditMode && staffPermissionIds.includes(28)" @click="confirmEditConfig">确认</div>
         </div>
         <div class="export-out-btn" style="margin-left: 10px" @click="exportExcel">
           <img src="@/assets/yonghu/icon1.3.png" alt="" style="margin-left: 7px" />

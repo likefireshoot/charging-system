@@ -132,7 +132,7 @@
               <el-table-column property="regionName" label="区域" min-width="70" align="center" />
               <el-table-column property="phone" label="联系电话" min-width="80" align="center" />
               <el-table-column property="pauseTime" label="暂停时间" min-width="100" align="center"></el-table-column>
-              <el-table-column label="操作" min-width="100" align="center" fixed="right">
+              <el-table-column label="操作" min-width="100" align="center" fixed="right" v-if="staffPermissionIds.includes(73)">
                 <template #default="scope">
                   <el-button type="success" size="middle" @click="openStartDialog(scope.row)">恢复用户</el-button>
                 </template>
@@ -214,6 +214,7 @@ export default {
       pageSize: 30,
       // 全局水厂ID、token
       companyId: JSON.parse(sessionStorage.getItem("userData")).companyId,
+      staffPermissionIds: JSON.parse(sessionStorage.getItem("userData")).staffPermissionIds,
       token: JSON.parse(sessionStorage.getItem("userData")).token,
       companyList: [],
       quyu_data: [],

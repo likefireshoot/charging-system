@@ -91,19 +91,19 @@
       </div>
       <div class="btn">
         <div class="left-btn">
-          <div v-if="userInfoData.isPause === 0" class="operate-btn stop-btn" @click="openStopDialog" >
+          <div v-if="userInfoData.isPause === 0  && staffPermissionIds.includes(63)" class="operate-btn stop-btn" @click="openStopDialog" >
             <img src="@/assets/menu/icon20.png" alt="" style="margin-left: 8px" />
             <span style="font-size: 20px; margin-left: 9%;">暂停用户</span>
           </div>
-          <div v-if="userInfoData.isPause === 1" class="operate-btn stop-btn" @click="openStartDialog" >
+          <div v-if="userInfoData.isPause === 1  && staffPermissionIds.includes(73)" class="operate-btn stop-btn" @click="openStartDialog" >
             <img src="@/assets/menu/icon20.png" alt="" style="margin-left: 8px" />
             <span style="font-size: 20px; margin-left: 9%;">恢复用户</span>
           </div>
-          <div class="operate-btn refund-btn" @click="openRefundBalanceDialog">
+          <div v-if="staffPermissionIds.includes(70)" class="operate-btn refund-btn" @click="openRefundBalanceDialog">
             <img src="@/assets/menu/icon5.png" alt="" style="margin-left: 10px" />
             <span style="font-size: 20px; margin-left: 9%; color: #5a5a5a">余额退款</span>
           </div>
-          <div class="operate-btn close-btn" @click="openCloseAccountDialog">
+          <div v-if="staffPermissionIds.includes(65)" class="operate-btn close-btn" @click="openCloseAccountDialog">
             <img src="@/assets/yonghu/icon4.png" alt="" style="margin-left: 8px" />
             <span style="font-size: 20px; margin-left: 9%; color: #5a5a5a">销户</span>
           </div>
@@ -229,6 +229,7 @@ export default {
       },
       flag: 0,
       companyId: JSON.parse(sessionStorage.getItem("userData")).companyId,
+      staffPermissionIds: JSON.parse(sessionStorage.getItem("userData")).staffPermissionIds,
       price_list: [],
       shuibiao_list: [
         {
