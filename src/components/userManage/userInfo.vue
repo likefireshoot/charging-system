@@ -84,8 +84,8 @@
         <div class="user-info-input">
           <span>水表开阀设置（不欠费时系统持续开阀）</span>
           <el-select v-model="userInfoData.keepValveOpenFree" class="big-font-el-select">
-            <el-option label="启用" :value="1"></el-option>
-            <el-option label="暂停" :value="0"></el-option>
+            <el-option label="启用（不欠费不可关阀）" :value="1"></el-option>
+            <el-option label="暂停（不欠费可关阀）" :value="0"></el-option>
           </el-select>
         </div>
       </div>

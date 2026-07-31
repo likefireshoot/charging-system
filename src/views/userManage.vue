@@ -210,7 +210,7 @@
             </el-table-column>
             <!-- <el-table-column property="imei" label="IMEI号" width="280" align="center" /> -->
 <!--            <el-table-column property="meterType" label="表类型" min-width="70" align="center" />-->
-            <el-table-column property="meterVendor" label="厂商" min-width="75" align="center" />
+            <el-table-column property="meterVendor" label="品牌" min-width="75" align="center" />
             <el-table-column property="priceName" label="价格" min-width="90" align="center">
               <template #default="scope">
     <span
@@ -795,7 +795,7 @@ export default {
         // { key: "meterVendor", label: "厂商", type: "input" },
         {
           key: "meterVendor",
-          label: "厂商",
+          label: "品牌",
           type: "select",
           clearable: true,
           options: [
@@ -2227,7 +2227,7 @@ export default {
 
 .serach-box {
   margin-top: 5px;
-  margin-bottom: 5px;
+  margin-bottom: 10px;
   height: 98px;
   display: flex;
   align-items: center;
@@ -2431,7 +2431,7 @@ export default {
 }
 
 .quyu-box {
-  width: 160px;
+  width: 170px;
   height: 98%;
   display: flex;
   flex-direction: column;
@@ -2810,6 +2810,7 @@ export default {
 <style scoped>
 :deep(.el-input__inner) {
   font-size: 16px !important;
+  font-size: 16px !important;
 }
 :deep(.el-select__wrapper .el-select__placeholder) {
   font-size: 16px !important;
@@ -2817,5 +2818,4 @@ export default {
 :deep(.el-select__wrapper .el-select__selected-item) {
   font-size: 16px !important;
 }
-
 </style>
