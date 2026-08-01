@@ -78,11 +78,27 @@
           <el-table-column property="regionName" label="区域名称" align="center" />
           <el-table-column property="priceName" label="价格类型" align="center" />
           <el-table-column label="费用构成明细" align="center">
-            <el-table-column property="waterFee" label="水费总额（元）" align="center" />
-            <el-table-column property="sewageFee" label="污水处理费总额（元）" align="center" />
-            <el-table-column property="baseFee" label="保底扣费总额（元）" align="center" />
+            <el-table-column property="waterFee" label="水费总额（元）" align="center" >
+              <template #default="scope">
+                {{ Number(scope.row.waterFee || 0).toFixed(2) }}
+              </template>
+            </el-table-column>
+            <el-table-column property="sewageFee" label="污水处理费总额（元）" align="center" >
+              <template #default="scope">
+                {{ Number(scope.row.sewageFee || 0).toFixed(2) }}
+              </template>
+            </el-table-column>
+            <el-table-column property="baseFee" label="保底扣费总额（元）" align="center" >
+              <template #default="scope">
+                {{ Number(scope.row.baseFee || 0).toFixed(2) }}
+              </template>
+            </el-table-column>
           </el-table-column>
-          <el-table-column property="totalCharge" label="总扣费金额（元）" align="center" />
+          <el-table-column property="totalCharge" label="总扣费金额（元）" align="center" >
+            <template #default="scope">
+              {{ Number(scope.row.totalCharge || 0).toFixed(2) }}
+            </template>
+          </el-table-column>
         </el-table>
         </div>
         <!-- 底部单独汇总行表格，无表头，固定在下方 -->
