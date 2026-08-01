@@ -51,6 +51,12 @@
       <div class="report-title">
         <h2>用户用水扣费明细统计报表（{{ params.dateRange[0] }} - {{ params.dateRange[1] }}）</h2>
       </div>
+      <div class="export-bar">
+        <div class="export-out-btn" style="margin-right: 10px" @click="handleExport">
+          <img src="@/assets/yonghu/icon1.3.png" alt="" style="margin-left: 7px" />
+          <span style="font-size: 20px; margin-left: 10px; color: #5a5a5a">导出</span>
+        </div>
+      </div>
       <div class="total-table-wrapper" style="width: 95%; margin: 0 auto;display: flex; flex-direction: column">
         <div class="table-scroll">
         <el-table
@@ -121,7 +127,7 @@
 <script>
 // 删掉无用echarts、markRaw、导出图表导入
 import service from "@/api/request";
-import { ElMessage } from "element-plus";
+import { ElMessage, ElLoading } from "element-plus";
 export default {
   name: "BillDetailReport",
   data() {
@@ -314,6 +320,44 @@ export default {
       }
     },
 
+    // 导出
+    async handleExport() {
+      const loading = ElLoading.service({
+        fullscreen: true,
+        text: "正在导出，请稍后...",
+        background: "rgba(0, 0, 0, 0.3)",
+        customClass: "export-loading",
+      });
+      try {
+        const body = {
+          companyId: this.params.company || this.companyId,
+          startDate: this.params.dateRange[0],
+          endDate: this.params.dateRange[1],
+          regionId: this.params.region.length ? this.params.region : [],
+          priceId: this.params.priceId ?? null,
+        };
+        const response = await service.post("/exportFeeGroupReport", body, { responseType: "blob" });
+        const blob = new Blob([response.data], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+        if (blob.size === 0) {
+          ElMessage.warning("内容为空，无法下载");
+          return;
+        }
+        const link = document.createElement("a");
+        link.href = window.URL.createObjectURL(blob);
+        link.download = `用户用水扣费明细统计报表（${this.params.dateRange[0]} - ${this.params.dateRange[1]}）.xlsx`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(link.href);
+        ElMessage.success("导出成功");
+      } catch (error) {
+        console.error("导出失败:", error);
+        ElMessage.error("导出失败");
+      } finally {
+        loading.close();
+      }
+    },
+
     // 重置搜索条件
     clearParams() {
       const getMonthRange = () => {
@@ -441,6 +485,32 @@ export default {
   background-color: #fff;
   border: 2px solid #f2f2f2;
   margin-right: 0;
+}
+
+.export-bar {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding-left: 2.5%;
+  margin-bottom: 5px;
+}
+
+.export-out-btn {
+  display: flex;
+  align-items: center;
+  width: 85px;
+  height: 32px;
+  color: white;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.3s;
+  font-size: 20px;
+  background-color: #fff;
+  border: 2px solid #f2f2f2;
+}
+
+.export-out-btn:hover {
+  border-color: #45ba7e;
 }
 
 .main-content {
