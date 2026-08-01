@@ -390,7 +390,7 @@ export default {
         company: null,
         priceId: null,
         pageNum: 1,
-        pageSize: this.params.pageSize
+        pageSize: 999999
       };
       this.fetchTotalData();
     },
