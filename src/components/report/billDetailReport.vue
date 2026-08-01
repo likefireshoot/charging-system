@@ -290,6 +290,7 @@ export default {
     // 查询总额数据
     // 【全部替换原有fetchTotalData】
     async fetchTotalData() {
+      this.params.pageNum = 1;
       this.loading = true;
       this.allFullData = [];
       this.detailTableData = [];
@@ -390,7 +391,7 @@ export default {
         company: null,
         priceId: null,
         pageNum: 1,
-        pageSize: 999999
+        pageSize: 15,
       };
       this.fetchTotalData();
     },
