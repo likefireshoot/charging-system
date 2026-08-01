@@ -471,7 +471,8 @@ watch(
         arrowIcon2,
         children: [
           { id: 131, name: "快速抄表", icon: require("@/assets/menu/icon11.png"), icon2: require("@/assets/menu/icon12.png"), path: "/meterReading/quickMeterReport" },
-          { id: 132, name: "抄表审核", icon: require("@/assets/menu/icon13.png"), icon2: require("@/assets/menu/icon14.png"), path: "/meterReading/reviewMeterReport" }
+          { id: 132, name: "抄表审核", icon: require("@/assets/menu/icon13.png"), icon2: require("@/assets/menu/icon14.png"), path: "/meterReading/reviewMeterReport" },
+          { id: 133, name: "区域报表", icon: require("@/assets/menu/icon15.png"), icon2: require("@/assets/menu/icon16.png"), path: "/meterReading/regionMeterReport" }
         ]
       };
 
