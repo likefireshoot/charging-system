@@ -49,15 +49,15 @@
 
     <div class="main-content">
       <div class="report-title">
-        <h2>收费明细统计报表（{{ params.dateRange[0] }} - {{ params.dateRange[1] }}）</h2>
-      </div>
-      <div class="export-bar">
-        <div class="export-out-btn" style="margin-right: 10px" @click="handleExport">
-          <img src="@/assets/yonghu/icon1.3.png" alt="" style="margin-left: 7px" />
-          <span style="font-size: 20px; margin-left: 10px; color: #5a5a5a">导出</span>
+        <div class="export-out-btn" @click="handleExport">
+          <img src="@/assets/yonghu/icon1.3.png" alt="" />
+          <span style="margin-left: 6px; color: #5a5a5a">导出</span>
+        </div>
+        <div class="title-text">
+          <h2>收费明细统计报表（{{ params.dateRange[0] }} - {{ params.dateRange[1] }}）</h2>
         </div>
       </div>
-      <div class="total-table-wrapper" style="width: 95%; margin: 0 auto;display: flex; flex-direction: column">
+      <div class="total-table-wrapper" style="margin: 0 auto;display: flex; flex-direction: column">
         <div class="table-scroll">
           <el-table
               class="detail-table"
@@ -487,13 +487,13 @@ export default {
 .export-out-btn {
   display: flex;
   align-items: center;
-  width: 85px;
+  width: 70px;
   height: 32px;
   color: white;
   border-radius: 5px;
   cursor: pointer;
   transition: all 0.3s;
-  font-size: 20px;
+  font-size: 18px;
   background-color: #fff;
   border: 2px solid #f2f2f2;
 }
@@ -516,9 +516,11 @@ export default {
 }
 
 .report-title {
+  display: flex;
   text-align: center;
   margin-top: 20px;
-  margin-bottom: 10px;
+  margin-bottom: 15px;
+  width: 100%;
 }
 
 .report-title h2 {
@@ -526,6 +528,10 @@ export default {
   color: #333;
   margin: 0;
   font-weight: 600;
+}
+
+.title-text {
+  width: calc(100% - 70px);
 }
 
 .total-table-wrapper {

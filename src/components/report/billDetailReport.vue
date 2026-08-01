@@ -49,15 +49,15 @@
 
     <div class="main-content">
       <div class="report-title">
-        <h2>用户用水扣费明细统计报表（{{ params.dateRange[0] }} - {{ params.dateRange[1] }}）</h2>
-      </div>
-      <div class="export-bar">
-        <div class="export-out-btn" style="margin-right: 10px" @click="handleExport">
-          <img src="@/assets/yonghu/icon1.3.png" alt="" style="margin-left: 7px" />
-          <span style="font-size: 20px; margin-left: 10px; color: #5a5a5a">导出</span>
+        <div class="export-out-btn" @click="handleExport">
+          <img src="@/assets/yonghu/icon1.3.png" alt="" />
+          <span style="margin-left: 6px; color: #5a5a5a">导出</span>
+        </div>
+        <div class="title-text">
+          <h2>用户用水扣费明细统计报表（{{ params.dateRange[0] }} - {{ params.dateRange[1] }}）</h2>
         </div>
       </div>
-      <div class="total-table-wrapper" style="width: 95%; margin: 0 auto;display: flex; flex-direction: column">
+      <div class="total-table-wrapper" style="margin: 0 auto;display: flex; flex-direction: column">
         <div class="table-scroll">
         <el-table
             class="detail-table"
@@ -78,27 +78,11 @@
           <el-table-column property="regionName" label="区域名称" align="center" />
           <el-table-column property="priceName" label="价格类型" align="center" />
           <el-table-column label="费用构成明细" align="center">
-            <el-table-column property="waterFee" label="水费总额（元）" align="center" >
-              <template #default="scope">
-                {{ Number(scope.row.waterFee || 0).toFixed(2) }}
-              </template>
-            </el-table-column>
-            <el-table-column property="sewageFee" label="污水处理费总额（元）" align="center" >
-              <template #default="scope">
-                {{ Number(scope.row.sewageFee || 0).toFixed(2) }}
-              </template>
-            </el-table-column>
-            <el-table-column property="baseFee" label="保底扣费总额（元）" align="center" >
-              <template #default="scope">
-                {{ Number(scope.row.baseFee || 0).toFixed(2) }}
-              </template>
-            </el-table-column>
+            <el-table-column property="waterFee" label="水费总额（元）" align="center" />
+            <el-table-column property="sewageFee" label="污水处理费总额（元）" align="center" />
+            <el-table-column property="baseFee" label="保底扣费总额（元）" align="center" />
           </el-table-column>
-          <el-table-column property="totalCharge" label="总扣费金额（元）" align="center" >
-            <template #default="scope">
-              {{ Number(scope.row.totalCharge || 0).toFixed(2) }}
-            </template>
-          </el-table-column>
+          <el-table-column property="totalCharge" label="总扣费金额（元）" align="center" />
         </el-table>
         </div>
         <!-- 底部单独汇总行表格，无表头，固定在下方 -->
@@ -182,6 +166,8 @@ export default {
       quyu_data: [],
       priceOptionList: [],
       loading: false,
+      // =====新增=====
+      allFullData: [], // 存放接口一次性返回的全部数据
       // 【新增2行】明细数组、汇总行对象
       detailTableData: [],
       totalTable: [
@@ -215,13 +201,19 @@ export default {
     // 页码切换
     handlePageChange(page) {
       this.params.pageNum = page;
-      this.fetchTotalData();
+      this.sliceTableData(); // 本地切片，不再请求接口
     },
 // 每页条数切换
     handleSizeChange(size) {
       this.params.pageSize = size;
       this.params.pageNum = 1;
-      this.fetchTotalData();
+      this.sliceTableData(); // 本地切片，不再请求接口
+    },
+    // 前端本地分页切片
+    sliceTableData() {
+      const start = (this.params.pageNum - 1) * this.params.pageSize;
+      const end = start + this.params.pageSize;
+      this.detailTableData = this.allFullData.slice(start, end);
     },
     // 获取水厂列表
     async getCompanyList() {
@@ -299,6 +291,7 @@ export default {
     // 【全部替换原有fetchTotalData】
     async fetchTotalData() {
       this.loading = true;
+      this.allFullData = [];
       this.detailTableData = [];
       try {
         const body = {
@@ -307,13 +300,14 @@ export default {
           companyId: this.params.company || this.companyId,
           regionId: this.params.region.length ? this.params.region : [],
           priceId: this.params.priceId ?? null,
-          pageNum: this.params.pageNum,
-          pageSize: this.params.pageSize
+          pageNum: 1,
+          pageSize: 999999,
         };
         const response = await service.post("/feeGroupReport", body);
         if (response.code === 200) {
-          this.detailTableData = response.data.items || [];
+          this.allFullData = response.data.items || [];
           this.totalNum = response.data.totalNum || 0;
+          this.sliceTableData()
           const total = response.data.total;
           // 赋值底部汇总行
           this.totalTable = [
@@ -352,7 +346,7 @@ export default {
           regionId: this.params.region.length ? this.params.region : [],
           priceId: this.params.priceId ?? null,
         };
-        const response = await service.post("/exportFeeGroupReport", body, { responseType: "blob" });
+        const response = await service.post("/exportFeeGroupReportV2", body, { responseType: "blob" });
         const blob = new Blob([response.data], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
         if (blob.size === 0) {
           ElMessage.warning("内容为空，无法下载");
@@ -507,22 +501,22 @@ export default {
   display: flex;
   align-items: center;
   width: 100%;
-  padding-left: 2.5%;
-  margin-bottom: 5px;
+  margin-top: 10px;
 }
 
 .export-out-btn {
   display: flex;
   align-items: center;
-  width: 85px;
+  width: 70px;
   height: 32px;
   color: white;
   border-radius: 5px;
   cursor: pointer;
   transition: all 0.3s;
-  font-size: 20px;
+  font-size: 18px;
   background-color: #fff;
   border: 2px solid #f2f2f2;
+  padding: 0 8px;
 }
 
 .export-out-btn:hover {
@@ -543,9 +537,11 @@ export default {
 }
 
 .report-title {
+  display: flex;
   text-align: center;
   margin-top: 20px;
   margin-bottom: 15px;
+  width: 100%;
 }
 
 .report-title h2 {
@@ -553,6 +549,9 @@ export default {
   color: #333;
   margin: 0;
   font-weight: 600;
+}
+.title-text {
+  width: calc(100% - 70px);
 }
 
 .total-table-wrapper {
