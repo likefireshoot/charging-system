@@ -33,6 +33,7 @@ import userRecordDetail from "@/components/userManage/userRecordDetail.vue";
 import commandLog from "../views/commandLog.vue";
 import errorReportRecord from "../views/errorReportRecord.vue";
 import historyDataManage from "@/views/historyDataManage.vue";
+import deviceManage from "@/views/deviceManage.vue";
 import billDetailReport from "@/components/report/billDetailReport.vue";
 import abnormalChargeReport from "@/components/report/abnormalChargeReport.vue";
 import quickMeterReport from "@/views/quickMeterReport.vue";
@@ -233,6 +234,11 @@ const routes = [
         path: "/field3",
         name: "field3",
         component: field3,
+      },
+      {
+        path: "/deviceManage",
+        name: "deviceManage",
+        component: deviceManage,
       },
     ],
   },

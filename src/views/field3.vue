@@ -4,24 +4,27 @@
     <div class="setCard">
       <div class="controlCard" v-if="showPlayTool">
         <div class="itemBtn" @click.stop="RunPlay()">
-          <img src="@/assets/field/icon1.svg" alt="">
+          <img src="@/assets/field/icon1.svg" alt="" />
           <p>播放</p>
         </div>
         <span></span>
         <div class="itemBtn" @click.stop="rePlay()">
-          <img src="@/assets/field/icon6.svg" alt="">
+          <img src="@/assets/field/icon6.svg" alt="" />
           <p>回退</p>
-        </div><span></span>
-        <div class="itemBtn" @click.stop='pause()'>
-          <img src="@/assets/field/icon10.svg" alt="">
+        </div>
+        <span></span>
+        <div class="itemBtn" @click.stop="pause()">
+          <img src="@/assets/field/icon10.svg" alt="" />
           <p>停止</p>
-        </div><span></span>
+        </div>
+        <span></span>
         <div class="itemBtn" @click.stop="setMultiple(1)">
-          <img src="@/assets/field/icon8.svg" alt="">
+          <img src="@/assets/field/icon8.svg" alt="" />
           <p>快退</p>
-        </div><span></span>
+        </div>
+        <span></span>
         <div class="itemBtn" @click.stop="setMultiple(2)">
-          <img src="@/assets/field/icon7.svg" alt="">
+          <img src="@/assets/field/icon7.svg" alt="" />
           <p>快进</p>
         </div>
       </div>
@@ -36,9 +39,9 @@
       <div class="item">
         <h2 class="titleName">时间</h2>
         <div class="form">
-          <selectTime width="130" :nowTime='paramData.startTime'></selectTime>
+          <selectTime width="130" :nowTime="paramData.startTime"></selectTime>
           <p>至</p>
-          <selectTime width="130" :nowTime='paramData.endTime'></selectTime>
+          <selectTime width="130" :nowTime="paramData.endTime"></selectTime>
         </div>
       </div>
 
@@ -55,30 +58,29 @@
           <p>当前位置</p>
         </a> -->
         <a class="btn on" @click.stop="getTrack">
-          <img src="@/assets/field/icon2.svg" alt="">
+          <img src="@/assets/field/icon2.svg" alt="" />
           <p>查询轨迹</p>
         </a>
       </div>
       <div class="timeTxt">
-        <img src="@/assets/field/icon3.svg" alt="">
+        <img src="@/assets/field/icon3.svg" alt="" />
         <p>当前轨迹时间</p>
-        <h2 v-if="videoData.nowTime">{{ formatHourMinute(new Date(videoData.nowTime))}}</h2>
+        <h2 v-if="videoData.nowTime">{{ formatHourMinute(new Date(videoData.nowTime)) }}</h2>
         <h2 v-else>00:00</h2>
       </div>
     </div>
-
   </div>
 </template>
-  
-  <script setup>
-import { splitArray, formatDateTime, formatHourMinute } from '@/api/being';
+
+<script setup>
+import { splitArray, formatDateTime, formatHourMinute } from "@/api/being";
 import AMapLoader from "@amap/amap-jsapi-loader";
-import { useStore } from 'vuex';
+import { useStore } from "vuex";
 const store = useStore();
-import { getCurrentInstance, onMounted, onUnmounted, reactive, ref, } from 'vue';
+import { getCurrentInstance, onMounted, onUnmounted, reactive, ref } from "vue";
 const { proxy } = getCurrentInstance();
-import { useRouter } from 'vue-router';
-import { ElMessage } from 'element-plus';
+import { useRouter } from "vue-router";
+import { ElMessage } from "element-plus";
 
 let aMaps = null;
 let AMap = null;
@@ -90,59 +92,65 @@ const mapData = {
   rotateEnable: true,
   pitchEnable: true,
   pitch: 25,
-}
-
+};
 
 async function gaodeMap() {
   AMap = await AMapLoader.load({
     key: "7052effea6756cf9731568d2f386c5b2", // 申请好的Web端开发者Key，首次调用 load 时必填
     version: "2.0", // 指定要加载的 JSAPI 的版本，缺省时默认为 1.4.15
-    plugins: ['AMap.MapType', 'AMap.MoveAnimation'], // 需要使用的的插件列表，如比例尺'AMap.Scale'等
+    plugins: ["AMap.MapType", "AMap.MoveAnimation"], // 需要使用的的插件列表，如比例尺'AMap.Scale'等
   });
+  const containerEl = document.getElementById("container");
+  console.log("=== field3.vue 地图调试 ===");
+  console.log("container 元素:", containerEl);
+  console.log("container 尺寸:", containerEl?.clientWidth, "x", containerEl?.clientHeight);
+  console.log("mapData.center:", mapData.center, "viewMode:", mapData.viewMode);
+  if (!containerEl || containerEl.clientWidth === 0 || containerEl.clientHeight === 0) {
+    console.warn("⚠️ 地图容器尺寸为 0，高德可能报 LngLat(NaN, NaN)。请检查 .mapCard / .cardBody 高度");
+  }
+
   aMaps = new AMap.Map("container", mapData);
   infoWindow = new AMap.InfoWindow({
     isCustom: true,
-    content: "信息弹框",  // 初始内容为空
-    offset: new AMap.Pixel(0, -30)  // 信息窗口偏移
+    content: "信息弹框", // 初始内容为空
+    offset: new AMap.Pixel(0, -30), // 信息窗口偏移
   });
 }
-
-
 
 const userList = ref([]);
 
 const userSelect = ref(null);
 function getTimeHm() {
   let date = new Date();
-  let hour = date.getHours()
+  let hour = date.getHours();
   let minute = date.getMinutes();
-  hour = hour < 10 ? '0' + hour : hour;
-  minute = minute < 10 ? '0' + minute : minute;
-  return `${hour}:${minute}`
+  hour = hour < 10 ? "0" + hour : hour;
+  minute = minute < 10 ? "0" + minute : minute;
+  return `${hour}:${minute}`;
 }
-
-
 
 const nowDate = new Date();
 let yearTxt = nowDate.getFullYear();
-let monthTxt = nowDate.getMonth() < 9 ? '0' + (parseInt(nowDate.getMonth()) + 1) : (parseInt(nowDate.getMonth()) + 1);
-let dateTxt = nowDate.getDate() < 10 ? '0' + (parseInt(nowDate.getDate())) : (parseInt(nowDate.getDate()));
-let yearDate = ref([yearTxt, monthTxt, dateTxt].join('-'));
-
+let monthTxt = nowDate.getMonth() < 9 ? "0" + (parseInt(nowDate.getMonth()) + 1) : parseInt(nowDate.getMonth()) + 1;
+let dateTxt = nowDate.getDate() < 10 ? "0" + parseInt(nowDate.getDate()) : parseInt(nowDate.getDate());
+let yearDate = ref([yearTxt, monthTxt, dateTxt].join("-"));
 
 const paramData = reactive({
-  startTime: '00:00',
-  endTime: '23:59',
+  startTime: "00:00",
+  endTime: "23:59",
   userId: null,
 });
 
-
 async function getAllUsers() {
-  let { data } = await proxy.ajax.get('getAllUsers');
+  let params = {
+    page: 1,
+    pageSize: 1000,
+    companyId: JSON.parse(sessionStorage.getItem("userData")).companyId,
+  };
+  let { data } = await proxy.ajax.post("/staff/queryStaff", params, true);
   userList.value = data;
-  userSelect.value = data.length > 0 ? data[0].username : null;
-  paramData.userId = data.length > 0 ? data[0].id : null;
-
+  userSelect.value = data.length > 0 ? data[0].staffName : null;
+  paramData.userId = data.length > 0 ? data[0].staffId : null;
 }
 function setUser(item) {
   paramData.userId = item.id;
@@ -152,11 +160,8 @@ let frameNum = ref(0);
 let frametList = reactive([]);
 let playMultiple = ref(1);
 let isPlayIng = ref(false);
-let playType = ref(0); // 0 停止 1  正序播放，2 反序播放 3 
+let playType = ref(0); // 0 停止 1  正序播放，2 反序播放 3
 const showPlayTool = ref(false);
-
-
-
 
 const mapMarketPolylines = reactive({
   UserTrack: [],
@@ -164,7 +169,6 @@ const mapMarketPolylines = reactive({
   market: [],
   Polylines: [],
 });
-
 
 const videoData = reactive({
   playing: false,
@@ -175,14 +179,12 @@ const videoData = reactive({
   nowTime: null,
   market: [],
   Polylines: [],
-})
-
+});
 
 const nowTime = ref(null);
 function setDate(item) {
   yearDate.value = item;
 }
-
 
 async function getTrack() {
   let param = new Object();
@@ -194,24 +196,16 @@ async function getTrack() {
   param.endTime = `${yearDate.value} ${paramData.endTime}`;
   param.userId = paramData.userId;
 
-
   aMaps.remove(mapMarketPolylines.market);
   aMaps.remove(mapMarketPolylines.Polylines);
   videoData.playLength = 0;
 
-
-
   pause();
 
-  let { data } = await proxy.ajax.post('getUserTrack', param, true);
-
-
-
+  let { data } = await proxy.ajax.post("getUserTrack", param, true);
 
   if (data.length == 0) {
-
-
-    ElMessage.warning('暂无轨迹');
+    ElMessage.warning("暂无轨迹");
 
     return;
   }
@@ -220,7 +214,7 @@ async function getTrack() {
 
   mapMarketPolylines.UserTrack = data.reduce((list, item) => {
     return [...list, ...item.points];
-  }, [])
+  }, []);
 
   let frametList = splitArray(mapMarketPolylines.UserTrack, 18).reduce((list, item) => {
     return [...list, item[0]];
@@ -233,61 +227,61 @@ async function getTrack() {
   aMaps.remove(mapMarketPolylines.market);
   aMaps.remove(mapMarketPolylines.Polylines);
 
-  mapMarketPolylines.market = frametList.map(item => {
+  mapMarketPolylines.market = frametList.map((item) => {
     let circleMarker = {
       position: [item.longitude, item.latitude],
       offset: new AMap.Pixel(-13, -30),
       icon: "device/market.png",
-      extData: item
+      extData: item,
     };
-    return new AMap.Marker(circleMarker)
+    return new AMap.Marker(circleMarker);
   });
-
 
   videoData.nowTime = mapMarketPolylines.UserTrack[0].timestamp;
   aMaps.add(mapMarketPolylines.market);
 
   mapMarketPolylines.Polylines = mapMarketPolylines.UserTrack.reduce((list, item) => {
-    if (list.find(a => a.trackId == item.trackId)) {
+    if (list.find((a) => a.trackId == item.trackId)) {
       return list;
     } else {
-      return [...list, item]
+      return [...list, item];
     }
-  }, []).map(a => {
-    return mapMarketPolylines.UserTrack.filter(item => item.trackId == a.trackId)
-  }).map(item => {
-    let PolylineItem = new AMap.Polyline({
-      path: item.map(a => { return [a.longitude, a.latitude] }),
-      strokeColor: "#46b97e",
-      strokeOpacity: 1,
-      strokeWeight: 6,
-      lineJoin: 'round',
-      lineCap: 'round',
-      zIndex: 5,
-      showDir: true,
-      extData: item
+  }, [])
+    .map((a) => {
+      return mapMarketPolylines.UserTrack.filter((item) => item.trackId == a.trackId);
+    })
+    .map((item) => {
+      let PolylineItem = new AMap.Polyline({
+        path: item.map((a) => {
+          return [a.longitude, a.latitude];
+        }),
+        strokeColor: "#46b97e",
+        strokeOpacity: 1,
+        strokeWeight: 6,
+        lineJoin: "round",
+        lineCap: "round",
+        zIndex: 5,
+        showDir: true,
+        extData: item,
+      });
+      return PolylineItem;
     });
-    return PolylineItem
-  })
   videoData.nowTime = mapMarketPolylines.UserTrack[0].timestamp;
   aMaps.add(mapMarketPolylines.market);
   aMaps.add(mapMarketPolylines.Polylines);
   aMaps.setFitView(mapMarketPolylines.market, false, [30, 20, 30, 20], 20);
 
-  mapMarketPolylines.market.map(item => {
-    item.on('mouseover', a => {
+  mapMarketPolylines.market.map((item) => {
+    item.on("mouseover", (a) => {
       let data = item.getExtData();
       infoWindow.setContent(`<div class="mapTimeCard"><h2>当前时刻:${formatDateTime(new Date(data.timestamp))}</h2></div>`);
-      infoWindow.open(aMaps, item.getPosition());  // 在 Marker 位置打开信息窗口
-    })
-    item.on('mouseout', a => {
+      infoWindow.open(aMaps, item.getPosition()); // 在 Marker 位置打开信息窗口
+    });
+    item.on("mouseout", (a) => {
       infoWindow.close();
-    })
-  })
+    });
+  });
 }
-
-
-
 
 function setMapMarketPolylines(isSetFitView) {
   aMaps.remove(mapMarketPolylines.Polylines);
@@ -298,46 +292,48 @@ function setMapMarketPolylines(isSetFitView) {
     } else {
       item.hide();
     }
-  })
+  });
 
-
-  let PolylineIndex = mapMarketPolylines.UserTrack.findIndex(item => item.id == mapMarketPolylines.marketArray[videoData.playLength - 1].id);
+  let PolylineIndex = mapMarketPolylines.UserTrack.findIndex((item) => item.id == mapMarketPolylines.marketArray[videoData.playLength - 1].id);
   let PolylinesArray = mapMarketPolylines.UserTrack.filter((item, index) => index <= PolylineIndex);
   mapMarketPolylines.Polylines = PolylinesArray.reduce((list, item) => {
-    if (list.find(a => a.trackId == item.trackId)) {
+    if (list.find((a) => a.trackId == item.trackId)) {
       return list;
     } else {
-      return [...list, item]
+      return [...list, item];
     }
-  }, []).map(a => {
-    return PolylinesArray.filter(item => item.trackId == a.trackId)
-  }).map(item => {
-    let PolylineItem = new AMap.Polyline({
-      path: item.map(a => { return [a.longitude, a.latitude] }),
-      strokeColor: "#46b97e",
-      strokeOpacity: 1,
-      strokeWeight: 6,
-      lineJoin: 'round',
-      lineCap: 'round',
-      zIndex: 5,
-      showDir: true,
+  }, [])
+    .map((a) => {
+      return PolylinesArray.filter((item) => item.trackId == a.trackId);
+    })
+    .map((item) => {
+      let PolylineItem = new AMap.Polyline({
+        path: item.map((a) => {
+          return [a.longitude, a.latitude];
+        }),
+        strokeColor: "#46b97e",
+        strokeOpacity: 1,
+        strokeWeight: 6,
+        lineJoin: "round",
+        lineCap: "round",
+        zIndex: 5,
+        showDir: true,
+      });
+      return PolylineItem;
     });
-    return PolylineItem
-  });
 
   videoData.nowTime = mapMarketPolylines.market[videoData.playLength - 1].timestamp;
   aMaps.add(mapMarketPolylines.Polylines);
-};
-
+}
 
 //播放
 function play() {
   if (videoData.playType == 0) return;
   let length = mapMarketPolylines.marketArray.length;
   if (videoData.playLength == 0) {
-    mapMarketPolylines.market.map(item => {
+    mapMarketPolylines.market.map((item) => {
       item.hide();
-    })
+    });
     aMaps.remove(mapMarketPolylines.Polylines);
     mapMarketPolylines.Polylines = [];
   }
@@ -347,7 +343,7 @@ function play() {
       setMapMarketPolylines();
       setTimeout(() => {
         play();
-      }, videoData.Multiple * 1000)
+      }, videoData.Multiple * 1000);
       return;
     }
     videoData.playing = false;
@@ -358,26 +354,25 @@ function play() {
       setMapMarketPolylines();
       setTimeout(() => {
         play();
-      }, videoData.Multiple * 1000)
+      }, videoData.Multiple * 1000);
       return;
     }
     videoData.playing = false;
   }
 }
 
-
 // 开始播放
 function RunPlay() {
   if (videoData.playing && videoData.playType == 1) {
-    ElMessage.warning('当前正在播放');
+    ElMessage.warning("当前正在播放");
     return;
-  };
+  }
   pause();
   setTimeout(() => {
     videoData.playType = 1;
     videoData.playing = true;
     play();
-  }, 1150)
+  }, 1150);
   play();
 }
 
@@ -388,22 +383,22 @@ function pause() {
 
 function rePlay() {
   if (videoData.playing && videoData.playType == 2) {
-    ElMessage.warning('当前正在回放');
+    ElMessage.warning("当前正在回放");
     return;
-  };
+  }
   pause();
   setTimeout(() => {
     videoData.playType = 2;
     videoData.playing = true;
     play();
-  }, 1250)
+  }, 1250);
 }
 
 function setMultiple(index) {
   //快退
   if (index == 1) {
     if (videoData.Multiple >= 2.75) {
-      ElMessage.warning('已达到最慢倍数！');
+      ElMessage.warning("已达到最慢倍数！");
       return;
     }
     videoData.Multiple = parseFloat(Number(videoData.Multiple) + 0.25).toFixed(2);
@@ -411,49 +406,32 @@ function setMultiple(index) {
   //快进
   if (index == 2) {
     if (videoData.Multiple <= 0.25) {
-      ElMessage.warning('已达到最大倍数！');
+      ElMessage.warning("已达到最大倍数！");
       return;
     }
     videoData.Multiple = parseFloat(Number(videoData.Multiple) - 0.25).toFixed(2);
   }
 }
 
-
-function nowMarket() {
-
-
-};
-
-
-
+function nowMarket() {}
 
 onMounted(async () => {
-  store.commit('setNavIndex', 1);
+  store.commit("setNavIndex", 1);
   getAllUsers();
   await gaodeMap();
-
 });
 
 onUnmounted(() => {
   // map?.destroy();
 });
+</script>
 
-
-
-
-
-
-
-
-
-  </script>
-  
-  
-  <style lang="scss" scoped>
+<style lang="scss" scoped>
 .cardBody {
   background: #f9f9f9;
   display: flex;
   flex-direction: column;
+  height: 100%; /* 兜底：确保根容器撑满 #app，使 #container 有有效高度，避免高德 3D 地图 LngLat(NaN, NaN) */
 }
 
 .mapCard {

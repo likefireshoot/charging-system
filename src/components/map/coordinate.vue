@@ -122,10 +122,10 @@
 
   </div>
 </template>
-  
-  
-  
-  
+
+
+
+
   <script setup>
 import { ElMessage } from 'element-plus'
 import { reactive, defineProps, ref, onMounted, onBeforeUnmount,defineEmits,getCurrentInstance } from "vue";
@@ -248,14 +248,14 @@ async function save(){
 
 
   </script>
-  
-  
+
+
   <style lang="scss" scoped>
 .popCard {
   position: absolute;
-  right: 20px;
+  right: 180px;
   bottom: 20px;
-  top: 68px;
+  top: 20px;
   width: 430px;
   background: #fff;
   z-index: 200;
@@ -280,7 +280,7 @@ async function save(){
     padding: 0 20px;
     position: relative;
     p {
-      font-size: 18px;
+      font-size: 22px;
       color: #585657;
     }
     a {
@@ -362,9 +362,10 @@ async function save(){
 }
 
 .title {
-  font-size: 16px;
+  font-size: 20px;
   color: #585657;
   line-height: 32px;
+  width: 390px;
   height: 32px;
   margin: 10px 20px 0;
 }
@@ -373,7 +374,7 @@ async function save(){
   height: 40px;
   line-height: 40px;
   background: #ecf8f2;
-  font-size: 18px;
+  font-size: 20px;
   color: #585657;
   font-weight: bold;
   padding: 0 15px;
@@ -412,7 +413,7 @@ async function save(){
     position: relative;
     z-index: 20;
     p {
-      font-size: 16px;
+      font-size: 20px;
       color: #585657;
       flex: 1;
     }
@@ -458,7 +459,7 @@ async function save(){
         display: flex;
         align-items: center;
         padding: 0 12px;
-        font-size: 16px;
+        font-size: 20px;
         color: #a0a0a0;
         border-radius: 6px;
         transition: all 0.2s;
@@ -476,7 +477,7 @@ async function save(){
   display: flex;
   flex-direction: column;
   .name {
-    font-size: 16px;
+    font-size: 20px;
     color: #585657;
     line-height: 32px;
     height: 32px;
@@ -606,7 +607,7 @@ async function save(){
       }
     }
     p {
-      font-size: 16px;
+      font-size: 20px;
       color: #585657;
     }
   }
@@ -630,7 +631,7 @@ async function save(){
       margin-right: 8px;
     }
     p {
-      font-size: 16px;
+      font-size: 20px;
       color: #ffffff;
     }
   }
