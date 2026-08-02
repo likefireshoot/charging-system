@@ -15,7 +15,7 @@
             <el-option v-for="item in quyu_data" :key="item.id" :label="item.label" :value="item.value"></el-option>
           </el-select>
         </div>
-        <div class="search-input" style="margin-left: 20px">
+        <div class="search-input">
           <span>收费人</span>
           <el-select v-model="params.rechargeUser" clearable filterable placeholder="请选择收费人">
             <el-option v-for="item in staffNameOptions" :key="item" :label="item" :value="item"></el-option>
@@ -31,18 +31,18 @@
               end-placeholder="结束日期"
               format="YYYY-MM-DD"
               value-format="YYYY-MM-DD"
-              style="width: 320px; font-size: 18px;"
+              style="width: 320px; font-size: 16px;"
           />
         </div>
       </div>
       <div class="buttons">
         <div class="sercah-btn" @click="fetchTotalData">
           <img src="@/assets/baobiao/icon6.png" alt="" style="margin-left: 10px"/>
-          <span style="font-size: 20px; margin-left: 15%">查询</span>
+          <span style="margin-left: 10%">搜索</span>
         </div>
         <div class="clear-btn" @click="clearParams">
           <img src="@/assets/baobiao/icon5.png" alt="" style="margin-left: 10px"/>
-          <span style="font-size: 20px; margin-left: 15%; color: #5a5a5a">重置</span>
+          <span style="margin-left: 10%; color: #5a5a5a">清空</span>
         </div>
       </div>
     </div>
@@ -50,6 +50,12 @@
     <div class="main-content">
       <div class="report-title">
         <h2>收费明细统计报表（{{ params.dateRange[0] }} - {{ params.dateRange[1] }}）</h2>
+      </div>
+      <div class="export-bar">
+        <div class="export-out-btn" style="margin-right: 10px" @click="handleExport">
+          <img src="@/assets/yonghu/icon1.3.png" alt="" style="margin-left: 7px" />
+          <span style="font-size: 20px; margin-left: 10px; color: #5a5a5a">导出</span>
+        </div>
       </div>
       <div class="total-table-wrapper" style="width: 95%; margin: 0 auto;display: flex; flex-direction: column">
         <div class="table-scroll">
@@ -60,9 +66,9 @@
               v-loading="loading"
               style="width:100%"
               height="100%"
-              :header-cell-style="{ height: '66px',background: '#46B97E', color: '#FFFFFF', fontWeight: 'bold', fontSize: '23px' }"
+              :header-cell-style="{ height: '66px',background: '#46B97E', color: '#FFFFFF', fontWeight: 'bold', fontSize: '22px' }"
               :row-style="{ height: '50px' }"
-              :cell-style="{ fontSize: '23px', textAlign: 'center' }"
+              :cell-style="{ fontSize: '22px', textAlign: 'center' }"
           >
             <el-table-column property="businessDate" label="营业时间" align="center" />
             <el-table-column property="totalCount" label="交易笔数" align="center" />
@@ -78,7 +84,7 @@
             border
             style="width:100%;margin-top:-1px;"
             :show-header="false"
-            :cell-style="{ fontSize: '23px', textAlign: 'center', fontWeight: 'bold'}"
+            :cell-style="{ fontSize: '22px', textAlign: 'center', fontWeight: 'bold'}"
             row-class-name="summary-row"
         >
           <el-table-column property="businessDate" align="center" />
@@ -110,7 +116,7 @@
 
 <script>
 import service from "@/api/request";
-import { ElMessage } from "element-plus";
+import { ElMessage, ElLoading } from "element-plus";
 export default {
   name: "BillDetailReport",
   data() {
@@ -294,6 +300,51 @@ export default {
       }
     },
 
+    // 导出
+    async handleExport() {
+      const loading = ElLoading.service({
+        fullscreen: true,
+        text: "正在导出，请稍后...",
+        background: "rgba(0, 0, 0, 0.3)",
+        customClass: "export-loading",
+      });
+      try {
+        const exportParams = {
+          companyId: this.params.company || this.companyId,
+          startDate: this.params.dateRange[0],
+          endDate: this.params.dateRange[1],
+        };
+        if (this.params.region !== null) {
+          exportParams.regionId = this.params.region;
+        }
+        if (this.params.rechargeUser !== null) {
+          exportParams.rechargeUser = this.params.rechargeUser;
+        }
+        const response = await service.post("/exportRechargeDailyReport", null, {
+          params: exportParams,
+          responseType: "blob",
+        });
+        const blob = new Blob([response.data], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+        if (blob.size === 0) {
+          ElMessage.warning("内容为空，无法下载");
+          return;
+        }
+        const link = document.createElement("a");
+        link.href = window.URL.createObjectURL(blob);
+        link.download = `收费明细统计报表（${this.params.dateRange[0]} - ${this.params.dateRange[1]}）.xlsx`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(link.href);
+        ElMessage.success("导出成功");
+      } catch (error) {
+        console.error("导出失败:", error);
+        ElMessage.error("导出失败");
+      } finally {
+        loading.close();
+      }
+    },
+
     // 重置搜索条件
     clearParams() {
       const getMonthRange = () => {
@@ -350,58 +401,56 @@ export default {
 .baobiao-container {
   display: flex;
   flex-direction: column;
-  width: 100%;
-  height: 98%;
-  padding: 0 20px;
+  min-width: 94%;
+  height: 100%;
+  padding: 0 15px;
 }
 
 .search-box {
-  margin-top: 15px;
-  margin-bottom: 20px;
-  width: 100%;
-  min-height: 98px;
-  padding: 12px 0;
+  margin-top: 5px;
+  margin-bottom: 10px;
+  width: 99.3%;
+  height: 98px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   border: 1px solid #e9e9e9;
   border-radius: 5px;
   background-color: #fff;
+  padding: 0 10px;
 }
 
 .search-content {
   display: flex;
   flex-wrap: wrap;
   align-content: center;
-  width: calc(100% - 240px);
+  width: 80%;
   min-height: 100%;
 }
 
 .search-input {
   display: flex;
   flex-direction: column;
-  width: 18%;
-  min-width: 180px;
-  margin-right: 20px;
-  margin-bottom: 10px;
-  margin-left: 10px;
+  width: 15%;
+  margin-right: 10px;
+  height: 100%;
 }
 
 .search-input > span {
-  font-size: 20px;
+  font-size: 18px;
   margin-bottom: 5px;
 }
 
 .buttons {
   display: flex;
-  width: 240px;
+  width: 220px;
   height: 100%;
   align-items: center;
-  margin-right: 30px;
 }
 
 .buttons > * {
-  width: 120px;
+  width: 100px;
+  margin-right: 10px;
 }
 
 .sercah-btn,
@@ -413,37 +462,63 @@ export default {
   cursor: pointer;
   transition: all 0.3s;
   color: #fff;
+  font-size: 18px;
 }
 
 .sercah-btn {
   background-color: #45ba7e;
-  margin-right: 30px;
 }
 
 .clear-btn {
   background-color: #fff;
   border: 2px solid #f2f2f2;
-  margin-right: 10px;
+  margin-right: 0;
+}
+
+.export-bar {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding-left: 2.5%;
+  margin-bottom: 15px;
+  margin-left: 15px;
+}
+
+.export-out-btn {
+  display: flex;
+  align-items: center;
+  width: 85px;
+  height: 32px;
+  color: white;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.3s;
+  font-size: 20px;
+  background-color: #fff;
+  border: 2px solid #f2f2f2;
+}
+
+.export-out-btn:hover {
+  border-color: #45ba7e;
 }
 
 .main-content {
-  width: 96%;
+  width: 99.3%;
   flex: 1;
-  min-height: 0;
+  height: calc(100% - 120px);
+  border: 1px solid #e9e9e9;
   background-color: #fff;
   border-radius: 5px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-top: 10px;
   padding: 0 10px;
-  margin-bottom: 10px;
 }
 
 .report-title {
   text-align: center;
   margin-top: 20px;
-  margin-bottom: 20px;
+  margin-bottom: 10px;
 }
 
 .report-title h2 {
@@ -454,7 +529,7 @@ export default {
 }
 
 .total-table-wrapper {
-  width: 95%;
+  width: 100%;
   flex:1;
   min-height:0;
 
@@ -483,7 +558,7 @@ export default {
   background-color: #46B97E !important;
 }
 :deep(.summary-row td) {
-  font-size: 23px;
+  font-size: 22px;
   text-align: center;
   font-weight: bold;
   color: white;
@@ -503,11 +578,25 @@ export default {
 .page-box {
   flex-shrink: 0;
   width: 100%;
-  height: 65px;
+  height: 40px;
   display: flex;
   justify-content: center;
   align-items: center;
   position: static;
   margin-top: 5px;
+  font-size: 18px;
+}
+</style>
+
+<style scoped>
+:deep(.el-input__inner) {
+  font-size: 16px !important;
+  font-size: 16px !important;
+}
+:deep(.el-select__wrapper .el-select__placeholder) {
+  font-size: 16px !important;
+}
+:deep(.el-select__wrapper .el-select__selected-item) {
+  font-size: 16px !important;
 }
 </style>

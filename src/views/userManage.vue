@@ -48,24 +48,24 @@
         <div class="command-btn"
              :class="{ 'btn-single-only-disabled': multipleSelection.length === 0 || hasPauseUserSelected }"
              @click="(multipleSelection.length > 0 && !hasPauseUserSelected) && openBatchPauseDialog()"
-             v-if="staffPermissionIds.includes(11)">
+             v-if="staffPermissionIds.includes(63)">
           <img src="@/assets/menu/icon19.png" alt="" />
           <span>停户</span>
         </div>
         <div class="water-meter-record-btn" @click="pause_record_btn_click"
-             v-if="staffPermissionIds.includes(11)">
+             v-if="staffPermissionIds.includes(64)">
           <img src="@/assets/menu/icon19.png" alt="" />
           <span>停户列表</span>
         </div>
         <div class="command-btn"
              :class="{ 'btn-single-only-disabled': multipleSelection.length === 0 }"
              @click="multipleSelection.length > 0 && openBatchCloseDialog()"
-             v-if="staffPermissionIds.includes(11)">
+             v-if="staffPermissionIds.includes(65)">
           <img src="@/assets/menu/icon3.png" alt="" />
           <span>销户</span>
         </div>
         <div class="water-meter-record-btn" @click="close_record_btn_click"
-             v-if="staffPermissionIds.includes(11)">
+             v-if="staffPermissionIds.includes(66)">
           <img src="@/assets/menu/icon3.png" alt="" />
           <span>销户列表</span>
         </div>
@@ -80,12 +80,12 @@
           <span>区域关阀设置</span>
         </div>
         <div class="water-meter-record-btn" @click="post_pay_list_btn_click"
-             v-if="staffPermissionIds.includes(11)">
+             v-if="staffPermissionIds.includes(67)">
           <img src="@/assets/yonghu/icon7.png" alt="" />
           <span>欠费不关阀列表（后付费）</span>
         </div>
         <div class="water-meter-record-btn" @click="can_close_no_arrears_btn_click"
-             v-if="staffPermissionIds.includes(11)">
+             v-if="staffPermissionIds.includes(68)">
           <img src="@/assets/yonghu/icon7.png" alt="" />
           <span>不欠费可关阀列表</span>
         </div>
@@ -109,7 +109,7 @@
           <span>充值记录</span>
         </div>
         <div class="recharge-record-btn" @click="recharge_cancel_record_btn_click"
-             v-if="staffPermissionIds.includes(11)">
+             v-if="staffPermissionIds.includes(69)">
           <img src="@/assets/yonghu/icon7.png" alt="" />
           <span>充值撤销记录</span>
         </div>
@@ -767,20 +767,20 @@ export default {
         { key: 'recharge', label: '充值', permission: 10 },
         { key: 'changeMeter', label: '换表', permission: 13 },
         { key: 'rechargeRecord', label: '充值记录', permission: 11 },
-        { key: 'rechargeCancelRecord', label: '充值撤销记录', permission: 11 },
+        { key: 'rechargeCancelRecord', label: '充值撤销记录', permission: 69 },
         { key: 'changeRecord', label: '换表记录', permission: 14 },
         // 新增暂停记录
-        { key: 'pauseRecord', label: '停户记录', permission: 11 },
+        { key: 'pauseRecord', label: '停户列表', permission: 64 },
         // 新增销户记录
-        { key: 'closeRecord', label: '销户记录', permission: 11 },
+        { key: 'closeRecord', label: '销户列表', permission: 66 },
         { key: 'export', label: '导出', permission: null },
         { key: 'batchPrice', label: '批量修改水价类型', permission: null, defaultVisible: false },
         { key: 'commonMeterTemplate', label: '普表用水量模板下载', permission: null, defaultVisible: false },
         { key: 'commonMeterImport', label: '普表用水量信息导入', permission: null, defaultVisible: false },
-        { key: 'batchPause', label: '停户', permission: 11 },
-        { key: 'batchClose', label: '销户', permission: 11 },
-        { key: 'postPayList', label: '欠费不关阀列表（后付费）', permission: 11 },
-        { key: 'canCloseNoArrears', label: '不欠费可关阀列表', permission: 11 },
+        { key: 'batchPause', label: '停户', permission: 63 },
+        { key: 'batchClose', label: '销户', permission: 65 },
+        { key: 'postPayList', label: '欠费不关阀列表（后付费）', permission: 67 },
+        { key: 'canCloseNoArrears', label: '不欠费可关阀列表', permission: 68 },
       ],
 
       // ****** 筛选栏配置 ******
