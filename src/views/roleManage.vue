@@ -340,7 +340,7 @@ export default {
       editCheckAll: false,
       editIndeterminate: false,
       permissionList: [],
-      basePermissions: ["首页", "用户管理", "报表统计", "通知管理", "通知管理-短信记录"],
+      basePermissions: ["首页", "用户管理", "报表统计", "通知管理"],
 
       total: null,
 
@@ -538,10 +538,20 @@ export default {
         .get("/role/permissions")
         .then((res) => {
           if (res.code === 200) {
-            this.permissionList = res.data.map((item) => ({
+            // this.permissionList = res.data.map((item) => ({
+            //   id: item.permissionId,
+            //   label: item.permissionName,
+            // }));
+            let list = res.data.map((item) => ({
               id: item.permissionId,
               label: item.permissionName,
             }));
+            if (this.companyId !== 1){
+              list = list.filter(item => {
+                return item.label !== '员工中心-水厂管理' && item.label !== '员工中心-新增水厂'
+              })
+            }
+            this.permissionList = list;
           }
         })
         .catch((err) => {
