@@ -23,11 +23,13 @@
               </span>
             </div>
             <div class="data-item"><span>电话：</span>{{ currentUser.phone || '-' }}</div>
+            <div class="data-item" v-if="currentUser.userOtherPhone != null || companyId === 95"><span>电话2：</span>{{ currentUser.userOtherPhone != null ? currentUser.userOtherPhone : '暂无' }}</div>
             <div class="data-item"><span>开户：</span>{{ currentUser.createTime || '-' }}</div>
             <div class="data-item"><span>地址：</span>{{ currentUser.userAddr || '-' }}</div>
             <div class="data-item"><span>区域：</span>{{ currentUser.regionName || '-' }}</div>
             <div class="data-item"><span>价格：</span>{{ currentUser.userType || '-' }}</div>
             <div class="data-item"><span>水厂：</span>{{ currentUser.companyName || '-' }}</div>
+            <div class="data-item" v-if="currentUser.userRemark != null || companyId === 95"><span>备注：</span>{{ currentUser.userRemark != null ? currentUser.userRemark : '暂无' }}</div>
           </div>
         </div>
 
@@ -156,6 +158,9 @@ export default {
     };
   },
   computed: {
+    companyId() {
+      return JSON.parse(sessionStorage.getItem("userData")).companyId;
+    },
     selectedMeter() {
       return this.userMeters.find(m => m.meterCode === this.selectedMeterCode) || {};
     },
@@ -219,6 +224,8 @@ export default {
           userAddr: r.userAddr || "",
           regionName: r.regionName || "",
           phone: r.userPhone || "",
+          userOtherPhone: r.userOtherPhone,
+          userRemark: r.userRemark,
           userType: r.priceName || "",
           createTime: r.createTime || "",
           meterType: r.meterType || "",

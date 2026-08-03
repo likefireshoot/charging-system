@@ -282,6 +282,7 @@ const adminNavList = reactive([
     icon2: require("@/assets/menu/icon10.png"),
     path: "/report",
     ports: ["93"],
+    // 添加箭头图标信息
     arrowIcon1,
     arrowIcon2,
     children: [
@@ -305,7 +306,6 @@ const adminNavList = reactive([
     icon: require("@/assets/add/icon-02.png"),
     icon2: require("@/assets/add/icon-03.png"),
     path: "/reportManage",
-    ports: ["93"],
     arrowIcon1,
     arrowIcon2,
     children: [
@@ -361,28 +361,53 @@ const nonAdminNavList = reactive([
     icon2: require("@/assets/add/icon-03.png"),
     path: "/reportManage",
     ports: ["93"],
-    arrowIcon1,
-    arrowIcon2,
     children: [
       { id: 51, name: "短信配置", icon: require("@/assets/add/icon-04.png"), icon2: require("@/assets/add/icon-05.png"), path: "/reportManage/smsConfiguration" },
       { id: 52, name: "短信记录", icon: require("@/assets/add/icon-06.png"), icon2: require("@/assets/add/icon-07.png"), path: "/reportManage/smsRecord" },
     ],
   },
-  { id: 6, name: "警告管理", icon: require("@/assets/menu/icon19.png"), icon2: require("@/assets/menu/icon20.png"), path: "/warningManage", ports: ["92", "93"] },
   { id: 20, name: "水务地图", icon: require("@/assets/icon7.png"), icon2: require("@/assets/icon10.png"), path: "/map", ports: ["92"] },
   { id: 21, name: "外勤管理", icon: require("@/assets/icon8.png"), icon2: require("@/assets/icon9.png"), path: "/field", ports: ["92"] },
-]);
+  { id: 22, name: "设备管理", icon: require("@/assets/menu/icon32.png"), icon2: require("@/assets/menu/icon33.png"), path: "/deviceManage", ports: ["92"] },
+];
 
-navLists.sort((a, b) => {
-  const indexA = adminNavList.findIndex((item) => item.id === a.id);
-  const indexB = adminNavList.findIndex((item) => item.id === b.id);
-  return indexA - indexB;
-});
+const navLists = reactive([]);
+
+function buildMenu(userData) {
+  const tempMenus = JSON.parse(JSON.stringify(baseMenu));
+  if (staffPermissionIds.value.includes(1)) {
+    tempMenus.push({ id: 1, name: "开户管理", icon: require("@/assets/menu/icon24.png"), icon2: require("@/assets/menu/icon23.png"), path: "/accountManage", ports: ["93"] });
+  }
+  if (staffPermissionIds.value.includes(19)) {
+    tempMenus.push({ id: 3, name: "价格管理", icon: require("@/assets/menu/icon5.png"), icon2: require("@/assets/menu/icon6.png"), path: "/priceManage", ports: ["93"]});
+  }
+  if (staffPermissionIds.value.includes(27)) {
+    tempMenus.push({ id: 6, name: "警告管理", icon: require("@/assets/menu/icon19.png"), icon2: require("@/assets/menu/icon20.png"), path: "/warningManage", ports: ["92", "93"] });
+  }
+  if (staffPermissionIds.value.includes(51)) {
+    tempMenus.push({ id: 7, name: "异常数据", icon: require("@/assets/menu/icon30.png"), icon2: require("@/assets/menu/icon31.png"), path: "/errorReportRecord", ports: ["92", "93"]});
+  }
+  if (staffPermissionIds.value.includes(50)) {
+    tempMenus.push({ id: 8, name: "命令状态", icon: require("@/assets/menu/icon30.png"), icon2: require("@/assets/menu/icon31.png"), path: "/commandLog", ports: ["92", "93"]});
+  }
+  if (staffPermissionIds.value.includes(29)) {
+    tempMenus.push({ id: 9, name: "员工中心", icon: require("@/assets/add/icon-08.png"), icon2: require("@/assets/add/icon-09.png"), path: "/employeeManage", ports: ["92", "93"]});
+  }
+  if (staffPermissionIds.value.includes(35)) {
+    tempMenus.push({ id: 10, name: "角色管理", icon: require("@/assets/menu/icon27.png"), icon2: require("@/assets/menu/icon28.png"), path: "/roleManage", ports: ["93"] });
+  }
+  if (staffPermissionIds.value.includes(55)) {
+    tempMenus.push({ id: 11, name: "历史数据管理", icon: require("@/assets/menu/icon17.png"), icon2: require("@/assets/menu/icon18.png"), path: "/historyDataManage", ports: ["93"] });
+  }
+  if (staffPermissionIds.value.includes(39)) {
+    tempMenus.push({ id: 12, name: "操作日志", icon: require("@/assets/add/icon-10.png"), icon2: require("@/assets/add/icon-11.png"), path: "/logManage", ports: ["92", "93"]});
+  }
+  // 统一排序
+  tempMenus.sort((a,b) => a.id - b.id);
+  return tempMenus;
+}
 
 console.log(navLists);
-
-// 动态的navList
-const navList = reactive([]);
 
 const user_info_dialogFormVisible = ref(false);
 const userInfoData = reactive({
@@ -476,7 +501,7 @@ watch(
   (newUserData) => {
     navLists.length = 0;
 
-    const baseList = newUserData.staffCharacterId ? adminNavList : nonAdminNavList;
+    const baseList = buildMenu(newUserData);
     filterByPort(baseList).forEach((item) => navLists.push({ ...item }));
 
     // 所有公司都显示普表抄表菜单（只在 93 收费端口展示）
