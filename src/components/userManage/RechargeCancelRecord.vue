@@ -21,11 +21,12 @@
             <el-input v-model="transactionData.meterCode" placeholder="请输入..." />
           </div>
           <div class="search-input" style="width: 18%; margin-right: 10px">
-            <span>收费类型</span>
+            <span>退款方式</span>
             <el-select v-model="transactionData.rechargeType" placeholder="请选择收费类型">
               <el-option label="现金" value="现金"></el-option>
               <el-option label="微信支付" value="微信支付"></el-option>
               <el-option label="免费赠送" value="免费赠送"></el-option>
+              <el-option label="现金（销户退费）" value="现金（销户退费）" />
             </el-select>
           </div>
           <div class="search-input" style="width: 25%; margin-right: 10px">
@@ -56,6 +57,10 @@
         </div>
         <div class="recharge-record-list">
           <div class="command-buttons">
+            <div class="export-btn" @click="exportExcel">
+              <img src="@/assets/yonghu/icon1.3.png" alt="" />
+              <span>导出</span>
+            </div>
             <div class="reflush" style="margin-left: 10px" @click="reflush">
               <img src="@/assets/yonghu/icon15.png" alt="" />
             </div>
@@ -76,9 +81,9 @@
               <el-table-column type="selection" width="50" align="center" fixed="left" />
               <el-table-column property="userId" label="用户号" min-width="120" align="center" fixed="left" />
               <el-table-column property="userName" label="用户名称" min-width="140" align="center" />
-              <el-table-column property="regionName" label="所属区域" min-width="120" align="center" />
-              <el-table-column property="userPhone" label="联系电话" min-width="130" align="center" />
-              <el-table-column label="表号" min-width="180" align="center">
+              <el-table-column property="regionName" label="所属区域" min-width="100" align="center" />
+              <el-table-column property="userPhone" label="联系电话" min-width="100" align="center" />
+              <el-table-column label="表号" min-width="120" align="center">
                 <template #default="scope">
                   <div class="meter-code-cell">
                     <span class="meter-code-text">{{ scope.row.meterCode || "-" }}</span>
@@ -89,25 +94,25 @@
                   </div>
                 </template>
               </el-table-column>
-              <el-table-column property="rechargeType" label="充值方式" min-width="100" align="center" />
+              <el-table-column property="rechargeType" label="退款方式" min-width="100" align="center" />
               <el-table-column property="rechargeAmount" label="充值金额" min-width="110" align="center">
                 <template #default="scope">{{ scope.row.rechargeAmount }} 元</template>
               </el-table-column>
-              <el-table-column property="createTime" label="充值时间" min-width="170" align="center" />
-              <el-table-column property="createCancelTime" label="撤销时间" min-width="170" align="center" />
+              <el-table-column property="createTime" label="充值时间" min-width="140" align="center" />
+              <el-table-column property="createCancelTime" label="撤销时间" min-width="140" align="center" />
               <el-table-column property="cancelStaffName" label="撤销员工" min-width="100" align="center" />
               <el-table-column property="rechargeUser" label="充值员工" min-width="100" align="center" />
-              <el-table-column property="oldBalance" label="充值前余额/元" min-width="120" align="center">
-                <template #default="scope">{{ scope.row.oldBalance }} 元</template>
+              <el-table-column property="oldBalance" label="充值前余额" min-width="120" align="center">
+                <template #default="scope">{{ scope.row.oldBalance }}</template>
               </el-table-column>
-              <el-table-column property="newBalance" label="充值后余额/元" min-width="120" align="center">
-                <template #default="scope">{{ scope.row.newBalance }} 元</template>
+              <el-table-column property="newBalance" label="充值后余额" min-width="120" align="center">
+                <template #default="scope">{{ scope.row.newBalance }}</template>
               </el-table-column>
-              <el-table-column property="cancelOldBalance" label="撤销前余额/元" min-width="130" align="center">
-                <template #default="scope">{{ scope.row.cancelOldBalance ?? "-" }} 元</template>
+              <el-table-column property="cancelOldBalance" label="撤销前余额" min-width="130" align="center">
+                <template #default="scope">{{ scope.row.cancelOldBalance ?? "-" }}</template>
               </el-table-column>
-              <el-table-column property="cancelNewBalance" label="撤销后余额/元" min-width="130" align="center">
-                <template #default="scope">{{ scope.row.cancelNewBalance ?? "-" }} 元</template>
+              <el-table-column property="cancelNewBalance" label="撤销后余额" min-width="130" align="center">
+                <template #default="scope">{{ scope.row.cancelNewBalance ?? "-" }}</template>
               </el-table-column>
               <el-table-column property="meterType" label="水表类型" min-width="100" align="center" />
             </el-table>
@@ -301,7 +306,42 @@ export default {
         }
       }
       return obj;
-    }
+    },
+
+    // 导出撤销充值全局Excel
+    async exportExcel() {
+      try {
+        const params = this.buildQueryParams();
+        const queryStr = this.buildQueryStr(params);
+        // 后端导出接口地址
+        const url = `/userManage/userCharge/exportCancelRechargeGlobal${queryStr}`;
+        const res = await service.get(url, {
+          responseType: "blob"
+        });
+
+        const blob = new Blob([res.data], {
+          type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        });
+
+        if (blob.size === 0) {
+          ElMessage.warning("当前筛选条件无导出数据");
+          return;
+        }
+
+        const downloadUrl = window.URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = downloadUrl;
+        link.download = "充值撤销记录表.xlsx";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(downloadUrl);
+        ElMessage.success("导出成功");
+      } catch (error) {
+        console.error("撤销充值记录导出失败：", error);
+        ElMessage.error("导出失败：" + (error.response?.data?.message || error.message));
+      }
+    },
   },
 };
 </script>
@@ -320,7 +360,6 @@ export default {
 .recharge-record-dialog-content {
   width: 94%;
   max-width: 2100px;
-  //max-height: 96vh;
   height: 98%;
   border: 1px solid #fafafa;
   background-color: #fafafa;
@@ -336,8 +375,6 @@ export default {
 
 .recharge-record-content {
   width: 100%;
-  //min-height: 72vh;
-  //max-height: calc(88vh - 45px);
   height: 100%;
   background-color: #fff;
   border-radius: 5px;
@@ -526,6 +563,30 @@ export default {
   font-size: 20px;
   background-color: #fff;
   border: 2px solid #f2f2f2;
+}
+
+.export-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  background-color: #fff;
+  border: 1px solid #dcdfe6;
+  transition: all 0.3s;
+  font-size: 20px;
+  color: #606266;
+}
+
+.export-btn img {
+  width: 18px;
+  height: 18px;
+}
+
+.export-btn:hover {
+  background-color: #f5f7fa;
+  border-color: #46B97E;
 }
 
 .page-box {

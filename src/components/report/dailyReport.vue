@@ -238,9 +238,9 @@ export default {
 
       // 创建 ResizeObserver 实例来监听 weekshouyi div 大小变化
       this.weekchartResizeObserver = new ResizeObserver(
-        this.debounce(() => {
-          this.weekchart.resize(); // 当大小变化时，调用 resize 来调整图表的尺寸
-        }, 200)
+          this.debounce(() => {
+            this.weekchart.resize(); // 当大小变化时，调用 resize 来调整图表的尺寸
+          }, 200)
       ); // 200 毫秒的防抖延时
 
       // 开始监听 weekshouyi div 的大小变化
@@ -256,22 +256,22 @@ export default {
     },
     getCompanyList() {
       service
-        .get("/getAllUnblockCompany")
-        .then((response) => {
-          if (response.code === 200) {
-            this.companyList = response.data.map((item) => {
-              return {
-                id: item.companyId,
-                name: item.companyName,
-              };
-            });
-          } else {
-            ElMessage.error(response.msg);
-          }
-        })
-        .catch((error) => {
-          console.error(error);
-        });
+          .get("/getAllUnblockCompany")
+          .then((response) => {
+            if (response.code === 200) {
+              this.companyList = response.data.map((item) => {
+                return {
+                  id: item.companyId,
+                  name: item.companyName,
+                };
+              });
+            } else {
+              ElMessage.error(response.msg);
+            }
+          })
+          .catch((error) => {
+            console.error(error);
+          });
     },
     getRegionData() {
       let url = "";
@@ -285,36 +285,36 @@ export default {
         url = `/getRegion?companyId=${this.companyId}`; // 所属水厂ID
       }
       service
-        .get(`${url}`)
-        .then((response) => {
-          if (response.code === 200) {
-            this.quyu_data = response.data.map((item) => {
-              return {
-                id: item.regionId,
-                value: item.regionId,
-                label: item.regionName,
-              };
-            });
-            console.log(this.quyu_data);
-          }
-        })
-        .catch((error) => {
-          ElMessage.error("获取区域数据失败");
-        });
+          .get(`${url}`)
+          .then((response) => {
+            if (response.code === 200) {
+              this.quyu_data = response.data.map((item) => {
+                return {
+                  id: item.regionId,
+                  value: item.regionId,
+                  label: item.regionName,
+                };
+              });
+              console.log(this.quyu_data);
+            }
+          })
+          .catch((error) => {
+            ElMessage.error("获取区域数据失败");
+          });
     },
     getStaffNames() {
       service
-        .get("/staff/getStaffNames")
-        .then((response) => {
-          if (response.code === 200) {
-            this.staffNameOptions = [...new Set((response.data || []).filter(Boolean))];
-          } else {
-            ElMessage.error(response.msg);
-          }
-        })
-        .catch(() => {
-          ElMessage.error("获取收费人列表失败");
-        });
+          .get("/staff/getStaffNames")
+          .then((response) => {
+            if (response.code === 200) {
+              this.staffNameOptions = [...new Set((response.data || []).filter(Boolean))];
+            } else {
+              ElMessage.error(response.msg);
+            }
+          })
+          .catch(() => {
+            ElMessage.error("获取收费人列表失败");
+          });
     },
     getTradeData() {
       let params = { companyId: "" };
@@ -332,21 +332,21 @@ export default {
         rechargeUser: this.params.rechargeUser || "",
       }).toString();
       service
-        .get(`/dayReport?${query}`)
-        .then((response) => {
-          if (response.code === 200) {
-            this.trade_data = response.data;
-            console.log(this.params);
-            console.log(this.trade_data);
-            console.log(response.data);
-            this.getWeekTradeData();
-          } else {
+          .get(`/dayReport?${query}`)
+          .then((response) => {
+            if (response.code === 200) {
+              this.trade_data = response.data;
+              console.log(this.params);
+              console.log(this.trade_data);
+              console.log(response.data);
+              this.getWeekTradeData();
+            } else {
+              ElMessage.error("请选择查询的日期");
+            }
+          })
+          .catch((error) => {
             ElMessage.error("请选择查询的日期");
-          }
-        })
-        .catch((error) => {
-          ElMessage.error("请选择查询的日期");
-        });
+          });
     },
     getWeekTradeData() {
       //计算开始时间
@@ -380,33 +380,33 @@ export default {
         rechargeUser: this.params.rechargeUser || "",
       }).toString();
       service
-        .get(`/weekReport?${query}`)
-        .then((response) => {
-          if (response.code === 200) {
-            // 提取 reportTimeStart 数据
-            const reportTimeStarts = response.data.currentSingularReport.map((item) => {
-              return item.reportTimeStart;
-            });
-            // 更新 xAxis.data
-            this.weekchart_option.xAxis.data = reportTimeStarts;
-            //提取营业总额
-            const totalMoneys = response.data.currentSingularReport.map((item) => {
-              return item.totalMoney;
-            });
-            console.log(response.data);
-            console.log(response.data.currentSingularReport);
-            // 更新 series.data
-            this.weekchart_option.series[0].data = totalMoneys;
-            // 更新图表
-            this.beforeUnmount();
-            this.weekChart();
-          } else {
+          .get(`/weekReport?${query}`)
+          .then((response) => {
+            if (response.code === 200) {
+              // 提取 reportTimeStart 数据
+              const reportTimeStarts = response.data.currentSingularReport.map((item) => {
+                return item.reportTimeStart;
+              });
+              // 更新 xAxis.data
+              this.weekchart_option.xAxis.data = reportTimeStarts;
+              //提取营业总额
+              const totalMoneys = response.data.currentSingularReport.map((item) => {
+                return item.totalMoney;
+              });
+              console.log(response.data);
+              console.log(response.data.currentSingularReport);
+              // 更新 series.data
+              this.weekchart_option.series[0].data = totalMoneys;
+              // 更新图表
+              this.beforeUnmount();
+              this.weekChart();
+            } else {
+              ElMessage.error("请选择查询的日期");
+            }
+          })
+          .catch((error) => {
             ElMessage.error("请选择查询的日期");
-          }
-        })
-        .catch((error) => {
-          ElMessage.error("请选择查询的日期");
-        });
+          });
     },
     clear() {
       this.params.region = "";

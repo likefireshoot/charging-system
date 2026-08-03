@@ -33,10 +33,13 @@ import userRecordDetail from "@/components/userManage/userRecordDetail.vue";
 import commandLog from "../views/commandLog.vue";
 import errorReportRecord from "../views/errorReportRecord.vue";
 import historyDataManage from "@/views/historyDataManage.vue";
+import deviceManage from "@/views/deviceManage.vue";
 import billDetailReport from "@/components/report/billDetailReport.vue";
 import abnormalChargeReport from "@/components/report/abnormalChargeReport.vue";
 import quickMeterReport from "@/views/quickMeterReport.vue";
+import rechargeDetailReport from "@/components/report/rechargeDetailReport.vue";
 import reviewMeterReport from "@/views/reviewMeterReport.vue";
+import regionMeterReport from "@/views/regionMeterReport.vue";
 
 const routes = [
   {
@@ -90,6 +93,11 @@ const routes = [
             path: "reviewMeterReport",
             name: "reviewMeterReport",
             component: reviewMeterReport,
+          },
+          {
+            path: "regionMeterReport",
+            name: "regionMeterReport",
+            component: regionMeterReport,
           }
         ]
       },
@@ -152,6 +160,11 @@ const routes = [
             path: "readingCountYearlyReport",
             name: "readingCountYearlyReport",
             component: readingCountYearlyReport,
+          },
+          {
+            path: "rechargeDetailReport",
+            name: "rechargeDetailReport",
+            component: rechargeDetailReport,
           },
           {
             path: "billDetailReport",
@@ -221,6 +234,11 @@ const routes = [
         path: "/field3",
         name: "field3",
         component: field3,
+      },
+      {
+        path: "/deviceManage",
+        name: "deviceManage",
+        component: deviceManage,
       },
     ],
   },

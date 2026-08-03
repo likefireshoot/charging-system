@@ -2,12 +2,13 @@
   <div class="transaction-table-container">
     <div class="search-bar">
       <div class="search-input-item">
-        <span>充值类型</span>
+        <span>退款方式</span>
         <el-select v-model="transactionData.rechargeType" placeholder="全部" style="width: 130px; font-size: 18px;" @change="handleTimeTypeChange">
           <el-option label="全部" value="" />
           <el-option label="现金" value="现金" />
           <el-option label="微信支付" value="微信支付" />
           <el-option label="免费赠送" value="免费赠送" />
+          <el-option label="现金（销户退费）" value="现金（销户退费）" />
         </el-select>
       </div>
       <div class="search-input-item">
@@ -70,6 +71,10 @@
     </div>
 
     <div class="tool-bar">
+      <div class="export-btn" @click="exportExcel">
+        <img src="@/assets/yonghu/icon1.3.png" alt="" />
+        <span>导出</span>
+      </div>
       <div class="refresh-btn" @click="handleRefresh">
         <img src="@/assets/yonghu/icon15.png" alt="" />
       </div>
@@ -88,41 +93,41 @@
         @selection-change="handleSelectionChange"
       >
         <el-table-column type="selection" width="50" align="center" fixed="left" />
-        <el-table-column property="userId" label="用户号" min-width="120" align="center" fixed="left" />
-        <el-table-column property="userName" label="用户名称" min-width="140" align="center" />
-        <el-table-column property="regionName" label="所属区域" min-width="120" align="center" />
+        <el-table-column property="userId" label="用户号" min-width="100" align="center" fixed="left" />
+        <el-table-column property="userName" label="用户名称" min-width="130" align="center" />
+<!--        <el-table-column property="regionName" label="所属区域" min-width="120" align="center" />-->
 <!--        <el-table-column property="userPhone" label="联系电话" min-width="130" align="center" />-->
-        <el-table-column label="表号" min-width="180" align="center">
-          <template #default="scope">
-            <div class="meter-code-cell">
-              <span class="meter-code-text">{{ scope.row.meterCode || "-" }}</span>
-              <span v-if="meterStatusMap[scope.row.meterCode] !== undefined"
-                    :class="['meter-status', meterStatusMap[scope.row.meterCode] === '0' ? 'current' : 'history']">
-                {{ meterStatusMap[scope.row.meterCode] === '0' ? '当前表' : '历史表' }}
-              </span>
-            </div>
-          </template>
-        </el-table-column>
-        <el-table-column property="rechargeType" label="充值方式" min-width="100" align="center" />
+<!--        <el-table-column label="表号" min-width="180" align="center">-->
+<!--          <template #default="scope">-->
+<!--            <div class="meter-code-cell">-->
+<!--              <span class="meter-code-text">{{ scope.row.meterCode || "-" }}</span>-->
+<!--              <span v-if="meterStatusMap[scope.row.meterCode] !== undefined"-->
+<!--                    :class="['meter-status', meterStatusMap[scope.row.meterCode] === '0' ? 'current' : 'history']">-->
+<!--                {{ meterStatusMap[scope.row.meterCode] === '0' ? '当前表' : '历史表' }}-->
+<!--              </span>-->
+<!--            </div>-->
+<!--          </template>-->
+<!--        </el-table-column>-->
+        <el-table-column property="rechargeType" label="退款方式" min-width="100" align="center" />
         <el-table-column property="rechargeAmount" label="充值金额" min-width="110" align="center">
           <template #default="scope">{{ scope.row.rechargeAmount }} 元</template>
         </el-table-column>
-        <el-table-column property="createTime" label="充值时间" min-width="170" align="center" />
-        <el-table-column property="createCancelTime" label="撤销时间" min-width="170" align="center" />
-        <el-table-column property="cancelStaffName" label="撤销员工" min-width="100" align="center" />
-        <el-table-column property="rechargeUser" label="充值员工" min-width="100" align="center" />
-        <el-table-column property="oldBalance" label="充值前余额/元" min-width="120" align="center">
-          <template #default="scope">{{ scope.row.oldBalance }} 元</template>
-        </el-table-column>
-        <el-table-column property="newBalance" label="充值后余额/元" min-width="120" align="center">
-          <template #default="scope">{{ scope.row.newBalance }} 元</template>
-        </el-table-column>
-        <el-table-column property="cancelOldBalance" label="撤销前余额/元" min-width="130" align="center">
+        <el-table-column property="createTime" label="充值时间" min-width="150" align="center" />
+        <el-table-column property="createCancelTime" label="撤销时间" min-width="150" align="center" />
+<!--        <el-table-column property="oldBalance" label="充值前余额/元" min-width="120" align="center">-->
+<!--          <template #default="scope">{{ scope.row.oldBalance }} 元</template>-->
+<!--        </el-table-column>-->
+<!--        <el-table-column property="newBalance" label="充值后余额/元" min-width="120" align="center">-->
+<!--          <template #default="scope">{{ scope.row.newBalance }} 元</template>-->
+<!--        </el-table-column>-->
+        <el-table-column property="cancelOldBalance" label="撤销前余额" min-width="130" align="center">
           <template #default="scope">{{ scope.row.cancelOldBalance ?? "-" }} 元</template>
         </el-table-column>
-        <el-table-column property="cancelNewBalance" label="撤销后余额/元" min-width="130" align="center">
+        <el-table-column property="cancelNewBalance" label="撤销后余额" min-width="130" align="center">
           <template #default="scope">{{ scope.row.cancelNewBalance ?? "-" }} 元</template>
         </el-table-column>
+        <el-table-column property="rechargeUser" label="充值员工" min-width="100" align="center" />
+        <el-table-column property="cancelStaffName" label="撤销员工" min-width="100" align="center" />
 <!--        <el-table-column property="meterType" label="水表类型" min-width="100" align="center" />-->
       </el-table>
     </div>
@@ -190,6 +195,39 @@ export default {
     this.queryList();
   },
   methods: {
+    async exportExcel() {
+      try {
+        const params = this.buildQueryParams();
+        const queryStr = this.buildQueryStr(params);
+        // 后端个人导出接口地址
+        const url = `/userManage/userCharge/exportCancelRechargePersonal${queryStr}`;
+        const res = await service.get(url, {
+          responseType: "blob"
+        });
+
+        const blob = new Blob([res.data], {
+          type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        });
+
+        if (blob.size === 0) {
+          ElMessage.warning("当前筛选条件无导出数据");
+          return;
+        }
+
+        const downloadUrl = window.URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = downloadUrl;
+        link.download = `${this.user.userName || "用户"}_充值撤销记录.xlsx`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(downloadUrl);
+        ElMessage.success("导出成功");
+      } catch (error) {
+        console.error("撤销充值记录导出失败：", error);
+        ElMessage.error("导出失败：" + (error.response?.data?.message || error.message));
+      }
+    },
     initData() {
       this.transactionData.userId = this.user.userId;
       this.transactionData.companyId = this.user.companyId;
@@ -384,11 +422,11 @@ export default {
 .search-bar {
   display: flex;
   align-items: center;
-  gap: 20px;
-  margin-bottom: 15px;
+  gap: 15px;
+  margin-bottom: 10px;
   flex-wrap: wrap;
   background: #ffffff;
-  padding: 12px 20px;
+  padding: 10px 15px;
   border-radius: 8px;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
   border: 1px solid #e9eef2;
@@ -397,7 +435,7 @@ export default {
 .search-input-item {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
 }
 
 .search-input-item > span {
@@ -409,45 +447,31 @@ export default {
 .time-input {
   display: flex;
   align-items: center;
-  gap: 10px;
 }
 
-/* 时间选择器字体调大 */
 .time-input :deep(.el-input__inner) {
   font-size: 18px;
-  height: 40px;
-  line-height: 40px;
 }
-
 .time-input :deep(.el-date-editor .el-input__inner) {
   font-size: 18px;
 }
-
-/* 下拉选项字体调大 */
+.time-input :deep(.el-input__inner::placeholder) {
+  font-size: 18px;
+}
+.time-input :deep(.el-range-input__inner) {
+  font-size: 18px;
+}
+.time-input :deep(.el-range-input__inner::placeholder) {
+  font-size: 18px;
+}
 .time-input :deep(.el-select-dropdown__item) {
-  font-size: 18px;
-}
-
-.time-input :deep(.el-date-table td) {
-  font-size: 18px;
-}
-
-.time-input :deep(.el-date-table td span) {
-  font-size: 18px;
-}
-
-.time-input :deep(.el-month-table td .cell) {
-  font-size: 18px;
-}
-
-.time-input :deep(.el-year-table td .cell) {
   font-size: 18px;
 }
 
 .search-buttons {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   margin-left: auto;
 }
 
@@ -455,11 +479,12 @@ export default {
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 6px 16px;
+  padding: 5px 15px;
   border-radius: 4px;
   cursor: pointer;
   transition: all 0.3s;
   font-size: 18px;
+  height: auto;
 }
 
 .search-btn {
@@ -494,15 +519,15 @@ export default {
 .tool-bar {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin-bottom: 15px;
+  gap: 10px;
+  margin-bottom: 8px;
 }
 
-.tool-btn, .refresh-btn {
+.tool-btn, .refresh-btn,.export-btn {
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 6px 16px;
+  padding: 5px 8px;
   border-radius: 4px;
   cursor: pointer;
   background-color: #fff;
@@ -512,12 +537,12 @@ export default {
   color: #606266;
 }
 
-.tool-btn img, .refresh-btn img {
+.tool-btn img, .refresh-btn img, .export-btn img {
   width: 18px;
   height: 18px;
 }
 
-.tool-btn:hover, .refresh-btn:hover {
+.tool-btn:hover, .refresh-btn:hover, .export-btn:hover {
   background-color: #f5f7fa;
   border-color: #46B97E;
 }
@@ -565,7 +590,7 @@ export default {
 }
 
 .refresh-btn {
-  padding: 6px 12px;
+  padding: 5px 8px;
 }
 
 .table-wrapper {
@@ -575,46 +600,10 @@ export default {
 }
 
 .pagination-container {
-  margin-top: 20px;
+  margin-top: 5px;
   display: flex;
   justify-content: center;
   flex-shrink: 0;
-}
-
-.pagination-container :deep(.el-pagination) {
-  font-size: 20px;
-}
-
-.pagination-container :deep(.el-pagination .btn-prev),
-.pagination-container :deep(.el-pagination .btn-next) {
-  min-width: 44px;
-  height: 44px;
-  line-height: 44px;
   font-size: 18px;
-}
-
-.pagination-container :deep(.el-pager li) {
-  min-width: 44px;
-  height: 44px;
-  line-height: 44px;
-  font-size: 18px;
-  margin: 0 4px;
-}
-
-.pagination-container :deep(.el-pagination__total) {
-  font-size: 18px;
-  line-height: 44px;
-  margin-right: 20px;
-}
-
-.pagination-container :deep(.el-pagination__jump) {
-  font-size: 18px;
-  line-height: 44px;
-  margin-left: 20px;
-}
-
-.pagination-container :deep(.el-pagination__jump input) {
-  height: 36px;
-  line-height: 36px;
 }
 </style>

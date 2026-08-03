@@ -2,27 +2,27 @@
   <div class="yuangong-container">
     <div class="search-box">
       <div class="search-content">
-        <div class="search-input" style="margin-left: 10px" v-if="companyId === 1">
+        <div class="search-input" v-if="companyId === 1">
           <span>所属水厂</span>
           <el-select v-model="params.company" placeholder="请选择所属水厂">
             <el-option v-for="item in companyList" :key="item.id" :label="item.name" :value="item.id"></el-option>
           </el-select>
         </div>
-        <div class="search-input" style="margin-left: 10px">
+        <div class="search-input">
           <span>账户</span>
           <el-input v-model="params.account" placeholder="请输入..." />
         </div>
-        <div class="search-input" style="margin-left: 10px">
+        <div class="search-input">
           <span>员工名称</span>
           <el-input v-model="params.staffName" placeholder="请输入..." />
         </div>
-        <div class="search-input" style="margin-left: 10px">
+        <div class="search-input">
           <span>职位</span>
           <el-select v-model="params.staffPostsId">
             <el-option v-for="item in postsList" :key="item.id" :label="item.name" :value="item.value"></el-option>
           </el-select>
         </div>
-        <div class="search-input" style="margin-left: 10px">
+        <div class="search-input">
           <span>角色</span>
           <el-select v-model="params.staffCharacterId">
             <el-option v-for="item in rolesList" :key="item.id" :label="item.name" :value="item.id"></el-option>
@@ -31,57 +31,57 @@
       </div>
       <div class="buttons" >
         <div class="sercah-btn" @click="search">
-          <img src="@/assets/yonghu/icon16.png" alt="" style="margin-left: 8px" />
-          <span style="font-size: 20px; margin-left: 15%">搜索</span>
+          <img src="@/assets/yonghu/icon16.png" alt="" style="margin-left: 10px" />
+          <span style="margin-left: 10%">搜索</span>
         </div>
         <div class="clear-btn" @click="clear">
           <img src="@/assets/yuangong/icon4.png" alt="" style="margin-left: 10px" />
-          <span style="font-size: 20px; margin-left: 15%; color: #5a5a5a">清空</span>
+          <span style="margin-left: 10%; color: #5a5a5a">清空</span>
         </div>
       </div>
     </div>
     <div class="yuangong-info">
       <div class="command-box">
-        <div class="add-btn" style="width: 130px; margin-left: 10px" @click="add_dialogFormVisible = true" v-if="staffPermissionIds.includes(30)">
-          <img src="@/assets/yuangong/icon6.png" alt="" style="margin-left: 8px" />
-          <span style="font-size: 20px; margin-left: 10px; color: #5a5a5a">新增水厂</span>
+        <div class="add-btn" @click="add_dialogFormVisible = true" v-if="staffPermissionIds.includes(30) && companyId == 1">
+          <img src="@/assets/yuangong/icon6.png" alt="" />
+          <span style="margin-left: 6px; color: #5a5a5a">新增水厂</span>
         </div>
-        <div class="add-btn" style="width: 130px; margin-left: 10px" @click="addRegion_dialogFormVisible = true" v-if="staffPermissionIds.includes(31)">
-          <img src="@/assets/yuangong/icon6.png" alt="" style="margin-left: 8px" />
-          <span style="font-size: 20px; margin-left: 10px; color: #5a5a5a">新增区域</span>
+        <div class="add-btn" @click="openAddRegionDialog" v-if="staffPermissionIds.includes(31)">
+          <img src="@/assets/yuangong/icon6.png" alt="" />
+          <span style="margin-left: 6px; color: #5a5a5a">新增区域</span>
         </div>
-        <div class="add-btn" style="width: 130px; margin-left: 10px" @click="addStaff_dialogFormVisible = true" v-if="staffPermissionIds.includes(52)">
-          <img src="@/assets/yuangong/icon6.png" alt="" style="margin-left: 8px" />
-          <span style="font-size: 20px; margin-left: 10px; color: #5a5a5a">新增员工</span>
+        <div class="add-btn" @click="addStaff_dialogFormVisible = true" v-if="staffPermissionIds.includes(52)">
+          <img src="@/assets/yuangong/icon6.png" alt="" />
+          <span style="margin-left: 6px; color: #5a5a5a">新增员工</span>
         </div>
-        <div class="add-btn" style="width: 130px; margin-left: 10px" @click="edit_company_block = true"
+        <div class="add-btn" @click="edit_company_block = true"
              v-if="staffPermissionIds.includes(40) && companyId == 1">
-          <img src="@/assets/yuangong/icon6.png" alt="" style="margin-left: 8px" />
-          <span style="font-size: 20px; margin-left: 10px; color: #5a5a5a">水厂管理</span>
+          <img src="@/assets/yuangong/icon6.png" alt="" />
+          <span style="margin-left: 6px; color: #5a5a5a">水厂管理</span>
         </div>
-        <div class="add-btn" style="width: 130px; margin-left: 10px" @click="deleteRegion_dialogFormVisible = true" v-if="staffPermissionIds.includes(32)">
-          <img src="@/assets/yuangong/icon4.png" alt="" style="margin-left: 8px" />
-          <span style="font-size: 20px; margin-left: 10px; color: #5a5a5a">删除区域</span>
+        <div class="add-btn" @click="openDeleteRegionDialog" v-if="staffPermissionIds.includes(32)">
+          <img src="@/assets/yuangong/icon4.png" alt="" />
+          <span style="margin-left: 6px; color: #5a5a5a">删除区域</span>
         </div>
-        <div class="delete-btn" style="margin-left: 10px" @click="delete_click" v-if="staffPermissionIds.includes(33)">
-          <img src="@/assets/yuangong/icon4.png" alt="" style="margin-left: 8px" />
-          <span style="font-size: 20px; margin-left: 10px; color: #5a5a5a">删除</span>
+        <div class="delete-btn" @click="delete_click" v-if="staffPermissionIds.includes(33)">
+          <img src="@/assets/yuangong/icon4.png" alt="" />
+          <span style="margin-left: 6px; color: #5a5a5a">删除</span>
         </div>
-        <div class="edit-btn" style="margin-left: 10px" :class="{ 'btn-single-only-disabled': multipleSelection.length !== 1 }"
+        <div class="edit-btn" :class="{ 'btn-single-only-disabled': multipleSelection.length !== 1 }"
              @click="multipleSelection.length === 1 && edit_click()" v-if="staffPermissionIds.includes(34)">
-          <img src="@/assets/yuangong/icon3.png" alt="" style="margin-left: 8px" />
-          <span style="font-size: 20px; margin-left: 10px; color: #5a5a5a">编辑</span>
+          <img src="@/assets/yuangong/icon3.png" alt="" />
+          <span style="margin-left: 6px; color: #5a5a5a">编辑</span>
         </div>
         <!-- <div class="export-in-btn" style="margin-left: 10px">
           <img src="@/assets/yuangong/icon1.png" alt="" style="margin-left: 7px" />
           <span style="font-size: 16px; margin-left: 10px; color: #5a5a5a">导入</span>
           <input ref="fileInput" type="file" accept=".xls,.xlsx" style="display: none" />
         </div> -->
-        <div class="export-out-btn" style="margin-left: 10px" @click="exportExcel">
-          <img src="@/assets/yonghu/icon1.3.png" alt="" style="margin-left: 7px" />
-          <span style="font-size: 20px; margin-left: 10px; color: #5a5a5a">导出</span>
+        <div class="export-out-btn" @click="exportExcel">
+          <img src="@/assets/yonghu/icon1.3.png" alt="" />
+          <span style="margin-left: 6px; color: #5a5a5a">导出</span>
         </div>
-        <div class="reflush" style="margin-left: 10px" @click="reflush">
+        <div class="reflush" @click="reflush">
           <img src="@/assets/yonghu/icon15.png" alt="" />
         </div>
       </div>
@@ -151,25 +151,42 @@
     </div>
     <!-- 新增区域 -->
     <div class="add-dialog" v-if="addRegion_dialogFormVisible">
-      <div class="add-dialog-content">
+      <div class="add-dialog-content add-region">
         <div class="title">
           <div style="margin-left: 10px; display: flex; align-items: center">
             <img src="@/assets/fapiao/icon8.png" alt="" style="margin-right: 10px" />
             <span style="font-size: 20px">新增区域</span>
           </div>
-          <div style="margin-right: 10px; cursor: pointer" @click="addRegion_dialogFormVisible = false">
+          <div style="margin-right: 10px; cursor: pointer" @click="closeAddRegionDialog">
             <img src="@/assets/close.png" alt="" />
           </div>
         </div>
-        <div class="add-content">
+        <div class="add-content" style="flex-direction: column">
           <div class="add-input" v-if="companyId === 1" style="margin-right: 7%">
             <span>水厂名称</span>
             <el-select v-model="addRegion.companyId">
               <el-option v-for="item in companyList" :key="item.id" :label="item.name" :value="item.id"></el-option>
             </el-select>
           </div>
+
+          <!-- 已有区域列表【两列布局】 -->
+          <div class="region-list-box">
+            <span style="color: #575556; font-size: 20px; margin-bottom: 8px; display:block">已有区域列表</span>
+            <div class="region-table-scroll" style="border: 1px solid #e6e6e6; padding: 8px 15px">
+              <div class="region-grid-wrap">
+                <div class="region-item" v-for="item in addRegionQuYuList" :key="item.regionId">
+                  {{ item.regionName }}
+                </div>
+                <!-- 空数据提示 -->
+                <div v-if="addRegionQuYuList.length === 0" class="empty-box">
+                  暂无数据
+                </div>
+              </div>
+            </div>
+          </div>
+
           <div class="add-input">
-            <span>区域名称</span>
+            <span>新增区域名称</span>
             <el-input v-model="addRegion.regionName" placeholder="请输入..." />
           </div>
         </div>
@@ -178,7 +195,7 @@
             <el-icon style="margin-left: 15%"><Check /></el-icon>
             <span style="font-size: 20px; margin-left: 15%">确认</span>
           </div>
-          <div class="cancel-btn" @click="addRegion_dialogFormVisible = false">
+          <div class="cancel-btn" @click="closeAddRegionDialog">
             <el-icon style="margin-left: 15%; color: #45ba7e"><Close /></el-icon>
             <span style="font-size: 20px; margin-left: 15%; color: #5a5a5a">取消</span>
           </div>
@@ -187,7 +204,7 @@
     </div>
     <!-- 删除区域 -->
     <div class="add-dialog" v-if="deleteRegion_dialogFormVisible">
-      <div class="add-dialog-content">
+      <div class="add-dialog-content add-region">
         <div class="title">
           <div style="margin-left: 10px; display: flex; align-items: center">
             <img src="@/assets/yuangong/icon4.png" alt="" style="margin-right: 10px" />
@@ -204,14 +221,33 @@
               <el-option v-for="item in companyList" :key="item.id" :label="item.name" :value="item.id"></el-option>
             </el-select>
           </div>
-          <div class="add-input">
-            <span>区域名称</span>
-            <el-select v-model="deleteRegion.regionIds" multiple clearable collapse-tags placeholder="请选择区域" popper-class="custom-header" :max-collapse-tags="1">
-              <template #header>
-                <el-checkbox class="user-checkbox" v-model="checkAll" :indeterminate="indeterminate" @change="handleCheckAll"> 全选 </el-checkbox>
-              </template>
-              <el-option v-for="item in regionList" :key="item.id" :label="item.label" :value="item.id" />
-            </el-select>
+
+          <!-- 已有区域列表【两列布局】 -->
+          <div class="region-list-box-delete">
+            <div style="display: flex;justify-content: space-between;align-items: center;margin-bottom: 8px">
+              <span style="color: #575556; font-size: 20px;">已有区域列表</span>
+              <div>
+              <el-checkbox v-model="checkAll" :indeterminate="indeterminate" @change="handleCheckAll"></el-checkbox>
+                <span style="font-size: 20px; color: #575556; margin-left: 5px">全选</span>
+              </div>
+            </div>
+            <div class="region-table-scroll" style="border: 1px solid #e6e6e6; padding: 8px 15px">
+              <div class="region-grid-wrap">
+                <div
+                    class="region-item"
+                    :class="{active: deleteRegion.regionIds.includes(item.id)}"
+                    v-for="item in regionList"
+                    :key="item.id"
+                    @click="toggleRegionItem(item.id)"
+                >
+                  {{ item.label }}
+                </div>
+                <!-- 空数据提示 -->
+                <div v-if="regionList.length === 0" class="empty-box">
+                  暂无数据
+                </div>
+              </div>
+            </div>
           </div>
         </div>
         <div class="btn">
@@ -323,7 +359,7 @@
 
         <!-- 编辑水厂停用功能 -->
         <div class="edit-dialog" v-if="edit_company_block">
-          <div class="add-dialog-content">
+          <div class="add-dialog-content company-manage-dialog">
             <div class="title">
               <div style="margin-left: 10px; display: flex; align-items: center">
                 <img src="@/assets/fapiao/icon8.png" alt="" style="margin-right: 10px" />
@@ -337,12 +373,12 @@
                       <el-table-column prop="name" label="水厂名称"  align="center" />
 
 
-                      <el-table-column label="操作">
+                      <el-table-column label="状态" align="center">
                         <template #default="scope">
-                          <el-button :type="scope.row.isBlock === '正常' ? 'danger' : 'primary'" size="large"
-                                                      @click="editCompanyStatus(scope.row.id)">
-                            {{ scope.row.isBlock === '正常' ? '停用' : '启用' }}
-                          </el-button>
+                          <el-select :model-value="scope.row.isBlock" @change="(val) => handleCompanyStatusChange(scope.row)" style="width: 25%;">
+                            <el-option label="启用" value="正常"></el-option>
+                            <el-option label="停用" value="停用"></el-option>
+                          </el-select>
                         </template>
                       </el-table-column>
                     </el-table>
@@ -537,7 +573,9 @@ export default {
         staffPostsId: null, // 职位：1=经理, 0=员工
         staffCharacterId: null, // 权限角色ID
         companyId: null // 所属水厂ID
-      }
+      },
+
+      addRegionQuYuList: [], // 新增：新增区域弹窗内展示的区域列表
     };
   },
   watch: {
@@ -546,14 +584,14 @@ export default {
     //     this.getEmployeeData();
     //   },
     // },
-    deleteRegion_dialogFormVisible: {
-      handler() {
-        if (this.companyId !== 1) {
-          this.deleteRegion.companyId = this.companyId;
-          this.getRegionData();
-        }
-      },
-    },
+    // deleteRegion_dialogFormVisible: {
+    //   handler() {
+    //     if (this.companyId !== 1) {
+    //       this.deleteRegion.companyId = this.companyId;
+    //       this.getRegionData();
+    //     }
+    //   },
+    // },
     "deleteRegion.regionIds": {
       handler(val) {
         if (val.length === 0) {
@@ -570,22 +608,35 @@ export default {
     "deleteRegion.companyId": {
       handler() {
         if (this.flag == 0) {
+          // 切换水厂，清空所有选中区域
+          this.deleteRegion.regionIds = [];
+          this.checkAll = false;
+          this.indeterminate = false;
+          this.regionList = [];
           this.getRegionData();
         }
       },
+    },
+    "addRegion.companyId": {
+      handler(newVal) {
+        console.log('选中水厂id变化', newVal)
+        // 清空旧列表
+        this.addRegionQuYuList = []
+        this.loadRegionList()
+      }
     },
   },
   computed: {
     // 每列的百分比宽度
     columnPercentages() {
       return {
-        selection: 5,
+        selection: 4,
         index: 7,
-        account: 11,
-        worker_name: 10,
-        company: 10,
-        address: 20,
-        phone: 14,
+        account: 13,
+        worker_name: 14,
+        company: 16,
+        address: 15,
+        phone: 11,
         post: 10,
         role: 10,
         //password: 10,
@@ -622,6 +673,86 @@ export default {
     }
   },
   methods: {
+    openDeleteRegionDialog(){
+      this.deleteRegion_dialogFormVisible = true;
+      // 清空上次选中
+      this.deleteRegion.regionIds = [];
+      this.checkAll = false;
+      this.indeterminate = false;
+      this.regionList = [];
+
+      if (this.companyId !== 1) {
+        // 非管理员自动赋值水厂
+        this.deleteRegion.companyId = this.companyId;
+        this.getRegionData();
+      }else{
+        // 超级管理员清空，手动选择
+        this.deleteRegion.companyId = null;
+      }
+    },
+    // 点击单个区域方块 选中/取消选中
+    toggleRegionItem(regionId) {
+      const index = this.deleteRegion.regionIds.indexOf(regionId)
+      if (index > -1) {
+        // 已存在 → 删除
+        this.deleteRegion.regionIds.splice(index, 1)
+      } else {
+        // 不存在 → 添加
+        this.deleteRegion.regionIds.push(regionId)
+      }
+    },
+    // 打开新增区域弹窗
+    openAddRegionDialog() {
+      this.addRegion_dialogFormVisible = true;
+      // 清空旧数据
+      this.addRegion.regionName = "";
+      this.addRegionQuYuList = [];
+
+      // 非超级管理员，自动赋值本厂id，直接加载区域
+      if (this.companyId !== 1) {
+        this.addRegion.companyId = this.companyId;
+        this.loadRegionList();
+      } else {
+        // 超级管理员，清空水厂，等待手动选择
+        this.addRegion.companyId = null;
+      }
+    },
+
+// 关闭弹窗
+    closeAddRegionDialog() {
+      this.addRegion_dialogFormVisible = false;
+      this.addRegion.regionName = "";
+      this.addRegionQuYuList = [];
+    },
+
+// 根据水厂ID加载区域列表（复用你给的接口地址）
+    async loadRegionList() {
+      if (!this.addRegion.companyId) {
+        this.addRegionQuYuList = [];
+        return;
+      }
+
+      let url = `/getRegion?companyId=${this.addRegion.companyId}`;
+      try {
+        const response = await service.get(url);
+        if (response.code === 200) {
+          this.addRegionQuYuList = response.data.map(item => {
+            return {
+              regionId: item.regionId,
+              regionName: item.regionName
+            }
+          })
+        }
+      } catch (error) {
+        ElMessage.error("获取区域数据失败");
+      }
+    },
+
+    handleCompanyStatusChange(row) {
+      // 不管选中正常/停用，直接调用原有接口，后端自动反转状态
+      this.editCompanyStatus(row.id);
+    },
+
     // 新增员工函数
     async addStaffConfirm() {
       if (this.companyId !== 1) {
@@ -776,6 +907,12 @@ export default {
         });
     },
     getRegionData() {
+      // 关键判断：没有水厂ID，直接终止，不发起请求！
+      if (!this.deleteRegion.companyId) {
+        this.regionList = [];
+        return;
+      }
+
       let url = `/getRegion?companyId=${this.deleteRegion.companyId}`;
       service
         .get(`${url}`, {
@@ -975,6 +1112,7 @@ export default {
       }
       if (this.addRegion.regionName == null || this.addRegion.regionName == "") {
         ElMessage.error("区域名称不能为空！");
+        return;
       }
       this.addRegion.regionName = this.addRegion.regionName ? this.addRegion.regionName.trim() : this.addRegion.regionName;
       service
@@ -992,7 +1130,7 @@ export default {
     deleteRegion_confirm() {
       this.flag = 1;
       if (!this.deleteRegion.regionIds || this.deleteRegion.regionIds.length === 0) {
-        ElMessage.error("区域名称不能为空！");
+        ElMessage.error("请选择要删除的区域！");
         this.flag = 1;
         return;
       }
@@ -1019,6 +1157,9 @@ export default {
       this.deleteRegion_dialogFormVisible = false;
       this.deleteRegion.companyId = null;
       this.deleteRegion.regionIds = [];
+      this.regionList = [];
+      this.checkAll = false;
+      this.indeterminate = false;
       this.$nextTick(() => {
         this.flag = 0;
       });
@@ -1307,27 +1448,27 @@ export default {
   flex-direction: column;
   align-content: center;
   justify-content: center;
-  width: 100%;
-  height: 98%;
-  padding: 0px 20px;
+  min-width: 94%;
+  height: 100%;
+  padding: 0px 15px;
 }
 
 .search-box {
-  margin-top: 15px;
-  margin-bottom: 20px;
-  width: 100%;
-  height: 112px;
+  margin-top: 5px;
+  margin-bottom: 10px;
+  width: 99.3%;
+  height: 98px;
   display: flex;
   align-items: center;
-  justify-content: space-around; /* 每个元素两侧的间隔相等 */
   border: 1px solid #e9e9e9;
   border-radius: 5px;
   background-color: #fff;
+  padding: 0 10px;
 }
 
 .search-content {
   display: flex;
-  width: 75%;
+  width: 70%;
   height: 100%;
 }
 
@@ -1335,9 +1476,9 @@ export default {
   display: flex;
   justify-content: center; /* 确保子元素在父容器中垂直居中 */
   flex-direction: column;
-  width: 25%;
+  width: 15%;
   height: 100%;
-  margin-right: 20px;
+  margin-right: 10px;
 }
 
 .search-input > span {
@@ -1359,14 +1500,17 @@ export default {
 
 .buttons {
   display: flex;
-  width: 260px;
+  width: 220px;
   height: 100%;
   align-items: center;
-  margin-left: 100px;
+  position: absolute;
+  right: 10px;
+  margin-left: 0;
 }
 
 .buttons > * {
-  width: 120px;
+  width: 100px;
+  margin-right: 10px;
 }
 
 .sercah-btn,
@@ -1378,11 +1522,11 @@ export default {
   cursor: pointer;
   transition: all 0.3s;
   color: #fff;
+  font-size: 18px;
 }
 
 .sercah-btn {
   background-color: #45ba7e;
-  margin-right: 50px;
 }
 .clear-btn {
   background-color: #fff;
@@ -1391,8 +1535,8 @@ export default {
 }
 
 .yuangong-info {
-  width: 100%;
-  height: calc(100% - 150px);
+  width: 99.3%;
+  height: calc(100% - 120px);
   margin-bottom: 0px;
   display: flex;
   flex-direction: column;
@@ -1401,19 +1545,19 @@ export default {
   border-radius: 5px;
   background-color: #fff;
   position: relative;
+  padding: 0 10px;
 }
 
 .command-box {
   display: flex;
   align-items: center;
   width: 100%;
-  height: 40px;
-  margin-top: 15px;
-  margin-bottom: 10px;
+  height: auto;
+  margin-top: 10px;
 }
 
 .command-box > * {
-  margin-right: 20px;
+  margin-right: 10px;
 }
 
 .add-btn,
@@ -1423,15 +1567,16 @@ export default {
 .export-out-btn {
   display: flex;
   align-items: center;
-  width: 90px; /* 设置按钮的宽度 */
-  height: 40px; /* 设置按钮的高度 */
+  width: auto; /* 设置按钮的宽度 */
+  height: 35px; /* 设置按钮的高度 */
   color: white;
   border-radius: 5px;
   cursor: pointer;
   transition: all 0.3s;
-  font-size: 20px;
+  font-size: 18px;
   background-color: #fff;
   border: 2px solid #f2f2f2;
+  padding: 0 8px;
 }
 
 .reflush {
@@ -1439,7 +1584,7 @@ export default {
   align-items: center;
   justify-content: center;
   width: 35px; /* 设置按钮的宽度 */
-  height: 32px; /* 设置按钮的高度 */
+  height: 35px; /* 设置按钮的高度 */
   color: white;
   border-radius: 5px;
   cursor: pointer;
@@ -1458,11 +1603,12 @@ export default {
 }
 
 .yuangong-table {
-  height: calc(98% - 110px);
+  height: calc(100% - 100px);
+  margin-top: 8px;
 }
 
 .page-box {
-  height: 65px;
+  height: 40px;
   position: absolute;
   bottom: 0;
 }
@@ -1598,8 +1744,8 @@ export default {
   width: 90%;
   height: 100%;
   display: flex;
+  flex-direction: column;
   justify-content: flex-start;
-  align-items: center;
   margin-top: 20px;
   padding: 0 3%;
 }
@@ -1609,7 +1755,6 @@ export default {
   justify-content: center; /* 确保子元素在父容器中垂直居中 */
   flex-direction: column;
   width: 45%;
-  height: 100%;
 }
 
 .add-input > span {
@@ -1659,4 +1804,81 @@ export default {
      cursor: not-allowed !important;
      pointer-events: none;
    }
+
+.company-manage-dialog {
+  height: 100vh !important;
+}
+
+.add-region {
+  height: 100vh;
+}
+
+.region-list-box {
+  width:100%;
+  flex:1;
+  min-height:0;
+  margin:10px 0;
+  display:flex;
+  flex-direction:column;
+  max-height: 60vh;
+}
+
+.region-list-box-delete {
+  width:100%;
+  flex:1;
+  min-height:0;
+  margin:10px 0;
+  display:flex;
+  flex-direction:column;
+  max-height: 70vh;
+}
+
+.region-table-scroll {
+  flex:1;
+  min-height:0;
+  overflow-y:auto;
+}
+
+.region-grid-wrap {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr); /* 固定两列 */
+  gap: 10px 16px; /* 上下间距10，左右间距16 */
+}
+.region-item {
+  padding: 6px 10px;
+  border: 1px solid #e4e7ed;
+  border-radius: 4px;
+  text-align: center;
+  background: #fff;
+  color: #575556;
+  transition: all 0.2s;
+}
+
+.region-item.active {
+  background-color: #45ba7e;
+  color: #ffffff;
+  border-color: #45ba7e;
+}
+.region-item:hover:not(.active) {
+  background: #f0f0f0;
+}
+
+.empty-box {
+  grid-column: 1 / -1; /* 横跨整行两列 */
+  text-align: center;
+  color: #909399;
+  padding: 20px 0;
+}
+</style>
+
+<style scoped>
+:deep(.el-input__inner) {
+  font-size: 16px !important;
+}
+:deep(.el-select__wrapper .el-select__placeholder) {
+  font-size: 16px !important;
+}
+:deep(.el-select__wrapper .el-select__selected-item) {
+  font-size: 16px !important;
+}
 </style>

@@ -13,7 +13,7 @@
       </div>
       -->
       <div class="search-input-item">
-        <span style="margin-right: 20px">时间</span>
+        <span >时间</span>
         <div class="time-input">
           <el-select v-model="searchParams.timeType" placeholder="请选择" style="width: 100px; font-size: 18px;">
             <el-option label="年" value="year" />
@@ -108,14 +108,14 @@
         <el-table-column property="userId" label="用户号" min-width="120" align="center" />
         <el-table-column property="userName" label="用户名称" min-width="140" align="center" />
         <el-table-column property="meterCode" label="表号" min-width="160" align="center" />
-        <el-table-column property="chargeAmount" label="扣费金额" min-width="110" align="center">
-          <template #default="scope">{{ scope.row.chargeAmount }} 元</template>
-        </el-table-column>
         <el-table-column property="oldBalance" label="原金额" min-width="110" align="center">
-          <template #default="scope">{{ scope.row.oldBalance }} 元</template>
+          <template #default="scope">{{ scope.row.oldBalance }}</template>
+        </el-table-column>
+        <el-table-column property="chargeAmount" label="扣费金额" min-width="110" align="center">
+          <template #default="scope">{{ scope.row.chargeAmount }}</template>
         </el-table-column>
         <el-table-column property="newBalance" label="余额" min-width="110" align="center">
-          <template #default="scope">{{ scope.row.newBalance }} 元</template>
+          <template #default="scope">{{ scope.row.newBalance }}</template>
         </el-table-column>
         <el-table-column property="createTime" label="扣费时间" min-width="180" align="center" />
         <el-table-column label="扣费类型" min-width="120" align="center">
@@ -496,11 +496,11 @@ export default {
 .search-bar {
   display: flex;
   align-items: center;
-  gap: 20px;
-  margin-bottom: 15px;
+  gap: 10px;
+  margin-bottom: 10px;
   flex-wrap: wrap;
   background: #ffffff;
-  padding: 12px 20px;
+  padding: 10px 15px;
   border-radius: 8px;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
   border: 1px solid #e9eef2;
@@ -509,11 +509,11 @@ export default {
 .search-input-item {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
 }
 
 .search-input-item > span {
-  font-size: 20px;
+  font-size: 18px;
   color: #606266;
   white-space: nowrap;
 }
@@ -521,46 +521,32 @@ export default {
 .time-input {
   display: flex;
   align-items: center;
-  gap: 10px;
 }
 
-/* 时间选择器字体调大 */
 .time-input :deep(.el-input__inner) {
-  font-size: 20px;
-  height: 40px;
-  line-height: 40px;
+  font-size: 18px;
 }
-
 .time-input :deep(.el-date-editor .el-input__inner) {
-  font-size: 20px;
+  font-size: 18px;
 }
-
-/* 下拉选项字体调大 */
+.time-input :deep(.el-input__inner::placeholder) {
+  font-size: 18px;
+}
+.time-input :deep(.el-range-input__inner) {
+  font-size: 18px;
+}
+.time-input :deep(.el-range-input__inner::placeholder) {
+  font-size: 18px;
+}
 .time-input :deep(.el-select-dropdown__item) {
-  font-size: 20px;
-}
-
-.time-input :deep(.el-date-table td) {
-  font-size: 20px;
-}
-
-.time-input :deep(.el-date-table td span) {
-  font-size: 20px;
-}
-
-.time-input :deep(.el-month-table td .cell) {
-  font-size: 20px;
-}
-
-.time-input :deep(.el-year-table td .cell) {
-  font-size: 20px;
+  font-size: 18px;
 }
 
 .total-summary {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 6px 16px;
+  padding: 5px 16px;
   background: #f7fbf8;
   border: 1px solid #d9efe2;
   border-radius: 6px;
@@ -569,13 +555,13 @@ export default {
 }
 
 .total-summary .summary-label {
-  font-size: 20px;
+  font-size: 18px;
   letter-spacing: 2px;  /* 调大字间距 */
   color: #5a5a5a;
 }
 
 .total-summary .summary-value {
-  font-size: 22px;
+  font-size: 20px;
   color: #f56c6c;
   font-weight: bold;
 }
@@ -583,18 +569,19 @@ export default {
 .search-buttons {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
 }
 
 .search-btn, .clear-btn {
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 6px 16px;
+  padding: 5px 15px;
   border-radius: 4px;
   cursor: pointer;
   transition: all 0.3s;
-  font-size: 20px;
+  font-size: 18px;
+  height: auto;
 }
 
 .search-btn {
@@ -629,21 +616,21 @@ export default {
 .tool-bar {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin-bottom: 15px;
+  gap: 10px;
+  margin-bottom: 8px;
 }
 
 .export-btn, .refresh-btn {
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 6px 16px;
+  padding: 5px 8px;
   border-radius: 4px;
   cursor: pointer;
   background-color: #fff;
   border: 1px solid #dcdfe6;
   transition: all 0.3s;
-  font-size: 20px;
+  font-size: 18px;
   color: #606266;
 }
 
@@ -664,46 +651,11 @@ export default {
 }
 
 .pagination-container {
-  margin-top: 20px;
+  margin-top: 5px;
   display: flex;
   justify-content: center;
   flex-shrink: 0;
-}
-
-.pagination-container :deep(.el-pagination) {
-  font-size: 20px;
-}
-
-.pagination-container :deep(.el-pagination .btn-prev),
-.pagination-container :deep(.el-pagination .btn-next) {
-  min-width: 44px;
-  height: 44px;
-  line-height: 44px;
   font-size: 18px;
 }
 
-.pagination-container :deep(.el-pager li) {
-  min-width: 44px;
-  height: 44px;
-  line-height: 44px;
-  font-size: 18px;
-  margin: 0 4px;
-}
-
-.pagination-container :deep(.el-pagination__total) {
-  font-size: 18px;
-  line-height: 44px;
-  margin-right: 20px;
-}
-
-.pagination-container :deep(.el-pagination__jump) {
-  font-size: 18px;
-  line-height: 44px;
-  margin-left: 20px;
-}
-
-.pagination-container :deep(.el-pagination__jump input) {
-  height: 36px;
-  line-height: 36px;
-}
 </style>

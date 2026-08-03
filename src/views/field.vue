@@ -48,7 +48,7 @@
       <div class="item">
         <h2 class="titleName">抄表人员</h2>
         <div class="form">
-          <selectCard2 width="130" :options="userList" propValue="username" v-model:select="userSelect" @selectItem="setUser"></selectCard2>
+          <selectCard2 width="170" :options="userList" propValue="staffName" v-model:select="userSelect" @selectItem="setUser"></selectCard2>
         </div>
       </div>
 
@@ -57,7 +57,7 @@
           <img src="@/assets/field/icon5.svg" alt="">
           <p>当前位置</p>
         </a> -->
-        <a class="btn on" @click.stop="getTrack">
+        <a class="btn on" style="width: 140px;height: 50px" @click.stop="getTrack">
           <img src="@/assets/field/icon2.svg" alt="" />
           <p>查询轨迹</p>
         </a>
@@ -81,7 +81,9 @@ import { getCurrentInstance, onMounted, onUnmounted, reactive, ref } from "vue";
 const { proxy } = getCurrentInstance();
 import { useRouter } from "vue-router";
 import { ElMessage } from "element-plus";
+import service from "@/api/request";
 
+const companyId = JSON.parse(sessionStorage.getItem("userData")).companyId;
 let aMaps = null;
 let AMap = null;
 let infoWindow = null;
@@ -131,16 +133,62 @@ const paramData = reactive({
   startTime: "00:00",
   endTime: "23:59",
   userId: null,
+  companyId: null,
 });
 
 async function getAllUsers() {
-  let { data } = await proxy.ajax.get("getAllUsers");
-  userList.value = data;
-  userSelect.value = data.length > 0 ? data[0].username : null;
-  paramData.userId = data.length > 0 ? data[0].id : null;
+  let params = {
+    pageNo: 1,
+    pageSize: 1000,
+    companyId: null,
+    account: null,
+    staffName: null,
+    staffPostsId: null,
+    staffCharacterId: null,
+  };
+  if (companyId === 1) {
+    params.companyId = null;
+  } else {
+    params.companyId = companyId;
+  }
+  // 获取token
+  let token = "";
+  const userData = sessionStorage.getItem("userData");
+  if (userData) {
+    try {
+      token = JSON.parse(userData).token || "";
+    } catch (e) {
+      console.error("解析userData失败", e);
+    }
+  }
+  // let { data } = await proxy.ajax.post("/staff/queryStaff", params, true);
+  // console.log(data);
+  // userList.value = data.records;
+  //userSelect.value = data.length > 0 ? data.records[0].staffName : null;
+  //paramData.userId = data.length > 0 ? data.records[0].staffId : null;
+  service
+    .post("/staff/queryStaff", params, {
+      headers: {
+        Authorization: token, // 添加token请求头
+        token: token, // 添加token请求头
+      },
+    })
+    .then((response) => {
+      if (response.code === 200) {
+        userList.value = response.data.records;
+      } else {
+        ElMessage.error(response.msg);
+      }
+    })
+    .catch((error) => {
+      ElMessage.error(error);
+    });
 }
+
 function setUser(item) {
-  paramData.userId = item.id;
+  console.log(item);
+  paramData.userId = item.staffId;
+  //paramData.companyId = item.companyId;
 }
 
 let frameNum = ref(0);
@@ -180,6 +228,8 @@ async function getTrack() {
   param.startTime = `${yearDate.value} ${paramData.startTime}`;
   param.endTime = `${yearDate.value} ${paramData.endTime}`;
   param.userId = paramData.userId;
+  //新增companyId参数
+  // param.companyId = paramData.companyId;
   aMaps.remove(mapMarketPolylines.market);
   aMaps.remove(mapMarketPolylines.Polylines);
   videoData.playLength = 0;
@@ -397,6 +447,7 @@ onUnmounted(() => {
   background: #f9f9f9;
   display: flex;
   flex-direction: column;
+  height: 100%; /* 兜底：确保父链缺失 flex 高度时仍能撑满 #app，使 #container 有有效高度，避免高德 3D 地图 LngLat(NaN) */
 }
 
 .mapCard {
@@ -429,7 +480,7 @@ onUnmounted(() => {
     flex-direction: column;
     margin-right: 10px;
     h2.titleName {
-      font-size: 16px;
+      font-size: 20px;
       color: #585657;
       line-height: 36px;
       height: 36px;
@@ -456,7 +507,7 @@ onUnmounted(() => {
         }
       }
       p {
-        font-size: 16px;
+        font-size: 20px;
         color: #a0a0a0;
         margin: 0 10px;
       }
@@ -482,7 +533,7 @@ onUnmounted(() => {
         margin-right: 8px;
       }
       p {
-        font-size: 16px;
+        font-size: 22px;
         color: #585657;
       }
       &.on {
@@ -507,7 +558,7 @@ onUnmounted(() => {
       margin-right: 10px;
     }
     p {
-      font-size: 16px;
+      font-size: 18px;
       color: #585657;
       margin-right: 20px;
     }

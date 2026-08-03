@@ -7,61 +7,61 @@
           <el-option v-for="item in companyList" :key="item.id" :label="item.name" :value="item.id"></el-option>
         </el-select>
       </div>
-      <div class="search-input" style="margin-left: 10px">
+      <div class="search-input">
         <span>用户号</span>
         <el-input v-model="param.userId" placeholder="请输入..." />
       </div>
-      <div class="search-input" style="margin-left: 10px">
+      <div class="search-input">
         <span>用户名称</span>
         <el-input v-model="param.userName" placeholder="请输入..." />
       </div>
       <div class="search-input">
         <span>表号</span>
-        <el-input v-model="param.meterCode" type="number" placeholder="请输入..." />
+        <el-input v-model="param.meterCode" placeholder="请输入..." />
       </div>
       <div class="buttons">
         <div class="sercah-btn" @click="search">
           <img src="@/assets/yonghu/icon16.png" alt="" style="margin-left: 10px" />
-          <span style="font-size: 20px; margin-left: 15%">搜索</span>
+          <span style="font-size: 18px; margin-left: 10%">搜索</span>
         </div>
         <div class="clear-btn" @click="clear">
           <img src="@/assets/yonghu/icon4.png" alt="" style="margin-left: 10px" />
-          <span style="font-size: 20px; margin-left: 15%; color: #5a5a5a">清空</span>
+          <span style="font-size: 18px; margin-left: 10%; color: #5a5a5a">清空</span>
         </div>
       </div>
     </div>
     <div class="user-info">
       <div class="command-box">
-        <div class="export-out-btn" style="margin-left: 5px; width: 200px" @click="addAndBind_dialogFormVisible = true" v-if="staffPermissionIds.includes(2) && staffPermissionIds.includes(3)">
-          <img src="@/assets/yonghu/icon13.png" alt="" style="margin-left: 7px" />
-          <span style="font-size: 20px; margin-left: 10px; color: #5a5a5a">开户 & 绑定设备</span>
+        <div class="export-out-btn" @click="addAndBind_dialogFormVisible = true" v-if="staffPermissionIds.includes(2) && staffPermissionIds.includes(3)">
+          <img src="@/assets/yonghu/icon13.png" alt="" />
+          <span style="color: #5a5a5a; margin-left: 6px">开户&绑定设备</span>
         </div>
-        <div class="add-btn" style="margin-left: 5px" @click="add_dialogFormVisible = true" v-if="staffPermissionIds.includes(2)">
-          <img src="@/assets/yonghu/icon13.png" alt="" style="margin-left: 8px" />
-          <span style="font-size: 20px; margin-left: 8px; color: #5a5a5a">开户</span>
+        <div class="add-btn" @click="add_dialogFormVisible = true" v-if="staffPermissionIds.includes(2)">
+          <img src="@/assets/yonghu/icon13.png" alt=""/>
+          <span style="margin-left: 6px; color: #5a5a5a">开户</span>
         </div>
-        <div class="export-out-btn" style="margin-left: 5px;width:130px" @click="deviceBinding_dialogFormVisible = true" v-if="staffPermissionIds.includes(3)">
-          <img src="@/assets/yonghu/icon21.png" alt="" style="margin-left: 7px" />
-          <span style="font-size: 20px; margin-left: 10px; color: #5a5a5a">设备绑定</span>
+        <div class="export-out-btn" @click="deviceBinding_dialogFormVisible = true" v-if="staffPermissionIds.includes(3)">
+          <img src="@/assets/yonghu/icon21.png" alt=""/>
+          <span style="margin-left: 6px; color: #5a5a5a">设备绑定</span>
         </div>
-        <div class="delete-btn" style="margin-left: 5px" @click="delete_btn_click" v-if="staffPermissionIds.includes(4)">
-          <img src="@/assets/yonghu/icon4.png" alt="" style="margin-left: 8px" />
-          <span style="font-size: 20px; margin-left: 8px; color: #5a5a5a">删除</span>
+        <div class="delete-btn" @click="delete_btn_click" v-if="staffPermissionIds.includes(4)">
+          <img src="@/assets/yonghu/icon4.png" alt="" />
+          <span style="margin-left: 6px; color: #5a5a5a">删除</span>
         </div>
-        <div class="export-out-btn" style="margin-left: 5px; width: 250px" @click="downloadUserAndBindTemplate" v-if="staffPermissionIds.includes(5)">
-          <img src="@/assets/yonghu/icon1.png" alt="" style="margin-left: 7px" />
-          <span style="font-size: 20px; margin-left: 10px; color: #5a5a5a">开户绑定导入模板下载</span>
+        <div class="export-out-btn" @click="downloadUserAndBindTemplate" v-if="staffPermissionIds.includes(5)">
+          <img src="@/assets/yonghu/icon1.png" alt="" />
+          <span style="margin-left: 6px; color: #5a5a5a">开户绑定导入模板下载</span>
         </div>
-        <div class="export-in-btn" style="margin-left: 5px; width: 200px" @click="triggerUserAndBindImport" v-if="staffPermissionIds.includes(5)">
-          <img src="@/assets/yonghu/icon2.png" alt="" style="margin-left: 7px" />
-          <span style="font-size: 20px; margin-left: 5px; color: #5a5a5a">开户绑定信息导入</span>
+        <div class="export-in-btn" @click="triggerUserAndBindImport" v-if="staffPermissionIds.includes(5)">
+          <img src="@/assets/yonghu/icon2.png" alt="" />
+          <span style="margin-left: 6px; color: #5a5a5a">开户绑定信息导入</span>
           <input ref="userAndBindFileInput" type="file" accept=".xls,.xlsx" style="display: none" @change="importUserAndBind" />
         </div>
-        <div class="export-out-btn" style="margin-left: 5px" @click="exportExcel">
-          <img src="@/assets/yonghu/icon1.3.png" alt="" style="margin-left: 7px" />
-          <span style="font-size: 20px; margin-left: 10px; color: #5a5a5a">导出</span>
+        <div class="export-out-btn" @click="exportExcel">
+          <img src="@/assets/yonghu/icon1.3.png" alt="" />
+          <span style="margin-left: 6px; color: #5a5a5a">导出</span>
         </div>
-        <div class="reflush" style="margin-left: 5px" @click="reflush">
+        <div class="reflush" @click="reflush">
           <img src="@/assets/yonghu/icon15.png" alt="" />
         </div>
       </div>
@@ -82,9 +82,9 @@
             id="yonghu-table"
             v-loading="isLoading"
           >
-            <el-table-column type="selection" :selectable="selectable" min-width="40" align="center" fixed="left" />
-            <el-table-column property="theId" label="序号" width="73" align="center" fixed="left" />
-            <el-table-column property="userId" label="用户号" min-width="95" align="center" fixed="left" >
+            <el-table-column type="selection" :selectable="selectable" min-width="35" align="center" fixed="left" />
+            <el-table-column property="theId" label="序号" min-width="80" align="center" fixed="left" />
+            <el-table-column property="userId" label="用户号" min-width="110" align="center" fixed="left" >
               <template #header="scope">
                 <div class="sortable-header" @click="toggleSort('userId')">
                   <span>{{ scope.column.label }}</span>
@@ -95,20 +95,20 @@
                 </div>
               </template>
             </el-table-column>
-            <el-table-column property="userName" label="用户名" min-width="70" align="center"> </el-table-column>
-            <el-table-column property="userPhone" label="联系电话" min-width="100" align="center" />
-            <el-table-column property="meterCode" label="表号" min-width="100" align="center" />
-            <el-table-column property="reading" label="读数" min-width="70" align="center" />
-            <el-table-column property="meterType" label="表类型" min-width="70" align="center" />
-            <el-table-column property="priceName" label="价格类型" min-width="90" align="center" />
-            <el-table-column property="smsConfigName" label="短信配置" min-width="90" align="center"></el-table-column>
-            <el-table-column property="userAddr" label="用户地址" min-width="100" align="center" />
-            <el-table-column property="companyName" label="水厂" min-width="70" align="center" />
-            <el-table-column property="regionName" label="区域" min-width="80" align="center" />
-            <el-table-column property="approver1" label="开户人" min-width="70" align="center" />
-            <el-table-column property="factoryDate" label="出厂日期" min-width="70" align="center" />
-            <el-table-column property="firstInspectDate" label="首检日期" min-width="70" align="center" />
-            <el-table-column property="createTime" label="开户时间" min-width="100" align="center">
+            <el-table-column property="userName" label="用户名" min-width="85" align="center"> </el-table-column>
+            <el-table-column property="userPhone" label="电话" min-width="80" align="center" />
+            <el-table-column property="meterCode" label="表号" min-width="90" align="center" />
+            <el-table-column property="reading" label="读数" min-width="110" align="center" />
+            <el-table-column property="meterType" label="类型" min-width="85" align="center" />
+            <el-table-column property="priceName" label="价格" min-width="85" align="center" />
+            <el-table-column property="smsConfigName" label="短信" min-width="85" align="center"></el-table-column>
+            <el-table-column property="userAddr" label="地址" min-width="85" align="center" />
+            <el-table-column property="companyName" label="水厂" min-width="85" align="center" />
+            <el-table-column property="regionName" label="区域" min-width="85" align="center" />
+            <el-table-column property="approver1" label="开户人" min-width="85" align="center" />
+            <el-table-column property="factoryDate" label="出厂" min-width="100" align="center" />
+            <el-table-column property="firstInspectDate" label="首检" min-width="100" align="center" />
+            <el-table-column property="createTime" label="开户" min-width="90" align="center">
               <template #header="scope">
                 <div class="sortable-header" @click="toggleSort('time')">
                   <span>{{ scope.column.label }}</span>
@@ -981,7 +981,6 @@ export default {
   height: 40px;
   line-height: 40px;
   border-radius: 5px;
-  margin: 0 10px;
 }
 
 /* 设置鼠标滑过选项时的字体颜色 */
@@ -995,8 +994,8 @@ export default {
   align-content: center;
   justify-content: center;
   min-width: 94%;
-  height: 98%;
-  padding: 0px 20px;
+  height: 100%;
+  padding: 0px 15px;
 }
 
 .account-container > * {
@@ -1008,8 +1007,8 @@ export default {
 }
 
 .serach-box {
-  margin-top: 15px;
-  margin-bottom: 20px;
+  margin-top: 5px;
+  margin-bottom: 10px;
   height: 98px;
   display: flex;
   align-items: center;
@@ -1021,9 +1020,9 @@ export default {
   justify-content: flex-start;
   justify-content: center; /* 确保子元素在父容器中垂直居中 */
   flex-direction: column;
-  width: 14%;
+  width: 12%;
   height: 100%;
-  margin-right: 20px;
+  margin-right: 10px;
 }
 
 .search-input > span {
@@ -1043,16 +1042,16 @@ export default {
 
 .buttons {
   display: flex;
-  width: 240px;
+  width: 220px;
   height: 100%;
   align-items: center;
   position: absolute;
-  right: 20px;
+  right: 10px;
 }
 
 .buttons > * {
-  width: 120px;
-  margin-right: 30px;
+  width: 100px;
+  margin-right: 10px;
 }
 
 .sercah-btn,
@@ -1076,28 +1075,27 @@ export default {
 }
 
 .user-info {
-  height: calc(100% - 135px);
+  height: calc(100% - 120px);
   margin-bottom: 0px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   position: relative;
+  padding: 0 10px;
 }
 
 .command-box {
   display: flex;
   align-items: center;
-  width: 100%;
-  height: 40px;
+  width: 99%;
+  height: auto;
   /* margin-top: 20px; */
-  margin-bottom: 20px;
   position: absolute;
-  top: 20px;
-}
-
-.command-box > * {
-  margin-right: 15px;
+  margin-bottom: 0px;
+  top: 10px;
+  gap: 10px;
+  left: 10px;
 }
 
 .add-btn,
@@ -1111,15 +1109,16 @@ export default {
 .export-out-btn {
   display: flex;
   align-items: center;
-  width: 90px; /* 设置按钮的宽度 */
+  width: auto; /* 设置按钮的宽度 */
   height: 35px; /* 设置按钮的高度 */
   color: white;
   border-radius: 5px;
   cursor: pointer;
   transition: all 0.3s;
-  font-size: 20px;
+  font-size: 18px;
   background-color: #fff;
   border: 2px solid #f2f2f2;
+  padding: 0 8px;
 }
 
 .reflush {
@@ -1127,7 +1126,7 @@ export default {
   align-items: center;
   justify-content: center;
   width: 35px; /* 设置按钮的宽度 */
-  height: 32px; /* 设置按钮的高度 */
+  height: 35px; /* 设置按钮的高度 */
   color: white;
   border-radius: 5px;
   cursor: pointer;
@@ -1139,13 +1138,13 @@ export default {
 
 .user-list {
   width: 100%;
-  height: calc(100% - 150px);
+  height: calc(100% - 110px);
   display: flex;
-  margin-top: 15px;
+  margin-top: 8px;
 }
 
 .quyu-box {
-  width: 200px;
+  width: 170px;
   height: 100%;
   display: flex;
   flex-direction: column;
@@ -1153,7 +1152,7 @@ export default {
   background-color: #fafafa;
   border-radius: 5px;
   padding: 10px;
-  margin-right: 20px;
+  margin-right: 10px;
 }
 
 .quyu-box > * {
@@ -1173,13 +1172,13 @@ export default {
 
 .user-table {
   width: 80%;
-  height: calc(100%- 10px);
+  height: 100%;
   flex-grow: 1;
 }
 
 .page-box {
   width: 100%;
-  height: 65px;
+  height: 40px;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -1447,4 +1446,16 @@ export default {
   background-size: contain;
 }
 
+</style>
+
+<style scoped>
+:deep(.el-input__inner) {
+  font-size: 16px !important;
+}
+:deep(.el-select__wrapper .el-select__placeholder) {
+  font-size: 16px !important;
+}
+:deep(.el-select__wrapper .el-select__selected-item) {
+  font-size: 16px !important;
+}
 </style>

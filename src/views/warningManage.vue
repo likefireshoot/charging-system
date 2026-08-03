@@ -2,13 +2,13 @@
 <template>
   <div class="jinggao-container">
     <div class="serach-box">
-      <div class="search-input" style="margin-left: 10px" v-if="companyId === 1">
+      <div class="search-input" v-if="companyId === 1">
         <span>所属水厂</span>
         <el-select  class="big-font-el-select" v-model="params.company" placeholder="请选择所属水厂">
           <el-option v-for="item in companyList" :key="item.id" :value="item.id" :label="item.name"></el-option>
         </el-select>
       </div>
-      <div class="search-input" style="margin-left: 10px">
+      <div class="search-input">
         <span>警告类型</span>
         <el-select class="big-font-el-select" v-model="params.warningType" @change="onWarningTypeChange">
           <el-option label="欠费用户" value="欠费用户"></el-option>
@@ -24,7 +24,7 @@
         <span>用户号</span>
         <el-input v-model="params.userId" placeholder="请输入..." />
       </div>
-      <div class="search-input" style="margin-left: 10px">
+      <div class="search-input">
         <span>用户名称</span>
         <el-input v-model="params.userName" placeholder="请输入..." />
       </div>
@@ -41,16 +41,38 @@
         <el-select class="big-font-el-select" v-model="params.valveStatus">
           <el-option label="开阀" value="开阀"></el-option>
           <el-option label="关阀" value="关阀"></el-option>
+          <el-option label="故障" value="故障"></el-option>
+        </el-select>
+      </div>
+      <div class="search-input">
+        <span>电量</span>
+        <el-select class="big-font-el-select" v-model="params.battery" clearable placeholder="请选择">
+          <el-option label="正常" value="正常"></el-option>
+          <el-option label="异常" value="异常"></el-option>
+        </el-select>
+      </div>
+      <div class="search-input">
+        <span>品牌</span>
+        <el-select class="big-font-el-select" v-model="params.meterVendor" clearable placeholder="请选择">
+          <el-option label="圣鑫" value="圣鑫"></el-option>
+          <el-option label="旧圣鑫" value="旧圣鑫"></el-option>
+          <el-option label="太阳能" value="太阳能"></el-option>
+          <el-option label="信驰" value="信驰"></el-option>
+          <el-option label="旧信驰" value="旧信驰"></el-option>
+          <el-option label="旧信驰KF01" value="旧信驰KF01"></el-option>
+          <el-option label="4G信驰" value="4G信驰"></el-option>
+          <el-option label="集万讯" value="集万讯"></el-option>
+          <el-option label="千宝通" value="千宝通"></el-option>
         </el-select>
       </div>
       <div class="buttons">
         <div class="sercah-btn" @click="getWaringData">
           <img src="@/assets/yonghu/icon16.png" alt="" style="margin-left: 12px" />
-          <span style="font-size: 20px; margin-left: 10px">搜索</span>
+          <span style="font-size: 18px; margin-left: 10%">搜索</span>
         </div>
         <div class="clear-btn" @click="clear">
           <img src="@/assets/yonghu/icon4.png" alt="" style="margin-left: 12px" />
-          <span style="font-size: 20px; margin-left: 10px; color: #5a5a5a">清空</span>
+          <span style="font-size: 18px; margin-left: 10%; color: #5a5a5a">清空</span>
         </div>
       </div>
     </div>
@@ -70,12 +92,12 @@
               class="config-input"
             />
           </div>
-          <el-checkbox v-model="configEditMode" class="config-checkbox">编辑</el-checkbox>
-          <div class="config-confirm-btn" v-if="configEditMode" @click="confirmEditConfig">确认</div>
+          <el-checkbox v-model="configEditMode" class="config-checkbox" v-if="staffPermissionIds.includes(28)">编辑</el-checkbox>
+          <div class="config-confirm-btn" v-if="configEditMode && staffPermissionIds.includes(28)" @click="confirmEditConfig">确认</div>
         </div>
         <div class="export-out-btn" style="margin-left: 10px" @click="exportExcel">
           <img src="@/assets/yonghu/icon1.3.png" alt="" style="margin-left: 7px" />
-          <span style="font-size: 20px; margin-left: 10px; color: #5a5a5a">导出</span>
+          <span style="font-size: 18px; margin-left: 10px; color: #5a5a5a">导出</span>
         </div>
         <div class="reflush" style="margin-left: 10px" @click="reflush">
           <img src="@/assets/yonghu/icon15.png" alt="" />
@@ -83,7 +105,7 @@
       </div>
       <div class="jinggao-list">
         <div class="quyu-box">
-          <el-input v-model="filterText" placeholder="请输入关键字进行过滤" style="height: 32px; margin-bottom: 10px" />
+          <el-input v-model="filterText" placeholder="请输入关键字检索" style="height: 32px; margin-bottom: 10px" />
           <el-tree
             ref="treeRef"
             style="max-width: 600px"
@@ -111,47 +133,65 @@
             <el-table-column type="selection" :width="selectionWidth" align="center" fixed="left" />
             <el-table-column property="theId" label="序号" :width="idWidth" align="center" fixed="left"> </el-table-column>
             <el-table-column property="userId" label="用户号" :width="userIdWidth" align="center" />
-            <el-table-column property="userName" label="用户名称" :width="userNameWidth" align="center" />
-            <el-table-column property="meterCode" label="表号" :width="biaohaoWidth" align="center" />
-            <el-table-column property="userAddr" label="用户地址" :width="addressWidth" align="center" />
-<!--            <el-table-column property="regionName" label="所属区域" :width="quyuWidth" align="center" />-->
-<!--            <el-table-column property="companyName" label="所属水厂" :width="companyWidth" align="center" />-->
-            <el-table-column property="userPhone" label="联系电话" :width="phoneWidth" align="center" />
-            <el-table-column v-if="showLongTimeNoReportColumn" property="meterVendor" label="厂商" :width="deviceVendorWidth" align="center" />
-<!--            <el-table-column property="meterCode" label="表号" :width="biaohaoWidth" align="center" />-->
-            <!-- <el-table-column property="imei" label="IMEI号" :width="imeihaoWidth" align="center" /> -->
-            <el-table-column v-if="showLongTimeNoReportColumn" property="battery" label="电量" :width="deviceBatteryWidth" align="center" />
-            <el-table-column v-if="showLongTimeNoReportColumn" property="valveStatus" label="阀门" :width="deviceValveWidth" align="center" />
-<!--            <el-table-column property="createTime" :label="warningTimeLabel" :width="warningTimeWidth" align="center" :formatter="formatDateByType"/>-->
-<!--            <el-table-column property="warningType" label="警告类型" :width="warningTypeWidth" align="center" />-->
-            <el-table-column v-if="showOweAmountColumn" property="oweAmount" label="欠费金额" :width="oweAmountWidth" align="center">
-<!--              <template #default="{ row }">-->
-<!--                {{ formatOweAmount(row.oweAmount) }}-->
-<!--              </template>-->
-<!--            </el-table-column>-->
+            <el-table-column property="userName" label="用户名" :width="userNameWidth" align="center" >
               <template #default="scope">
-                <span @click="handleDetail(scope.row)"
-                      style="color: #46b97e; display: block; width: 100%; text-align: center">{{ formatOweAmount(scope.row.oweAmount)}}</span>
+                <span @click="handleUserInfo(scope.row)"
+                      style="color: #46b97e; display: block; width: 100%; text-align: center">
+                  {{ scope.row.userName }}
+                </span>
               </template>
             </el-table-column>
-<!--            <el-table-column property="totalWater" label="读数" :width="totalWaterWidth" align="center" />-->
-            <el-table-column v-if="!showFrequentReportColumn && !showValveClosedIncreaseColumn" label="读数" :width="totalWaterWidth" align="center">
+            <el-table-column property="meterCode" label="表号" :width="biaohaoWidth" align="center" />
+            <el-table-column property="regionName" label="区域" :width="quyuWidth" align="center" />
+            <el-table-column property="userAddr" label="地址" :width="addressWidth" align="center" />
+            <el-table-column property="userPhone" label="电话" :width="phoneWidth" align="center" />
+            <el-table-column property="meterVendor" label="品牌" :width="deviceVendorWidth" align="center" />
+            <el-table-column property="companyName" label="水厂" :width="companyWidth" align="center" />
+<!--            <el-table-column property="meterCode" label="表号" :width="biaohaoWidth" align="center" />-->
+            <!-- <el-table-column property="imei" label="IMEI号" :width="imeihaoWidth" align="center" /> -->
+            <el-table-column property="valveStatus" label="阀门" :width="deviceValveWidth" align="center" />
+            <el-table-column property="battery" label="电量" :width="deviceBatteryWidth" align="center" />
+            <el-table-column label="读数" :width="totalWaterWidth" align="center">
               <template #default="scope">
                 <span @click="handleWarningMeterJump(scope.row)"
                       style="color: #46b97e; cursor: pointer; display: block; width: 100%; text-align: center">{{ scope.row.totalWater }}</span>
               </template>
             </el-table-column>
+            <el-table-column property="balance" label="余额" :width="amountWidth" align="center" />
             <el-table-column property="warningType" label="警告类型" :width="warningTypeWidth" align="center" />
             <el-table-column property="createTime" :label="warningTimeLabel" :width="warningTimeWidth" align="center" :formatter="formatDateByType" />
-            <el-table-column v-if="showOweAmountColumn" property="valveStatus" label="阀门状态" :width="valveStatusWidth" align="center"/>
+            <el-table-column v-if="showOweAmountColumn" property="oweAmount" label="欠费金额" :width="oweAmountWidth" align="center">
+              <template #header>
+                <div class="sortable-header">
+                  <span>欠费金额</span>
+                  <div class="sort-icons">
+                    <!-- 升序 ▲ -->
+                    <span
+                      class="asc-icon"
+                      :class="{ active: params.sortType === 1 }"
+                      @click="setSortType(1)"
+                    >▲</span>
+                    <!-- 降序 ▼ -->
+                    <span
+                      class="desc-icon"
+                      :class="{ active: params.sortType === 0 }"
+                      @click="setSortType(0)"
+                    >▼</span>
+                  </div>
+                </div>
+              </template>
+              <template #default="scope">
+                <span @click="handleDetail(scope.row)"
+                      style="color: #46b97e; display: block; width: 100%; text-align: center">{{ formatOweAmount(scope.row.oweAmount)}}</span>
+              </template>
+            </el-table-column>
             <el-table-column v-if="showOweAmountColumn" property="qianfeiDays" label="欠费天数" :width="qianfeiDaysWidth" align="center" />
             <el-table-column v-if="showZeroUsageColumn" property="durationDays" label="0用量天数" :width="durationDaysWidth" align="center" />
-            <el-table-column v-if="showLargeUsageColumn" property="largeUsageAmount" label="昨日用水量/吨" :width="largeUsageAmountWidth" align="center" />
-            <el-table-column v-if="showDeviceAbnormalColumn" property="valveStatus" label="阀门" :width="deviceValveWidth" align="center" />
-            <el-table-column v-if="showDeviceAbnormalColumn" property="battery" label="电量" :width="deviceBatteryWidth" align="center" />
+            <el-table-column v-if="showLargeUsageColumn" property="largeUsageAmount" label="昨日用水量" :width="largeUsageAmountWidth" align="center" />
             <el-table-column v-if="showDeviceAbnormalColumn" property="signalValue" label="信号值" :width="deviceSignalWidth" align="center" />
-            <el-table-column v-if="showDeviceAbnormalColumn" property="meterVendor" label="厂商" :width="deviceVendorWidth" align="center" />
             <el-table-column v-if="showLongTimeNoReportColumn" property="durationDays" label="未上报天数" :width="durationDaysWidth" align="center" />
+            <el-table-column v-if="showLongTimeNoReportColumn" property="signalValue" label="信号值" :width="deviceSignalWidth" align="center" />
+
 
             <!-- 水表频繁上报专用列 -->
             <el-table-column v-if="showFrequentReportColumn" label="当日上报次数" :width="reportCountWidth" align="center">
@@ -160,7 +200,6 @@
                       style="color: #46b97e; cursor: pointer; display: block; width: 100%; text-align: center">{{ scope.row.dailyReportCount }}</span>
               </template>
             </el-table-column>
-            <el-table-column v-if="showFrequentReportColumn" property="meterVendor" label="厂商" :width="deviceVendorWidth" align="center" />
             <!-- 关阀状态读数增加专用列 -->
             <el-table-column v-if="showValveClosedIncreaseColumn" label="上次读数" :width="lastReadingWidth" align="center">
               <template #default="{ row }">
@@ -172,12 +211,13 @@
                 {{ row.abnormalWaterDelta != null ? row.abnormalWaterDelta : '' }}
               </template>
             </el-table-column>
-            <el-table-column v-if="showValveClosedIncreaseColumn" label="告警时读数" :width="alarmReadingWidth" align="center">
-              <template #default="scope">
-                <span @click="handleWarningMeterJump(scope.row)"
-                      style="color: #46b97e; cursor: pointer; display: block; width: 100%; text-align: center">{{ scope.row.tons != null ? scope.row.tons : '' }}</span>
-              </template>
-            </el-table-column>
+            <el-table-column v-if="showValveClosedIncreaseColumn" property="continueDays" label="持续漏水天数" :width="continueDaysWidth" align="center"></el-table-column>
+<!--            <el-table-column v-if="showValveClosedIncreaseColumn" label="告警时读数" :width="alarmReadingWidth" align="center">-->
+<!--              <template #default="scope">-->
+<!--                <span @click="handleWarningMeterJump(scope.row)"-->
+<!--                      style="color: #46b97e; cursor: pointer; display: block; width: 100%; text-align: center">{{ scope.row.tons != null ? scope.row.tons : '' }}</span>-->
+<!--              </template>-->
+<!--            </el-table-column>-->
           </el-table>
         </div>
       </div>
@@ -190,6 +230,11 @@
     </div>
 
   </div>
+
+  <!-- 点击用户名称弹出框 -->
+  <userInfoVue v-if="user_info_dialogFormVisible" :user_info_dialogFormVisible="user_info_dialogFormVisible"
+               :quyu_data="quyu_data" :data="multipleSelection[0]" @close="closeUserInfoDialog"></userInfoVue>
+
 </template>
 
 <script>
@@ -199,8 +244,9 @@ import axios from "axios";
 import { useWarningStore } from "@/store/warningStore.js";
 import { mapState } from "pinia";
 import { useDetailNavigation } from "@/composables/useDetailNavigation";
+import userInfoVue from "@/components/userManage/userInfo.vue";
 export default {
-  components: {},
+  components: {userInfoVue},
   setup() {
     const { navigateToDetail } = useDetailNavigation();
     return { navigateToDetail };
@@ -219,6 +265,10 @@ export default {
         company: null,
         companyId: null,
         valveStatus: "",
+        // 新增电量、厂商
+        meterVendor: "",
+        battery: "",
+        sortType: null // 新增：0=欠费降序，1=欠费升序，null=默认时间
       },
       companyId: JSON.parse(sessionStorage.getItem("userData")).companyId,
       staffPermissionIds: JSON.parse(sessionStorage.getItem("userData")).staffPermissionIds,
@@ -261,6 +311,8 @@ export default {
       abnormalIncreaseWidth: 0,
       alarmReadingWidth: 0,
       companyWidth: 0,
+      amountWidth: 0,
+      continueDaysWidth: 0,
       // 父容器元素
       parentContainer: null,
       // ResizeObserver 实例
@@ -268,10 +320,11 @@ export default {
 
       // 警告配置参数展示
       configItems: [
-        { label: '大用量额度（吨）', key: 'amountQuota', displayValue: '' },
-        { label: '最大持续未上报天数（天）', key: 'delayDays', displayValue: '' },
-        { label: '最大每日上报次数', key: 'maxDailyReportTimes', displayValue: '' },
-        { label: '最大零用量天数', key: 'maxDaysWithoutUsage', displayValue: '' },
+        { label: '大用量预警吨数', key: 'amountQuota', displayValue: '' },
+        { label: '持续未上报预警天数', key: 'delayDays', displayValue: '' },
+        { label: '每日频繁上报预警次数', key: 'maxDailyReportTimes', displayValue: '' },
+        { label: '零用量预警天数', key: 'maxDaysWithoutUsage', displayValue: '' },
+        { label: '关阀读数增加预警天数', key: 'maxDaysAbnormalWater', displayValue: '' },
       ],
       configEditMode: false,
 
@@ -284,6 +337,8 @@ export default {
 
       //存储当前勾选的行的数据信息
       multipleSelection: [],
+
+      user_info_dialogFormVisible: false,
 
     };
   },
@@ -344,6 +399,7 @@ export default {
       if (this.showZeroUsageColumn) return "未用水起始时间";
       if (this.showLongTimeNoReportColumn) return "未上报起始时间";
       if (this.showFrequentReportColumn) return "警告日期";
+      if (this.showValveClosedIncreaseColumn) return "漏水起始时间";
       return "警告时间";
     },
     // 定义每列的百分比宽度
@@ -354,122 +410,159 @@ export default {
       // 欠费用户 — sum: 4+5+6+9+11+9+9+11+7+6+8+7+8 = 100
       if (this.showOweAmountColumn) {
         return {
-          selection: 4,
+          selection: 2,
           id: 5,
           userId: 6,
-          userName: 9,
-          address: 11,
-          phone: 9,
-          biaohao: 9,
-          warningTime: 11,
-          warningType: 7,
-          totalWater: 6,
-          oweAmount: 8,
-          valveStatus: 7,
-          qianfeiDays: 8,
+          userName: 6,
+          address: 6,
+          phone: 5,
+          biaohao: 6,
+          deviceVendor: 5,
+          company: 6,
+          deviceValve: 5,
+          deviceBattery: 5,
+          warningTime: 8,
+          warningType: 5,
+          totalWater: 7,
+          amount: 7,
+          oweAmount: 6,
+          qianfeiDays: 5,
+          quyu: 5,
         };
       }
       // 水表0用量用户 — sum: 4+5+7+10+13+11+10+13+9+7+11 = 100
       if (this.showZeroUsageColumn) {
         return {
-          selection: 4,
+          selection: 2,
           id: 5,
-          userId: 7,
-          userName: 10,
-          address: 13,
-          phone: 11,
-          biaohao: 10,
-          warningTime: 13,
-          warningType: 9,
+          userId: 6,
+          userName: 7,
+          address: 8,
+          phone: 5,
+          biaohao: 6,
+          deviceVendor: 5,
+          company: 6,
+          deviceValve: 5,
+          deviceBattery: 5,
+          warningTime: 8,
+          warningType: 7,
           totalWater: 7,
-          durationDays: 11,
+          amount: 7,
+          durationDays: 6,
+          quyu: 5,
         };
       }
       // 设备异常 — sum: 4+5+6+9+11+9+8+10+7+6+6+6+6+7 = 100
       if (this.showDeviceAbnormalColumn) {
         return {
-          selection: 4,
+          selection: 2,
           id: 5,
           userId: 6,
-          userName: 9,
-          address: 11,
-          phone: 9,
-          biaohao: 8,
-          warningTime: 10,
+          userName: 8,
+          address: 6,
+          phone: 5,
+          biaohao: 6,
+          deviceVendor: 6,
+          company: 6,
+          deviceValve: 5,
+          deviceBattery: 5,
+          warningTime: 8,
           warningType: 7,
-          totalWater: 6,
-          deviceValve: 6,
-          deviceBattery: 6,
+          totalWater: 7,
+          amount: 7,
           deviceSignal: 6,
-          deviceVendor: 7,
+          quyu: 5,
         };
       }
       // 水表大用量用户 — sum: 4+5+7+10+13+11+10+13+9+7+11 = 100
       if (this.showLargeUsageColumn) {
         return {
-          selection: 4,
+          selection: 2,
           id: 5,
-          userId: 7,
-          userName: 10,
-          address: 13,
-          phone: 11,
-          biaohao: 10,
-          warningTime: 13,
-          warningType: 9,
+          userId: 6,
+          userName: 7,
+          address: 6,
+          phone: 5,
+          biaohao: 6,
+          deviceVendor: 5,
+          company: 6,
+          deviceValve: 5,
+          deviceBattery: 5,
+          warningTime: 8,
+          warningType: 7,
           totalWater: 7,
-          largeUsageAmount: 11,
+          amount: 9,
+          largeUsageAmount: 6,
+          quyu: 5,
         };
       }
       // 数据长时间未上报 — sum: 4+5+7+9+11+11+9+10+8+5+9+6+6 = 100
       if (this.showLongTimeNoReportColumn) {
         return {
-          selection: 4,
+          selection: 2,
           id: 5,
-          userId: 7,
-          userName: 8,
-          address: 8,
-          phone: 8,
-          biaohao: 9,
-          warningTime: 10,
-          warningType: 8,
-          totalWater: 5,
-          durationDays: 9,
-          deviceValve: 6,
-          deviceBattery: 6,
-          deviceVendor: 7,
+          userId: 6,
+          userName: 7,
+          address: 6,
+          phone: 5,
+          biaohao: 5,
+          deviceVendor: 5,
+          company: 6,
+          deviceValve: 4.5,
+          deviceBattery: 4.5,
+          warningTime: 7,
+          warningType: 7,
+          totalWater: 7,
+          amount: 6,
+          durationDays: 6,
+          deviceSignal: 6,
+          quyu: 5,
         };
       }
       // 水表频繁上报 — sum: 4+5+7+11+13+11+10+13+10+8+8 = 100
       if (this.showFrequentReportColumn) {
         return {
-          selection: 4,
+          selection: 2,
           id: 5,
-          userId: 7,
-          userName: 11,
-          address: 13,
-          phone: 11,
-          biaohao: 10,
-          warningTime: 13,
-          warningType: 10,
-          reportCount: 8,
-          deviceVendor: 8,
+          userId: 6,
+          userName: 7,
+          address: 7,
+          phone: 5,
+          biaohao: 7,
+          deviceVendor: 6,
+          company: 6,
+          deviceValve: 5,
+          deviceBattery: 5,
+          warningTime: 7,
+          warningType: 7,
+          totalWater: 7,
+          amount: 7,
+          reportCount: 6,
+          quyu: 5,
         };
       }
       // 关阀状态读数增加 — sum: 4+6+7+10+13+9+9+12+9+6+7+8 = 100
       if (this.showValveClosedIncreaseColumn) {
         return {
-          selection: 4,
-          id: 6,
-          userId: 7,
-          userName: 10,
-          address: 13,
-          phone: 9,
-          biaohao: 9,
-          warningTime: 12,
-          warningType: 9,
-          lastReading: 6,
-          abnormalIncrease: 7,
-          alarmReading: 8,
+          selection: 2,
+          id: 5,
+          userId: 6,
+          userName: 6,
+          address: 6,
+          phone: 5,
+          biaohao: 5,
+          deviceVendor: 5,
+          company: 5,
+          deviceValve: 3,
+          deviceBattery: 3,
+          warningTime: 6,
+          warningType: 5,
+          totalWater: 7,
+          amount: 7,
+          lastReading: 7,
+          abnormalIncrease: 6,
+          quyu: 5,
+          continueDays: 6,
         };
       }
       // 默认（fallback）— sum: 4+6+8+12+14+11+11+15+10+9 = 100
@@ -568,6 +661,13 @@ export default {
     }
   },
   methods: {
+    // 设置欠费金额排序：0降序，1升序，再次点击同一切回null默认
+    setSortType(type) {
+      // 重复点击同一按钮则取消排序（恢复默认按时间）
+      this.params.sortType = this.params.sortType === type ? null : type;
+      this.params.pageNo = 1;
+      this.getWaringData();
+    },
     // ****** 欠费金额点击 → 跳转至用户详情页（默认 tab：扣费记录）
     handleDetail(row) {
       this.navigateToDetail(row, {
@@ -602,6 +702,7 @@ export default {
       }
       this.warningTypeDebounceTimer = setTimeout(() => {
         this.params.pageNo = 1;
+        this.params.sortType = null; // 重置排序
         this.getWaringData();
       }, 300);
     },
@@ -684,13 +785,17 @@ export default {
         this.lastReadingWidth = p.lastReading ? (p.lastReading / 100) * w : 0;
         this.abnormalIncreaseWidth = p.abnormalIncrease ? (p.abnormalIncrease / 100) * w : 0;
         this.alarmReadingWidth = p.alarmReading ? (p.alarmReading / 100) * w : 0;
+        this.companyWidth = p.company ? (p.company / 100) * w : 0;
+        this.amountWidth = p.amount ? (p.amount / 100) * w : 0;
+        this.quyuWidth = p.quyu ? (p.quyu / 100) * w : 0;
+        this.continueDaysWidth = p.continueDays ? (p.continueDays / 100) * w : 0;
       }
     },
     formatOweAmount(val) {
       if (val === null || val === undefined || val === "") return "--";
       const num = Number(val);
-      if (Number.isFinite(num)) return `${num.toFixed(2)} 元`;
-      return `${val} 元`;
+      if (Number.isFinite(num)) return `${num.toFixed(2)}`;
+      return `${val}`;
     },
     formatDateByType(row){
       if (!row.createTime) return "";
@@ -858,6 +963,7 @@ export default {
     reflush() {
       this.warningDataCache = {};
       this.clear(1);
+      this.params.sortType = null; // 重置排序
       this.filterText = "";
       this.$refs.treeRef.setCurrentKey(null);
       this.region = "";
@@ -869,7 +975,7 @@ export default {
       } else {
         params.companyId = this.companyId; // 所属水厂ID
       }
-      params.warningType = "欠费用户"
+      params.warningType = this.params.warningType
       service
         .post("/warning/queryWarning", params)
         .then((response) => {
@@ -896,13 +1002,15 @@ export default {
     clear(isSearch) {
       this.params.company = null;
       this.params.companyId = null;
-      this.params.warningType = "欠费用户";
+      // this.params.warningType = "欠费用户";
       this.params.userName = "";
       this.params.imei = "";
       this.params.meterCode = "";
       this.params.valveStatus = "";
       this.params.regionName = "";
       this.params.userId = "";
+      this.params.meterVendor = "";
+      this.params.battery = "";
       if (typeof isSearch != 'number' || isNaN(isSearch)) {
         this.warningDataCache = {};
         this.filterText = "";
@@ -911,12 +1019,25 @@ export default {
         }
         this.region = "";
         this.params.pageNo = 1;
+        this.params.sortType = null; // 重置排序
         this.getWaringData();
       }
     },
     exportExcel() {
+      // 拼接动态文件名
+      const baseName = "警告数据列表";
+      const suffix = ".xlsx";
+      // 如果有选中警告类型就拼接，没有就使用默认
+      const fileName = this.params.warningType
+          ? `${baseName}_${this.params.warningType}${suffix}`
+          : `${baseName}${suffix}`;
+      // 复制params并剔除分页参数 pageNo、pageSize
+      const tempParams = { ...this.params };
+      delete tempParams.pageNo;
+      delete tempParams.pageSize;
+
       const exportParams = {
-        ...this.params,
+        ...tempParams,
         companyId: this.companyId === 1 ? this.params.company || null : this.companyId,
       };
       if (this.region) {
@@ -944,7 +1065,7 @@ export default {
 
           const link = document.createElement("a");
           link.href = window.URL.createObjectURL(blob);
-          link.download = "警告数据列表.xlsx";
+          link.download = fileName;
           document.body.appendChild(link);
           link.click();
           document.body.removeChild(link);
@@ -1009,6 +1130,7 @@ export default {
             this.configItems[1].displayValue = response.data.maxDaysWithoutReport;
             this.configItems[2].displayValue = response.data.maxDailyReportTimes;
             this.configItems[3].displayValue = response.data.maxDaysWithoutUsage;
+            this.configItems[4].displayValue = response.data.maxDaysAbnormalWater;
           } else {
             ElMessage.error(response.msg);
           }
@@ -1035,9 +1157,10 @@ export default {
       const delayDays = this.configItems[1].displayValue;
       const maxDailyReportTimes = this.configItems[2].displayValue;
       const maxDaysWithoutUsage = this.configItems[3].displayValue;
+      const maxDaysAbnormalWater = this.configItems[4].displayValue;
 
       service
-        .get(`/warning/setWarningConfig?amountQuota=${amountQuota}&delayDays=${delayDays}&maxDailyReportTimes=${maxDailyReportTimes}&maxDaysWithoutUsage=${maxDaysWithoutUsage}`)
+        .get(`/warning/setWarningConfig?amountQuota=${amountQuota}&delayDays=${delayDays}&maxDailyReportTimes=${maxDailyReportTimes}&maxDaysWithoutUsage=${maxDaysWithoutUsage}&maxDaysAbnormalWater=${maxDaysAbnormalWater}`)
         .then((response) => {
           if (response.code === 200) {
             ElMessage.success('设置成功');
@@ -1049,6 +1172,22 @@ export default {
         .catch((error) => {
           ElMessage.error(error);
         });
+    },
+    // 点击用户名打开用户详情
+    handleUserInfo(row) {
+      // 校验权限17（和用户管理页一致）
+      if (this.staffPermissionIds.includes(17)) {
+        this.multipleSelection[0] = row;
+        this.user_info_dialogFormVisible = true;
+      } else {
+        ElMessage.warning("暂无用户详情查看权限");
+      }
+    },
+    // 关闭用户详情弹窗
+    closeUserInfoDialog() {
+      this.user_info_dialogFormVisible = false;
+      this.multipleSelection = [];
+      this.getWaringData(); // 关闭后刷新警告表格数据
     },
   }
 };
@@ -1126,7 +1265,6 @@ export default {
   height: 40px;
   line-height: 40px;
   border-radius: 5px;
-  margin: 0 10px;
 }
 
 /* 设置鼠标滑过选项时的字体颜色 */
@@ -1139,9 +1277,9 @@ export default {
   flex-direction: column;
   align-content: center;
   justify-content: center;
-  width: 100%;
-  height: 98%;
-  padding: 0px 20px;
+  min-width: 94%;
+  height: 100%;
+  padding: 0px 15px;
 }
 
 .jinggao-container > * {
@@ -1153,7 +1291,7 @@ export default {
 }
 
 .serach-box {
-  margin-top: 10px;
+  margin-top: 5px;
   margin-bottom: 10px;
   height: 98px;
   display: flex;
@@ -1166,13 +1304,13 @@ export default {
   justify-content: flex-start;
   justify-content: center; /* 确保子元素在父容器中垂直居中 */
   flex-direction: column;
-  width: 12%;
+  width: 9%;
   height: 100%;
-  margin-right: 20px;
+  margin-right: 10px;
 }
 
 .search-input > span {
-  font-size: 20px;
+  font-size: 18px;
   margin-bottom: 5px;
 }
 
@@ -1188,17 +1326,16 @@ export default {
 
 .buttons {
   display: flex;
-  width: 240px;
+  width: 220px;
   height: 100%;
   align-items: center;
   position: absolute;
-  right: 20px;
-  margin-right: 30px;
+  right: 10px;
 }
 
 .buttons > * {
-  width: 120px;
-  margin-right: 50px;
+  width: 100px;
+  margin-right: 10px;
 }
 
 .sercah-btn,
@@ -1223,7 +1360,6 @@ export default {
 
 .jinggao-info {
   height: calc(100% - 120px);
-  margin-bottom: 0px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1231,26 +1367,34 @@ export default {
   position: relative;
 }
 
+
+.jinggao-info {
+  padding: 0px 10px;
+  border: 1px solid #e9e9e9;
+  border-radius: 5px;
+  width: 99.3%;
+  background-color: #fff;
+}
+
 .command-box {
   display: flex;
   align-items: center;
-  width: 100%;
+  width: 99%;
   height: 40px;
-  margin-bottom: 20px;
   position: absolute;
-  top: 15px;
+  top: 10px;
 }
 
 .command-box > * {
-  margin-right: 20px;
+  margin-right: 10px;
 }
 
 .config-display {
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 15px;
   flex-wrap: wrap;
-  padding-left: 30px;
+  padding-left: 15px;
 }
 
 .config-item {
@@ -1260,14 +1404,14 @@ export default {
 }
 
 .config-label {
-  font-size: 20px;
+  font-size: 18px;
   color: #575556;
   white-space: nowrap;
 }
 
 .config-input {
-  width: 100px;
-  font-size: 20px;
+  width: 65px;
+  font-size: 18px;
 }
 
 .config-input-editable :deep(.el-input__inner) {
@@ -1279,11 +1423,11 @@ export default {
 
 .config-checkbox {
   white-space: nowrap;
-  font-size: 20px;
+  font-size: 18px;
 }
 
 :deep(.config-checkbox .el-checkbox__label) {
-  font-size: 20px;
+  font-size: 18px;
 }
 
 .config-confirm-btn {
@@ -1291,12 +1435,12 @@ export default {
   align-items: center;
   justify-content: center;
   height: 35px;
-  padding: 0 20px;
+  padding: 0 15px;
   background-color: #45ba7e;
   color: #fff;
   border-radius: 5px;
   cursor: pointer;
-  font-size: 20px;
+  font-size: 18px;
   white-space: nowrap;
   transition: all 0.3s;
 }
@@ -1332,7 +1476,7 @@ export default {
   align-items: center;
   justify-content: center;
   width: 35px; /* 设置按钮的宽度 */
-  height: 32px; /* 设置按钮的高度 */
+  height: 35px; /* 设置按钮的高度 */
   color: white;
   border-radius: 5px;
   cursor: pointer;
@@ -1344,14 +1488,13 @@ export default {
 
 .jinggao-list {
   width: 100%;
-  height: calc(100% - 150px);
+  height: calc(100% - 110px);
   display: flex;
-  margin-top: 10px;
-  margin-bottom: 5px;
+  margin-top: 8px;
 }
 
 .quyu-box {
-  width: 220px;
+  width: 170px;
   height: 100%;
   display: flex;
   flex-direction: column;
@@ -1359,7 +1502,7 @@ export default {
   background-color: #fafafa;
   border-radius: 5px;
   padding: 10px;
-  margin-right: 1%;
+  margin-right: 10px;
 }
 
 .quyu-box > * {
@@ -1377,8 +1520,7 @@ export default {
 
 .jinggao-table {
   flex: 1;
-  margin-left: 1%;
-  height: calc(100% - 10px);
+  height: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -1387,13 +1529,16 @@ export default {
 
 .page-box {
   width: 100%;
-  height: 65px;
+  height: 40px;
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-top: 5px;
   position: absolute;
   bottom: 0;
+  pointer-events: none;
+}
+.page-box > * {
+  pointer-events: auto;
 }
 
 .add-dialog {
@@ -1511,6 +1656,27 @@ export default {
   background: transparent !important;
 }
 
+.sortable-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+.sort-icons {
+  display: flex;
+  flex-direction: column;
+  line-height: 1;
+  font-size: 12px;
+  gap: 2px;
+}
+.asc-icon, .desc-icon {
+  cursor: pointer;
+  color: #cccccc;
+}
+.asc-icon.active, .desc-icon.active {
+  color: #ffffff;
+}
+
 </style>
 
 <style lang="scss" scoped>
@@ -1521,5 +1687,17 @@ export default {
       color: white;
     }
   }
+}
+</style>
+
+<style scoped>
+:deep(.el-input__inner) {
+  font-size: 16px !important;
+}
+:deep(.el-select__wrapper .el-select__placeholder) {
+  font-size: 16px !important;
+}
+:deep(.el-select__wrapper .el-select__selected-item) {
+  font-size: 16px !important;
 }
 </style>

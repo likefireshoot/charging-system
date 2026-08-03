@@ -64,7 +64,7 @@
         <el-table-column property="commandStatus" label="通讯状态" min-width="130" align="center" />
         <el-table-column property="createTime" label="通讯下发时间" min-width="180" align="center" />
         <el-table-column property="finishTime" label="通讯完成时间" min-width="180" align="center" />
-        <el-table-column property="meterVendor" label="厂商" min-width="120" align="center" />
+<!--        <el-table-column property="meterVendor" label="厂商" min-width="120" align="center" />-->
         <el-table-column property="displayStaffName" label="下发员工" min-width="120" align="center" />
         <el-table-column property="description" label="描述" min-width="260" align="center" show-overflow-tooltip />
       </el-table>
@@ -121,6 +121,10 @@ export default {
     };
   },
   mounted() {
+    this.fetchCommandLogs();
+  },
+  activated() {
+    // 新增：被keep-alive缓存，再次激活页面时执行
     this.fetchCommandLogs();
   },
   watch: {
@@ -239,11 +243,11 @@ export default {
 .search-bar {
   display: flex;
   align-items: center;
-  gap: 16px;
-  margin-bottom: 15px;
+  gap: 15px;
+  margin-bottom: 10px;
   flex-wrap: wrap;
   background: #ffffff;
-  padding: 12px 20px;
+  padding: 10px 15px;
   border-radius: 8px;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
   border: 1px solid #e9eef2;
@@ -252,13 +256,30 @@ export default {
 .search-input-item {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
 }
 
 .search-input-item > span {
   font-size: 18px;
   color: #606266;
   white-space: nowrap;
+}
+
+.search-input-item :deep(.el-input__inner) {
+  font-size: 18px;
+}
+.search-input-item :deep(.el-input__inner::placeholder) {
+  font-size: 18px;
+}
+.search-input-item :deep(.el-select__wrapper .el-select__placeholder),
+.search-input-item :deep(.el-select__wrapper .el-select__label) {
+  font-size: 18px;
+}
+.search-input-item :deep(.el-range-input__inner) {
+  font-size: 18px;
+}
+.search-input-item :deep(.el-range-input__inner::placeholder) {
+  font-size: 18px;
 }
 
 .fixed-meter :deep(.el-input.is-disabled .el-input__wrapper) {
@@ -268,7 +289,7 @@ export default {
 .search-buttons {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   margin-left: auto;
 }
 
@@ -278,11 +299,12 @@ export default {
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 6px 16px;
+  padding: 5px 15px;
   border-radius: 4px;
   cursor: pointer;
   transition: all 0.3s;
   font-size: 18px;
+  height: auto;
 }
 
 .search-btn {
@@ -317,8 +339,8 @@ export default {
 .tool-bar {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin-bottom: 15px;
+  gap: 10px;
+  margin-bottom: 8px;
 }
 
 .refresh-btn {
@@ -332,46 +354,10 @@ export default {
 }
 
 .pagination-container {
-  margin-top: 20px;
+  margin-top: 5px;
   display: flex;
   justify-content: center;
   flex-shrink: 0;
-}
-
-.pagination-container :deep(.el-pagination) {
-  font-size: 20px;
-}
-
-.pagination-container :deep(.el-pagination .btn-prev),
-.pagination-container :deep(.el-pagination .btn-next) {
-  min-width: 44px;
-  height: 44px;
-  line-height: 44px;
   font-size: 18px;
-}
-
-.pagination-container :deep(.el-pager li) {
-  min-width: 44px;
-  height: 44px;
-  line-height: 44px;
-  font-size: 18px;
-  margin: 0 4px;
-}
-
-.pagination-container :deep(.el-pagination__total) {
-  font-size: 18px;
-  line-height: 44px;
-  margin-right: 20px;
-}
-
-.pagination-container :deep(.el-pagination__jump) {
-  font-size: 18px;
-  line-height: 44px;
-  margin-left: 20px;
-}
-
-.pagination-container :deep(.el-pagination__jump input) {
-  height: 36px;
-  line-height: 36px;
 }
 </style>

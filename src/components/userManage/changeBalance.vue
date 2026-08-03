@@ -100,6 +100,7 @@ export default {
         userId: this.rechargeData.userId,
         meterCode: this.rechargeData.meterCode,
         newBalance: this.rechargeData.newBalance,
+        imei: this.data.imei,
       };
       console.log(params);
 

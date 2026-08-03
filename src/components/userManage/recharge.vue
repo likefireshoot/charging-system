@@ -31,7 +31,7 @@
           </span>
           <el-radio-group v-model="rechargeData.rechargeType">
             <el-radio label="现金">现金</el-radio>
-            <el-radio label="免费赠送">免费赠送</el-radio>
+            <el-radio label="免费赠送" v-if="isSuperAdmin">免费赠送</el-radio>
           </el-radio-group>
         </div>
         <div class="recharge-input" style="margin-right: 1%; width: 100%">
@@ -142,6 +142,7 @@ import { ElMessage } from "element-plus";
 import service from "@/api/request";
 import axios from "axios";
 import { compileString } from "sass";
+import { mapState } from "vuex";
 
 export default {
   props: {
@@ -178,6 +179,15 @@ export default {
       // 缓存请求参数，弹窗确认后使用
       tempDataParams: null,
     };
+  },
+  computed: {
+    isSuperAdmin() {
+      // 直接读取vuex仓库，不需要mapState
+      const userData = this.$store.state.userData;
+      console.log('登录信息',userData)
+      if (!userData) return false;
+      return userData.staffCharacterId === 7;
+    }
   },
   mounted() {
     this.assignmentData();
@@ -369,7 +379,10 @@ export default {
         meterCode: formData.meterCode,
         rechargeType: formData.rechargeType,
         rechargeAmount: rechargeAmount,
-        region: formData.region
+        region: formData.region,
+        userId: this.data.userId,
+        imei: this.data.imei,
+        companyId: this.data.companyId,
       };
 
       // 弹出确认提示框，不再直接请求接口
