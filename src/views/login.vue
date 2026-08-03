@@ -8,7 +8,7 @@
 
         <div class="logo">
           <img src="@/assets/logo.svg" class="icon" alt="" />
-          <p>水务收费系统</p>
+          <p>{{ systemTitle }}</p>
         </div>
       </div>
       <div class="form">
@@ -168,6 +168,9 @@ import { getCurrentInstance, onMounted, reactive, ref } from "vue";
 import { useRouter } from "vue-router";
 import { ElMessage } from "element-plus";
 import service from "@/api/request";
+
+// 根据端口号决定系统标题：92=水务抄表系统，93=水务收费系统，其他默认水务收费系统
+const systemTitle = window.location.port === "92" ? "水务抄表系统" : "水务收费系统";
 
 const { proxy } = getCurrentInstance();
 const store = useStore();
