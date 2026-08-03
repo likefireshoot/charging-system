@@ -265,8 +265,8 @@ if (staffPermissionIds.value.includes(39)) {
   });
 }
 const adminNavList = reactive([
-  { id: 0, name: "首页", icon: require("@/assets/menu/icon1.png"), icon2: require("@/assets/menu/icon2.png"), path: "/homePage", ports: ["92", "93"] },
   { id: 22, name: "设备管理", icon: require("@/assets/menu/icon32.png"), icon2: require("@/assets/menu/icon33.png"), path: "/deviceManage", ports: ["92"] },
+  { id: 0, name: "首页", icon: require("@/assets/menu/icon1.png"), icon2: require("@/assets/menu/icon2.png"), path: "/homePage", ports: ["93"] },
   { id: 1, name: "开户管理", icon: require("@/assets/menu/icon24.png"), icon2: require("@/assets/menu/icon23.png"), path: "/accountManage", ports: ["93"] },
   { id: 2, name: "用户管理", icon: require("@//assets/menu/icon3.png"), icon2: require("@/assets/menu/icon4.png"), path: "/userManage", ports: ["92", "93"] },
   { id: 3, name: "价格管理", icon: require("@/assets/menu/icon5.png"), icon2: require("@/assets/menu/icon6.png"), path: "/priceManage", ports: ["93"] },
@@ -321,8 +321,8 @@ const adminNavList = reactive([
 ]);
 
 const nonAdminNavList = reactive([
-  { id: 0, name: "首页", icon: require("@/assets/menu/icon1.png"), icon2: require("@/assets/menu/icon2.png"), path: "/homePage", ports: ["92", "93"] },
   { id: 22, name: "设备管理", icon: require("@/assets/menu/icon32.png"), icon2: require("@/assets/menu/icon33.png"), path: "/deviceManage", ports: ["92"] },
+  { id: 0, name: "首页", icon: require("@/assets/menu/icon1.png"), icon2: require("@/assets/menu/icon2.png"), path: "/homePage", ports: ["93"] },
   { id: 1, name: "开户管理", icon: require("@/assets/menu/icon24.png"), icon2: require("@/assets/menu/icon23.png"), path: "/accountManage", ports: ["93"] },
   { id: 2, name: "用户管理", icon: require("@//assets/menu/icon3.png"), icon2: require("@/assets/menu/icon4.png"), path: "/userManage", ports: ["92", "93"] },
   { id: 3, name: "价格管理", icon: require("@/assets/menu/icon5.png"), icon2: require("@/assets/menu/icon6.png"), path: "/priceManage", ports: ["93"] },
