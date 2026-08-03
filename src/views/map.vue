@@ -191,37 +191,22 @@ let overlayList = ref([]) //装所有的点
 
 async function getAllTow() {
   let url = "";
-  console.log("=== 地图初始化调试 ===");
-  console.log("companyId:", companyId, typeof companyId);
   if (companyId === 1) {
     url = `/device_display/getAllTown`;
   } else {
     url = `/device_display/getAllTown?companyId=${companyId}`;
   }
-  console.log("请求URL:", url);
   let { data } = await proxy.ajax.get(url);
-  console.log("ajax.get 返回 data:", data, "类型:", typeof data, "长度:", data?.length);
-  if (data && Array.isArray(data)) {
-    console.log("data[0]:", data[0]);
-    console.log("data[0].lat:", data[0]?.lat, "data[0].lnt:", data[0]?.lnt);
-  }
 
   // 同步设置中心点（高德要求 [经度, 纬度]），避免依赖异步 service.get 的竞态；
-  // 接口返回空时保留默认有效中心，避免 center=null 触发高德 LngLat(NaN, NaN)
+  // 接口返回空或经纬度无效时保留默认有效中心点，避免 center=null 触发高德 LngLat(NaN, NaN)
   if (data && data.length > 0) {
     const lat = parseFloat(data[0].lat);
     const lng = parseFloat(data[0].lnt);
-    console.log("parseFloat lat:", lat, "lng:", lng, "isNaN(lat):", isNaN(lat), "isNaN(lng):", isNaN(lng));
     if (!isNaN(lat) && !isNaN(lng)) {
       mapData.center = [lng, lat];
-    } else {
-      console.warn("经纬度为无效数字，保留默认中心点");
     }
-  } else {
-    console.warn("data 为空或非数组，保留默认中心点 mapData.center:", mapData.center);
   }
-
-  console.log("最终 center:", mapData.center, "调用 gaodeMap() 前");
 
   // 仍用 service 拉一次补全 town 下拉列表，但不参与地图初始化
   service
@@ -232,7 +217,9 @@ async function getAllTow() {
         allTownSelect.value = res.data.length > 0 ? res.data[0].id : null;
       }
     })
-    .catch(() => {});
+    .catch((err) => {
+      ElMessage.error(err);
+    });
 
   await gaodeMap();
 
@@ -263,15 +250,6 @@ async function gaodeMap() {
       version: "2.0.0", // Loca 版本，缺省 1.3.2
     },
   });
-  const mapEl = document.getElementById("map");
-  console.log("=== map.vue 地图调试 ===");
-  console.log("map 容器元素:", mapEl);
-  console.log("map 容器尺寸:", mapEl?.clientWidth, "x", mapEl?.clientHeight);
-  console.log("mapData.center:", mapData.center, "viewMode:", mapData.viewMode);
-  if (!mapEl || mapEl.clientWidth === 0 || mapEl.clientHeight === 0) {
-    console.warn("⚠️ 地图容器尺寸为 0，高德可能报 LngLat(NaN, NaN)。请检查 .mapCard / .cardBody 高度");
-  }
-
   aMaps = new AMap.Map("map", mapData);
   // 创建 Loca 实例
   locaMap = new Loca.Container({
@@ -813,7 +791,6 @@ function setPolyline(item) {
   }
 
   const geo = new Loca.GeoJSONSource({ data: item });
-
 
   const layer = new Loca.PulseLineLayer({
     zIndex: 10,

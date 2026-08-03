@@ -9,7 +9,7 @@
       </div>
       <div class="logo">
         <img src="@/assets/logo.png" class="icon" alt="" />
-        <p>水务收费系统</p>
+        <p>{{ systemTitle }}</p>
       </div>
 
       <div class="userCard">
@@ -166,6 +166,8 @@ const arrowIcon2 = require("@/assets/arrowIcon2.png");
 
 // 端口过滤：92=抄表系统，93=收费系统，本地开发(非92/93)默认全部展示
 const currentPort = window.location.port;
+// 菜单标题按端口显示：92=水务抄表系统，93=水务收费系统
+const systemTitle = currentPort === "92" ? "水务抄表系统" : "水务收费系统";
 function filterByPort(list) {
   if (currentPort !== "92" && currentPort !== "93") return list;
   return list
@@ -223,10 +225,10 @@ const baseMenu = [
     name: "通知管理",
     icon: require("@/assets/add/icon-02.png"),
     icon2: require("@/assets/add/icon-03.png"),
-    path: "/reportManage", // 添加箭头图标信息
-    ports: ["93"],
+    path: "/reportManage",
     arrowIcon1,
     arrowIcon2,
+    ports: ["93"],
     children: [
       { id: 51, name: "短信配置", icon: require("@/assets/add/icon-04.png"), icon2: require("@/assets/add/icon-05.png"), path: "/reportManage/smsConfiguration" },
       { id: 52, name: "短信记录", icon: require("@/assets/add/icon-06.png"), icon2: require("@/assets/add/icon-07.png"), path: "/reportManage/smsRecord" },
@@ -236,12 +238,13 @@ const baseMenu = [
   { id: 21, name: "外勤管理", icon: require("@/assets/icon8.png"), icon2: require("@/assets/icon9.png"), path: "/field", ports: ["92"] },
   { id: 22, name: "设备管理", icon: require("@/assets/menu/icon32.png"), icon2: require("@/assets/menu/icon33.png"), path: "/deviceManage", ports: ["92"] },
 ];
+
 const navLists = reactive([]);
 
 function buildMenu(userData) {
   const tempMenus = JSON.parse(JSON.stringify(baseMenu));
   if (staffPermissionIds.value.includes(1)) {
-    tempMenus.push({ id: 1, name: "开户管理", icon: require("@//assets/menu/icon24.png"), icon2: require("@/assets/menu/icon23.png"), path: "/accountManage", ports: ["93"] });
+    tempMenus.push({ id: 1, name: "开户管理", icon: require("@/assets/menu/icon24.png"), icon2: require("@/assets/menu/icon23.png"), path: "/accountManage", ports: ["93"] });
   }
   if (staffPermissionIds.value.includes(19)) {
     tempMenus.push({ id: 3, name: "价格管理", icon: require("@/assets/menu/icon5.png"), icon2: require("@/assets/menu/icon6.png"), path: "/priceManage", ports: ["93"]});
