@@ -308,11 +308,11 @@ const adminNavList = reactive([
   },
   { id: 6, name: "警告管理", icon: require("@/assets/menu/icon19.png"), icon2: require("@/assets/menu/icon20.png"), path: "/warningManage", ports: ["92", "93"] },
   { id: 7, name: "异常数据", icon: require("@/assets/menu/icon30.png"), icon2: require("@/assets/menu/icon31.png"), path: "/errorReportRecord", ports: ["92", "93"] },
-  { id: 9, name: "命令状态", icon: require("@/assets/menu/icon30.png"), icon2: require("@/assets/menu/icon31.png"), path: "/commandLog", ports: ["93"] },
+  { id: 9, name: "命令状态", icon: require("@/assets/menu/icon30.png"), icon2: require("@/assets/menu/icon31.png"), path: "/commandLog", ports: ["92", "93"] },
   { id: 10, name: "员工中心", icon: require("@/assets/add/icon-08.png"), icon2: require("@/assets/add/icon-09.png"), path: "/employeeManage", ports: ["92", "93"] },
   { id: 11, name: "角色管理", icon: require("@/assets/menu/icon27.png"), icon2: require("@/assets/menu/icon28.png"), path: "/roleManage", ports: ["93"] },
   { id: 12, name: "历史数据管理", icon: require("@/assets/menu/icon17.png"), icon2: require("@/assets/menu/icon18.png"), path: "/historyDataManage", ports: ["93"] },
-  { id: 8, name: "操作日志", icon: require("@/assets/add/icon-10.png"), icon2: require("@/assets/add/icon-11.png"), path: "/logManage", ports: ["93"] },
+  { id: 8, name: "操作日志", icon: require("@/assets/add/icon-10.png"), icon2: require("@/assets/add/icon-11.png"), path: "/logManage", ports: ["92", "93"] },
   { id: 20, name: "水务地图", icon: require("@/assets/icon7.png"), icon2: require("@/assets/icon10.png"), path: "/map", ports: ["92"] },
   { id: 21, name: "外勤管理", icon: require("@/assets/icon8.png"), icon2: require("@/assets/icon9.png"), path: "/field", ports: ["92"] },
   { id: 22, name: "设备管理", icon: require("@/assets/menu/icon32.png"), icon2: require("@/assets/menu/icon33.png"), path: "/deviceManage", ports: ["92"] },
@@ -470,16 +470,13 @@ watch(
   (newUserData) => {
     navLists.length = 0;
 
-    const allowedCompanyIds = [41, 65, 95];
-
     const baseList = newUserData.staffCharacterId ? adminNavList : nonAdminNavList;
     filterByPort(baseList).forEach((item) => navLists.push({ ...item }));
 
-    // 只有 companyId 在允许列表中才显示普表抄表菜单（且只在 93 收费端口展示）
-    if (newUserData && allowedCompanyIds.includes(Number(newUserData.companyId))) {
-      console.log('✅ 允许访问普表抄表功能 - companyId:', newUserData.companyId);
-
+    // 所有公司都显示普表抄表菜单（只在 93 收费端口展示）
+    if (newUserData) {
       // 找到普表抄表菜单的位置并添加到 navLists
+      // 子菜单带 permissionId：父菜单仅在其子菜单至少有一个命中用户权限时才显示
       const meterReadingMenu = {
         id: 13,
         name: "普表抄表",
@@ -490,24 +487,30 @@ watch(
         arrowIcon1,
         arrowIcon2,
         children: [
-          { id: 131, name: "快速抄表", icon: require("@/assets/menu/icon11.png"), icon2: require("@/assets/menu/icon12.png"), path: "/meterReading/quickMeterReport" },
-          { id: 132, name: "抄表审核", icon: require("@/assets/menu/icon13.png"), icon2: require("@/assets/menu/icon14.png"), path: "/meterReading/reviewMeterReport" },
-          { id: 133, name: "区域报表", icon: require("@/assets/menu/icon15.png"), icon2: require("@/assets/menu/icon16.png"), path: "/meterReading/regionMeterReport" }
+          { id: 131, name: "快速抄表", permissionId: 81, icon: require("@/assets/menu/icon11.png"), icon2: require("@/assets/menu/icon12.png"), path: "/meterReading/quickMeterReport" },
+          { id: 132, name: "抄表审核", permissionId: 82, icon: require("@/assets/menu/icon13.png"), icon2: require("@/assets/menu/icon14.png"), path: "/meterReading/reviewMeterReport" },
+          { id: 133, name: "区域报表", permissionId: 83, icon: require("@/assets/menu/icon15.png"), icon2: require("@/assets/menu/icon16.png"), path: "/meterReading/regionMeterReport" }
         ]
       };
 
       // 按端口过滤（92 抄表端口不展示普表抄表）
       const meterMenus = filterByPort([meterReadingMenu]);
       if (meterMenus.length > 0) {
-        const reportManageIndex = navLists.findIndex(item => item.id === 5);
-        if (reportManageIndex !== -1) {
-          navLists.splice(reportManageIndex + 1, 0, meterMenus[0]);
-        } else {
-          navLists.push(meterMenus[0]);
+        const menu = meterMenus[0];
+        // 父菜单按子菜单可见性显示：仅保留有权限的子菜单
+        const visibleChildren = (menu.children || []).filter(
+          (child) => staffPermissionIds.value.includes(child.permissionId)
+        );
+        if (visibleChildren.length > 0) {
+          menu.children = visibleChildren;
+          const reportManageIndex = navLists.findIndex(item => item.id === 5);
+          if (reportManageIndex !== -1) {
+            navLists.splice(reportManageIndex + 1, 0, menu);
+          } else {
+            navLists.push(menu);
+          }
         }
       }
-    } else {
-      console.log('❌ 不允许访问普表抄表功能 - companyId:', newUserData?.companyId);
     }
 
     watchRoute();
