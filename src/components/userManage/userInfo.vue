@@ -35,6 +35,10 @@
           <span>联系电话</span>
           <el-input v-model="userInfoData.userPhone" />
         </div>
+        <div class="user-info-input" v-if="userInfoData.userOtherPhone != null || companyId === 95">
+          <span>联系电话2</span>
+          <el-input v-model="userInfoData.userOtherPhone" />
+        </div>
         <div class="user-info-input">
           <span>表号</span>
           <el-input v-model="userInfoData.meterCode" disabled />
@@ -56,7 +60,7 @@
           </el-select>
         </div>
         <div class="user-info-input">
-          <span>开户审批人1</span>
+          <span>开户审批人</span>
           <el-select v-model="userInfoData.approver_1" class="big-font-el-select">
             <el-option v-for="item in approver_list" :key="item.id" :label="item.label" :value="item.label"> </el-option>
           </el-select>
@@ -87,6 +91,10 @@
             <el-option label="启用（不欠费不可关阀）" :value="1"></el-option>
             <el-option label="暂停（不欠费可关阀）" :value="0"></el-option>
           </el-select>
+        </div>
+        <div class="user-info-input" v-if="userInfoData.userRemark != null || companyId === 95">
+          <span>备注</span>
+          <el-input v-model="userInfoData.userRemark" />
         </div>
       </div>
       <div class="btn">
@@ -208,6 +216,8 @@ export default {
         userAddr: "",
         regionName: "",
         userPhone: "",
+        userOtherPhone: null,
+        userRemark: null,
         meterCode: "",
         meterType: "",
         priceName: "",
@@ -310,6 +320,8 @@ export default {
       this.userInfoData.userAddr = this.data.userAddr;
       this.userInfoData.regionName = this.data.regionName;
       this.userInfoData.userPhone = this.data.phone;
+      this.userInfoData.userOtherPhone = this.data.userOtherPhone;
+      this.userInfoData.userRemark = this.data.userRemark;
       this.userInfoData.meterCode = this.data.meterCode;
       this.userInfoData.meterType = this.data.meterType;
       this.userInfoData.priceId = this.data.priceId;
@@ -471,7 +483,7 @@ export default {
         },
         {
           condition: this.userInfoData.approver_1 === null || this.userInfoData.approver_1 === "",
-          message: "开户审批人1不能为空！",
+          message: "开户审批人不能为空！",
         },
         // {
         //   condition: this.userInfoData.approver_2 === null || this.userInfoData.approver_2 === "",
@@ -509,6 +521,8 @@ export default {
         userAddr: this.userInfoData.userAddr,
         regionName: this.userInfoData.regionName,
         userPhone: userPhone,
+        userOtherPhone: this.userInfoData.userOtherPhone || null,
+        userRemark: this.userInfoData.userRemark || null,
         imei: this.userInfoData.imei,
         approver_1: this.userInfoData.approver_1,
         approver_2: approver_2,
@@ -692,6 +706,8 @@ export default {
           this.userInfoData.companyId = full.companyId;
           this.userInfoData.regionName = full.regionName;
           this.userInfoData.userPhone = full.phone;
+          this.userInfoData.userOtherPhone = full.userOtherPhone;
+          this.userInfoData.userRemark = full.userRemark;
           this.userInfoData.meterCode = full.meterCode;
           this.userInfoData.meterType = full.meterType;
           this.userInfoData.priceId = full.priceId;
@@ -735,14 +751,14 @@ export default {
 
 .user-info-dialog-content {
   width: 75%;
-  height: 600px;
+  height: 750px;
   border: 1px solid #fafafa;
   background-color: #fafafa;
   border-radius: 5px;
   position: absolute;
   left: 50%;
   top: 50%;
-  margin-top: -350px;
+  margin-top: -425px;
   transform: translateX(-50%);
   display: flex;
   flex-direction: column;
@@ -751,6 +767,8 @@ export default {
 
 .user-info-content {
   width: 96%;
+  flex: 1;
+  min-height: 0;
   background-color: #fff;
   border-radius: 5px;
   margin-top: 15px;
