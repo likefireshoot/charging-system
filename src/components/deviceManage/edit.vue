@@ -17,7 +17,12 @@
         </div>
         <div class="edit-input" style="margin-right: 1%; width: 24%">
           <span>imei号</span>
-          <el-input v-model="editData.imei" class="input-item" disabled />
+          <el-input
+            v-model="editData.imei"
+            class="input-item"
+            :disabled="!imeiEditable"
+            @click="handleImeiClick"
+          />
         </div>
         <div class="edit-input" style="margin-right: 1%; width: 24%">
           <span>所属水厂</span>
@@ -59,8 +64,9 @@
 </template>
 
 <script>
+import { h } from "vue";
 import service from "@/api/request";
-import { ElMessage } from "element-plus";
+import { ElMessage, ElMessageBox } from "element-plus";
 
 export default {
   props: {
@@ -94,9 +100,13 @@ export default {
       changshang_list: [
         { id: 1, label: "信驰", value: 1 },
         { id: 2, label: "集万讯", value: 2 },
-        { id: 3, label: "太阳能", value: 3 },
-        { id: 4, label: "圣鑫", value: 4 },
-        { id: 5, label: "旧信驰", value: 5 },
+        { id: 3, label: "千宝通", value: 3 },
+        { id: 4, label: "太阳能", value: 4 },
+        { id: 5, label: "圣鑫", value: 5 },
+        { id: 6, label: "旧信驰", value: 6 },
+        { id: 7, label: "旧信驰KF01", value: 7 },
+        { id: 8, label: "4G信驰", value: 8 },
+        { id: 9, label: "旧圣鑫", value: 9 }
       ],
       shuibiao_list: [
         {
@@ -110,12 +120,22 @@ export default {
       ],
     };
   },
+  computed: {
+    imeiEditable() {
+      return this.data.imei && this.data.imei.includes("|");
+    },
+  },
   mounted() {
     this.assignment();
   },
   methods: {
     handleEditClose() {
       this.$emit("close");
+    },
+    handleImeiClick() {
+      if (!this.imeiEditable) {
+        ElMessage.warning("此表非新表，imei不可编辑，请联系开发人员处理");
+      }
     },
     assignment() {
       this.editData.meterId = this.data.meterId;
@@ -144,6 +164,7 @@ export default {
 
       let formData = {
         meterId: this.editData.meterId,
+        imei: this.editData.imei,
         productId: this.editData.productId,
         deviceId: this.editData.deviceId,
         masterKey: this.editData.masterKey,
@@ -154,6 +175,7 @@ export default {
       // 定义字段名映射，将属性名映射为友好的显示名称
       const fieldNameMap = {
         meterId: "表号",
+        imei: "imei号",
         productId: "产品ID",
         deviceId: "设备ID",
         masterKey: "masterKey",
@@ -167,7 +189,7 @@ export default {
           if (obj.hasOwnProperty(key)) {
             const fullKey = parentKey ? `${parentKey}.${key}` : key;
             const value = obj[key];
-            if (key === "companyId" || key === "masterKey") {
+            if (key === "companyId" || key === "masterKey" || key === "deviceId" || key === "productId") {
               continue;
             } else {
               if (typeof value === "object" && value !== null) {
@@ -198,21 +220,51 @@ export default {
         this.editData.masterKey = this.editData.masterKey.trim();
       }
 
-      // 所有字段都不为空，提交数据到后台
-      service
-        .post("/userManage/meterRead/editMeter", formData)
-        .then((res) => {
-          if (res.code === 200) {
-            ElMessage.success("提交成功");
-            // 可以在这里添加提交成功后的其他逻辑，比如关闭对话框
-            this.handleEditClose();
-          } else if (res.code === -1) {
-            ElMessage.error(res.msg);
-          }
+      const doSubmit = () => {
+        service
+          .post("/userManage/meterRead/editMeter", formData)
+          .then((res) => {
+            if (res.code === 200) {
+              ElMessage.success("提交成功");
+              this.handleEditClose();
+            } else if (res.code === -1) {
+              ElMessage.error(res.msg);
+            }
+          })
+          .catch((err) => {
+            ElMessage.error("提交失败：" + err.message);
+          });
+      };
+
+      if (this.editData.imei !== this.data.imei) {
+        const msg = h("div", { style: "line-height: 2;" }, [
+          h("div", { style: "background: #f5f7fa; border-radius: 8px; padding: 16px; margin-bottom: 12px;" }, [
+            h("div", { style: "margin-bottom: 10px;" }, [
+              h("span", { style: "color: #909399; font-size: 14px;" }, "原 IMEI"),
+              h("div", { style: "color: #909399; font-size: 15px; word-break: break-all; text-decoration: line-through;" }, this.data.imei),
+            ]),
+            h("div", { style: "text-align: center; color: #c0c4cc; font-size: 18px; margin: 4px 0;" }, "⬇"),
+            h("div", [
+              h("span", { style: "color: #409eff; font-size: 14px; font-weight: 600;" }, "新 IMEI"),
+              h("div", { style: "color: #409eff; font-size: 16px; font-weight: 700; word-break: break-all;" }, this.editData.imei),
+            ]),
+          ]),
+          h("div", { style: "background: #fef0f0; border-left: 4px solid #f56c6c; border-radius: 4px; padding: 10px 14px;" }, [
+            h("span", { style: "color: #f56c6c; font-size: 13px; font-weight: 600;" }, "⚠ 请务必确认新 IMEI 号准确无误，提交后无法二次修改！"),
+          ]),
+        ]);
+
+        ElMessageBox.confirm(msg, "确认修改 IMEI", {
+          confirmButtonText: "确认提交",
+          cancelButtonText: "取消",
+          customClass: "imei-confirm-dialog",
+          lockScroll: false,
         })
-        .catch((err) => {
-          ElMessage.error("提交失败：" + err.message);
-        });
+          .then(() => { doSubmit(); })
+          .catch(() => {});
+      } else {
+        doSubmit();
+      }
     },
   },
 };
@@ -325,5 +377,13 @@ export default {
 .cancel-btn {
   background-color: #fff;
   margin-right: 5%;
+}
+
+.imei-confirm-dialog {
+  width: 480px;
+}
+
+.imei-confirm-dialog .el-message-box__message {
+  padding: 0 4px;
 }
 </style>

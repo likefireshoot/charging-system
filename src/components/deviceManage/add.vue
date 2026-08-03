@@ -13,50 +13,16 @@
       <div class="account-add-content">
         <div class="edit-input" style="margin-right: 1%">
           <span>表号</span>
-          <el-input v-model="addData.meterCode" class="input-item" />
-        </div>
-        <div class="edit-input" style="margin-right: 1%">
-          <span>imei号</span>
-          <el-input v-model="addData.imei" class="input-item" />
-        </div>
-        <div class="edit-input" style="margin-right: 1%">
-          <span>水表类型</span>
-          <el-select v-model="addData.meterType" placeholder="请选择水表类型">
-            <el-option v-for="item in shuibiao_list" :key="item.id" :value="item.label"></el-option>
-          </el-select>
-        </div>
-        <div class="edit-input" style="margin-right: 1%">
-          <span>masterKey</span>
-          <el-input v-model="addData.masterKey" class="input-item" />
-        </div>
-        <div class="edit-input" style="margin-right: 1%">
-          <span>所属水厂</span>
-          <el-select v-model="addData.companyId" class="input-item">
-            <el-option v-for="item in companyList" :key="item.id" :label="item.name" :value="item.id"></el-option>
-          </el-select>
-        </div>
-        <div class="edit-input" style="margin-right: 1%">
-          <span>所属厂商</span>
-          <el-select v-model="addData.meterVendor" class="input-item">
-            <el-option v-for="item in changshang_list" :key="item.id" :label="item.label" :value="item.label"></el-option>
-          </el-select>
-        </div>
-        <div v-if="addData.meterVendor !== '太阳能'" class="edit-input" style="margin-right: 1%">
-          <span>产品ID</span>
-          <el-input v-model="addData.productId" class="input-item"></el-input>
-        </div>
-        <div v-if="addData.meterVendor !== '太阳能'" class="edit-input" style="margin-right: 1%">
-          <span>设备 ID</span>
-          <el-input v-model="addData.deviceId" class="input-item"></el-input>
+          <el-input v-model="addData.meterCode" class="input-item" @input="onMeterCodeChange" />
         </div>
         <div class="edit-input" style="margin-right: 1%">
           <span>水表吨位数</span>
-          <el-input v-model.number="addData.tonnage" type="number" class="input-item" placeholder="默认为 0"></el-input>
+          <el-input v-model.number="addData.tonnage" type="number" class="input-item" placeholder="默认为 0" />
         </div>
-        <!-- <div v-if="addData.meterVendor === '信驰' || addData.meterVendor === '集万讯'" class="edit-input" style="margin-right: 1%">
-          <span>设备名称</span>
-          <el-input v-model="addData.meterName" class="input-item"></el-input>
-        </div> -->
+        <div v-if="addData.meterVendor" class="auto-info">
+          <span>自动识别：</span>
+          <span class="auto-tag">{{ addData.meterVendor }}</span>
+        </div>
       </div>
       <div class="btn">
         <div class="confirm-btn" @click="handleCommit">
@@ -100,24 +66,6 @@ export default {
         companyId: null,
         tonnage: 0,
       },
-      companyId: JSON.parse(sessionStorage.getItem("userData")).companyId,
-      changshang_list: [
-        { id: 1, label: "信驰", value: 1 },
-        { id: 2, label: "集万讯", value: 2 },
-        { id: 3, label: "太阳能", value: 3 },
-        { id: 4, label: "圣鑫", value: 4 },
-        { id: 5, label: "旧信驰", value: 5 },
-      ],
-      shuibiao_list: [
-        {
-          id: 1,
-          label: "NB-IoT表",
-        },
-        {
-          id: 2,
-          label: "普通水表",
-        },
-      ],
     };
   },
   methods: {
@@ -125,75 +73,91 @@ export default {
       this.$emit("close");
     },
 
+    onMeterCodeChange() {
+      const code = this.addData.meterCode.trim();
+      if (!code) {
+        this.resetAutoFields();
+        return;
+      }
+
+      this.addData.imei = code + "|新表|自动检测中...";
+      this.addData.meterType = "NB-IoT表";
+      this.addData.companyId = 1;
+
+      if (/^[1379]\d{9}$/.test(code)) {
+        this.addData.meterVendor = "信驰";
+        this.addData.masterKey = "5eb4f253756d4b16858afd965f39ad43";
+        this.addData.productId = "17245445";
+        this.addData.deviceId = "默认id";
+      } else if (/^1\d{13}$/.test(code)) {
+        this.addData.meterVendor = "集万讯";
+        this.addData.masterKey = "无";
+        this.addData.productId = "无";
+        this.addData.deviceId = "无";
+      } else if (/^6\d{13}$/.test(code)) {
+        this.addData.meterVendor = "圣鑫";
+        this.addData.masterKey = "e44c23dee3804ddea74f4f10b720d368";
+        this.addData.productId = "17247122";
+        this.addData.deviceId = "默认id";
+      } else if (/^00\d{12}$/.test(code)) {
+        this.addData.meterVendor = "千宝通";
+        this.addData.masterKey = "无";
+        this.addData.productId = "无";
+        this.addData.deviceId = "无";
+      } else if (/^00\d{10}$/.test(code)) {
+        this.addData.meterVendor = "千宝通";
+        this.addData.imei = code + "|对接方式接入无需imei";
+        this.addData.masterKey = "无";
+        this.addData.productId = "无";
+        this.addData.deviceId = "无";
+        this.addData.meterType = "有线表";
+      } else {
+        this.addData.meterVendor = "";
+        this.addData.masterKey = null;
+        this.addData.productId = "";
+        this.addData.deviceId = "";
+      }
+    },
+
+    resetAutoFields() {
+      this.addData.imei = "";
+      this.addData.meterVendor = "";
+      this.addData.productId = "";
+      this.addData.deviceId = "";
+      this.addData.meterType = "";
+      this.addData.masterKey = null;
+      this.addData.companyId = null;
+    },
+
     handleCommit() {
-      let missingFields = [];
-      let formData = {};
       Object.keys(this.addData).forEach((key) => {
         if (typeof this.addData[key] === "string") {
           this.addData[key] = this.addData[key].trim();
         }
       });
-      formData = this.addData;
-      if (formData.meterVendor === "太阳能") {
-        //formData.meterName = "太阳能水表";
-        formData.productId = "1234";
-        formData.deviceId = "5678";
+
+      const formData = this.addData;
+
+      if (!formData.meterCode) {
+        ElMessage.error("表号不能为空");
+        return;
       }
-      // 校验水表吨位数是否为有效数字
+
+      if (!formData.meterVendor) {
+        ElMessage.error("表号格式不正确，请重新确认");
+        return;
+      }
+
       if (formData.tonnage !== undefined && formData.tonnage !== null && formData.tonnage !== "") {
-        // 正则：只允许数字（整数或小数）
         if (!/^-?\d+(\.\d+)?$/.test(formData.tonnage)) {
           ElMessage.error("水表吨位数必须是数字");
           return;
         }
         formData.tonnage = Number(formData.tonnage);
       } else {
-        ElMessage.info("水表吨位数设置为 0")
         formData.tonnage = 0;
       }
 
-      // 定义字段名映射，将属性名映射为友好的显示名称
-      const fieldNameMap = {
-        meterCode: "表号",
-        imei: "IMEI号",
-        meterType: "水表类型",
-        meterVendor: "所属厂商",
-        productId: "产品ID",
-        deviceId: "设备ID",
-      };
-
-      // 递归遍历对象属性
-      function traverseObject(obj, parentKey = "") {
-        for (const key in obj) {
-          if (obj.hasOwnProperty(key)) {
-            const fullKey = parentKey ? `${parentKey}.${key}` : key;
-            const value = obj[key];
-            if (key === "masterKey" || key === "companyId") {
-              continue;
-            } else {
-              if (typeof value === "object" && value !== null) {
-                // 如果是对象，继续递归遍历
-                traverseObject(value, fullKey);
-              } else {
-                // 检查值是否为空，排除0的情况
-                if (value === undefined || value === null || value === "") {
-                  missingFields.push(fullKey);
-                }
-              }
-            }
-          }
-        }
-      }
-
-      traverseObject(formData);
-
-      if (missingFields.length > 0) {
-        const fieldNames = missingFields.map((field) => fieldNameMap[field] || field);
-        const message = fieldNames.join("、") + "不能为空";
-        ElMessage.error(message);
-        return;
-      }
-      // 校验水表吨位数
       if (formData.tonnage < 0) {
         ElMessage.error("水表吨位数不能为负数");
         return;
@@ -203,15 +167,11 @@ export default {
         return;
       }
 
-      console.log(formData);
-
-      // 所有字段都不为空，提交数据到后台
       service
         .post("/userManage/meterRead/addMeter", formData)
         .then((res) => {
           if (res.code === 200) {
             ElMessage.success("提交成功");
-            // 可以在这里添加提交成功后的其他逻辑，比如关闭对话框
             this.handleAddClose();
           } else if (res.code === -1) {
             ElMessage.error(res.msg);
@@ -332,5 +292,20 @@ export default {
 .cancel-btn {
   background-color: #fff;
   margin-right: 5%;
+}
+
+.auto-info {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 8px 0;
+  font-size: 16px;
+  color: #747374;
+}
+
+.auto-tag {
+  color: #45ba7e;
+  font-weight: bold;
+  margin-left: 8px;
 }
 </style>

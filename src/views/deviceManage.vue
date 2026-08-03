@@ -96,9 +96,9 @@
             :header-cell-style="{ background: '#46B97E', color: '#FFFFFF' }" @selection-change="handleSelectionChange"
             id="device-table">
             <el-table-column type="selection" min-width="55" align="center" fixed="left" />
-            <!-- <el-table-column label="序号" :width="idWidth" align="center" fixed="left" #default="scope">
-              {{ scope.$index + 1 + (params.page - 1) * params.pageSize }}
-            </el-table-column> -->
+<!--            <el-table-column label="序号" min-width="80" align="center" fixed="left" #default="scope">-->
+<!--              {{ scope.$index + 1 + (params.page - 1) * params.pageSize }}-->
+<!--            </el-table-column>-->
             <el-table-column property="meterCode" label="表号" min-width="130" align="center" fixed="left" />
             <el-table-column property="newReading" label="水表读数/吨" min-width="110" align="center" />
             <el-table-column property="valveStatus" label="阀门状态" min-width="90" align="center" />
@@ -118,8 +118,8 @@
       </div>
       <div class="page-box">
         <div class="demo-pagination-block">
-          <el-pagination v-model:current-page="params.page" v-model:page-size="params.pageSize"
-            :page-sizes="[5, 10, 15]" layout="total,  prev, pager, next, jumper" :total="total" />
+          <el-pagination v-model:current-page="params.page" v-model:page-size="params.pageSize" :page-sizes="[5, 10, 15]" layout="total,  prev, pager, next, jumper" :total="total"
+          @current-change="handlePageChange"/>
         </div>
       </div>
     </div>
@@ -146,20 +146,35 @@
     :command_dialogFormVisible="command_dialogFormVisible_xinchi" :commandType="commandType"
     :data="multipleSelection[0]" @close="closeCommandDialog"></commandXinchiVue>
 
-  <!-- 命令下发弹出框-旧信驰 -->
+  <!-- 命令下发弹出框-旧信驰/旧信驰KF01 -->
   <commandOldXinchi v-if="command_dialogFormVisible_old_xinchi"
     :command_dialogFormVisible="command_dialogFormVisible_old_xinchi" :commandType="commandType"
     :data="multipleSelection[0]" @close="closeCommandDialog"></commandOldXinchi>
+
+  <!-- 命令下发弹出框-4G信驰 -->
+  <command4GXinchi v-if="command_dialogFormVisible_4g_xinchi"
+    :command_dialogFormVisible="command_dialogFormVisible_4g_xinchi" :commandType="commandType"
+    :data="multipleSelection[0]" @close="closeCommandDialog"></command4GXinchi>
 
   <!-- 命令下发弹出框-集万讯 -->
   <commandJiWanXun v-if="command_dialogFormVisible_jiwanxun"
     :command_dialogFormVisible="command_dialogFormVisible_jiwanxun" :commandType="commandType"
     :data="multipleSelection[0]" @close="closeCommandDialog"></commandJiWanXun>
 
+  <!-- 命令下发弹出框-千宝通 -->
+  <commandQianBaoTong v-if="command_dialogFormVisible_qianbaotong"
+    :command_dialogFormVisible="command_dialogFormVisible_qianbaotong" :commandType="commandType"
+    :data="multipleSelection[0]" @close="closeCommandDialog"></commandQianBaoTong>
+
   <!-- 命令下发弹出框-圣鑫 -->
   <commandShengXin v-if="command_dialogFormVisible_shengxin"
     :command_dialogFormVisible="command_dialogFormVisible_shengxin" :commandType="commandType"
     :data="multipleSelection[0]" @close="closeCommandDialog"></commandShengXin>
+
+  <!-- 命令下发弹出框-旧圣鑫 -->
+  <commandOldShengXin v-if="command_dialogFormVisible_old_shengxin"
+    :command_dialogFormVisible="command_dialogFormVisible_old_shengxin" :commandType="commandType"
+    :data="multipleSelection[0]" @close="closeCommandDialog"></commandOldShengXin>
 </template>
 
 <script>
@@ -172,16 +187,22 @@ import editVue from "@/components/deviceManage/edit.vue";
 import commandTaiYangNengVue from "@/components/userManage/commandDialog/command_taiyangneng.vue";
 import commandXinchiVue from "@/components/userManage/commandDialog/command_xinchi.vue";
 import commandJiWanXun from "@/components/userManage/commandDialog/command_jiwanxun.vue";
+import commandQianBaoTong from "@/components/userManage/commandDialog/command_qianbaotong.vue";
 import commandShengXin from "@/components/userManage/commandDialog/command_shengxin.vue";
 import commandOldXinchi from "@/components/userManage/commandDialog/command_old_xinchi.vue";
+import command4GXinchi from "@/components/userManage/commandDialog/command_4g_xinchi.vue";
+import commandOldShengXin from "@/components/userManage/commandDialog/command_oldshengxin.vue";
 
 export default {
   components: {
     commandTaiYangNengVue,
     commandXinchiVue,
     commandJiWanXun,
+    commandQianBaoTong,
     commandShengXin,
     commandOldXinchi,
+    command4GXinchi,
+    commandOldShengXin,
     deleteVue,
     addVue,
     editVue,
@@ -209,9 +230,13 @@ export default {
       changshang_list: [
         { id: 1, label: "信驰", value: 1 },
         { id: 2, label: "集万讯", value: 2 },
-        { id: 3, label: "太阳能", value: 3 },
-        { id: 4, label: "圣鑫", value: 4 },
-        { id: 5, label: "旧信驰", value: 5 },
+        { id: 3, label: "千宝通", value: 3 },
+        { id: 4, label: "太阳能", value: 4 },
+        { id: 5, label: "圣鑫", value: 5 },
+        { id: 6, label: "旧信驰", value: 6 },
+        { id: 7, label: "旧信驰KF01", value: 7 },
+        { id: 8, label: "4G信驰", value: 8 },
+        { id: 9, label: "旧圣鑫", value: 9 }
       ],
       shuibiao_list: [
         {
@@ -247,17 +272,23 @@ export default {
       command_dialogFormVisible_taiyangneng: false,
       command_dialogFormVisible_xinchi: false,
       command_dialogFormVisible_jiwanxun: false,
+      command_dialogFormVisible_qianbaotong: false,
       command_dialogFormVisible_shengxin: false,
       command_dialogFormVisible_old_xinchi: false,
+      command_dialogFormVisible_4g_xinchi: false,
+      command_dialogFormVisible_old_shengxin: false,
+
+      // ****** 锁
+      isLoading: false
     };
   },
   watch: {
-    "params.page"() {
-      this.getDeviceData();
-    },
+    // "params.page"() {
+    //   this.getDeviceData();
+    // },
   },
   computed: {
-    // 删除按钮在未选时禁用
+     // 删除按钮在未选时禁用
     deleteDisabled() {
       return this.multipleSelection.length === 0;
     },
@@ -265,6 +296,7 @@ export default {
     singleSelectionDisabled() {
       return this.multipleSelection.length !== 1;
     },
+
     // 定义每列的百分比宽度
     columnPercentages() {
       return {
@@ -300,6 +332,14 @@ export default {
     }
   },
   methods: {
+    // ****** 手动处理分页变化，避免 watch 循环 ******
+    handlePageChange(page) {
+      if (this.isLoading) return;
+      // this.isLoading = true;
+      this.params.page = page;
+      this.getDeviceData();
+    },
+
     filterNode(value, data) {
       if (!value) return true;
       return data.label.includes(value);
@@ -348,14 +388,17 @@ export default {
     closeEditDialog() {
       this.edit_dialogFormVisible = false;
       this.multipleSelection = [];
-      this.reflush();
+      this.getDeviceData();
     },
     closeCommandDialog() {
       this.command_dialogFormVisible_taiyangneng = false;
       this.command_dialogFormVisible_xinchi = false;
       this.command_dialogFormVisible_jiwanxun = false;
+      this.command_dialogFormVisible_qianbaotong = false;
       this.command_dialogFormVisible_shengxin = false;
       this.command_dialogFormVisible_old_xinchi = false;
+      this.command_dialogFormVisible_4g_xinchi = false;
+      this.command_dialogFormVisible_old_shengxin = false;
       this.multipleSelection = [];
       this.commandType = "";
       this.reflush();
@@ -419,7 +462,11 @@ export default {
           this.command_dialogFormVisible_xinchi = true;
           break;
         case "旧信驰":
+        case "旧信驰KF01":
           this.command_dialogFormVisible_old_xinchi = true;
+          break;
+        case "4G信驰":
+          this.command_dialogFormVisible_4g_xinchi = true;
           break;
         case "卓正":
           this.command_dialogFormVisible_zhuozheng = true;
@@ -433,11 +480,16 @@ export default {
         case "圣鑫":
           this.command_dialogFormVisible_shengxin = true;
           break;
+        case "旧圣鑫":
+          this.command_dialogFormVisible_old_shengxin = true;
+          break;
         default:
           ElMessage.error(this.commandType + " 为未知设备厂商，无法下发命令");
       }
     },
     getDeviceData() {
+      if (this.isLoading) return
+      this.isLoading = true
       if (this.companyId === 1) {
       } else {
         this.params.companyId = this.companyId; // 所属水厂ID
@@ -491,7 +543,7 @@ export default {
               });
             }
             this.total = response.data.total;
-            this.params.page = response.data.currentPages;
+            // this.params.page = response.data.currentPages;
           } else {
             ElMessage.error(response.msg);
           }
@@ -499,7 +551,9 @@ export default {
         .catch((error) => {
           //ElMessage.error(error);
           console.log(error);
-        });
+        }).finally(()=>{
+          this.isLoading = false
+      });
     },
     filterNonEmptyParams(params) {
       const filteredParams = {};
@@ -517,7 +571,6 @@ export default {
       this.clear();
       this.params.page = 1;
       this.params.pageSize = 50;
-
       let params = {
         page: 1,
         pageSize: 50,
@@ -766,7 +819,6 @@ export default {
   color: #46b97e;
 }
 
-
 :deep(.el-pagination) {
   --el-color-primary: #46b97e;
 }
@@ -818,7 +870,7 @@ export default {
   padding: 0px 20px;
 }
 
-.jinggao-container>* {
+.jinggao-container > * {
   padding: 0px 10px;
   border: 1px solid #e9e9e9;
   border-radius: 5px;
@@ -856,7 +908,7 @@ export default {
   width: 100%;
 }
 
-.time-input>* {
+.time-input > * {
   width: 50%;
   margin-right: 20px;
 }
@@ -870,7 +922,7 @@ export default {
   right: 20px;
 }
 
-.buttons>* {
+.buttons > * {
   width: 120px;
   margin-right: 50px;
 }
@@ -889,7 +941,6 @@ export default {
 .sercah-btn {
   background-color: #45ba7e;
 }
-
 .clear-btn {
   background-color: #fff;
   border: 2px solid #f2f2f2;

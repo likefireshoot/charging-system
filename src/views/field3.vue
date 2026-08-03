@@ -100,15 +100,6 @@ async function gaodeMap() {
     version: "2.0", // 指定要加载的 JSAPI 的版本，缺省时默认为 1.4.15
     plugins: ["AMap.MapType", "AMap.MoveAnimation"], // 需要使用的的插件列表，如比例尺'AMap.Scale'等
   });
-  const containerEl = document.getElementById("container");
-  console.log("=== field3.vue 地图调试 ===");
-  console.log("container 元素:", containerEl);
-  console.log("container 尺寸:", containerEl?.clientWidth, "x", containerEl?.clientHeight);
-  console.log("mapData.center:", mapData.center, "viewMode:", mapData.viewMode);
-  if (!containerEl || containerEl.clientWidth === 0 || containerEl.clientHeight === 0) {
-    console.warn("⚠️ 地图容器尺寸为 0，高德可能报 LngLat(NaN, NaN)。请检查 .mapCard / .cardBody 高度");
-  }
-
   aMaps = new AMap.Map("container", mapData);
   infoWindow = new AMap.InfoWindow({
     isCustom: true,
