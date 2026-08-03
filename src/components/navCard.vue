@@ -159,6 +159,7 @@ import { getCurrentInstance, reactive, ref, computed, watch } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import service from "@/api/request";
 import { ElMessage } from "element-plus";
+import { portSwitch, getEffectivePort } from "@/portSwitch";
 
 // 引入箭头图标
 const arrowIcon1 = require("@/assets/arrowIcon1.png");
@@ -166,12 +167,15 @@ const arrowIcon2 = require("@/assets/arrowIcon2.png");
 
 // 端口过滤：92=抄表系统，93=收费系统，本地开发(非92/93)默认全部展示
 const currentPort = window.location.port;
+const effectivePort = computed(() => getEffectivePort());
+
 // 菜单标题按端口显示：92=水务抄表系统，93=水务收费系统
-const systemTitle = currentPort === "92" ? "水务抄表系统" : "水务收费系统";
+const systemTitle = computed(() => (effectivePort.value === "92" ? "水务抄表系统" : "水务收费系统"));
 function filterByPort(list) {
-  if (currentPort !== "92" && currentPort !== "93") return list;
+  const port = effectivePort.value;
+  if (port !== "92" && port !== "93") return list;
   return list
-    .filter((item) => !item.ports || item.ports.includes(currentPort))
+    .filter((item) => !item.ports || item.ports.includes(port))
     .map((item) => ({
       ...item,
       children: item.children ? filterByPort(item.children) : undefined,
