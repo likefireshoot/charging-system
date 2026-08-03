@@ -9,7 +9,7 @@
       </div>
       <div class="logo">
         <img src="@/assets/logo.png" class="icon" alt="" />
-        <p>水务收费系统</p>
+        <p>{{ systemTitle }}</p>
       </div>
 
       <div class="userCard">
@@ -166,6 +166,8 @@ const arrowIcon2 = require("@/assets/arrowIcon2.png");
 
 // 端口过滤：92=抄表系统，93=收费系统，本地开发(非92/93)默认全部展示
 const currentPort = window.location.port;
+// 菜单标题按端口显示：92=水务抄表系统，93=水务收费系统
+const systemTitle = currentPort === "92" ? "水务抄表系统" : "水务收费系统";
 function filterByPort(list) {
   if (currentPort !== "92" && currentPort !== "93") return list;
   return list
@@ -264,6 +266,7 @@ if (staffPermissionIds.value.includes(39)) {
 }
 const adminNavList = reactive([
   { id: 0, name: "首页", icon: require("@/assets/menu/icon1.png"), icon2: require("@/assets/menu/icon2.png"), path: "/homePage", ports: ["92", "93"] },
+  { id: 22, name: "设备管理", icon: require("@/assets/menu/icon32.png"), icon2: require("@/assets/menu/icon33.png"), path: "/deviceManage", ports: ["92"] },
   { id: 1, name: "开户管理", icon: require("@/assets/menu/icon24.png"), icon2: require("@/assets/menu/icon23.png"), path: "/accountManage", ports: ["93"] },
   { id: 2, name: "用户管理", icon: require("@//assets/menu/icon3.png"), icon2: require("@/assets/menu/icon4.png"), path: "/userManage", ports: ["92", "93"] },
   { id: 3, name: "价格管理", icon: require("@/assets/menu/icon5.png"), icon2: require("@/assets/menu/icon6.png"), path: "/priceManage", ports: ["93"] },
@@ -315,11 +318,11 @@ const adminNavList = reactive([
   { id: 8, name: "操作日志", icon: require("@/assets/add/icon-10.png"), icon2: require("@/assets/add/icon-11.png"), path: "/logManage", ports: ["92", "93"] },
   { id: 20, name: "水务地图", icon: require("@/assets/icon7.png"), icon2: require("@/assets/icon10.png"), path: "/map", ports: ["92"] },
   { id: 21, name: "外勤管理", icon: require("@/assets/icon8.png"), icon2: require("@/assets/icon9.png"), path: "/field", ports: ["92"] },
-  { id: 22, name: "设备管理", icon: require("@/assets/menu/icon32.png"), icon2: require("@/assets/menu/icon33.png"), path: "/deviceManage", ports: ["92"] },
 ]);
 
 const nonAdminNavList = reactive([
   { id: 0, name: "首页", icon: require("@/assets/menu/icon1.png"), icon2: require("@/assets/menu/icon2.png"), path: "/homePage", ports: ["92", "93"] },
+  { id: 22, name: "设备管理", icon: require("@/assets/menu/icon32.png"), icon2: require("@/assets/menu/icon33.png"), path: "/deviceManage", ports: ["92"] },
   { id: 1, name: "开户管理", icon: require("@/assets/menu/icon24.png"), icon2: require("@/assets/menu/icon23.png"), path: "/accountManage", ports: ["93"] },
   { id: 2, name: "用户管理", icon: require("@//assets/menu/icon3.png"), icon2: require("@/assets/menu/icon4.png"), path: "/userManage", ports: ["92", "93"] },
   { id: 3, name: "价格管理", icon: require("@/assets/menu/icon5.png"), icon2: require("@/assets/menu/icon6.png"), path: "/priceManage", ports: ["93"] },
@@ -364,7 +367,6 @@ const nonAdminNavList = reactive([
   { id: 6, name: "警告管理", icon: require("@/assets/menu/icon19.png"), icon2: require("@/assets/menu/icon20.png"), path: "/warningManage", ports: ["92", "93"] },
   { id: 20, name: "水务地图", icon: require("@/assets/icon7.png"), icon2: require("@/assets/icon10.png"), path: "/map", ports: ["92"] },
   { id: 21, name: "外勤管理", icon: require("@/assets/icon8.png"), icon2: require("@/assets/icon9.png"), path: "/field", ports: ["92"] },
-  { id: 22, name: "设备管理", icon: require("@/assets/menu/icon32.png"), icon2: require("@/assets/menu/icon33.png"), path: "/deviceManage", ports: ["92"] },
 ]);
 
 navLists.sort((a, b) => {
