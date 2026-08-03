@@ -1,5 +1,5 @@
 <template>
-  <div class="card">
+  <div class="card" :style="loginBgStyle">
     <div class="loginForm">
       <div class="loginTxt">
         <h2>荆州市水韵水务设备有限公司</h2>
@@ -168,9 +168,16 @@ import { getCurrentInstance, onMounted, reactive, ref } from "vue";
 import { useRouter } from "vue-router";
 import { ElMessage } from "element-plus";
 import service from "@/api/request";
+import { getEffectivePort } from "@/portSwitch";
 
-// 根据端口号决定系统标题：92=水务抄表系统，93=水务收费系统，其他默认水务收费系统
-const systemTitle = window.location.port === "92" ? "水务抄表系统" : "水务收费系统";
+// 根据端口号决定系统标题：92=水务抄表系统，93=水务收费系统
+// 受 src/portSwitch.js 的调试开关控制（开关A=>92，开关B=>93）
+const systemTitle = getEffectivePort() === "92" ? "水务抄表系统" : "水务收费系统";
+
+// 登录页背景：92端口用 loginbg92.png，其他保持原 loginbg.png 图片
+const loginBgStyle = getEffectivePort() === "92"
+  ? { background: 'url("' + require("@/assets/loginbg92.png") + '") center center no-repeat', backgroundSize: "cover" }
+  : { background: 'url("' + require("@/assets/loginbg.png") + '") center center no-repeat', backgroundSize: "cover" };
 
 const { proxy } = getCurrentInstance();
 const store = useStore();
@@ -555,11 +562,10 @@ async function resetPassword() {
   object-fit: contain;
 }
 
-.card {
+  .card {
   justify-content: center;
   align-items: center;
   // background: #baefe4;
-  background: url("@/assets/loginbg.png") center center no-repeat;
   background-size: cover;
   .loginForm {
     width: 1100px;
