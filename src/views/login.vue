@@ -1,5 +1,5 @@
 <template>
-  <div class="card" :style="loginBgStyle">
+  <div class="card" :class="{ 'theme-blue': isPort92 }" :style="loginBgStyle">
     <div class="loginForm">
       <div class="loginTxt">
         <h2>荆州市水韵水务设备有限公司</h2>
@@ -80,7 +80,7 @@
           <li style="height: 55px">
             <label for="">
               <img src="@/assets/icon1.svg" alt="" class="icon" />
-              <el-select v-model="registerParam.companyId" placeholder="请选择所属水厂" style="background: #dff0ed; border-color: #dff0ed">
+              <el-select v-model="registerParam.companyId" placeholder="请选择所属水厂" :style="isPort92 ? 'background: #e3f2fd; border-color: #e3f2fd' : 'background: #dff0ed; border-color: #dff0ed'">
                 <el-option v-for="item in companyList" :key="item.id" :label="item.name" :value="item.id"></el-option>
               </el-select>
               <!-- <input type="text" v-model="registerParam.companyName" placeholder="请选择所属水厂" /> -->
@@ -173,6 +173,9 @@ import { getEffectivePort } from "@/portSwitch";
 // 根据端口号决定系统标题：92=水务抄表系统，93=水务收费系统
 // 受 src/portSwitch.js 的调试开关控制（开关A=>92，开关B=>93）
 const systemTitle = getEffectivePort() === "92" ? "水务抄表系统" : "水务收费系统";
+
+// 92端口使用蓝色主题
+const isPort92 = getEffectivePort() === "92";
 
 // 登录页背景：92端口用 loginbg92.png，其他保持原 loginbg.png 图片
 const loginBgStyle = getEffectivePort() === "92"
@@ -719,6 +722,72 @@ async function resetPassword() {
       &:hover {
         background: #4eb480;
       }
+    }
+  }
+}
+
+/* ========== 92端口蓝色主题（与蓝色背景协调） ========== */
+.theme-blue {
+  .loginForm {
+    .loginTxt {
+      h2 {
+        color: #1a8cdb;
+        text-shadow: 2px -2px 0px rgba(255, 255, 255, 1);
+      }
+      .border {
+        background: #5ebcf7;
+      }
+    }
+    .logo p {
+      color: #1a8cdb;
+    }
+  }
+
+  .form {
+    .title {
+      span {
+        background: #b8ddf5;
+      }
+      h2 {
+        color: #1a8cdb;
+      }
+    }
+    ul li label {
+      background: #e3f2fd;
+    }
+    ul li button {
+      background-color: #1a8cdb;
+      &:hover {
+        background-color: #299fe8;
+      }
+    }
+    .txt a {
+      color: #1a8cdb;
+      &.forget {
+        color: #585657;
+      }
+      &:hover {
+        color: #1a8cdb;
+      }
+    }
+    .btn {
+      background: linear-gradient(135deg, #1a8cdb, #299fe8);
+      &:hover {
+        background: linear-gradient(135deg, #299fe8, #42aef0);
+      }
+    }
+  }
+}
+
+/* 92端口蓝色主题 - el-select 下拉框（正确写法：:deep 在 .theme-blue 外包裹） */
+.theme-blue {
+  :deep(.el-select) {
+    --el-color-primary: #e3f2fd;
+    --el-border-color-hover: #e3f2fd;
+
+    .el-select__wrapper {
+      --el-fill-color-blank: #e3f2fd;
+      --el-border-color: #e3f2fd;
     }
   }
 }
