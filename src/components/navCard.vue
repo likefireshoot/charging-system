@@ -22,18 +22,18 @@
 
       <div class="navLists">
         <template v-for="(item, index) in navLists" :key="index">
-          <a class="item" :class="navIndex == index ? 'on' : ''" @click.stop="toggleSubMenu(item, index)" :style="{ cursor: item.children && item.children.length > 0 ? 'pointer' : 'default' }">
+          <a class="item" :class="navIndex === item.path ? 'on' : ''" @click.stop="toggleSubMenu(item)" :style="{ cursor: item.children && item.children.length > 0 ? 'pointer' : 'default' }">
             <div class="imgBox">
               <img :src="item.icon" alt="" />
               <img class="hov" :src="item.icon2" alt="" />
             </div>
             <p>{{ item.name }}</p>
             <!-- 添加箭头图标 -->
-            <img v-if="item.children && item.children.length > 0" :src="subNavOpen[index] ? item.arrowIcon1 : item.arrowIcon2" alt="arrow" class="arrow-icon" />
+            <img v-if="item.children && item.children.length > 0" :src="subNavOpen[item.path] ? item.arrowIcon1 : item.arrowIcon2" alt="arrow" class="arrow-icon" />
           </a>
-          <div v-if="item.children && item.children.length > 0" class="subNavList" :style="{ display: subNavOpen[index] ? 'block' : 'none' }">
-            <template v-for="(child, childIndex) in item.children" :key="child.id">
-              <a class="subItem" :class="subNavIndex === `${index}-${childIndex}` ? 'on' : ''" @click.stop="pushRouter(child, `${index}-${childIndex}`)">
+          <div v-if="item.children && item.children.length > 0" class="subNavList" :style="{ display: subNavOpen[item.path] ? 'block' : 'none' }">
+            <template v-for="child in item.children" :key="child.id">
+              <a class="subItem" :class="subNavIndex === child.path ? 'on' : ''" @click.stop="pushRouter(child)">
                 <div class="imgBox">
                   <img :src="child.icon" alt="" />
                   <img class="hov" :src="child.icon2" alt="" />
@@ -72,15 +72,15 @@
 
       <div class="navLists">
         <template v-for="(item, index) in navLists" :key="index">
-          <a class="item" :class="navIndex == index ? 'on' : ''" @click.stop="handleMenuClick(item, index)">
+          <a class="item" :class="navIndex === item.path ? 'on' : ''" @click.stop="handleMenuClick(item)">
             <div class="imgBox">
               <img :src="item.icon" alt="" />
               <img class="hov" :src="item.icon2" alt="" />
             </div>
           </a>
-          <div v-if="item.children && item.children.length > 0" class="subNavList" :style="{ display: subNavOpen[index] ? 'block' : 'none' }" style="padding-left: 0">
-            <template v-for="(child, childIndex) in item.children" :key="child.id">
-              <a class="subItem" :class="subNavIndex === `${index}-${childIndex}` ? 'on' : ''" @click.stop="pushRouter(child, `${index}-${childIndex}`)">
+          <div v-if="item.children && item.children.length > 0" class="subNavList" :style="{ display: subNavOpen[item.path] ? 'block' : 'none' }" style="padding-left: 0">
+            <template v-for="child in item.children" :key="child.id">
+              <a class="subItem" :class="subNavIndex === child.path ? 'on' : ''" @click.stop="pushRouter(child)">
                 <div class="imgBox">
                   <img :src="child.icon" alt="" />
                   <img class="hov" :src="child.icon2" alt="" />
@@ -184,11 +184,27 @@ const { proxy } = getCurrentInstance();
 const router = useRouter();
 const route = useRoute();
 const store = useStore();
-const navIndex = computed(() => store.state.navIndex);
+const navIndex = computed(() => {
+  if (route.matched.length === 2) return route.path;
+  return null;
+});
 
-const subNavIndex = ref(null);
+const subNavIndex = computed(() => {
+  if (route.matched.length === 3) return route.path;
+  return null;
+});
 
 const subNavOpen = reactive({});
+
+watch(
+  () => (route.matched.length === 3 ? route.matched[1].path : null),
+  (parentPath) => {
+    if (parentPath) {
+      subNavOpen[parentPath] = true;
+    }
+  },
+  { immediate: true }
+);
 
 const staffPermissionIds = computed(() => {
   return store.state.userData.staffPermissionIds;
@@ -285,8 +301,6 @@ function buildMenu(userData) {
   return tempMenus;
 }
 
-console.log(navLists);
-
 const user_info_dialogFormVisible = ref(false);
 const userInfoData = reactive({
   staffId: "",
@@ -298,75 +312,6 @@ const userInfoData = reactive({
   againPassword: "",
 });
 const companyList = reactive([]);
-const watchRoute = () => {
-  console.log(route, "route");
-  console.log(navLists, "navLists");
-  console.log(navLists.findIndex((item) => item.path === route.fullPath));
-
-  if (route.matched.length === 2) {
-    store.commit(
-      "setNavIndex",
-      navLists.findIndex((item) => item.path === route.fullPath)
-    );
-  } else if (route.matched.length === 3) {
-    const findIndexFn = (arr) => {
-      const indexArr = [];
-      const fn = (arr) => {
-        arr.map((v, i) => {
-          if (v.path === route.matched[1].path) {
-            indexArr.push(i.toString());
-            v.children.map((value, index) => {
-              if (value.path === route.fullPath) {
-                indexArr.push(index.toString());
-              }
-            });
-          }
-        });
-      };
-      fn(arr);
-      return indexArr;
-    };
-    store.commit("setNavIndex", null);
-    // console.log(findIndexFn(navLists), "findIndexFn(navLists)");
-    const indexArr = findIndexFn(navLists);
-    subNavIndex.value = indexArr.join("-");
-    subNavOpen[subNavIndex.value[0]] = true;
-  }
-};
-// console.log(navIndex.value, route, route.fullPath, "navIndex");
-watch(route, (to, from) => {
-  console.log(to, from, "to,from");
-  watchRoute();
-});
-if (route.matched.length === 2) {
-  store.commit(
-    "setNavIndex",
-    navLists.findIndex((item) => item.path === route.fullPath)
-  );
-} else if (route.matched.length === 3) {
-  const findIndexFn = (arr) => {
-    const indexArr = [];
-    const fn = (arr) => {
-      arr.map((v, i) => {
-        if (v.path === route.matched[1].path) {
-          indexArr.push(i.toString());
-          v.children.map((value, index) => {
-            if (value.path === route.fullPath) {
-              indexArr.push(index.toString());
-            }
-          });
-        }
-      });
-    };
-    fn(arr);
-    return indexArr;
-  };
-  store.commit("setNavIndex", null);
-  // console.log(findIndexFn(navLists), "findIndexFn(navLists)");
-  const indexArr = findIndexFn(navLists);
-  subNavIndex.value = indexArr.join("-");
-  subNavOpen[subNavIndex.value[0]] = true;
-}
 const userData = computed(() => {
   // console.log("123123123");
   // console.log(store.state.userData);
@@ -422,38 +367,29 @@ watch(
       }
     }
 
-    watchRoute();
   },
   { immediate: true }
 );
 
-function pushRouter(item, index) {
-  console.log(item, index);
+function pushRouter(item) {
   if (item.path) {
-    store.commit("setNavIndex", index); // 更新 navIndex
-    setTimeout(() => {
-      console.log(navIndex.value, "navIndex");
-    }, 1000);
-    subNavIndex.value = index; // 更新 subNavIndex
     router.replace(item.path);
   }
 }
 
-function toggleSubMenu(item, index) {
+function toggleSubMenu(item) {
   if (item.children && item.children.length > 0) {
-    subNavOpen[index] = !subNavOpen[index];
-    console.log(subNavOpen, "subNavOpen");
+    subNavOpen[item.path] = !subNavOpen[item.path];
   } else {
-    store.commit("setNavIndex", index); // 更新 navIndex
-    pushRouter(item, index);
+    pushRouter(item);
   }
 }
 
-function handleMenuClick(item, index) {
+function handleMenuClick(item) {
   if (item.children && item.children.length > 0) {
-    toggleSubMenu(item, index);
+    toggleSubMenu(item);
   } else {
-    pushRouter(item, index);
+    pushRouter(item);
   }
 }
 

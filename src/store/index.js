@@ -2,7 +2,7 @@ import { createStore } from "vuex";
 
 export default createStore({
   state: {
-    navIndex: 1,
+    navIndex: null,
     userData: sessionStorage.getItem("userData") ? JSON.parse(sessionStorage.getItem("userData")) : null,
   },
   getters: {},
