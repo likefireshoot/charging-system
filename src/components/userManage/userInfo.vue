@@ -301,7 +301,7 @@ export default {
       handler(newVal) {
         if (!newVal || !newVal.meterCode) return;
         // 每次传入行数据（打开弹窗），根据表号查询完整用户信息
-        this.fetchFullUserInfo(newVal.meterCode);
+        this.fetchFullUserInfo(newVal);
       },
       deep: true,
       immediate: true
@@ -688,51 +688,74 @@ export default {
       });
     },
     // 根据表号获取完整用户信息
-    async fetchFullUserInfo(meterCode) {
+    async fetchFullUserInfo(row) {
       this.pageLoading = true;
       try {
-        // 新接口
+        const meterCode = row.meterCode;
+        // 第一步：根据表号进行查询
         const res = await service.get(`/userManage/userCharge/user/info/byMeterCode?meterCode=${encodeURIComponent(meterCode)}`, {
-          headers: { Authorization: this.$store.state.userData.token }
+          headers: { Authorization: this.$store.state.userData.token },
+          skipAutoMsg: true // 开启静默模式，拦截器不再自动弹报错
         })
         if (res.code === 200 && res.data) {
-          const full = res.data;
           // 完整数据覆盖 userInfoData
-          this.userInfoData.userId = full.userId;
-          this.userInfoData.imei = full.imei;
-          this.userInfoData.userName = full.userName;
-          this.userInfoData.userAddr = full.userAddr;
-          this.userInfoData.company = full.companyName;
-          this.userInfoData.companyId = full.companyId;
-          this.userInfoData.regionName = full.regionName;
-          this.userInfoData.userPhone = full.phone;
-          this.userInfoData.userOtherPhone = full.userOtherPhone;
-          this.userInfoData.userRemark = full.userRemark;
-          this.userInfoData.meterCode = full.meterCode;
-          this.userInfoData.meterType = full.meterType;
-          this.userInfoData.priceId = full.priceId;
-          this.userInfoData.smsConfigId = full.smsConfigId;
-          this.userInfoData.approver_1 = full.approver1;
-          this.userInfoData.factoryDate = full.factoryDate || "";
-          this.userInfoData.firstInspectDate = full.firstInspectDate || "";
-          this.userInfoData.createTime = full.createTime ? full.createTime.split(" ")[0] : "";
-          this.userInfoData.enableArrearsValve = full.enableArrearsValve === null ? "default" : full.enableArrearsValve;
-          this.userInfoData.keepValveOpenFree = full.keepValveOpenFree ?? 1;
-          this.userInfoData.isPause = full.isPause ?? 0;
-          this.userInfoData.balance = full.balance ?? 0;
-          // 重新加载下拉选项（水厂/区域/价格/审批人）
-          Promise.all([this.getCompanyList(), this.getRegionData(), this.getPriceList(), this.getSmsConfigList(), this.getApproverList()]).then(() => {
-            this.flag = 1;
-          })
+          this.fillUserData(res.data);
+          return;
         }
+        throw new Error("表号可能不再使用，根据表号查询用户信息查询失败，即将根据用户号进行查询");
       } catch (err) {
-        console.error("查询完整用户信息失败", err);
-        ElMessage.warning("获取完整用户信息失败，使用表格基础数据");
-        // 查询失败保留原有表格传过来的数据
-        this.assignmentData();
+        console.log("byMeterCode查询失败，切换备用接口", err);
+        try {
+          // 第二步：备用方案，使用 userId+meterCode+companyId 查询
+          const meterCode = row.meterCode;
+          const userId = row.userId;
+          const companyId = row.companyId;
+          const resBackup = await service.get(`/userManage/userCharge/user/info/byUserId?meterCode=${encodeURIComponent(meterCode)}&userId=${userId}&companyId=${companyId}`, {
+            headers: { Authorization: this.$store.state.userData.token }
+          })
+          if (resBackup.code === 200 && resBackup.data) {
+            this.fillUserData(resBackup.data);
+            return;
+          }
+          throw new Error("用户信息查询失败");
+        } catch (err2) {
+          console.error("查询用户信息失败", err2);
+          ElMessage.warning("无法获取完整用户信息，使用表格基础数据");
+          // 双接口全部失败，使用父组件传入的基础行数据填充
+          this.assignmentData();
+        }
       } finally {
         this.pageLoading = false;
       }
+    },
+    // 抽离公共赋值方法，避免重复代码
+    fillUserData(full) {
+      this.userInfoData.userId = full.userId;
+      this.userInfoData.imei = full.imei;
+      this.userInfoData.userName = full.userName;
+      this.userInfoData.userAddr = full.userAddr;
+      this.userInfoData.company = full.companyName;
+      this.userInfoData.companyId = full.companyId;
+      this.userInfoData.regionName = full.regionName;
+      this.userInfoData.userPhone = full.phone;
+      this.userInfoData.userOtherPhone = full.userOtherPhone;
+      this.userInfoData.userRemark = full.userRemark;
+      this.userInfoData.meterCode = full.meterCode;
+      this.userInfoData.meterType = full.meterType;
+      this.userInfoData.priceId = full.priceId;
+      this.userInfoData.smsConfigId = full.smsConfigId;
+      this.userInfoData.approver_1 = full.approver1;
+      this.userInfoData.factoryDate = full.factoryDate || "";
+      this.userInfoData.firstInspectDate = full.firstInspectDate || "";
+      this.userInfoData.createTime = full.createTime ? full.createTime.split(" ")[0] : "";
+      this.userInfoData.enableArrearsValve = full.enableArrearsValve === null ? "default" : full.enableArrearsValve;
+      this.userInfoData.keepValveOpenFree = full.keepValveOpenFree ?? 1;
+      this.userInfoData.isPause = full.isPause ?? 0;
+      this.userInfoData.balance = full.balance ?? 0;
+      // 重新加载下拉选项（水厂/区域/价格/审批人）
+      Promise.all([this.getCompanyList(), this.getRegionData(), this.getPriceList(), this.getSmsConfigList(), this.getApproverList()]).then(() => {
+        this.flag = 1;
+      })
     },
   },
 };

@@ -143,7 +143,11 @@ service.interceptors.response.use(
     } else if (response.request.responseType === "blob" && response.status == 200) {
       return Promise.resolve(response);
     } else {
-      ElMessage.error(res.msg);
+      // ElMessage.error(res.msg);
+        // 新增判断：如果配置了skipAutoMsg，跳过自动弹窗
+        if (!response.config.skipAutoMsg) {
+            ElMessage.error(res.msg);
+        }
       return Promise.reject(new Error(res.msg || "Error"));
     }
   },
