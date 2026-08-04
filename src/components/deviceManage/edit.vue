@@ -122,7 +122,7 @@ export default {
   },
   computed: {
     imeiEditable() {
-      return this.data.imei && this.data.imei.includes("|");
+      return this.data.imei && (this.data.imei.includes("_")||this.data.imei.includes("|"));
     },
   },
   mounted() {

@@ -80,7 +80,7 @@ export default {
         return;
       }
 
-      this.addData.imei = code + "|新表|自动检测中...";
+      this.addData.imei = code + "_新表_自动检测中...";
       this.addData.meterType = "NB-IoT表";
       this.addData.companyId = 1;
 
@@ -106,7 +106,7 @@ export default {
         this.addData.deviceId = "无";
       } else if (/^00\d{10}$/.test(code)) {
         this.addData.meterVendor = "千宝通";
-        this.addData.imei = code + "|对接方式接入无需imei";
+        this.addData.imei = code + "_对接方式接入无需imei";
         this.addData.masterKey = "无";
         this.addData.productId = "无";
         this.addData.deviceId = "无";
