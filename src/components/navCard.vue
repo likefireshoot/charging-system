@@ -159,13 +159,15 @@ import { getCurrentInstance, reactive, ref, computed, watch } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import service from "@/api/request";
 import { ElMessage } from "element-plus";
+import { getEffectivePort } from "@/portSwitch";
 
 // 引入箭头图标
 const arrowIcon1 = require("@/assets/arrowIcon1.png");
 const arrowIcon2 = require("@/assets/arrowIcon2.png");
 
 // 端口过滤：92=抄表系统，93=收费系统，本地开发(非92/93)默认全部展示
-const currentPort = window.location.port;
+// 使用 getEffectivePort() 以便和 login 页一致地支持本地调试开关（showMeter/showCharge）
+const currentPort = getEffectivePort();
 // 菜单标题按端口显示：92=水务抄表系统，93=水务收费系统
 const systemTitle = currentPort === "92" ? "水务抄表系统" : "水务收费系统";
 function filterByPort(list) {
@@ -193,7 +195,7 @@ const staffPermissionIds = computed(() => {
 });
 
 const baseMenu = [
-  { id: 0, name: "首页", icon: require("@/assets/menu/icon1.png"), icon2: require("@/assets/menu/icon2.png"), path: "/homePage", ports: ["92", "93"]  },
+  { id: 0, name: "首页", icon: require("@/assets/menu/icon1.png"), icon2: require("@/assets/menu/icon2.png"), path: "/homePage", ports: ["93"]  },
   { id: 2, name: "用户管理", icon: require("@/assets/menu/icon3.png"), icon2: require("@/assets/menu/icon4.png"), path: "/userManage", ports: ["92", "93"]  },
   {
     id: 4,
@@ -272,6 +274,14 @@ function buildMenu(userData) {
   }
   // 统一排序
   tempMenus.sort((a,b) => a.id - b.id);
+  // 92端口(抄表系统)：设备管理(id=22)提到最前面
+  if (currentPort === "92") {
+    const deviceIdx = tempMenus.findIndex(m => m.id === 22);
+    if (deviceIdx > -1) {
+      const deviceMenu = tempMenus.splice(deviceIdx, 1)[0];
+      tempMenus.unshift(deviceMenu);
+    }
+  }
   return tempMenus;
 }
 
