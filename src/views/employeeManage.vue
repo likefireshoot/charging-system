@@ -50,7 +50,7 @@
           <img src="@/assets/yuangong/icon6.png" alt="" />
           <span style="margin-left: 6px; color: #5a5a5a">新增区域</span>
         </div>
-        <div class="add-btn" @click="addStaff_dialogFormVisible = true" v-if="staffPermissionIds.includes(52)">
+        <div class="add-btn" @click="openAddStaffDialog" v-if="staffPermissionIds.includes(52)">
           <img src="@/assets/yuangong/icon6.png" alt="" />
           <span style="margin-left: 6px; color: #5a5a5a">新增员工</span>
         </div>
@@ -394,7 +394,7 @@
             <img src="@/assets/fapiao/icon8.png" alt="" style="margin-right: 10px" />
             <span style="font-size: 20px">新增员工</span>
           </div>
-          <div style="margin-right: 10px; cursor: pointer" @click="addStaff_dialogFormVisible = false">
+          <div style="margin-right: 10px; cursor: pointer" @click="closeAddStaffDialog">
             <img src="@/assets/close.png" alt="" />
           </div>
         </div>
@@ -402,7 +402,7 @@
           <!-- 所属水厂（仅总水厂显示） -->
           <div class="add-input" v-if="companyId === 1" style="margin-right: 7%; margin-bottom: 15px">
             <span>所属水厂</span>
-            <el-select v-model="addStaffForm.companyId" placeholder="请选择所属水厂">
+            <el-select v-model="addStaffForm.companyId" placeholder="请选择所属水厂" @change="handleCompanyChange">
               <el-option v-for="item in companyList" :key="item.id" :label="item.name" :value="item.id"></el-option>
             </el-select>
           </div>
@@ -450,7 +450,7 @@
             <el-icon style="margin-left: 15%"><Check /></el-icon>
             <span style="font-size: 20px; margin-left: 15%">确认</span>
           </div>
-          <div class="cancel-btn" @click="addStaff_dialogFormVisible = false">
+          <div class="cancel-btn" @click="closeAddStaffDialog">
             <el-icon style="margin-left: 15%; color: #45ba7e"><Close /></el-icon>
             <span style="font-size: 20px; margin-left: 15%; color: #5a5a5a">取消</span>
           </div>
@@ -660,7 +660,7 @@ export default {
     if (this.parentContainer) {
       this.resizeObserver.observe(this.parentContainer);
     }
-    this.getRoleList();
+    this.getRoleListByCompany(this.companyId);
     this.getCompanyList();
     this.getEmployeeData();
     this.userData = sessionStorage.getItem("userData");
@@ -673,6 +673,18 @@ export default {
     }
   },
   methods: {
+    openAddStaffDialog() {
+      this.resetAddStaffForm();
+      this.addStaff_dialogFormVisible = true;
+
+      this.addStaffForm.companyId = this.companyId;
+      this.getRoleListByCompany(this.companyId);
+    },
+    closeAddStaffDialog() {
+      this.addStaff_dialogFormVisible = false;
+      this.resetAddStaffForm();
+      this.getRoleListByCompany(this.companyId);
+    },
     openDeleteRegionDialog(){
       this.deleteRegion_dialogFormVisible = true;
       // 清空上次选中
@@ -822,6 +834,8 @@ export default {
         staffCharacterId: null,
         companyId: this.companyId === 1 ? null : this.companyId
       };
+      // 清空角色下拉
+      this.rolesList = [];
     },
 
     // ****** 手动处理分页变化，避免 watch 循环 ******
@@ -891,20 +905,30 @@ export default {
         ElMessage.warning("请选择需要编辑的员工数据");
       }
     },
-    getRoleList() {
-      service
-        .get("/role/roles")
-        .then((res) => {
-          if (res.code === 200) {
-            this.rolesList = res.data.map((item) => ({
-              id: item.roleId,
-              name: item.roleName,
-            }));
-          }
-        })
-        .catch((err) => {
-          ElMessage.error(err);
-        });
+    // 根据水厂ID加载角色列表
+    async getRoleListByCompany(companyId) {
+      if (!companyId) {
+        this.rolesList = [];
+        return;
+      }
+      try {
+        const res = await service.get(`/role/roles?companyId=${companyId}`);
+        if (res.code === 200) {
+          this.rolesList = res.data.map((item) => ({
+            id: item.roleId,
+            name: item.roleName,
+          }));
+        }
+      } catch (err) {
+        ElMessage.error("获取角色列表失败");
+      }
+    },
+    // 水厂下拉切换触发
+    handleCompanyChange() {
+      // 切换水厂，清空已选择角色
+      this.addStaffForm.staffCharacterId = null;
+      // 重新加载对应水厂角色
+      this.getRoleListByCompany(this.addStaffForm.companyId);
     },
     getRegionData() {
       // 关键判断：没有水厂ID，直接终止，不发起请求！
