@@ -7,7 +7,7 @@
         <div class="border"></div>
 
         <div class="logo">
-          <img src="@/assets/logo.svg" class="icon" alt="" />
+          <img :src="isPort92 ? require('@/assets/logo-blue.svg') : require('@/assets/logo.svg')" class="icon" alt="" />
           <p>{{ systemTitle }}</p>
         </div>
       </div>

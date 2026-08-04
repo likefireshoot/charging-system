@@ -6,7 +6,7 @@ import { reactive } from "vue";
 // 两个都 false => 按真实访问端口判断（本地 8080 全显示）
 // 切换效果只需改下面两行 true/false，无需注释代码
 export const portSwitch = reactive({
-  showMeter: false, // 开关A：显示92端口界面
+  showMeter: true, // 开关A：显示92端口界面
   showCharge: false, // 开关B：显示93端口界面
 });
 
