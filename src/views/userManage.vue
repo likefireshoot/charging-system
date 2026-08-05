@@ -127,7 +127,7 @@
           <img src="@/assets/jiage/icon3.png" alt="" />
           <span>批量修改水价类型</span>
         </div>
-        <div class="export-out-btn" @click="common_meter_template_click">
+        <!-- <div class="export-out-btn" @click="common_meter_template_click">
           <img src="@/assets/yonghu/icon1.png" alt="" />
           <span>普表用水量模板下载</span>
         </div>
@@ -136,7 +136,7 @@
           <span>普表用水量信息导入</span>
           <input ref="commonMeterInput" type="file" accept=".xls,.xlsx" style="display: none"
             @change="common_meter_click" />
-        </div>
+        </div> -->
         <div class="export-out-btn" @click="exportExcel">
           <img src="@/assets/yonghu/icon1.3.png" alt="" />
           <span>导出</span>

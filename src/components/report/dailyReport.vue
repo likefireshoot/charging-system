@@ -24,10 +24,6 @@
             <el-option v-for="item in staffNameOptions" :key="item" :label="item" :value="item"></el-option>
           </el-select>
         </div>
-        <div class="search-input" style="margin-left: 20px; justify-content: flex-end">
-          <span>&nbsp;</span>
-          <a href="javascript:;" style="font-size: 20px; color: #46b97e; text-decoration: none; line-height: 35px; font-weight: bold;" @click="exportDailyCashierReport">收费员日汇总导出</a>
-        </div>
       </div>
       <div class="buttons">
         <div class="sercah-btn" @click="getTradeData">
@@ -38,6 +34,12 @@
           <img src="@/assets/baobiao/icon5.png" alt="" style="margin-left: 10px" />
           <span style="font-size: 20px; margin-left: 15%; color: #5a5a5a">清空</span>
         </div>
+      </div>
+    </div>
+    <div class="command-box">
+      <div class="export-out-btn" @click="openExportDialog">
+        <img src="@/assets/yonghu/icon1.3.png" alt="" style="width: 22px; height: 22px" />
+        <span style="margin-left: 8px; color: #5a5a5a; font-size: 20px">收费员日汇总导出</span>
       </div>
     </div>
     <div class="baobiao-info">
@@ -118,6 +120,45 @@
         </div>
       </div>
     </div>
+
+    <div class="export-dialog-overlay" v-if="exportDialogVisible" @click.self="exportDialogVisible = false">
+      <div class="export-dialog">
+        <div class="export-dialog-title">
+          <span>收费员日汇总导出</span>
+          <img src="@/assets/yonghu/icon4.png" alt="close" @click="exportDialogVisible = false" class="export-dialog-close" />
+        </div>
+        <div class="export-dialog-body">
+          <div class="export-dialog-row">
+            <div class="export-dialog-item">
+              <span>收费人</span>
+              <el-select v-model="exportForm.rechargeUser" filterable placeholder="请选择收费人">
+                <el-option v-for="item in staffNameOptions" :key="item" :label="item" :value="item"></el-option>
+              </el-select>
+            </div>
+            <div class="export-dialog-item">
+              <span>区域(可选)</span>
+              <el-select v-model="exportForm.region" clearable placeholder="请选择区域">
+                <el-option v-for="item in quyu_data" :key="item.id" :label="item.label" :value="item.label"></el-option>
+              </el-select>
+            </div>
+          </div>
+          <div class="export-dialog-row">
+            <div class="export-dialog-item">
+              <span>起始日期</span>
+              <el-date-picker v-model="exportForm.startDate" type="date" placeholder="选择起始日期" format="YYYY-MM-DD" value-format="YYYY-MM-DD" />
+            </div>
+            <div class="export-dialog-item">
+              <span>结束日期</span>
+              <el-date-picker v-model="exportForm.endDate" type="date" placeholder="选择结束日期" format="YYYY-MM-DD" value-format="YYYY-MM-DD" />
+            </div>
+          </div>
+        </div>
+        <div class="export-dialog-footer">
+          <div class="export-dialog-btn-cancel" @click="exportDialogVisible = false">取消</div>
+          <div class="export-dialog-btn-confirm" @click="exportDailyCashierReport">确认导出</div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -145,6 +186,13 @@ export default {
       quyu_data: [],
       staffNameOptions: [],
       trade_data: {},
+      exportDialogVisible: false,
+      exportForm: {
+        region: "",
+        startDate: "",
+        endDate: "",
+        rechargeUser: "",
+      },
       weekchart: null,
       weekchart_option: {
         grid: {
@@ -411,20 +459,35 @@ export default {
             ElMessage.error("请选择查询的日期");
           });
     },
+    openExportDialog() {
+      const userData = JSON.parse(sessionStorage.getItem("userData"));
+      this.exportForm = {
+        region: this.params.region || "",
+        startDate: this.params.record_time || "",
+        endDate: this.params.record_time || "",
+        rechargeUser: userData.staffName || this.params.rechargeUser || "",
+      };
+      this.exportDialogVisible = true;
+    },
     async exportDailyCashierReport() {
-      if (!this.params.record_time) {
-        ElMessage.error("请选择收费日期");
+      if (!this.exportForm.rechargeUser) {
+        ElMessage.error("请选择收费人");
         return;
       }
-      if (!this.params.rechargeUser) {
-        ElMessage.error("请选择收费人");
+      if (!this.exportForm.startDate) {
+        ElMessage.error("请选择起始日期");
+        return;
+      }
+      if (!this.exportForm.endDate) {
+        ElMessage.error("请选择结束日期");
         return;
       }
 
       const query = new URLSearchParams({
-        record_time: this.params.record_time || "",
-        region: this.params.region || "",
-        rechargeUser: this.params.rechargeUser || "",
+        region: this.exportForm.region || "",
+        startDate: this.exportForm.startDate,
+        endDate: this.exportForm.endDate,
+        rechargeUser: this.exportForm.rechargeUser,
       }).toString();
 
       try {
@@ -435,10 +498,11 @@ export default {
         const url = window.URL.createObjectURL(blob);
         const link = document.createElement("a");
         link.href = url;
-        link.download = `收费日报表_${this.params.record_time}_${this.params.rechargeUser}.pdf`;
+        link.download = `收费日报表_${this.exportForm.startDate}_至_${this.exportForm.endDate}_${this.exportForm.rechargeUser}.pdf`;
         link.click();
         window.URL.revokeObjectURL(url);
         ElMessage.success("导出成功");
+        this.exportDialogVisible = false;
       } catch (error) {
         console.error(error);
         ElMessage.error("导出失败");
@@ -474,6 +538,159 @@ export default {
 
 :deep(.el-pagination) {
   --el-color-primary: #46b97e;
+}
+
+.command-box {
+  display: flex;
+  align-items: center;
+  width: 99.3%;
+  height: auto;
+  margin-bottom: 10px;
+  margin-top: -10px;
+}
+
+.export-out-btn {
+  display: flex;
+  align-items: center;
+  width: auto;
+  height: 44px;
+  color: white;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.3s;
+  font-size: 20px;
+  background-color: #fff;
+  border: 2px solid #f2f2f2;
+  padding: 0 8px;
+}
+
+.export-dialog-overlay {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 200;
+  background-color: rgb(31 33 38 / 40%);
+}
+
+.export-dialog {
+  width: 720px;
+  background-color: #fafafa;
+  border-radius: 10px;
+  position: absolute;
+  left: 50%;
+  top: 40%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.export-dialog-title {
+  width: 100%;
+  height: 55px;
+  line-height: 55px;
+  background-color: #fff;
+  border-radius: 10px 10px 0 0;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+  text-align: center;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 20px;
+  font-size: 24px;
+  font-weight: bold;
+  color: #333;
+}
+
+.export-dialog-close {
+  width: 28px;
+  height: 28px;
+  cursor: pointer;
+  opacity: 0.5;
+  transition: opacity 0.2s;
+}
+
+.export-dialog-close:hover {
+  opacity: 0.8;
+}
+
+.export-dialog-body {
+  width: 90%;
+  background-color: #fff;
+  border-radius: 6px;
+  margin-top: 24px;
+  padding: 28px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.export-dialog-row {
+  display: flex;
+  gap: 36px;
+}
+
+.export-dialog-item {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.export-dialog-item > span {
+  font-size: 22px;
+  margin-bottom: 8px;
+  color: #333;
+}
+
+.export-dialog-item .el-select,
+.export-dialog-item .el-date-picker {
+  width: 100%;
+}
+
+.export-dialog-footer {
+  width: 100%;
+  height: 70px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 40px;
+  margin-top: 18px;
+  margin-bottom: 14px;
+}
+
+.export-dialog-btn-cancel,
+.export-dialog-btn-confirm {
+  height: 44px;
+  width: 140px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  transition: all 0.2s;
+}
+
+.export-dialog-btn-cancel {
+  background-color: #fff;
+  color: #666;
+  border: 1px solid #e0e0e0;
+}
+
+.export-dialog-btn-cancel:hover {
+  background-color: #f5f5f5;
+}
+
+.export-dialog-btn-confirm {
+  background-color: #45ba7e;
+  color: #fff;
+}
+
+.export-dialog-btn-confirm:hover {
+  background-color: #3aa06b;
 }
 
 .baobiao-container {
