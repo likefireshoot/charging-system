@@ -24,6 +24,10 @@
             <el-option v-for="item in staffNameOptions" :key="item" :label="item" :value="item"></el-option>
           </el-select>
         </div>
+        <div class="search-input" style="margin-left: 20px; justify-content: flex-end">
+          <span>&nbsp;</span>
+          <a href="javascript:;" style="font-size: 20px; color: #46b97e; text-decoration: none; line-height: 35px; font-weight: bold;" @click="exportDailyCashierReport">收费员日汇总导出</a>
+        </div>
       </div>
       <div class="buttons">
         <div class="sercah-btn" @click="getTradeData">
@@ -103,8 +107,7 @@
         <div class="week-report-title">
           <span style="font-size: 22px; margin-top: 10px; margin-bottom: 5px">收费日报表统计（{{ params.record_time }}）
               <a href="javascript:;" style="font-size: 22px; margin-left: 0px;color: #46b97e;" @click="exportChartExcel(weekchart,'收费日报表统计')">(导出)</a>
-
-          </span>
+              </span>
           <div class="flex-container">
             <div style="width: 4px; height: 4px; background-color: #46b87d; margin-right: 5px"></div>
             <div style="width: 4px; height: 4px; background-color: #90d5b2; margin-right: 5px"></div>
@@ -407,6 +410,39 @@ export default {
           .catch((error) => {
             ElMessage.error("请选择查询的日期");
           });
+    },
+    async exportDailyCashierReport() {
+      if (!this.params.record_time) {
+        ElMessage.error("请选择收费日期");
+        return;
+      }
+      if (!this.params.rechargeUser) {
+        ElMessage.error("请选择收费人");
+        return;
+      }
+
+      const query = new URLSearchParams({
+        record_time: this.params.record_time || "",
+        region: this.params.region || "",
+        rechargeUser: this.params.rechargeUser || "",
+      }).toString();
+
+      try {
+        const response = await service.get(`/dailyCashierReport?${query}`, {
+          responseType: "blob",
+        });
+        const blob = response.data;
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `收费日报表_${this.params.record_time}_${this.params.rechargeUser}.pdf`;
+        link.click();
+        window.URL.revokeObjectURL(url);
+        ElMessage.success("导出成功");
+      } catch (error) {
+        console.error(error);
+        ElMessage.error("导出失败");
+      }
     },
     clear() {
       this.params.region = "";
