@@ -24,7 +24,7 @@
     </div>
     <div class="yuangong-info">
       <div class="command-box">
-        <div class="add-btn" @click="add_dialogFormVisible = true" v-if="staffPermissionIds.includes(36)">
+        <div class="add-btn" @click="openAddDialog" v-if="staffPermissionIds.includes(36)">
           <img src="@/assets/yuangong/icon6.png" alt="" />
           <span style="margin-left: 6px; color: #5a5a5a">新增</span>
         </div>
@@ -76,13 +76,28 @@
           <el-table-column label="角色名称" :width="roleNameWidth" align="center" #default="scope">
             <span class="table-bold-text">{{ scope.row.roleName }}</span>
           </el-table-column>
-          <el-table-column label="权限内容" :width="permissionsWidth" align="center" #default="scope">
-            <div class="table-permission-list">
-              <span
-                v-for="(item, index) in scope.row.permissionContentArray"
-                :key="index"
-                class="table-permission-tag"
-              >{{ item }}</span>
+          <el-table-column label="权限内容" :width="permissionsWidth" align="left" #default="scope">
+            <div class="table-permission-tree-wrap">
+              <template v-for="pNode in scope.row.permissionTree ?? []" :key="pNode.permissionId">
+                <div class="tree-row tree-parent">
+                  <div class="table-tree-row tree-parent">
+                    <span class="collapse-btn table-collapse-btn"
+                      @click="toggleRowTree(scope.row, pNode.permissionId)"
+                      :class="{isCollapsed: scope.row._treeCollapse?.[pNode.permissionId]}">
+                      <i class="arrow-icon"></i>
+                    </span>
+                    <span class="tree-text">{{ pNode.permissionName }}</span>
+                  </div>
+                </div>
+                <!-- 子权限横向布局 flex-wrap -->
+                <div v-show="Array.isArray(pNode.children) && pNode.children.length && !scope.row._treeCollapse?.[pNode.permissionId]" class="tree-children-wrap">
+                  <div class="tree-child-items">
+          <span v-for="cNode in pNode.children" :key="cNode.permissionId" class="tree-child-item">
+            {{ cNode.permissionName }}
+          </span>
+                  </div>
+                </div>
+              </template>
             </div>
           </el-table-column>
         </el-table>
@@ -550,6 +565,11 @@ export default {
         this.permissionsWidth = (this.columnPercentages.permissions / 100) * parentWidth;
       }
     },
+    openAddDialog() {
+      this.add_dialogFormVisible = true;
+      // 打开新增弹窗，权限分组全部展开
+      this.collapseMap = {};
+    },
     delete_click() {
       if (this.multipleSelection.length > 0) {
         this.delete_dialogFormVisible = true;
@@ -693,7 +713,7 @@ export default {
             const list = Array.isArray(res.data?.list) ? res.data.list : [];
             this.roleData = list.map((role, idx) => {
               try {
-                const permissionIds = role.permissions?.map((p) => p.permissionId) || [];
+                const permissionIds = this.getAllPermissionId(role.permissionTree);
 
                 return {
                   ...role,
@@ -724,6 +744,25 @@ export default {
           this.isLoading = false
       });
     },
+    toggleRowTree(row, pid) {
+      console.log('点击展开')
+      if (!row._treeCollapse) {
+        row._treeCollapse = {}
+      }
+      row._treeCollapse[pid] = !row._treeCollapse[pid]
+    },
+    //递归遍历树，收集全部permissionId
+    getAllPermissionId(treeArr){
+      let ids = []
+      if(!Array.isArray(treeArr)) return ids
+      treeArr.forEach(item=>{
+        ids.push(item.permissionId)
+        if(item.children && item.children.length>0){
+          ids = ids.concat(this.getAllPermissionId(item.children))
+        }
+      })
+      return ids
+    },
     search() {
       this.getRoleData();
     },
@@ -747,18 +786,26 @@ export default {
           if (res.code === 200) {
             // 从返回结果里取 list，没拿到就兜底空数组
             const list = Array.isArray(res.data?.list) ? res.data.list : [];
-            this.roleData = list.map((role) => {
-              return {
-                ...role,
-                permissionContentArray: (()=>{
-                  const base = [...this.basePermissions];
-                  const allPerm = role.permissions?.map((p) => p.permissionName) || [];
-                  const normal = allPerm.filter(name => !name.startsWith('小程序'));
-                  const mini = allPerm.filter(name => name.startsWith('小程序'));
-                  return [...base, ...normal, ...mini];
-                })(),
-                permissionIds: role.permissions?.map((p) => p.permissionId) || [],
-              };
+            this.roleData = list.map((role, idx) => {
+              try {
+                const permissionIds = this.getAllPermissionId(role.permissionTree);
+
+                return {
+                  ...role,
+                  permissionContentArray: (()=>{
+                    const base = [...this.basePermissions];
+                    const allPerm = role.permissions?.map((p) => p.permissionName) || [];
+                    // 区分小程序开头 和 其他权限
+                    const normal = allPerm.filter(name => !name.startsWith('小程序'));
+                    const mini = allPerm.filter(name => name.startsWith('小程序'));
+                    return [...base, ...normal, ...mini];
+                  })(),
+                  permissionIds,
+                };
+              } catch (e) {
+                console.error("第", idx, "条数据出错:", role, e);
+                throw e; // 继续往外抛，让外层 catch 触发
+              }
             });
             this.total = res.data.total;
             this.params.pageNo = 1;
@@ -1632,6 +1679,74 @@ export default {
 /* 展开状态：箭头向下 */
 .collapse-btn:not(.isCollapsed) .arrow-icon{
   transform: rotate(45deg);
+}
+.table-permission-tree-wrap {
+  line-height: 28px;
+  padding:4px 0;
+}
+.tree-row {
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
+.tree-parent {
+  font-weight:500;
+}
+.tree-arrow {
+  width:20px;
+  cursor:pointer;
+  user-select:none;
+  flex-shrink:0;
+}
+.tree-arrow-empty {
+  width:20px;
+  flex-shrink:0;
+}
+.tree-children-wrap {
+  padding-left:22px;
+  margin:4px 0 8px;
+}
+.tree-child-items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+}
+.tree-child-item {
+  font-size:18px;
+  color:#444;
+  white-space: nowrap;
+  background:#f3f9f6;
+  padding:2px 8px;
+  border-radius:6px;
+  border: 2px solid #9fdfa2;
+}
+.tree-text {
+  font-size:20px;
+}
+.table-tree-row {
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
+.table-collapse-btn {
+  width:22px;
+  height:22px;
+  flex-shrink: 0;
+}
+.table-collapse-btn .arrow-icon {
+  width:7px;
+  height:7px;
+}
+:deep(.el-table th.is-leaf .cell) {
+  /* 找到权限内容那一列的表头，通过列顺序，你的表格顺序：
+  0 selection
+  1 序号
+  2 角色编号
+  3 角色名称
+  4 权限内容 */
+}
+:deep(.el-table th:nth-child(5) .cell) {
+  text-align: center !important;
 }
 </style>
 
