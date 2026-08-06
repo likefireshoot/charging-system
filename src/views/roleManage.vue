@@ -118,16 +118,35 @@
                 <span class="large-font">全选</span>
               </el-checkbox>
             </div>
-            <div class="permission-grid">
-              <el-checkbox
-                v-for="item in permissionList"
-                :key="item.id"
-                :label="item.id"
-                v-model="addData.permissionList"
-                class="permission-checkbox"
-              >
-                <span class="large-font">{{ item.label }}</span>
-              </el-checkbox>
+            <div class="permission-group-wrap">
+              <div v-for="parentItem in permissionList" :key="parentItem.id" class="permission-group-item">
+                <div class="group-title">
+                  <el-checkbox
+                      v-model="addData.permissionList"
+                      :label="parentItem.id"
+                      class="permission-checkbox"
+                      @change="onParentCheckChange(parentItem, 'add')"
+                  >
+                    <span class="large-font">{{ parentItem.label }}</span>
+                  </el-checkbox>
+                  <span class="collapse-btn" @click="toggleCollapse(parentItem.id)" :class="{isCollapsed:collapseMap[parentItem.id]}">
+                    <i class="arrow-icon"></i>
+                  </span>
+                </div>
+                <div class="group-child-row" v-if="!collapseMap[parentItem.id]">
+                  <el-checkbox-group v-model="addData.permissionList">
+                    <el-checkbox
+                        v-for="child in parentItem.children"
+                        :key="child.id"
+                        :label="child.id"
+                        class="permission-checkbox"
+                        @change="onChildCheckChange(parentItem, 'add')"
+                    >
+                      <span class="large-font">{{ child.label }}</span>
+                    </el-checkbox>
+                  </el-checkbox-group>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -235,16 +254,35 @@
                 <span class="large-font">全选</span>
               </el-checkbox>
             </div>
-            <div class="permission-grid">
-              <el-checkbox
-                v-for="item in permissionList"
-                :key="item.id"
-                :label="item.id"
-                v-model="editData.permissionList"
-                class="permission-checkbox"
-              >
-                <span class="large-font">{{ item.label }}</span>
-              </el-checkbox>
+            <div class="permission-group-wrap">
+              <div v-for="parentItem in permissionList" :key="parentItem.id" class="permission-group-item">
+                <div class="group-title">
+                  <el-checkbox
+                      v-model="editData.permissionList"
+                      :label="parentItem.id"
+                      class="permission-checkbox"
+                      @change="onParentCheckChange(parentItem, 'edit')"
+                  >
+                    <span class="large-font">{{ parentItem.label }}</span>
+                  </el-checkbox>
+                  <span class="collapse-btn" @click="toggleCollapse(parentItem.id)" :class="{isCollapsed:collapseMap[parentItem.id]}">
+                    <i class="arrow-icon"></i>
+                  </span>
+                </div>
+                <div class="group-child-row" v-if="!collapseMap[parentItem.id]">
+                  <el-checkbox-group v-model="editData.permissionList">
+                    <el-checkbox
+                        v-for="child in parentItem.children"
+                        :key="child.id"
+                        :label="child.id"
+                        class="permission-checkbox"
+                        @change="onChildCheckChange(parentItem, 'edit')"
+                    >
+                      <span class="large-font">{{ child.label }}</span>
+                    </el-checkbox>
+                  </el-checkbox-group>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -340,7 +378,7 @@ export default {
       editCheckAll: false,
       editIndeterminate: false,
       permissionList: [],
-      basePermissions: ["首页", "用户管理", "报表统计", "通知管理"],
+      basePermissions: ["首页"],
 
       total: null,
 
@@ -370,6 +408,9 @@ export default {
         username: null,
       },
 
+      // 权限分组收拢状态，key为父权限id，true=收拢，false=展开，默认全部展开false
+      collapseMap: {},
+
       // ****** 锁
       isLoading: false
     };
@@ -382,10 +423,11 @@ export default {
     // },
     "addData.permissionList": {
       handler(val) {
+        const totalAll = this.getAllPermissionIds(this.permissionList).length;
         if (val.length === 0) {
           this.checkAll = false;
           this.indeterminate = false;
-        } else if (val.length === this.permissionList.length) {
+        } else if (val.length === totalAll) {
           this.checkAll = true;
           this.indeterminate = false;
         } else {
@@ -395,10 +437,11 @@ export default {
     },
     "editData.permissionList": {
       handler(val) {
+        const totalAll = this.getAllPermissionIds(this.permissionList).length;
         if (val.length === 0) {
           this.editCheckAll = false;
           this.editIndeterminate = false;
-        } else if (val.length === this.permissionList.length) {
+        } else if (val.length === totalAll) {
           this.editCheckAll = true;
           this.editIndeterminate = false;
         } else {
@@ -409,16 +452,28 @@ export default {
   },
   computed: {
     selectedPermissionLabels() {
-      return this.addData.permissionList.map((id) => {
-        const perm = this.permissionList.find((p) => p.id === id);
-        return perm ? perm.label : "";
-      }).filter(Boolean);
+      const findLabel = (id, tree) => {
+        for(let p of tree) {
+          if(p.id === id) return p.label;
+          for(let c of p.children) {
+            if(c.id === id) return c.label;
+          }
+        }
+        return ''
+      }
+      return this.addData.permissionList.map(id=>findLabel(id,this.permissionList)).filter(Boolean)
     },
     selectedEditPermissionLabels() {
-      return this.editData.permissionList.map((id) => {
-        const perm = this.permissionList.find((p) => p.id === id);
-        return perm ? perm.label : "";
-      }).filter(Boolean);
+      const findLabel = (id, tree) => {
+        for(let p of tree) {
+          if(p.id === id) return p.label;
+          for(let c of p.children) {
+            if(c.id === id) return c.label;
+          }
+        }
+        return ''
+      }
+      return this.editData.permissionList.map(id=>findLabel(id,this.permissionList)).filter(Boolean)
     },
     // 每列的百分比宽度
     columnPercentages() {
@@ -471,7 +526,7 @@ export default {
     handleCheckAll(val) {
       this.indeterminate = false;
       if (val) {
-        this.addData.permissionList = this.permissionList.map((_) => _.id);
+        this.addData.permissionList = this.getAllPermissionIds(this.permissionList);
       } else {
         this.addData.permissionList = [];
       }
@@ -479,7 +534,7 @@ export default {
     handleEditCheckAll(val) {
       this.editIndeterminate = false;
       if (val) {
-        this.editData.permissionList = this.permissionList.map((_) => _.id);
+        this.editData.permissionList = this.getAllPermissionIds(this.permissionList);
       } else {
         this.editData.permissionList = [];
       }
@@ -509,6 +564,8 @@ export default {
         this.editData.roleId = this.multipleSelection[0].roleId;
         this.editData.roleName = this.multipleSelection[0].roleName;
         this.editData.permissionList = this.multipleSelection[0].permissionIds;
+        // 重置收拢，全部展开
+        this.collapseMap = {};
         console.log(this.editData);
       } else {
         ElMessage.warning("请选择需要编辑的角色数据");
@@ -535,28 +592,95 @@ export default {
     },
     getRoleList() {
       service
-        .get("/role/permissions")
-        .then((res) => {
-          if (res.code === 200) {
-            // this.permissionList = res.data.map((item) => ({
-            //   id: item.permissionId,
-            //   label: item.permissionName,
-            // }));
-            let list = res.data.map((item) => ({
-              id: item.permissionId,
-              label: item.permissionName,
-            }));
-            if (this.companyId !== 1){
-              list = list.filter(item => {
-                return item.label !== '员工中心-水厂管理' && item.label !== '员工中心-新增水厂'
-              })
+          .get("/role/permission/tree")
+          .then((res) => {
+            if (res.code === 200) {
+              const tree = res.data;
+              const currentCompanyId = this.companyId;
+              const transformTree = (arr) => {
+                const result = arr.map(parentNode => {
+                  let childList = Array.isArray(parentNode.children) ? [...parentNode.children] : [];
+                  if (currentCompanyId !== 1) {
+                    childList = childList.filter(child => {
+                      return child.permissionId !== 30 && child.permissionId !== 40;
+                    });
+                  }
+                  return {
+                    id: parentNode.permissionId,
+                    label: parentNode.permissionName,
+                    children: childList.map(child => ({
+                      id: child.permissionId,
+                      label: child.permissionName
+                    }))
+                  };
+                });
+
+                // 将【小程序】分组挪到数组末尾
+                const miniIndex = result.findIndex(item => item.label === '小程序');
+                if (miniIndex > -1) {
+                  const miniItem = result.splice(miniIndex, 1)[0];
+                  result.push(miniItem);
+                }
+                return result;
+              };
+              this.permissionList = transformTree(tree);
             }
-            this.permissionList = list;
-          }
+          })
+          .catch((err) => {
+            ElMessage.error(err);
+          });
+    },
+    // 切换分组收拢状态，只改UI，不修改勾选数据
+    toggleCollapse(parentId) {
+      this.collapseMap[parentId] = !this.collapseMap[parentId];
+    },
+// 获取【父+子】完整权限id集合，用于全选
+    getAllPermissionIds(treeArr) {
+      const ids = [];
+      treeArr.forEach(parent => {
+        ids.push(parent.id);
+        if(Array.isArray(parent.children)) {
+          parent.children.forEach(child => {
+            ids.push(child.id)
+          })
+        }
+      })
+      return ids;
+    },
+    // 点击父级复选框
+    onParentCheckChange(parentItem, mode) {
+      const list = mode === 'add' ? this.addData.permissionList : this.editData.permissionList;
+      const isParentChecked = list.includes(parentItem.id);
+      if(isParentChecked) {
+        // // 勾选父：把子全部加入
+        // parentItem.children.forEach(child=>{
+        //   if(!list.includes(child.id)) list.push(child.id)
+        // })
+      } else {
+        // 取消父：把子全部移除
+        parentItem.children.forEach(child=>{
+          const idx = list.indexOf(child.id);
+          if(idx > -1) list.splice(idx,1)
         })
-        .catch((err) => {
-          ElMessage.error(err);
-        });
+      }
+    },
+// 点击子复选框
+    onChildCheckChange(parentItem, mode) {
+      const list = mode === 'add' ? this.addData.permissionList : this.editData.permissionList;
+      const childIds = parentItem.children.map(c=>c.id);
+      // 当前已经勾选的子集合
+      const checkedChild = childIds.filter(cid=>list.includes(cid));
+      if(checkedChild.length > 0) {
+        // 子有勾选，父必须勾选
+        if(!list.includes(parentItem.id)) {
+          list.push(parentItem.id)
+        }
+      }
+      // else {
+      //   // 子全部取消，父取消
+      //   const pIndex = list.indexOf(parentItem.id);
+      //   if(pIndex > -1) list.splice(pIndex,1)
+      // }
     },
     getRoleData() {
       if(this.isLoading) return
@@ -573,10 +697,14 @@ export default {
 
                 return {
                   ...role,
-                  permissionContentArray: [
-                    ...this.basePermissions,
-                    ...(role.permissions?.map((p) => p.permissionName) || []),
-                  ],
+                  permissionContentArray: (()=>{
+                    const base = [...this.basePermissions];
+                    const allPerm = role.permissions?.map((p) => p.permissionName) || [];
+                    // 区分小程序开头 和 其他权限
+                    const normal = allPerm.filter(name => !name.startsWith('小程序'));
+                    const mini = allPerm.filter(name => name.startsWith('小程序'));
+                    return [...base, ...normal, ...mini];
+                  })(),
                   permissionIds,
                 };
               } catch (e) {
@@ -622,10 +750,13 @@ export default {
             this.roleData = list.map((role) => {
               return {
                 ...role,
-                permissionContentArray: [
-                  ...this.basePermissions,
-                  ...(role.permissions?.map((p) => p.permissionName) || []),
-                ],
+                permissionContentArray: (()=>{
+                  const base = [...this.basePermissions];
+                  const allPerm = role.permissions?.map((p) => p.permissionName) || [];
+                  const normal = allPerm.filter(name => !name.startsWith('小程序'));
+                  const mini = allPerm.filter(name => name.startsWith('小程序'));
+                  return [...base, ...normal, ...mini];
+                })(),
                 permissionIds: role.permissions?.map((p) => p.permissionId) || [],
               };
             });
@@ -680,6 +811,8 @@ export default {
         roleName: null,
         permissionList: [],
       };
+      // 重置收拢，全部展开
+      this.collapseMap = {};
     },
     editConfirm() {
       const validations = [
@@ -1076,7 +1209,7 @@ export default {
 /* 针对不同对话框设置具体的尺寸 */
 .add-role-dialog-content {
   width: 65%;
-  height: 80vh;
+  height: 98%;
   min-height: 500px;
 }
 
@@ -1087,7 +1220,7 @@ export default {
 
 .edit-dialog-content-1 {
   width: 65%;
-  height: 80vh;
+  height: 98%;
   min-height: 500px;
 }
 
@@ -1116,7 +1249,7 @@ export default {
 
 .add-role-content {
   width: 94%;
-  height: calc(80vh - 140px);
+  height: calc(100% - 180px);
   background-color: #fff;
   border-radius: 5px;
   margin-top: 15px;
@@ -1184,7 +1317,7 @@ export default {
 }
 
 .permission-checkbox {
-  margin-right: 0;
+  margin-right: 20px;
 }
 
 /* 大字体 */
@@ -1433,6 +1566,72 @@ export default {
   opacity: 0.5;
   cursor: not-allowed !important;
   pointer-events: none;
+}
+
+.permission-group-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  overflow-y: auto;
+  padding:8px 0;
+}
+.permission-group-item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.group-title {
+  font-size:20px;
+  font-weight:bold;
+  color:#333;
+}
+.group-child-row {
+  display:flex;
+  flex-wrap:wrap;
+  gap:22px 38px;
+  padding-left: 30px;
+}
+.group-title {
+  font-size:20px;
+  font-weight:bold;
+  color:#333;
+  display: flex;
+  align-items: center;
+  gap:12px;
+}
+.collapse-btn {
+  width:28px;
+  height:28px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor: pointer;
+  user-select: none;
+  border-radius:4px;
+  background-color:#f0f8f3;
+  transition: all 0.24s ease;
+}
+.collapse-btn:hover {
+  background-color:#45ba7e;
+}
+.collapse-btn:hover .arrow-icon {
+  border-color:#ffffff;
+}
+.arrow-icon {
+  width: 8px;
+  height: 8px;
+  border-right: 2px solid #45ba7e;
+  border-bottom: 2px solid #45ba7e;
+  transform: rotate(45deg);
+  transition: transform 0.24s ease;
+}
+/* 收拢状态：箭头向右 */
+.collapse-btn.isCollapsed .arrow-icon{
+  transform: rotate(-135deg);
+}
+/* 展开状态：箭头向下 */
+.collapse-btn:not(.isCollapsed) .arrow-icon{
+  transform: rotate(45deg);
 }
 </style>
 
