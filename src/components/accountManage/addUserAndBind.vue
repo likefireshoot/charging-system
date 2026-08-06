@@ -54,6 +54,19 @@
             <el-input v-model="form.meterCode" class="input-item" @blur="handleMeterCodeBlur" />
           </div>
           <div class="edit-input">
+            <span>是否为普通水表</span>
+            <el-select v-model="form.isNormalMeter" class="input-item big-font-el-select" placeholder="请选择">
+              <el-option label="是" :value="true" />
+              <el-option label="否" :value="false" />
+            </el-select>
+          </div>
+          <div class="edit-input">
+            <span>开户审批人</span>
+            <el-select v-model="form.approver_1" class="input-item big-font-el-select" placeholder="请选择">
+              <el-option v-for="item in approverList" :key="item.id" :label="item.label" :value="item.label" />
+            </el-select>
+          </div>
+          <div class="edit-input">
             <span>价格类型</span>
             <el-select v-model="form.priceId" class="input-item big-font-el-select" placeholder="请选择价格类型">
               <el-option v-for="item in priceList" :key="item.id" :label="item.label" :value="item.id" />
@@ -66,18 +79,12 @@
             </el-select>
           </div>
           <div class="edit-input">
-            <span>开户审批人</span>
-            <el-select v-model="form.approver_1" class="input-item big-font-el-select" placeholder="请选择">
-              <el-option v-for="item in approverList" :key="item.id" :label="item.label" :value="item.label" />
+            <span>结算关阀类型</span>
+            <el-select v-model="form.enableArrearsValve" class="input-item big-font-el-select"  placeholder="请选择结算关阀类型">
+              <el-option label="默认(自动关阀,随区域设置变化)" value="default" />
+              <el-option label="预付费(自动关阀,不随区域设置变化)" :value="0" />
+              <el-option label="后付费(手动关阀,不随区域设置变化)" :value="1" />
             </el-select>
-          </div>
-          <div class="edit-input">
-            <span>出厂日期（选填，不填默认为当前日期）</span>
-            <el-date-picker v-model="form.factoryDate" type="date" placeholder="不填默认为当前日期" style="flex-grow: 1; width: 100%; max-height: 35px" format="YYYY-MM-DD" value-format="YYYY-MM-DD" />
-          </div>
-          <div class="edit-input">
-            <span>首检日期（选填，不填默认为当前日期）</span>
-            <el-date-picker v-model="form.firstInspectDate" type="date" placeholder="不填默认为当前日期" style="flex-grow: 1; width: 100%; max-height: 35px" format="YYYY-MM-DD" value-format="YYYY-MM-DD" />
           </div>
           <div class="edit-input has-checkbox">
             <span style="margin-bottom: 10px;">水表读数（吨）</span>
@@ -100,12 +107,12 @@
             </el-checkbox>
           </div>
           <div class="edit-input">
-            <span>结算关阀类型</span>
-            <el-select v-model="form.enableArrearsValve" class="input-item big-font-el-select"  placeholder="请选择结算关阀类型">
-              <el-option label="默认(自动关阀,随区域设置变化)" value="default" />
-              <el-option label="预付费(自动关阀,不随区域设置变化)" :value="0" />
-              <el-option label="后付费(手动关阀,不随区域设置变化)" :value="1" />
-            </el-select>
+            <span>出厂日期（选填，不填默认为当前日期）</span>
+            <el-date-picker v-model="form.factoryDate" type="date" placeholder="不填默认为当前日期" style="flex-grow: 1; width: 100%; max-height: 35px" format="YYYY-MM-DD" value-format="YYYY-MM-DD" />
+          </div>
+          <div class="edit-input">
+            <span>首检日期（选填，不填默认为当前日期）</span>
+            <el-date-picker v-model="form.firstInspectDate" type="date" placeholder="不填默认为当前日期" style="flex-grow: 1; width: 100%; max-height: 35px" format="YYYY-MM-DD" value-format="YYYY-MM-DD" />
           </div>
         </div>
       </div>
@@ -210,7 +217,8 @@ export default {
         firstInspectDate: null,
         reading: null,
         meterId: null,
-        enableArrearsValve:  "default"
+        enableArrearsValve:  "default",
+        isNormalMeter: false
       },
       companyList: [],
       regionList: [],
@@ -510,7 +518,8 @@ export default {
           factoryDate: this.form.factoryDate || new Date().toISOString().split("T")[0],
           firstInspectDate: this.form.firstInspectDate || new Date().toISOString().split("T")[0],
           enableArrearsValve: this.form.enableArrearsValve === "default" ? null : this.form.enableArrearsValve,
-          newMeterReading: this.meterNotFound ? this.form.reading : undefined
+          newMeterReading: this.meterNotFound ? this.form.reading : undefined,
+          ...(this.form.isNormalMeter === true ? { meterType: "普通水表" } : {})
         },
       };
 

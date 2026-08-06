@@ -19,6 +19,10 @@
           <span>水表吨位数</span>
           <el-input v-model.number="addData.tonnage" type="number" class="input-item" placeholder="默认为 0" />
         </div>
+        <div class="edit-input edit-input-checkbox">
+          <span>是否为普通水表</span>
+          <el-checkbox v-model="isNormalMeter" @change="onNormalMeterChange" class="normal-meter-checkbox" />
+        </div>
         <div v-if="addData.meterVendor" class="auto-info">
           <span>自动识别：</span>
           <span class="auto-tag">{{ addData.meterVendor }}</span>
@@ -55,6 +59,7 @@ export default {
   },
   data() {
     return {
+      isNormalMeter: false,
       addData: {
         meterCode: "",
         imei: "",
@@ -70,13 +75,31 @@ export default {
   },
   methods: {
     handleAddClose() {
+      this.isNormalMeter = false;
       this.$emit("close");
+    },
+
+    onNormalMeterChange() {
+      if (this.addData.meterCode) {
+        this.onMeterCodeChange();
+      }
     },
 
     onMeterCodeChange() {
       const code = this.addData.meterCode.trim();
       if (!code) {
         this.resetAutoFields();
+        return;
+      }
+
+      if (this.isNormalMeter) {
+        this.addData.imei = code + "_普通水表";
+        this.addData.meterVendor = "";
+        this.addData.masterKey = "无";
+        this.addData.productId = "无";
+        this.addData.deviceId = "无";
+        this.addData.meterType = "普通水表";
+        this.addData.companyId = 1;
         return;
       }
 
@@ -127,6 +150,7 @@ export default {
       this.addData.meterType = "";
       this.addData.masterKey = null;
       this.addData.companyId = null;
+      this.isNormalMeter = false;
     },
 
     handleCommit() {
@@ -143,7 +167,7 @@ export default {
         return;
       }
 
-      if (!formData.meterVendor) {
+      if (!this.isNormalMeter && !formData.meterVendor) {
         ElMessage.error("表号格式不正确，请重新确认");
         return;
       }
@@ -185,7 +209,7 @@ export default {
 };
 </script>
 
-<style>
+<style scoped>
 .add-dialog {
   position: fixed;
   top: 0;
@@ -193,60 +217,59 @@ export default {
   left: 0;
   right: 0;
   z-index: 199;
-  background-color: rgb(31 33 38 / 15%);
+  background-color: rgba(31, 33, 38, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .account-dialog-content {
-  width: 70%;
-  min-height: 200px;
+  width: min(95%, 1200px);
   border: 1px solid #fafafa;
   background-color: #fafafa;
-  border-radius: 5px;
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translateX(-50%);
-  margin-top: -150px;
+  border-radius: 8px;
   display: flex;
   flex-direction: column;
   align-items: center;
+  box-sizing: border-box;
+  overflow-x: hidden;
 }
 
 .account-add-content {
-  min-height: 75px;
-  width: 94%;
+  width: 100%;
   background-color: #fff;
   border-radius: 5px;
-  margin-top: 15px;
-  margin-bottom: 5px;
+  margin-top: 10px;
+  margin-bottom: 10px;
   display: flex;
   justify-content: flex-start;
   flex-wrap: wrap;
-  padding: 5px;
-  overflow-y: auto;
+  gap: 10px;
+  padding: 15px 10px;
+  box-sizing: border-box;
+  overflow-x: hidden;
+  max-width: 100%;
 }
 
 .edit-input {
   display: flex;
-  justify-content: center; /* 确保子元素在父容器中垂直居中 */
+  justify-content: center;
   flex-direction: column;
-  width: 32.3%;
-  height: 73px;
+  flex: 1;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 .edit-input > span {
-  font-size: 20px;
+  font-size: 22px;
   color: #747374;
-  margin-bottom: 5px;
-}
-
-.edit-input > .el-input {
-  height: 35px;
+  margin-bottom: 8px;
+  white-space: nowrap;
   width: 100%;
 }
 
 .input-item {
-  height: 35px;
+  height: 42px;
   width: 100%;
 }
 
@@ -255,8 +278,8 @@ export default {
   background-color: #fff;
   border-radius: 5px 5px 0 0;
   box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
-  height: 45px;
-  line-height: 45px;
+  height: 55px;
+  line-height: 55px;
   text-align: center;
   display: flex;
   justify-content: space-between;
@@ -264,23 +287,15 @@ export default {
 
 .btn {
   width: 100%;
-  height: 40px;
+  height: 50px;
   display: flex;
   justify-content: flex-end;
   align-items: center;
-  margin-top: 15px;
-  margin-bottom: 15px;
-}
-
-.confirm-btn,
-.cancel-btn {
-  height: 35px;
-  width: 90px;
-  cursor: pointer;
-  border: 1px solid #f2f2f2;
+  margin-top: 20px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 10px;
   border-radius: 5px;
-  display: flex;
-  align-items: center;
 }
 
 .confirm-btn {
@@ -307,5 +322,26 @@ export default {
   color: #45ba7e;
   font-weight: bold;
   margin-left: 8px;
+}
+
+.edit-input-checkbox {
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+}
+
+.edit-input-checkbox > span {
+  width: auto;
+  margin-bottom: 0;
+}
+
+.normal-meter-checkbox {
+  transform: scale(1.4);
+  transform-origin: left center;
+}
+
+.edit-input-full {
+  flex: 0 0 100%;
+  max-width: 100%;
 }
 </style>
