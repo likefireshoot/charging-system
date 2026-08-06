@@ -89,7 +89,8 @@
           <img src="@/assets/yonghu/icon7.png" alt="" />
           <span>不欠费可关阀列表</span>
         </div>
-        <div class="command-btn" :class="{ 'btn-single-only-disabled': multipleSelection.length !== 1 || hasPauseUserSelected }" @click="(multipleSelection.length === 1 && !hasPauseUserSelected) && handleCommand()">
+        <div class="command-btn" :class="{ 'btn-single-only-disabled': multipleSelection.length !== 1 || hasPauseUserSelected }" @click="(multipleSelection.length === 1 && !hasPauseUserSelected) && handleCommand()"
+          v-if="staffPermissionIds.includes(89)">
           <img src="@/assets/yonghu/icon5.png" alt="" />
           <span>命令下发</span>
         </div>
@@ -123,9 +124,10 @@
           <img src="@/assets/yonghu/icon9.png" alt="" />
           <span>换表记录</span>
         </div>
-        <div class="export-in-btn" @click="multi_edit_meter_price">
+        <div class="export-in-btn" @click="multi_edit_meter_price"
+          v-if="staffPermissionIds.includes(90)">
           <img src="@/assets/jiage/icon3.png" alt="" />
-          <span>批量修改水价类型</span>
+          <span>修改水价</span>
         </div>
         <!-- <div class="export-out-btn" @click="common_meter_template_click">
           <img src="@/assets/yonghu/icon1.png" alt="" />
@@ -760,7 +762,7 @@ export default {
       // ****** 功能按钮配置 ******
       featureButtonConfigs: [
         { key: 'delete', label: '删除', permission: 6 },
-        { key: 'command', label: '命令下发', permission: null },
+        { key: 'command', label: '命令下发', permission: 89 },
         { key: 'valveOpen', label: '区域开阀设置', permission: 7 },
         { key: 'valveClose', label: '区域关阀设置', permission: 8 },
         { key: 'balance', label: '余额调整', permission: 9 },
@@ -774,7 +776,7 @@ export default {
         // 新增销户记录
         { key: 'closeRecord', label: '销户列表', permission: 66 },
         { key: 'export', label: '导出', permission: null },
-        { key: 'batchPrice', label: '批量修改水价类型', permission: null, defaultVisible: false },
+        { key: 'batchPrice', label: '修改水价', permission: 90, defaultVisible: false },
         { key: 'commonMeterTemplate', label: '普表用水量模板下载', permission: null, defaultVisible: false },
         { key: 'commonMeterImport', label: '普表用水量信息导入', permission: null, defaultVisible: false },
         { key: 'batchPause', label: '停户', permission: 63 },

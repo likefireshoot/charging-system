@@ -65,12 +65,12 @@
         </div>
         <div class="delete-btn" @click="delete_click" v-if="staffPermissionIds.includes(33)">
           <img src="@/assets/yuangong/icon4.png" alt="" />
-          <span style="margin-left: 6px; color: #5a5a5a">删除</span>
+          <span style="margin-left: 6px; color: #5a5a5a">删除员工</span>
         </div>
         <div class="edit-btn" :class="{ 'btn-single-only-disabled': multipleSelection.length !== 1 }"
              @click="multipleSelection.length === 1 && edit_click()" v-if="staffPermissionIds.includes(34)">
           <img src="@/assets/yuangong/icon3.png" alt="" />
-          <span style="margin-left: 6px; color: #5a5a5a">编辑</span>
+          <span style="margin-left: 6px; color: #5a5a5a">编辑员工</span>
         </div>
         <!-- <div class="export-in-btn" style="margin-left: 10px">
           <img src="@/assets/yuangong/icon1.png" alt="" style="margin-left: 7px" />

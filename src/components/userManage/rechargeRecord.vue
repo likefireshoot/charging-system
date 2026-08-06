@@ -78,7 +78,7 @@
         </div>
         <div class="recharge-record-list">
           <div class="command-buttons">
-            <div class="export-out-btn" style="margin-right: 10px; width: 110px" :class="{ 'btn-single-only-disabled': multipleSelection.length !== 1 }" @click="multipleSelection.length === 1 && receipt()">
+            <div v-if="staffPermissionIds.includes(91)" class="export-out-btn" style="margin-right: 10px; width: 110px" :class="{ 'btn-single-only-disabled': multipleSelection.length !== 1 }" @click="multipleSelection.length === 1 && receipt()">
               <img src="@/assets/yonghu/icon26.png" alt="" style="margin-left: 7px" />
               <span style="font-size: 20px; margin-left: 10px; color: #5a5a5a">开收据</span>
             </div>
