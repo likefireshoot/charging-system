@@ -713,18 +713,23 @@ export default {
             const list = Array.isArray(res.data?.list) ? res.data.list : [];
             this.roleData = list.map((role, idx) => {
               try {
+                // 表格展示用树，把小程序父节点挪到末尾
+                const transformTableTree = (tree) => {
+                  if(!Array.isArray(tree)) return tree;
+                  const arr = [...tree];
+                  const miniIdx = arr.findIndex(x=>x.permissionName === '小程序');
+                  if(miniIdx > -1){
+                    const miniItem = arr.splice(miniIdx,1)[0];
+                    arr.push(miniItem);
+                  }
+                  return arr;
+                }
+
                 const permissionIds = this.getAllPermissionId(role.permissionTree);
 
                 return {
                   ...role,
-                  permissionContentArray: (()=>{
-                    const base = [...this.basePermissions];
-                    const allPerm = role.permissions?.map((p) => p.permissionName) || [];
-                    // 区分小程序开头 和 其他权限
-                    const normal = allPerm.filter(name => !name.startsWith('小程序'));
-                    const mini = allPerm.filter(name => name.startsWith('小程序'));
-                    return [...base, ...normal, ...mini];
-                  })(),
+                  permissionTree: transformTableTree(role.permissionTree),
                   permissionIds,
                 };
               } catch (e) {
@@ -788,18 +793,22 @@ export default {
             const list = Array.isArray(res.data?.list) ? res.data.list : [];
             this.roleData = list.map((role, idx) => {
               try {
+                const transformTableTree = (tree) => {
+                  if(!Array.isArray(tree)) return tree;
+                  const arr = [...tree];
+                  const miniIdx = arr.findIndex(x=>x.permissionName === '小程序');
+                  if(miniIdx > -1){
+                    const miniItem = arr.splice(miniIdx,1)[0];
+                    arr.push(miniItem);
+                  }
+                  return arr;
+                }
+
                 const permissionIds = this.getAllPermissionId(role.permissionTree);
 
                 return {
                   ...role,
-                  permissionContentArray: (()=>{
-                    const base = [...this.basePermissions];
-                    const allPerm = role.permissions?.map((p) => p.permissionName) || [];
-                    // 区分小程序开头 和 其他权限
-                    const normal = allPerm.filter(name => !name.startsWith('小程序'));
-                    const mini = allPerm.filter(name => name.startsWith('小程序'));
-                    return [...base, ...normal, ...mini];
-                  })(),
+                  permissionTree: transformTableTree(role.permissionTree),
                   permissionIds,
                 };
               } catch (e) {
