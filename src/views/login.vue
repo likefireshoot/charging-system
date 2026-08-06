@@ -19,7 +19,12 @@
           </h2>
           <span></span>
         </div>
-        <ul v-if="!isRegister && !isForgetPassword">
+        <!-- 登录方式切换：账号密码 / 短信验证码 -->
+        <div class="loginTabs" v-if="!isRegister && !isForgetPassword">
+          <a :class="loginType === 'pwd' ? 'on' : ''" @click.stop="switchLoginType('pwd')">账号密码</a>
+          <a :class="loginType === 'sms' ? 'on' : ''" @click.stop="switchLoginType('sms')">短信验证码</a>
+        </div>
+        <ul v-if="!isRegister && !isForgetPassword && loginType === 'pwd'">
           <li>
             <label for="" style="height: 55px">
               <img src="@/assets/icon1.svg" alt="" class="icon" />
@@ -63,6 +68,40 @@
           </li>
 
           <a class="btn" @click.stop="goLogin">登录</a>
+        </ul>
+        <ul v-if="!isRegister && !isForgetPassword && loginType === 'sms'">
+          <li>
+            <label for="" style="height: 55px">
+              <img src="@/assets/icon1.svg" alt="" class="icon" />
+              <input type="text" v-model="smsParam.phone" placeholder="请输入手机号" maxlength="11" @blur="queryCompaniesByPhone" />
+            </label>
+          </li>
+          <li>
+            <label for="" style="height: 55px">
+              <img src="@/assets/icon1.svg" alt="" class="icon" />
+              <el-select v-model="smsParam.companyId" placeholder="请选择水厂" :style="isPort92 ? 'background: #e3f2fd; border-color: #e3f2fd' : 'background: #dff0ed; border-color: #dff0ed'">
+                <el-option v-for="item in smsCompanyList" :key="item.companyId" :label="item.companyName" :value="item.companyId"></el-option>
+              </el-select>
+            </label>
+          </li>
+          <li>
+            <label for="" style="height: 55px">
+              <img src="@/assets/icon2.svg" alt="" class="icon" />
+              <input
+                  type="text"
+                  v-model="smsParam.code"
+                  placeholder="请输入短信验证码"
+                  @keyup.enter="goSmsLogin"
+              />
+              <button :disabled="smsCountdown > 0" @click="sendWebCaptcha">
+                {{ smsCountdown > 0 ? smsCountdown + "s 后重发" : "获取验证码" }}
+              </button>
+            </label>
+          </li>
+          <!-- 占位 li：与账号密码登录的"验证码图片 + 忘记密码"区域等高，避免登录按钮跳动 -->
+          <li class="placeholderLi"></li>
+
+          <a class="btn" @click.stop="goSmsLogin">登录</a>
         </ul>
         <ul v-if="isRegister">
           <li style="height: 55px">
@@ -164,7 +203,7 @@
 
 <script setup>
 import { useStore } from "vuex";
-import { getCurrentInstance, onMounted, reactive, ref } from "vue";
+import { getCurrentInstance, onMounted, reactive, ref, watch } from "vue";
 import { useRouter } from "vue-router";
 import { ElMessage } from "element-plus";
 import service from "@/api/request";
@@ -195,6 +234,53 @@ onMounted(() => {
 
 const isRegister = ref(false);
 const isForgetPassword = ref(false);
+
+// 登录方式：pwd=账号密码，sms=短信验证码
+const loginType = ref("pwd");
+
+function switchLoginType(type) {
+  loginType.value = type;
+  if (type === "pwd") {
+    resetSmsState();
+  }
+}
+
+// 短信验证码登录参数
+const smsParam = reactive({
+  phone: "",
+  companyId: "",
+  code: "",
+});
+
+// 短信登录水厂下拉（按手机号查到的该用户绑定水厂）
+const smsCompanyList = ref([]);
+
+// 获取验证码 60s 倒计时
+const smsCountdown = ref(0);
+let smsTimer = null;
+
+// 是否已成功获取过验证码（用于切换水厂时判断是否需提示重发）
+const smsCodeSent = ref(false);
+
+// 切换水厂下拉时：清空验证码、重置倒计时、提示重新获取
+let lastCompanyId = "";
+watch(
+  () => smsParam.companyId,
+  (newVal, oldVal) => {
+    if (newVal === oldVal) return;
+    if (smsCodeSent.value) {
+      smsParam.code = "";
+      if (smsTimer) {
+        clearInterval(smsTimer);
+        smsTimer = null;
+      }
+      smsCountdown.value = 0;
+      smsCodeSent.value = false;
+      ElMessage.warning("切换水厂后，原验证码已失效，请重新获取验证码");
+    }
+    lastCompanyId = newVal;
+  }
+);
 
 // 图形验证码图片（Base64 Data URI）
 const captchaImg = ref("");
@@ -350,6 +436,110 @@ async function goLogin() {
     console.error("登录请求异常", error);
     // 验证码为一次性使用，登录失败后刷新验证码
     getCaptcha();
+  }
+}
+
+// 切换登录方式时重置短信相关状态
+function resetSmsState() {
+  smsParam.phone = "";
+  smsParam.companyId = "";
+  smsParam.code = "";
+  smsCompanyList.value = [];
+  if (smsTimer) {
+    clearInterval(smsTimer);
+    smsTimer = null;
+  }
+  smsCountdown.value = 0;
+  smsCodeSent.value = false;
+}
+
+// 输入手机号后，按手机号查询该用户绑定的正常水厂列表（供下拉框使用）
+async function queryCompaniesByPhone() {
+  if (!/^1[3-9]\d{9}$/.test(smsParam.phone)) {
+    ElMessage.error("请输入有效的手机号");
+    return;
+  }
+  try {
+    const res = await proxy.ajax.get(`/staff/queryCompaniesByPhone?phone=${smsParam.phone}`);
+    if (res.code === 200) {
+      smsCompanyList.value = res.data || [];
+      smsParam.companyId = "";
+      if (smsCompanyList.value.length === 0) {
+        ElMessage.warning("该手机号未绑定任何水厂");
+      }
+    } else {
+      ElMessage.error(res.msg || "查询水厂失败");
+    }
+  } catch (err) {
+    console.error("查询水厂失败：", err);
+  }
+}
+
+// 获取短信验证码（60s 倒计时），按下拉选中的水厂走对应短信通道
+async function sendWebCaptcha() {
+  if (!/^1[3-9]\d{9}$/.test(smsParam.phone)) {
+    ElMessage.error("请输入有效的手机号");
+    return;
+  }
+  // 先确认水厂列表已加载（若用户未先失焦触发，则主动查一次）
+  if (smsCompanyList.value.length === 0) {
+    await queryCompaniesByPhone();
+  }
+  if (!smsParam.companyId) {
+    ElMessage.error("请选择水厂");
+    return;
+  }
+  try {
+    const res = await proxy.ajax.get(
+      `/staff/sendWebCaptcha?phoneNum=${smsParam.phone}&companyId=${smsParam.companyId}`
+    );
+    if (res.code === 200) {
+      ElMessage.success("验证码已发送，请查收");
+      smsCodeSent.value = true;
+      startSmsCountdown();
+    } else {
+      ElMessage.error(res.msg || "获取验证码失败");
+    }
+  } catch (err) {
+    console.error("获取验证码失败：", err);
+  }
+}
+
+function startSmsCountdown() {
+  smsCountdown.value = 60;
+  smsTimer = setInterval(() => {
+    smsCountdown.value--;
+    if (smsCountdown.value <= 0) {
+      clearInterval(smsTimer);
+      smsTimer = null;
+    }
+  }, 1000);
+}
+
+// 短信验证码登录
+async function goSmsLogin() {
+  if (!/^1[3-9]\d{9}$/.test(smsParam.phone)) {
+    ElMessage.error("请输入有效的手机号");
+    return;
+  }
+  if (!smsParam.companyId) {
+    ElMessage.error("请选择水厂");
+    return;
+  }
+  if (smsParam.code === "") {
+    ElMessage.error("请输入短信验证码");
+    return;
+  }
+  try {
+    let { code, data } = await proxy.ajax.post("/staff/loginBySms", smsParam, true);
+    if (code == 200) {
+      sessionStorage.setItem("userData", JSON.stringify(data));
+      store.commit("setUserData", data);
+      console.log("短信登录成功", data);
+      route.replace({ name: "home" });
+    }
+  } catch (error) {
+    console.error("短信登录请求异常", error);
   }
 }
 
@@ -549,6 +739,13 @@ async function resetPassword() {
   margin-top: 10px;
 }
 
+/* 短信验证码登录的占位 li：与账号密码登录的"验证码图片 + 忘记密码"区域等高
+   使切换登录方式时"登录"按钮位置保持一致，避免视觉跳动 */
+.placeholderLi {
+  height: 110px;
+  display: block;
+}
+
 .captchaImgLabel {
   margin-right: 10px;
   font-size: 20px;
@@ -634,6 +831,28 @@ async function resetPassword() {
         color: #46b97e;
         font-weight: bold;
         margin: 0 30px;
+      }
+    }
+    /* 登录方式切换 Tab（账号密码 / 短信验证码） */
+    .loginTabs {
+      display: flex;
+      gap: 30px;
+      margin-bottom: 16px;
+      a {
+        font-size: 20px;
+        color: #585657;
+        cursor: pointer;
+        padding-bottom: 6px;
+        border-bottom: 2px solid transparent;
+        transition: all 0.2s;
+        &.on {
+          color: #46b97e;
+          border-bottom-color: #46b97e;
+          font-weight: bold;
+        }
+        &:hover {
+          color: #46b97e;
+        }
       }
     }
     ul {
