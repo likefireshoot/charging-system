@@ -95,6 +95,7 @@
     </div>
 
     <div class="table-wrapper">
+      <div class="table-scroll">
       <el-table
         :data="list"
         border
@@ -104,15 +105,20 @@
         :row-style="{ height: '50px' }"
         height="100%"
       >
-        <el-table-column type="selection" width="50" align="center" fixed="left" />
+        <el-table-column type="selection" min-width="50" align="center" fixed="left" />
         <el-table-column property="userId" label="用户号" min-width="120" align="center" />
-        <el-table-column property="userName" label="用户名称" min-width="140" align="center" />
-        <el-table-column property="meterCode" label="表号" min-width="160" align="center" />
+        <el-table-column property="userName" label="用户名" min-width="140" align="center" />
+        <el-table-column property="startRead" label="起码" min-width="100" align="center" />
+        <el-table-column property="endRead" label="止码" min-width="100" align="center" />
+        <el-table-column property="waterUse" label="用水量" min-width="100" align="center">
+          <template #default="scope">{{ scope.row.waterUse }}</template>
+        </el-table-column>
+        <el-table-column property="chargeAmount" label="扣费" min-width="110" align="center">
+          <template #default="scope">{{ scope.row.chargeAmount }}</template>
+        </el-table-column>
+<!--        <el-table-column property="meterCode" label="表号" min-width="160" align="center" />-->
         <el-table-column property="oldBalance" label="原金额" min-width="110" align="center">
           <template #default="scope">{{ scope.row.oldBalance }}</template>
-        </el-table-column>
-        <el-table-column property="chargeAmount" label="扣费金额" min-width="110" align="center">
-          <template #default="scope">{{ scope.row.chargeAmount }}</template>
         </el-table-column>
         <el-table-column property="newBalance" label="余额" min-width="110" align="center">
           <template #default="scope">{{ scope.row.newBalance }}</template>
@@ -123,6 +129,26 @@
             <span>{{ formatChargeType(scope.row.type) }}</span>
           </template>
         </el-table-column>
+      </el-table>
+      </div>
+      <!-- 底部固定汇总行，无表头，紧贴表格下方 -->
+      <el-table
+          :data="totalSummaryRow"
+          border
+          style="width:100%;margin-top:-1px;"
+          :show-header="false"
+          row-class-name="summary-row"
+      >
+        <el-table-column property="userId" min-width="170" align="center" />
+        <el-table-column property="userName" min-width="140" align="center" />
+        <el-table-column property="startRead" min-width="100" align="center" />
+        <el-table-column property="endRead" min-width="100" align="center" />
+        <el-table-column property="totalWaterUse" min-width="100" align="center" />
+        <el-table-column property="totalChargeAmount" min-width="110" align="center" />
+        <el-table-column property="oldBalance" min-width="110" align="center"/>
+        <el-table-column property="newBalance" min-width="110" align="center" />
+        <el-table-column property="createTime" min-width="180" align="center" />
+        <el-table-column property="type" min-width="120" align="center"/>
       </el-table>
     </div>
 
@@ -170,7 +196,22 @@ export default {
         timeType: "day",
         createTime: "",
         dateRange: null
-      }
+      },
+      // 新增底部汇总行
+      totalSummaryRow: [
+        {
+          userId: "汇总",
+          userName: "",
+          startRead: "",
+          endRead: "",
+          totalWaterUse: 0,
+          totalChargeAmount: 0,
+          oldBalance: "",
+          newBalance: "",
+          createTime: "",
+          type: ""
+        }
+      ],
     };
   },
   mounted() {
@@ -370,6 +411,7 @@ export default {
 
           this.total = response.data.totalElements || 0;
           await this.fetchTotalMoney();
+          await this.fetchSumData();
         } else {
           ElMessage.error(response.msg);
         }
@@ -479,6 +521,22 @@ export default {
       } catch (error) {
         console.error("导出失败:", error);
         ElMessage.error("导出失败: " + error.message);
+      }
+    },
+    async fetchSumData() {
+      if (!this.user.userId || !this.user.meterCode) return;
+      try {
+        const params = this.buildQueryParams();
+        const queryString = this.buildQueryString(params);
+        const url = `/charge/sum${queryString}`;
+        const res = await service.get(url);
+        if(res.code === 200){
+          const d = res.data;
+          this.totalSummaryRow[0].totalWaterUse = d.totalWaterUse;
+          this.totalSummaryRow[0].totalChargeAmount = d.totalChargeAmount;
+        }
+      }catch (e){
+        console.error("获取汇总行失败",e);
       }
     }
   }
@@ -657,5 +715,27 @@ export default {
   flex-shrink: 0;
   font-size: 18px;
 }
-
+.table-wrapper {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.table-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+/* 汇总行样式：绿色底色白色加粗文字 */
+:deep(.summary-row) {
+  height: 50px !important;
+  background-color: #46B97E !important;
+}
+:deep(.summary-row td) {
+  font-weight: bold;
+  color: #ffffff;
+  font-size: 20px;
+  text-align: center;
+}
 </style>

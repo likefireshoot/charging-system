@@ -245,8 +245,25 @@ function buildMenu(userData) {
   // if (staffPermissionIds.value.includes(55)) {
   //   tempMenus.push({ id: 11, name: "历史数据管理", icon: require("@/assets/menu/icon17.png"), icon2: require("@/assets/menu/icon18.png"), path: "/historyDataManage", ports: ["93"] });
   // }
-  if (staffPermissionIds.value.includes(39)) {
-    tempMenus.push({ id: 12, name: "操作日志", icon: require("@/assets/add/icon-10.png"), icon2: require("@/assets/add/icon-11.png"), path: "/logManage", ports: ["92", "93"]});
+  if (staffPermissionIds.value.includes(92)) {
+    const logChildren = [];
+    if (staffPermissionIds.value.includes(39)) {
+      logChildren.push({ id: 121, name: "操作日志", icon: require("@/assets/menu/icon11.png"), icon2: require("@/assets/menu/icon12.png"), path: "/logManage/operateLog"});
+    }
+    if (staffPermissionIds.value.includes(93)) {
+      logChildren.push({ id: 122, name: "登录日志", icon: require("@/assets/menu/icon17.png"), icon2: require("@/assets/menu/icon18.png"), path: "/logManage/loginLog"});
+    }
+    tempMenus.push({
+      id: 12,
+      name: "日志管理",
+      icon: require("@/assets/add/icon-10.png"),
+      icon2: require("@/assets/add/icon-11.png"),
+      path: "/logManage",
+      arrowIcon1,
+      arrowIcon2,
+      ports: ["92", "93"],
+      children: logChildren
+    });
   }
   if (staffPermissionIds.value.includes(87)) {
     tempMenus.push({ id: 2, name: "用户管理", icon: require("@/assets/menu/icon3.png"), icon2: require("@/assets/menu/icon4.png"), path: "/userManage", ports: ["92", "93"] },);
