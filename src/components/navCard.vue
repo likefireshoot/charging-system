@@ -297,8 +297,6 @@ function buildMenu(userData) {
       ],
     });
   }
-  // 登录安全（仅 93 收费系统展示，位于菜单最下方）
-  tempMenus.push({ id: 99, name: "登录安全", icon: require("@/assets/menu/icon32.png"), icon2: require("@/assets/menu/icon33.png"), path: "/loginSecurity", ports: ["93"] });
   // 统一排序
   tempMenus.sort((a,b) => a.id - b.id);
   // 92端口(抄表系统)：设备管理(id=22)提到最前面

@@ -19,7 +19,7 @@ import smsConfiguration from "@/components/reportManage/smsConfiguration.vue";
 import smsRecord from "@/components/reportManage/smsRecord.vue";
 import employeeManage from "../views/employeeManage.vue";
 import logManage from "../views/logManage.vue";
-import loginSecurity from "../views/loginSecurity.vue";
+
 import accountManage from "@/views/accountManage.vue";
 import readingCountDailyReport from "@/components/report/readingCountDailyReport.vue";
 import readingCountWeeklyReport from "@/components/report/readingCountWeeklyReport.vue";
@@ -248,11 +248,6 @@ const routes = [
         path: "/deviceManage",
         name: "deviceManage",
         component: deviceManage,
-      },
-      {
-        path: "/loginSecurity",
-        name: "loginSecurity",
-        component: loginSecurity,
       },
     ],
   },

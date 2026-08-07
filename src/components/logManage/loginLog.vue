@@ -41,6 +41,10 @@
         <div class="reflush" @click="reflush">
           <img src="@/assets/yonghu/icon15.png" alt="" />
         </div>
+        <div class="security-btn" @click="openLoginSecurity">
+          <img src="@/assets/menu/icon32.png" alt="" />
+          <span style="margin-left: 6px; color: #5a5a5a">登录安全</span>
+        </div>
       </div>
       <div class="yuangong-table">
         <el-table
@@ -74,6 +78,33 @@
         </div>
       </div>
     </div>
+
+    <el-dialog
+      v-model="loginSecurityDialogVisible"
+      title="登录安全设置"
+      width="680px"
+      :close-on-click-modal="false"
+      :lock-scroll="false"
+      append-to-body
+      destroy-on-close
+    >
+      <div class="security-setting-row">
+        <span class="security-setting-name">账号密码登录</span>
+        <el-select
+          v-model="disablePasswordLogin"
+          :disabled="loginSecuritySaving"
+          @change="onSwitchChange"
+          class="security-select"
+        >
+          <el-option
+            v-for="item in loginSecurityOptions"
+            :key="item.value"
+            :label="item.label"
+            :value="item.value"
+          />
+        </el-select>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
@@ -112,6 +143,14 @@ export default {
       resizeObserver: null,
 
       isLoading: false,
+
+      loginSecurityDialogVisible: false,
+      disablePasswordLogin: false,
+      loginSecuritySaving: false,
+      loginSecurityOptions: [
+        { label: "关闭", value: true },
+        { label: "开启", value: false },
+      ],
     };
   },
   computed: {
@@ -246,6 +285,45 @@ export default {
     reflush() {
       this.params.pageNo = 1;
       this.search();
+    },
+    openLoginSecurity() {
+      this.loginSecurityDialogVisible = true;
+      this.getLoginSetting();
+    },
+    getLoginSetting() {
+      service
+        .get("/staff/loginSetting")
+        .then((res) => {
+          if (res.code === 200) {
+            this.disablePasswordLogin = !!res.data.disablePasswordLogin;
+          } else {
+            ElMessage.error(res.msg || "获取登录安全设置失败");
+          }
+        })
+        .catch((err) => {
+          console.error("获取登录安全设置失败：", err);
+        });
+    },
+    onSwitchChange(val) {
+      this.loginSecuritySaving = true;
+      service
+        .post("/staff/loginSetting", { disablePasswordLogin: val })
+        .then((res) => {
+          if (res.code === 200) {
+            ElMessage.success("设置已保存");
+            this.disablePasswordLogin = val;
+          } else {
+            ElMessage.error(res.msg || "保存失败");
+            this.disablePasswordLogin = !val;
+          }
+        })
+        .catch((err) => {
+          console.error("保存失败：", err);
+          this.disablePasswordLogin = !val;
+        })
+        .finally(() => {
+          this.loginSecuritySaving = false;
+        });
     },
   },
 };
@@ -413,6 +491,10 @@ export default {
   margin-top: 10px;
 }
 
+.command-box > * {
+  margin-right: 10px;
+}
+
 .reflush {
   display: flex;
   align-items: center;
@@ -426,6 +508,38 @@ export default {
   font-size: 20px;
   background-color: #fff;
   border: 2px solid #f2f2f2;
+}
+
+.security-btn {
+  display: flex;
+  align-items: center;
+  width: auto;
+  height: 35px;
+  color: white;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.3s;
+  font-size: 18px;
+  background-color: #fff;
+  border: 2px solid #f2f2f2;
+  padding: 0 8px;
+}
+
+.security-setting-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 0;
+}
+
+.security-setting-name {
+  font-size: 18px;
+  color: #333;
+  font-weight: bold;
+}
+
+.security-select {
+  width: 160px;
 }
 
 .yuangong-table,
@@ -445,6 +559,12 @@ export default {
   height: 40px;
   position: absolute;
   bottom: 0;
+}
+</style>
+
+<style>
+html {
+  overflow-y: scroll;
 }
 </style>
 
