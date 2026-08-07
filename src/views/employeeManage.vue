@@ -185,6 +185,14 @@
             </div>
           </div>
 
+          <div class="add-input" style="margin-bottom: 20px;">
+            <span>区域类型</span>
+            <el-select v-model="addRegion.regionType">
+              <el-option label="远传表区域(默认)" :value="1" />
+              <el-option label="表册(普通水表区域)" :value="3" />
+            </el-select>
+          </div>
+
           <div class="add-input">
             <span>新增区域名称</span>
             <el-input v-model="addRegion.regionName" placeholder="请输入..." />
@@ -484,6 +492,7 @@ export default {
       addRegion: {
         companyId: null,
         regionName: null,
+        regionType: 1, // 默认远传表区域
       },
       deleteRegion: {
         companyId: "",
@@ -718,6 +727,7 @@ export default {
       this.addRegion_dialogFormVisible = true;
       // 清空旧数据
       this.addRegion.regionName = "";
+      this.addRegion.regionType = 1;
       this.addRegionQuYuList = [];
 
       // 非超级管理员，自动赋值本厂id，直接加载区域
@@ -1140,7 +1150,7 @@ export default {
       }
       this.addRegion.regionName = this.addRegion.regionName ? this.addRegion.regionName.trim() : this.addRegion.regionName;
       service
-        .get(`/addRegion?companyId=${this.addRegion.companyId}&regionName=${this.addRegion.regionName}`)
+        .get(`/addRegion?companyId=${this.addRegion.companyId}&regionName=${this.addRegion.regionName}&regionType=${this.addRegion.regionType}`)
         .then((response) => {
           if (response.code == 200) {
             ElMessage.success("区域添加成功");

@@ -429,8 +429,9 @@ const handleCompanyChange = async (companyId) => {
 
     if (res.code === 200) {
       const allRegions = res.data || [];
+      // 筛选普表区域：名称包含"普表"前缀（历史兼容），或 region_type === 3
       regionList.value = allRegions.filter(region =>
-        region.regionName && region.regionName.includes('普表')
+        (region.regionName && region.regionName.includes('普表')) || region.regionType === 3
       );
 
       reportList.value = [];

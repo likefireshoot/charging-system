@@ -355,10 +355,10 @@ const handleCompanyChange = async (companyId) => {
     const res = await service.get(`/getRegion?companyId=${companyId}`);
     
     if (res.code === 200) {
-      // 筛选出区域名称包含"普表"的区域
+      // 筛选普表区域：名称包含"普表"前缀（历史兼容），或 region_type === 3
       const allRegions = res.data || [];
       regionList.value = allRegions.filter(region =>
-        region.regionName && region.regionName.includes('普表')
+        (region.regionName && region.regionName.includes('普表')) || region.regionType === 3
       );
 
       // 清空审核列表和选中的区域
