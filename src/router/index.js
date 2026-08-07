@@ -209,21 +209,14 @@ const routes = [
         component: roleManage,
       },
       {
-        path: "/logManage",
-        name: "logManage",
-        component: log,
-        children: [
-          {
-            path: "operateLog",
-            name: "operateLog",
-            component: operateLog,
-          },
-          {
-            path: "loginLog",
-            name: "loginLog",
-            component: loginLog,
-          },
-        ],
+        path: "/operateLog",
+        name: "operateLog",
+        component: operateLog,
+      },
+      {
+        path: "/loginLog",
+        name: "loginLog",
+        component: loginLog,
       },
       {
         path: "/commandLog",
