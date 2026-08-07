@@ -212,46 +212,6 @@ const staffPermissionIds = computed(() => {
 
 const baseMenu = [
   { id: 0, name: "首页", icon: require("@/assets/menu/icon1.png"), icon2: require("@/assets/menu/icon2.png"), path: "/homePage", ports: ["93"]  },
-  { id: 2, name: "用户管理", icon: require("@/assets/menu/icon3.png"), icon2: require("@/assets/menu/icon4.png"), path: "/userManage", ports: ["92", "93"]  },
-  {
-    id: 4,
-    name: "报表统计",
-    icon: require("@/assets/menu/icon9.png"),
-    icon2: require("@/assets/menu/icon10.png"),
-    path: "/report",
-    ports: ["93"],
-    // 添加箭头图标信息
-    arrowIcon1,
-    arrowIcon2,
-    children: [
-      { id: 41, name: "收费日报表", icon: require("@/assets/menu/icon11.png"), icon2: require("@/assets/menu/icon12.png"), path: "/report/dailyReport" },
-      { id: 42, name: "收费周报表", icon: require("@/assets/menu/icon13.png"), icon2: require("@/assets/menu/icon14.png"), path: "/report/weeklyReport" },
-      { id: 43, name: "收费月报表", icon: require("@/assets/menu/icon15.png"), icon2: require("@/assets/menu/icon16.png"), path: "/report/monthlyReport" },
-      { id: 44, name: "收费年报表", icon: require("@/assets/menu/icon17.png"), icon2: require("@/assets/menu/icon18.png"), path: "/report/yearlyReport" },
-      { id: 45, name: "用水日报表", icon: require("@/assets/menu/icon11.png"), icon2: require("@/assets/menu/icon12.png"), path: "/report/readingCountDailyReport" },
-      { id: 46, name: "用水周报表", icon: require("@/assets/menu/icon13.png"), icon2: require("@/assets/menu/icon14.png"), path: "/report/readingCountWeeklyReport" },
-      { id: 47, name: "用水月报表", icon: require("@/assets/menu/icon15.png"), icon2: require("@/assets/menu/icon16.png"), path: "/report/readingCountMonthlyReport" },
-      { id: 48, name: "用水年报表", icon: require("@/assets/menu/icon17.png"), icon2: require("@/assets/menu/icon18.png"), path: "/report/readingCountYearlyReport" },
-      { id: 49, name: "用户报表", icon: require("@/assets/menu/icon3.png"), icon2: require("@/assets/menu/icon4.png"), path: "/report/accountsReport" },
-      { id: 490, name: "收费明细表", icon: require("@/assets/menu/icon5.png"), icon2: require("@/assets/menu/icon6.png"), path: "/report/rechargeDetailReport" },
-      { id: 491, name: "扣费明细表", icon: require("@/assets/menu/icon5.png"), icon2: require("@/assets/menu/icon6.png"), path: "/report/billDetailReport" },
-      // { id: 492, name: "大额扣费审计", icon: require("@/assets/menu/icon5.png"), icon2: require("@/assets/menu/icon6.png"), path: "/report/abnormalChargeReport" },
-    ],
-  },
-  {
-    id: 5,
-    name: "通知管理",
-    icon: require("@/assets/add/icon-02.png"),
-    icon2: require("@/assets/add/icon-03.png"),
-    path: "/reportManage",
-    arrowIcon1,
-    arrowIcon2,
-    ports: ["93"],
-    children: [
-      { id: 51, name: "短信配置", icon: require("@/assets/add/icon-04.png"), icon2: require("@/assets/add/icon-05.png"), path: "/reportManage/smsConfiguration" },
-      { id: 52, name: "短信记录", icon: require("@/assets/add/icon-06.png"), icon2: require("@/assets/add/icon-07.png"), path: "/reportManage/smsRecord" },
-    ],
-  },
   { id: 20, name: "水务地图", icon: require("@/assets/icon7.png"), icon2: require("@/assets/icon10.png"), path: "/map", ports: ["92"] },
   { id: 21, name: "外勤管理", icon: require("@/assets/icon8.png"), icon2: require("@/assets/icon9.png"), path: "/field", ports: ["92"] },
   { id: 22, name: "设备管理", icon: require("@/assets/menu/icon32.png"), icon2: require("@/assets/menu/icon33.png"), path: "/deviceManage", ports: ["92"] },
@@ -282,11 +242,60 @@ function buildMenu(userData) {
   if (staffPermissionIds.value.includes(35)) {
     tempMenus.push({ id: 10, name: "角色管理", icon: require("@/assets/menu/icon27.png"), icon2: require("@/assets/menu/icon28.png"), path: "/roleManage", ports: ["93"] });
   }
-  if (staffPermissionIds.value.includes(55)) {
-    tempMenus.push({ id: 11, name: "历史数据管理", icon: require("@/assets/menu/icon17.png"), icon2: require("@/assets/menu/icon18.png"), path: "/historyDataManage", ports: ["93"] });
-  }
+  // if (staffPermissionIds.value.includes(55)) {
+  //   tempMenus.push({ id: 11, name: "历史数据管理", icon: require("@/assets/menu/icon17.png"), icon2: require("@/assets/menu/icon18.png"), path: "/historyDataManage", ports: ["93"] });
+  // }
   if (staffPermissionIds.value.includes(39)) {
-    tempMenus.push({ id: 12, name: "操作日志", icon: require("@/assets/add/icon-10.png"), icon2: require("@/assets/add/icon-11.png"), path: "/logManage", ports: ["92", "93"]});
+    tempMenus.push({ id: 12, name: "操作日志", icon: require("@/assets/add/icon-10.png"), icon2: require("@/assets/add/icon-11.png"), path: "/operateLog"});
+  }
+  if (staffPermissionIds.value.includes(93)) {
+    tempMenus.push({ id: 14, name: "登录安全", icon: require("@/assets/menu/icon17.png"), icon2: require("@/assets/menu/icon18.png"), path: "/loginLog"});
+  }
+  if (staffPermissionIds.value.includes(87)) {
+    tempMenus.push({ id: 2, name: "用户管理", icon: require("@/assets/menu/icon3.png"), icon2: require("@/assets/menu/icon4.png"), path: "/userManage", ports: ["92", "93"] },);
+  }
+  if (staffPermissionIds.value.includes(88)) {
+    tempMenus.push({
+      id: 4,
+      name: "报表统计",
+      icon: require("@/assets/menu/icon9.png"),
+      icon2: require("@/assets/menu/icon10.png"),
+      path: "/report",
+      ports: ["93"],
+      // 添加箭头图标信息
+      arrowIcon1,
+      arrowIcon2,
+      children: [
+        { id: 41, name: "收费日报表", icon: require("@/assets/menu/icon11.png"), icon2: require("@/assets/menu/icon12.png"), path: "/report/dailyReport" },
+        { id: 42, name: "收费周报表", icon: require("@/assets/menu/icon13.png"), icon2: require("@/assets/menu/icon14.png"), path: "/report/weeklyReport" },
+        { id: 43, name: "收费月报表", icon: require("@/assets/menu/icon15.png"), icon2: require("@/assets/menu/icon16.png"), path: "/report/monthlyReport" },
+        { id: 44, name: "收费年报表", icon: require("@/assets/menu/icon17.png"), icon2: require("@/assets/menu/icon18.png"), path: "/report/yearlyReport" },
+        { id: 45, name: "用水日报表", icon: require("@/assets/menu/icon11.png"), icon2: require("@/assets/menu/icon12.png"), path: "/report/readingCountDailyReport" },
+        { id: 46, name: "用水周报表", icon: require("@/assets/menu/icon13.png"), icon2: require("@/assets/menu/icon14.png"), path: "/report/readingCountWeeklyReport" },
+        { id: 47, name: "用水月报表", icon: require("@/assets/menu/icon15.png"), icon2: require("@/assets/menu/icon16.png"), path: "/report/readingCountMonthlyReport" },
+        { id: 48, name: "用水年报表", icon: require("@/assets/menu/icon17.png"), icon2: require("@/assets/menu/icon18.png"), path: "/report/readingCountYearlyReport" },
+        { id: 49, name: "用户报表", icon: require("@/assets/menu/icon3.png"), icon2: require("@/assets/menu/icon4.png"), path: "/report/accountsReport" },
+        { id: 490, name: "收费明细表", icon: require("@/assets/menu/icon5.png"), icon2: require("@/assets/menu/icon6.png"), path: "/report/rechargeDetailReport" },
+        { id: 491, name: "扣费明细表", icon: require("@/assets/menu/icon5.png"), icon2: require("@/assets/menu/icon6.png"), path: "/report/billDetailReport" },
+        // { id: 492, name: "大额扣费审计", icon: require("@/assets/menu/icon5.png"), icon2: require("@/assets/menu/icon6.png"), path: "/report/abnormalChargeReport" },
+      ],
+    });
+  }
+  if (staffPermissionIds.value.includes(84)) {
+    tempMenus.push({
+      id: 5,
+      name: "短信通知",
+      icon: require("@/assets/add/icon-02.png"),
+      icon2: require("@/assets/add/icon-03.png"),
+      path: "/reportManage",
+      arrowIcon1,
+      arrowIcon2,
+      ports: ["93"],
+      children: [
+        { id: 51, name: "短信配置", icon: require("@/assets/add/icon-04.png"), icon2: require("@/assets/add/icon-05.png"), path: "/reportManage/smsConfiguration" },
+        { id: 52, name: "短信记录", icon: require("@/assets/add/icon-06.png"), icon2: require("@/assets/add/icon-07.png"), path: "/reportManage/smsRecord" },
+      ],
+    });
   }
   // 登录安全（仅 93 收费系统展示，位于菜单最下方）
   tempMenus.push({ id: 99, name: "登录安全", icon: require("@/assets/menu/icon32.png"), icon2: require("@/assets/menu/icon33.png"), path: "/loginSecurity", ports: ["93"] });

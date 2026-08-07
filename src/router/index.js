@@ -41,6 +41,9 @@ import quickMeterReport from "@/views/quickMeterReport.vue";
 import rechargeDetailReport from "@/components/report/rechargeDetailReport.vue";
 import reviewMeterReport from "@/views/reviewMeterReport.vue";
 import regionMeterReport from "@/views/regionMeterReport.vue";
+import log from "@/views/log.vue";
+import operateLog from "@/components/logManage/operateLog.vue";
+import loginLog from "@/components/logManage/loginLog.vue";
 
 const routes = [
   {
@@ -207,9 +210,14 @@ const routes = [
         component: roleManage,
       },
       {
-        path: "/logManage",
-        name: "logManage",
-        component: logManage,
+        path: "/operateLog",
+        name: "operateLog",
+        component: operateLog,
+      },
+      {
+        path: "/loginLog",
+        name: "loginLog",
+        component: loginLog,
       },
       {
         path: "/commandLog",

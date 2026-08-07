@@ -118,17 +118,15 @@
             <span v-else>{{ row.readingCount }}</span>
           </template>
         </el-table-column>
-        <el-table-column property="deltaWater" label="用水量" min-width="100" align="center" />
-        <!-- 新增结算量 -->
+<!--        <el-table-column property="deltaWater" label="用水量" min-width="100" align="center" />-->
         <el-table-column label="结算量" min-width="100" align="center">
           <template #default="scope">{{ scope.row.settleTon }}</template>
         </el-table-column>
-        <!-- 新增扣费吨值 -->
-        <el-table-column label="扣费吨值" min-width="100" align="center">
-          <template #default="scope">{{ scope.row.deductTon }}</template>
-        </el-table-column>
-        <el-table-column property="feeThisTime" label="扣费" min-width="100" align="center" />
-        <el-table-column property="balanceThisTime" label="余额" min-width="100" align="center" />
+<!--        <el-table-column label="扣费吨值" min-width="100" align="center">-->
+<!--          <template #default="scope">{{ scope.row.deductTon }}</template>-->
+<!--        </el-table-column>-->
+<!--        <el-table-column property="feeThisTime" label="扣费" min-width="100" align="center" />-->
+<!--        <el-table-column property="balanceThisTime" label="余额" min-width="100" align="center" />-->
         <el-table-column property="valveStatus" label="阀门" min-width="60" align="center" />
         <el-table-column property="createTime" label="抄表时间" min-width="150" align="center" />
 <!--        <el-table-column property="userPhone" label="手机号" min-width="180" align="center" />-->

@@ -70,7 +70,7 @@
     </div>
 
     <div class="tool-bar">
-      <div v-if="this.userIsPause === 0" class="tool-btn" :class="{ 'disabled-btn': multipleSelection.length !== 1 }" @click="multipleSelection.length === 1 && handleReceipt()">
+      <div v-if="this.userIsPause === 0 && staffPermissionIds.includes(91)" class="tool-btn" :class="{ 'disabled-btn': multipleSelection.length !== 1 }" @click="multipleSelection.length === 1 && handleReceipt()">
         <img src="@/assets/yonghu/icon26.png" alt="" />
         <span>开收据</span>
       </div>
