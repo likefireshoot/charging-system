@@ -69,6 +69,16 @@
           <img src="@/assets/menu/icon3.png" alt="" />
           <span>销户列表</span>
         </div>
+        <div class="command-btn" @click="openAddRegionDialog"
+             v-if="staffPermissionIds.includes(31)">
+          <img src="@/assets/yuangong/icon6.png" alt="" />
+          <span>新增区域</span>
+        </div>
+        <div class="command-btn" @click="openDeleteRegionDialog"
+             v-if="staffPermissionIds.includes(32)">
+          <img src="@/assets/yuangong/icon4.png" alt="" />
+          <span>删除区域</span>
+        </div>
         <div class="command-btn" @click="valveOpen_dialogFormVisible = true"
              v-if="staffPermissionIds.includes(7)">
           <img src="@/assets/yonghu/icon18.png" alt="" />
@@ -547,10 +557,36 @@
   </el-dialog>
 
   <!-- 批量销户确认弹窗 -->
-  <el-dialog v-model="batchCloseDialogVisible" title="批量销户确认" width="620" :lock-scroll="false">
-    <div style="font-size: 20px; text-align: center; line-height: 2.2; padding:10px 0;">
-      确定永久销户选中 <span style="color:#45ba7e;font-weight:bold">{{ multipleSelection.length }}</span> 户用户？<br/>
-      销户后用户水表绑定关系全部清除，操作无法恢复！<br/>
+  <el-dialog v-model="batchCloseDialogVisible" title="批量销户确认" width="1000" :lock-scroll="false">
+    <div style="font-size: 20px; line-height: 1.8; padding:10px 14px;">
+      <p>确定永久销户选中 <span style="color:#45ba7e;font-weight:bold">{{ batchCloseTipInfo.total }}</span> 户用户？</p>
+      <p style="color:#e6a23c">销户后用户水表绑定关系全部清除，操作无法恢复！</p>
+
+      <div v-if="batchCloseTipInfo.arrearsList.length > 0" style="margin-top:12px;padding:10px;background:#fef0f0;border-radius:6px;">
+        <p style="color:#f56c6c;font-weight:bold">⚠️ 存在 <b>{{ batchCloseTipInfo.arrearsList.length }}</b> 户欠费用户：</p>
+        <div style="max-height:200px;overflow-y:auto;margin-top:6px;color:#c03636;font-size:20px;">
+        <div v-for="u in batchCloseTipInfo.arrearsList" :key="u.imei">
+          用户名：{{u.userName}}，用户号：{{u.userId}}，表号：{{u.meterCode}}，余额{{u.balance}}元；
+        </div>
+        </div>
+      </div>
+
+      <div v-if="batchCloseTipInfo.hasBalanceList.length > 0" style="margin-top:12px;padding:10px;background:#f0f9ff;border-radius:6px;">
+        <p style="color:#409eff;font-weight:bold">ℹ️ 存在 <b>{{ batchCloseTipInfo.hasBalanceList.length }}</b> 户尚有余额用户：</p>
+        <div style="max-height:200px;overflow-y:auto;margin-top:6px;color:#2b7bcd;font-size:20px;">
+        <div v-for="u in batchCloseTipInfo.hasBalanceList" :key="u.imei"  style="display:flex;align-items:center;justify-content: space-between;margin:4px 0;">
+          <span>用户名：{{u.userName}}，用户号：{{u.userId}}，表号：{{u.meterCode}}，余额{{u.balance}}元；</span>
+          <div
+              v-if="staffPermissionIds.includes(70) && Number(u.balance) > 0"
+              class="refund-mini-btn"
+              @click="!u.isRefundBtnDisabled && openSingleRefund(u)"
+              :disabled="u.isRefundBtnDisabled"
+          >
+            余额退款
+          </div>
+        </div>
+        </div>
+      </div>
     </div>
     <template #footer>
       <div style="display:flex;justify-content:center;gap:24px;">
@@ -559,6 +595,132 @@
       </div>
     </template>
   </el-dialog>
+  <!-- 单行用户余额退款弹窗 -->
+  <el-dialog v-model="singleRefundDialogVisible" title="余额退款确认" width="620" :lock-scroll="false">
+    <div style="font-size: 20px; text-align: center; line-height: 2.2; padding:10px 0;">
+      确定要将用户【{{ singleRefundRow?.userName }}】账户内 {{ singleRefundRow?.balance }} 元余额全部返还？<br/>
+      操作后用户账号保留，仅清空账户余额。
+    </div>
+    <template #footer>
+      <div style="display:flex;justify-content:center;gap:24px;">
+        <el-button @click="singleRefundDialogVisible = false">取消</el-button>
+        <el-button @click="handleSingleRefund" style="background-color:#45ba7e;color:#fff" :loading="singleRefundLoading">确认退款</el-button>
+      </div>
+    </template>
+  </el-dialog>
+  <!-- 新增区域 -->
+  <div class="add-region-dialog" v-if="addRegion_dialogFormVisible">
+    <div class="add-region-dialog-content add-region">
+      <div class="title">
+        <div style="margin-left: 10px; display: flex; align-items: center">
+          <img src="@/assets/fapiao/icon8.png" alt="" style="margin-right: 10px" />
+          <span style="font-size: 20px">新增区域</span>
+        </div>
+        <div style="margin-right: 10px; cursor: pointer" @click="closeAddRegionDialog">
+          <img src="@/assets/close.png" alt="" />
+        </div>
+      </div>
+      <div class="add-region-content" style="flex-direction: column">
+        <div class="add-region-input" v-if="companyId === 1" style="margin-right: 7%">
+          <span>水厂名称</span>
+          <el-select v-model="addRegion.companyId">
+            <el-option v-for="item in companyList" :key="item.id" :label="item.name" :value="item.id"></el-option>
+          </el-select>
+        </div>
+
+        <!-- 已有区域列表【两列布局】 -->
+        <div class="region-list-box">
+          <span style="color: #575556; font-size: 20px; margin-bottom: 8px; display:block">已有区域列表</span>
+          <div class="region-table-scroll" style="border: 1px solid #e6e6e6; padding: 8px 15px">
+            <div class="region-grid-wrap">
+              <div class="region-item" v-for="item in addRegionQuYuList" :key="item.regionId">
+                {{ item.regionName }}
+              </div>
+              <!-- 空数据提示 -->
+              <div v-if="addRegionQuYuList.length === 0" class="empty-box">
+                暂无数据
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="add-region-input">
+          <span>新增区域名称</span>
+          <el-input v-model="addRegion.regionName" placeholder="请输入..." />
+        </div>
+      </div>
+      <div class="btn">
+        <div class="confirm-btn" @click="addRegion_confirm">
+          <el-icon style="margin-left: 15%"><Check /></el-icon>
+          <span style="font-size: 20px; margin-left: 15%">确认</span>
+        </div>
+        <div class="cancel-btn" @click="closeAddRegionDialog">
+          <el-icon style="margin-left: 15%; color: #45ba7e"><Close /></el-icon>
+          <span style="font-size: 20px; margin-left: 15%; color: #5a5a5a">取消</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- 删除区域 -->
+  <div class="add-region-dialog" v-if="deleteRegion_dialogFormVisible">
+    <div class="add-region-dialog-content add-region">
+      <div class="title">
+        <div style="margin-left: 10px; display: flex; align-items: center">
+          <img src="@/assets/yuangong/icon4.png" alt="" style="margin-right: 10px" />
+          <span style="font-size: 20px">删除区域</span>
+        </div>
+        <div style="margin-right: 10px; cursor: pointer" @click="cancelDeleteRegion">
+          <img src="@/assets/close.png" alt="" />
+        </div>
+      </div>
+      <div class="add-region-content">
+        <div class="add-region-input" v-if="companyId === 1" style="margin-right: 7%">
+          <span>水厂名称</span>
+          <el-select v-model="deleteRegion.companyId">
+            <el-option v-for="item in companyList" :key="item.id" :label="item.name" :value="item.id"></el-option>
+          </el-select>
+        </div>
+
+        <!-- 已有区域列表【两列布局】 -->
+        <div class="region-list-box-delete">
+          <div style="display: flex;justify-content: space-between;align-items: center;margin-bottom: 8px">
+            <span style="color: #575556; font-size: 20px;">已有区域列表</span>
+            <div>
+              <el-checkbox v-model="checkAll" :indeterminate="indeterminate" @change="handleCheckAll"></el-checkbox>
+              <span style="font-size: 20px; color: #575556; margin-left: 5px">全选</span>
+            </div>
+          </div>
+          <div class="region-table-scroll" style="border: 1px solid #e6e6e6; padding: 8px 15px">
+            <div class="region-grid-wrap">
+              <div
+                  class="region-item"
+                  :class="{active: deleteRegion.regionIds.includes(item.id)}"
+                  v-for="item in regionList"
+                  :key="item.id"
+                  @click="toggleRegionItem(item.id)"
+              >
+                {{ item.label }}
+              </div>
+              <!-- 空数据提示 -->
+              <div v-if="regionList.length === 0" class="empty-box">
+                暂无数据
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="btn">
+        <div class="confirm-btn" @click="deleteRegion_confirm">
+          <el-icon style="margin-left: 15%"><Check /></el-icon>
+          <span style="font-size: 20px; margin-left: 15%">确认</span>
+        </div>
+        <div class="cancel-btn" @click="cancelDeleteRegion">
+          <el-icon style="margin-left: 15%; color: #45ba7e"><Close /></el-icon>
+          <span style="font-size: 20px; margin-left: 15%; color: #5a5a5a">取消</span>
+        </div>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script>
@@ -819,6 +981,32 @@ export default {
       batchPauseDialogVisible: false,
       batchCloseDialogVisible: false,
       batchLoading: false,
+
+      //批量销户提示
+      batchCloseTipInfo: {
+        total: 0,
+        arrearsList: [], //欠费 balance<0
+        hasBalanceList: [], //有余额 balance>0
+      },
+      singleRefundRow: null,
+      singleRefundDialogVisible: false,
+      singleRefundLoading: false,
+
+      addRegion_dialogFormVisible: false,
+      deleteRegion_dialogFormVisible: false,
+      addRegion: {
+        companyId: null,
+        regionName: null,
+      },
+      deleteRegion: {
+        companyId: "",
+        regionIds: [],
+      },
+      checkAll: false,
+      indeterminate: false,
+      regionList: [],
+      flag: 0,
+      addRegionQuYuList: [],
     };
   },
   watch: {
@@ -857,6 +1045,36 @@ export default {
       },
       immediate: false,
       deep: false,
+    },
+    "deleteRegion.regionIds": {
+      handler(val) {
+        if (val.length === 0) {
+          this.checkAll = false;
+          this.indeterminate = false;
+        } else if (val.length === this.regionList.length) {
+          this.checkAll = true;
+          this.indeterminate = false;
+        } else {
+          this.indeterminate = true;
+        }
+      },
+    },
+    "deleteRegion.companyId": {
+      handler() {
+        if (this.flag == 0) {
+          this.deleteRegion.regionIds = [];
+          this.checkAll = false;
+          this.indeterminate = false;
+          this.regionList = [];
+          this.getRegionDataForDelete();
+        }
+      },
+    },
+    "addRegion.companyId": {
+      handler(newVal) {
+        this.addRegionQuYuList = []
+        this.loadRegionListForAdd();
+      }
     },
   },
   computed: {
@@ -1012,6 +1230,15 @@ export default {
 
 // 打开批量销户弹窗
     openBatchCloseDialog() {
+      const list = this.multipleSelection;
+      const arrearsList = list.filter(item => Number(item.balance) < 0);
+      const hasBalanceList = list.filter(item => Number(item.balance) > 0);
+
+      this.batchCloseTipInfo = {
+        total: list.length,
+        arrearsList,
+        hasBalanceList
+      };
       this.batchCloseDialogVisible = true;
     },
 // 执行批量销户
@@ -2116,6 +2343,197 @@ export default {
       this.multipleSelection = [];
       this.reflush();
     },
+    openSingleRefund(row) {
+      this.singleRefundRow = row;
+      this.singleRefundDialogVisible = true;
+    },
+    async handleSingleRefund() {
+      this.singleRefundLoading = true;
+      try {
+        const form = {
+          imei: this.singleRefundRow.imei,
+          userId: this.singleRefundRow.userId,
+          companyId: this.singleRefundRow.companyId,
+          meterCode: this.singleRefundRow.meterCode,
+          staffId: JSON.parse(sessionStorage.getItem("userData")).staffId
+        };
+        const res = await service.post("/userManage/userCharge/cancelRefund", form);
+        if (res.code === 200) {
+          ElMessage.success("余额退款成功");
+          // 直接找到弹窗列表中当前这一行，修改禁用状态
+          // 只修改弹窗内当前行对象，不请求接口刷新列表
+          const target = this.batchCloseTipInfo.hasBalanceList.find(item => item.meterCode === this.singleRefundRow.meterCode);
+          if (target) {
+            target.isRefundBtnDisabled = true;
+          }
+          this.singleRefundDialogVisible = false;
+        } else {
+          ElMessage.error(res.msg || "退款失败");
+        }
+      } catch (err) {
+        console.error(err);
+        ElMessage.error("退款请求异常");
+      } finally {
+        this.singleRefundLoading = false;
+      }
+    },
+    openAddRegionDialog() {
+      this.addRegion_dialogFormVisible = true;
+      this.addRegion.regionName = "";
+      this.addRegionQuYuList = [];
+      if (this.companyId !== 1) {
+        this.addRegion.companyId = this.companyId;
+        this.loadRegionListForAdd();
+      } else {
+        this.addRegion.companyId = null;
+      }
+    },
+    closeAddRegionDialog() {
+      this.addRegion_dialogFormVisible = false;
+      this.addRegion.regionName = "";
+      this.addRegionQuYuList = [];
+    },
+    async loadRegionListForAdd() {
+      if (!this.addRegion.companyId) {
+        this.addRegionQuYuList = [];
+        return;
+      }
+      let url = `/getRegion?companyId=${this.addRegion.companyId}`;
+      try {
+        const response = await service.get(url);
+        if (response.code === 200) {
+          this.addRegionQuYuList = response.data.map(item => {
+            return {
+              regionId: item.regionId,
+              regionName: item.regionName
+            }
+          })
+        }
+      } catch (error) {
+        ElMessage.error("获取区域数据失败");
+      }
+    },
+    openDeleteRegionDialog(){
+      this.deleteRegion_dialogFormVisible = true;
+      this.deleteRegion.regionIds = [];
+      this.checkAll = false;
+      this.indeterminate = false;
+      this.regionList = [];
+      if (this.companyId !== 1) {
+        this.deleteRegion.companyId = this.companyId;
+        this.getRegionDataForDelete();
+      }else{
+        this.deleteRegion.companyId = null;
+      }
+    },
+    toggleRegionItem(regionId) {
+      const index = this.deleteRegion.regionIds.indexOf(regionId)
+      if (index > -1) {
+        this.deleteRegion.regionIds.splice(index, 1)
+      } else {
+        this.deleteRegion.regionIds.push(regionId)
+      }
+    },
+    handleCheckAll(val) {
+      this.indeterminate = false;
+      if (val) {
+        this.deleteRegion.regionIds = this.regionList.map((_) => _.id);
+      } else {
+        this.deleteRegion.regionIds = [];
+      }
+    },
+    getRegionDataForDelete() {
+      if (!this.deleteRegion.companyId) {
+        this.regionList = [];
+        return;
+      }
+      let url = `/getRegion?companyId=${this.deleteRegion.companyId}`;
+      service
+          .get(`${url}`, {
+            headers: {
+              Authorization: this.token,
+            },
+          })
+          .then((response) => {
+            if (response.code === 200) {
+              this.regionList = response.data.map((item) => {
+                return {
+                  id: item.regionId,
+                  value: item.regionId,
+                  label: item.regionName,
+                };
+              });
+            }
+          })
+          .catch((error) => {
+            ElMessage.error("获取区域数据失败");
+          });
+    },
+    addRegion_confirm() {
+      if (this.companyId != 1) {
+        this.addRegion.companyId = this.companyId;
+      }
+      if (this.addRegion.companyId == null || this.addRegion.companyId == "") {
+        ElMessage.error("所属水厂不能为空！");
+        return;
+      }
+      if (this.addRegion.regionName == null || this.addRegion.regionName == "") {
+        ElMessage.error("区域名称不能为空！");
+        return;
+      }
+      this.addRegion.regionName = this.addRegion.regionName ? this.addRegion.regionName.trim() : this.addRegion.regionName;
+      service
+          .get(`/addRegion?companyId=${this.addRegion.companyId}&regionName=${this.addRegion.regionName}`)
+          .then((response) => {
+            if (response.code == 200) {
+              ElMessage.success("区域添加成功");
+              this.addRegion_dialogFormVisible = false;
+              // 添加完刷新左侧树
+              this.getRegionData();
+            }
+          })
+          .catch((err) => {
+            ElMessage.error("区域添加失败");
+          });
+    },
+    deleteRegion_confirm() {
+      this.flag = 1;
+      if (!this.deleteRegion.regionIds || this.deleteRegion.regionIds.length === 0) {
+        ElMessage.error("请选择要删除的区域！");
+        this.flag = 1;
+        return;
+      }
+      service
+          .get(`/deleteRegion?regionIds=${this.deleteRegion.regionIds}`)
+          .then((res) => {
+            if (res.code == 200) {
+              ElMessage.success("删除成功");
+              this.deleteRegion_dialogFormVisible = false;
+              this.deleteRegion.companyId = null;
+              this.deleteRegion.regionIds = [];
+              // 删除完刷新左侧区域树
+              this.getRegionData();
+            }
+          })
+          .catch((err) => {
+            ElMessage.error("删除失败");
+          })
+          .finally(() => {
+            this.flag = 1;
+          });
+    },
+    cancelDeleteRegion() {
+      this.flag = 1;
+      this.deleteRegion_dialogFormVisible = false;
+      this.deleteRegion.companyId = null;
+      this.deleteRegion.regionIds = [];
+      this.regionList = [];
+      this.checkAll = false;
+      this.indeterminate = false;
+      this.$nextTick(() => {
+        this.flag = 0;
+      });
+    },
   },
 };
 </script>
@@ -2806,6 +3224,132 @@ export default {
   background-image: url("@/assets/yonghu/icon22.png");
   background-repeat: no-repeat;
   background-size: contain;
+}
+.refund-mini-btn {
+  display: inline-block;
+  padding:2px 8px;
+  background:#409eff;
+  color:#fff;
+  border-radius:4px;
+  cursor:pointer;
+  font-size:16px;
+  transition: background 0.2s;
+}
+.refund-mini-btn:hover {
+  background:#66b1ff;
+}
+.refund-mini-btn[disabled] {
+  background:#c0c4cc;
+  cursor:not-allowed;
+}
+.add-region-dialog {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 199;
+  background-color: rgb(31 33 38 / 15%);
+}
+
+.add-region-dialog-content{
+  width: 35%;
+  height: 20%;
+  background-color: #fafafa;
+  border-radius: 5px;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.add-region {
+  height: 100vh;
+}
+.add-region-content {
+  border: 1px solid #fff;
+  background-color: #fff;
+  border-radius: 5px;
+  width: 90%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  margin-top: 20px;
+  padding: 0 3%;
+}
+.add-region-input {
+  display: flex;
+  justify-content: center; /* 确保子元素在父容器中垂直居中 */
+  flex-direction: column;
+  width: 45%;
+}
+.add-region-input > span {
+  font-size: 20px;
+  margin-bottom: 5px;
+  color: #575556;
+}
+.add-region-input > .el-input {
+  height: 35px;
+  width: 100%;
+}
+.region-list-box {
+  width:100%;
+  flex:1;
+  min-height:0;
+  margin:10px 0;
+  display:flex;
+  flex-direction:column;
+  max-height: 60vh;
+}
+
+.region-list-box-delete {
+  width:100%;
+  flex:1;
+  min-height:0;
+  margin:10px 0;
+  display:flex;
+  flex-direction:column;
+  max-height: 70vh;
+}
+
+.region-table-scroll {
+  flex:1;
+  min-height:0;
+  overflow-y:auto;
+}
+
+.region-grid-wrap {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr); /* 固定两列 */
+  gap: 10px 16px; /* 上下间距10，左右间距16 */
+}
+.region-item {
+  padding: 6px 10px;
+  border: 1px solid #e4e7ed;
+  border-radius: 4px;
+  text-align: center;
+  background: #fff;
+  color: #575556;
+  transition: all 0.2s;
+}
+
+.region-item.active {
+  background-color: #45ba7e;
+  color: #ffffff;
+  border-color: #45ba7e;
+}
+.region-item:hover:not(.active) {
+  background: #f0f0f0;
+}
+
+.empty-box {
+  grid-column: 1 / -1; /* 横跨整行两列 */
+  text-align: center;
+  color: #909399;
+  padding: 20px 0;
 }
 </style>
 

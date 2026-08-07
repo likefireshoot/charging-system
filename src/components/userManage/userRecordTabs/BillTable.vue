@@ -339,19 +339,29 @@ export default {
         }
       } else if (this.searchParams.createTime && this.searchParams.timeType) {
         let formattedTime = "";
+        let endTimeVal = "";
         let timeTypeValue = null;
 
         switch (this.searchParams.timeType) {
           case "year":
             formattedTime = `${this.searchParams.createTime}-01-01 00:00:00`;
+            endTimeVal = `${this.searchParams.createTime}-12-31 23:59:59`;
             timeTypeValue = 1;
             break;
           case "month":
             formattedTime = `${this.searchParams.createTime}-01 00:00:00`;
+            const [y, m] = this.searchParams.createTime.split("-");
+            const nextMonth = Number(m) + 1;
+            if(nextMonth > 12){
+              endTimeVal = `${Number(y)+1}-01-01 00:00:00`;
+            }else{
+              endTimeVal = `${y}-${String(nextMonth).padStart(2,'0')}-01 00:00:00`;
+            }
             timeTypeValue = 2;
             break;
           case "day":
             formattedTime = `${this.searchParams.createTime} 00:00:00`;
+            endTimeVal = `${this.searchParams.createTime} 23:59:59`;
             timeTypeValue = 3;
             break;
         }
@@ -359,6 +369,7 @@ export default {
         if (timeTypeValue) {
           params.timeType = timeTypeValue;
           params.createTime = formattedTime;
+          params.endTime = endTimeVal;
         }
       }
 

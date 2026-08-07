@@ -12,7 +12,7 @@
           <span>姓名</span>
           <el-input v-model="params.staffName" placeholder="请输入..." />
         </div>
-        <div class="search-input" style="width: 250px">
+        <div class="search-input" style="width: 320px">
           <span>登录日期</span>
           <el-date-picker
               v-model="timeRange"

@@ -4,7 +4,7 @@
       <div class="search-content">
         <div class="search-input" v-if="companyId === 1">
           <span>所属水厂</span>
-          <el-select v-model="params.company" placeholder="请选择所属水厂">
+          <el-select v-model="params.company" placeholder="请选择所属水厂" @change="onSearchCompanyChange">
             <el-option v-for="item in companyList" :key="item.id" :label="item.name" :value="item.id"></el-option>
           </el-select>
         </div>
@@ -16,12 +16,12 @@
           <span>员工名称</span>
           <el-input v-model="params.staffName" placeholder="请输入..." />
         </div>
-        <div class="search-input">
-          <span>职位</span>
-          <el-select v-model="params.staffPostsId">
-            <el-option v-for="item in postsList" :key="item.id" :label="item.name" :value="item.value"></el-option>
-          </el-select>
-        </div>
+<!--        <div class="search-input">-->
+<!--          <span>职位</span>-->
+<!--          <el-select v-model="params.staffPostsId">-->
+<!--            <el-option v-for="item in postsList" :key="item.id" :label="item.name" :value="item.value"></el-option>-->
+<!--          </el-select>-->
+<!--        </div>-->
         <div class="search-input">
           <span>角色</span>
           <el-select v-model="params.staffCharacterId">
@@ -46,10 +46,10 @@
           <img src="@/assets/yuangong/icon6.png" alt="" />
           <span style="margin-left: 6px; color: #5a5a5a">新增水厂</span>
         </div>
-        <div class="add-btn" @click="openAddRegionDialog" v-if="staffPermissionIds.includes(31)">
-          <img src="@/assets/yuangong/icon6.png" alt="" />
-          <span style="margin-left: 6px; color: #5a5a5a">新增区域</span>
-        </div>
+<!--        <div class="add-btn" @click="openAddRegionDialog" v-if="staffPermissionIds.includes(31)">-->
+<!--          <img src="@/assets/yuangong/icon6.png" alt="" />-->
+<!--          <span style="margin-left: 6px; color: #5a5a5a">新增区域</span>-->
+<!--        </div>-->
         <div class="add-btn" @click="openAddStaffDialog" v-if="staffPermissionIds.includes(52)">
           <img src="@/assets/yuangong/icon6.png" alt="" />
           <span style="margin-left: 6px; color: #5a5a5a">新增员工</span>
@@ -59,10 +59,10 @@
           <img src="@/assets/yuangong/icon6.png" alt="" />
           <span style="margin-left: 6px; color: #5a5a5a">水厂管理</span>
         </div>
-        <div class="add-btn" @click="openDeleteRegionDialog" v-if="staffPermissionIds.includes(32)">
-          <img src="@/assets/yuangong/icon4.png" alt="" />
-          <span style="margin-left: 6px; color: #5a5a5a">删除区域</span>
-        </div>
+<!--        <div class="add-btn" @click="openDeleteRegionDialog" v-if="staffPermissionIds.includes(32)">-->
+<!--          <img src="@/assets/yuangong/icon4.png" alt="" />-->
+<!--          <span style="margin-left: 6px; color: #5a5a5a">删除区域</span>-->
+<!--        </div>-->
         <div class="delete-btn" @click="delete_click" v-if="staffPermissionIds.includes(33)">
           <img src="@/assets/yuangong/icon4.png" alt="" />
           <span style="margin-left: 6px; color: #5a5a5a">删除员工</span>
@@ -106,7 +106,7 @@
           <el-table-column property="staffAddr" label="员工住址" :width="addressWidth" align="center" />
           <el-table-column property="staffPhone" label="手机号" :width="phoneWidth" align="center" />
           <el-table-column property="companyName" label="所属水厂" :width="companyWidth" align="center" />
-          <el-table-column property="staffPostsId" label="职位" :width="postWidth" align="center" />
+<!--          <el-table-column property="staffPostsId" label="职位" :width="postWidth" align="center" />-->
           <el-table-column property="roleName" label="角色" :width="roleWidth" align="center" />
           <!-- <el-table-column property="password" label="登录密码" :width="passwordWidth" align="center" /> -->
           <!-- <el-table-column property="lastLoginTime" label="上次登录时间" :width="lastLoginTimeWidth" align="center" /> -->
@@ -296,9 +296,9 @@
         <div class="title">
           <div style="margin-left: 10px; display: flex; align-items: center">
             <img src="@/assets/yuangong/icon3.png" alt="" style="margin-right: 10px" />
-            <span style="font-size: 20px">编辑</span>
+            <span style="font-size: 20px">编辑员工</span>
           </div>
-          <div style="margin-right: 10px; cursor: pointer" @click="edit_dialogFormVisible = false">
+          <div style="margin-right: 10px; cursor: pointer" @click="closeEditStaffDialog">
             <img src="@/assets/close.png" alt="" />
           </div>
         </div>
@@ -315,12 +315,12 @@
             <span>手机号</span>
             <el-input v-model="editData.staffPhone" />
           </div>
-          <div class="edit-input">
-            <span>职位</span>
-            <el-select class="big-font-el-select" v-model="editData.staffPostsId">
-              <el-option v-for="item in postsList" :key="item.id" :label="item.name" :value="item.name"></el-option>
-            </el-select>
-          </div>
+<!--          <div class="edit-input">-->
+<!--            <span>职位</span>-->
+<!--            <el-select class="big-font-el-select" v-model="editData.staffPostsId">-->
+<!--              <el-option v-for="item in postsList" :key="item.id" :label="item.name" :value="item.name"></el-option>-->
+<!--            </el-select>-->
+<!--          </div>-->
           <div class="edit-input">
             <span>角色</span>
             <el-select class="big-font-el-select" v-model="editData.roleName">
@@ -329,7 +329,7 @@
           </div>
           <div class="edit-input" v-if="companyId === 1" style="margin-right: 0">
             <span>所属水厂</span>
-            <el-select class="big-font-el-select" v-model="editData.companyName">
+            <el-select class="big-font-el-select" v-model="editData.companyName" @change="handleEditCompanyChange">
               <el-option v-for="item in companyList" :key="item.id" :label="item.name" :value="item.name"></el-option>
             </el-select>
           </div>
@@ -347,7 +347,7 @@
             <el-icon style="margin-left: 15%"><Check /></el-icon>
             <span style="font-size: 20px; margin-left: 15%">确认</span>
           </div>
-          <div class="cancel-btn" @click="edit_dialogFormVisible = false">
+          <div class="cancel-btn" @click="closeEditStaffDialog">
                         <el-icon style="margin-left: 15%; color: #45ba7e">
                           <Close />
                         </el-icon>
@@ -424,6 +424,10 @@
             <span>用户密码</span>
             <el-input v-model="addStaffForm.password" type="password" placeholder="请输入用户密码" />
           </div>
+          <div class="add-input" style="margin-bottom: 15px">
+            <span>确认密码</span>
+            <el-input v-model="addStaffForm.confirmPassword" type="password" placeholder="请再次输入用户密码" />
+          </div>
           <div class="add-input" style="margin-right: 7%; margin-bottom: 15px">
             <span>手机号</span>
             <el-input v-model="addStaffForm.staffPhone" placeholder="请输入手机号" />
@@ -432,12 +436,12 @@
             <span>员工地址</span>
             <el-input v-model="addStaffForm.staffAddr" placeholder="请输入员工地址" />
           </div>
-          <div class="add-input" style="margin-right: 7%; margin-bottom: 15px">
-            <span>员工职位</span>
-            <el-select v-model="addStaffForm.staffPostsId" placeholder="请选择职位">
-              <el-option v-for="item in postsList" :key="item.id" :label="item.name" :value="item.value"></el-option>
-            </el-select>
-          </div>
+<!--          <div class="add-input" style="margin-right: 7%; margin-bottom: 15px">-->
+<!--            <span>员工职位</span>-->
+<!--            <el-select v-model="addStaffForm.staffPostsId" placeholder="请选择职位">-->
+<!--              <el-option v-for="item in postsList" :key="item.id" :label="item.name" :value="item.value"></el-option>-->
+<!--            </el-select>-->
+<!--          </div>-->
           <div class="add-input" style="margin-bottom: 15px">
             <span>权限角色</span>
             <el-select v-model="addStaffForm.staffCharacterId" placeholder="请选择权限角色">
@@ -471,7 +475,7 @@ export default {
       params: {
         account: null,
         staffName: null,
-        staffPostsId: null,
+        // staffPostsId: null,
         staffCharacterId: null,
         company: null,
         companyId: null, // 所属水厂ID
@@ -490,18 +494,18 @@ export default {
         regionIds: [],
       },
 
-      postsList: [
-        {
-          id: 1,
-          name: "经理",
-          value: 1,
-        },
-        {
-          id: 2,
-          name: "员工",
-          value: 0,
-        },
-      ],
+      // postsList: [
+      //   {
+      //     id: 1,
+      //     name: "经理",
+      //     value: 1,
+      //   },
+      //   {
+      //     id: 2,
+      //     name: "员工",
+      //     value: 0,
+      //   },
+      // ],
       rolesList: [],
       companyList: [],
       employeeData: [],
@@ -512,7 +516,7 @@ export default {
         companyName: null,
         staffAddr: null,
         staffPhone: null,
-        staffPostsId: null,
+        // staffPostsId: null,
         // password: null,
         // againPassword: null,
         roleName: null,
@@ -529,7 +533,7 @@ export default {
       genderWidth: 0,
       addressWidth: 0,
       phoneWidth: 0,
-      postWidth: 0,
+      // postWidth: 0,
       roleWidth: 0,
       //passwordWidth: 0,
       lastLoginTimeWidth: 0,
@@ -568,9 +572,10 @@ export default {
         staffName: "",
         account: "",
         password: "",
+        confirmPassword: "",
         staffPhone: "",
         staffAddr: "",
-        staffPostsId: null, // 职位：1=经理, 0=员工
+        // staffPostsId: null, // 职位：1=经理, 0=员工
         staffCharacterId: null, // 权限角色ID
         companyId: null // 所属水厂ID
       },
@@ -633,11 +638,11 @@ export default {
         selection: 4,
         index: 7,
         account: 13,
-        worker_name: 14,
-        company: 16,
+        worker_name: 20,
+        company: 20,
         address: 15,
         phone: 11,
-        post: 10,
+        // post: 10,
         role: 10,
         //password: 10,
         // last_login_time: 16,
@@ -673,6 +678,42 @@ export default {
     }
   },
   methods: {
+    closeEditStaffDialog() {
+      this.edit_dialogFormVisible = false;
+      this.editData = {
+        staffName: null,
+        companyName: null,
+        staffAddr: null,
+        staffPhone: null,
+        roleName: null,
+        staffId: null,
+        id: null
+      };
+      // 清空角色下拉列表，防止旧数据残留
+      this.rolesList = [];
+      // 清空表格选中项，避免编辑完再次点编辑还拿上一行数据
+      this.multipleSelection = [];
+      this.reflush();
+    },
+    //编辑弹窗-编辑员工切换水厂
+    handleEditCompanyChange(){
+      //切换水厂清空已选角色
+      this.editData.roleName = null
+      //根据选中的水厂名称，拿到companyId
+      const curCompany = this.companyList.find(c=>c.name === this.editData.companyName)
+      if(curCompany?.id){
+        this.getRoleListByCompany(curCompany.id)
+      }else{
+        this.rolesList = []
+      }
+    },
+    // 搜索栏 水厂下拉切换
+    onSearchCompanyChange(){
+      // 切换水厂，清空角色筛选值
+      this.params.staffCharacterId = null
+      // 加载该水厂对应的角色列表
+      this.getRoleListByCompany(this.params.company)
+    },
     openAddStaffDialog() {
       this.resetAddStaffForm();
       this.addStaff_dialogFormVisible = true;
@@ -683,7 +724,7 @@ export default {
     closeAddStaffDialog() {
       this.addStaff_dialogFormVisible = false;
       this.resetAddStaffForm();
-      this.getRoleListByCompany(this.companyId);
+      this.reflush();
     },
     openDeleteRegionDialog(){
       this.deleteRegion_dialogFormVisible = true;
@@ -776,10 +817,12 @@ export default {
         { condition: !this.addStaffForm.staffName?.trim(), message: "员工名称不能为空" },
         { condition: !this.addStaffForm.account?.trim(), message: "用户账号不能为空" },
         { condition: !this.addStaffForm.password?.trim(), message: "用户密码不能为空" },
+        { condition: !this.addStaffForm.confirmPassword?.trim(), message: "请确认密码" },
+        { condition: this.addStaffForm.password.trim() !== this.addStaffForm.confirmPassword.trim(), message: "两次输入密码不一致" },
         { condition: !this.addStaffForm.staffPhone?.trim(), message: "手机号不能为空" },
         { condition: !/^1[3-9]\d{9}$/.test(this.addStaffForm.staffPhone), message: "手机号格式不正确" },
         { condition: !this.addStaffForm.staffAddr?.trim(), message: "员工地址不能为空" },
-        { condition: this.addStaffForm.staffPostsId === null, message: "请选择员工职位" },
+        // { condition: this.addStaffForm.staffPostsId === null, message: "请选择员工职位" },
         { condition: this.addStaffForm.staffCharacterId === null, message: "请选择权限角色" }
       ];
 
@@ -803,16 +846,14 @@ export default {
           password: this.addStaffForm.password.trim(),
           staffPhone: this.addStaffForm.staffPhone.trim(),
           staffAddr: this.addStaffForm.staffAddr.trim(),
-          staffPostsId: this.addStaffForm.staffPostsId,
+          // staffPostsId: this.addStaffForm.staffPostsId,
           staffCharacterId: this.addStaffForm.staffCharacterId,
           companyId: this.addStaffForm.companyId
         });
 
         if (res.code === 200) {
           ElMessage.success("新增员工成功");
-          this.addStaff_dialogFormVisible = false;
-          // 4. 清空表单
-          this.resetAddStaffForm();
+          this.closeAddStaffDialog()
           // 5. 刷新列表
           this.reflush();
         } else {
@@ -828,6 +869,7 @@ export default {
         staffName: "",
         account: "",
         password: "",
+        confirmPassword: "",
         staffPhone: "",
         staffAddr: "",
         staffPostsId: null,
@@ -881,7 +923,7 @@ export default {
         this.companyWidth = (this.columnPercentages.company / 100) * parentWidth;
         this.addressWidth = (this.columnPercentages.address / 100) * parentWidth;
         this.phoneWidth = (this.columnPercentages.phone / 100) * parentWidth;
-        this.postWidth = (this.columnPercentages.post / 100) * parentWidth;
+        // this.postWidth = (this.columnPercentages.post / 100) * parentWidth;
         this.roleWidth = (this.columnPercentages.role / 100) * parentWidth;
         //this.passwordWidth = (this.columnPercentages.password / 100) * parentWidth;
         // this.lastLoginTimeWidth = (this.columnPercentages.last_login_time / 100) * parentWidth;
@@ -900,6 +942,8 @@ export default {
         this.edit_dialogFormVisible = true;
         this.editData = this.multipleSelection[0];
         this.editData.id = this.multipleSelection[0].id;
+        // 新增：打开编辑弹窗，根据当前员工所属水厂加载角色列表
+        this.getRoleListByCompany(this.multipleSelection[0].companyId);
         console.log(this.editData);
       } else {
         ElMessage.warning("请选择需要编辑的员工数据");
@@ -1013,8 +1057,8 @@ export default {
             this.employeeData = response.data.records.map((item) => {
               return {
                 ...item,
-                staffCharacterId: item.staffCharacterId ? "管理员" : "普通员工",
-                staffPostsId: item.staffPostsId ? "经理" : "员工",
+                // staffCharacterId: item.staffCharacterId ? "管理员" : "普通员工",
+                // staffPostsId: item.staffPostsId ? "经理" : "员工",
               };
             });
             console.log(this.employeeData);
@@ -1060,10 +1104,11 @@ export default {
     clear(isSearch) {
       this.params.account = null;
       this.params.staffName = null;
-      this.params.staffPostsId = null;
+      // this.params.staffPostsId = null;
       this.params.staffCharacterId = null;
       this.params.company = null;
       this.params.companyId = null;
+      this.getRoleListByCompany(this.companyId)
       if (typeof isSearch != 'number' || isNaN(isSearch)) {
         this.params.pageNo = 1;
         this.getEmployeeData();
@@ -1091,8 +1136,8 @@ export default {
             this.employeeData = response.data.records.map((item) => {
               return {
                 ...item,
-                staffCharacterId: item.staffCharacterId ? "管理员" : "普通员工",
-                staffPostsId: item.staffPostsId ? "经理" : "员工",
+                // staffCharacterId: item.staffCharacterId ? "管理员" : "普通员工",
+                // staffPostsId: item.staffPostsId ? "经理" : "员工",
               };
             });
           } else {
@@ -1211,10 +1256,10 @@ export default {
           condition: !/^1[3-9]\d{9}$/.test(this.editData.staffPhone),
           message: "员工手机号格式不正确！",
         },
-        {
-          condition: this.editData.staffPostsId === null || this.editData.staffPostsId === "",
-          message: "员工职位不能为空！",
-        },
+        // {
+        //   condition: this.editData.staffPostsId === null || this.editData.staffPostsId === "",
+        //   message: "员工职位不能为空！",
+        // },
         {
           condition: this.editData.roleName === null || this.editData.roleName === "",
           message: "员工角色不能为空！",
@@ -1239,16 +1284,16 @@ export default {
         staffName: this.editData.staffName,
         staffAddr: this.editData.staffAddr,
         staffPhone: this.editData.staffPhone,
-        staffPostsId: null,
+        // staffPostsId: null,
         staffCharacterId: null,
         staffId: this.editData.staffId,
       };
       console.log(this.editData.staffPostsId);
-      for (let i = 0; i < this.postsList.length; i++) {
-        if (this.editData.staffPostsId === this.postsList[i].name) {
-          params.staffPostsId = this.postsList[i].value;
-        }
-      }
+      // for (let i = 0; i < this.postsList.length; i++) {
+      //   if (this.editData.staffPostsId === this.postsList[i].name) {
+      //     params.staffPostsId = this.postsList[i].value;
+      //   }
+      // }
       for (let i = 0; i < this.rolesList.length; i++) {
         if (this.editData.roleName === this.rolesList[i].name) {
           params.staffCharacterId = this.rolesList[i].id;
@@ -1265,7 +1310,7 @@ export default {
         .then((response) => {
           if (response.code === 200) {
             ElMessage.success("编辑成功");
-            this.edit_dialogFormVisible = false;
+            this.closeEditStaffDialog();
             this.reflush();
           } else {
             ElMessage.error(response.msg);
