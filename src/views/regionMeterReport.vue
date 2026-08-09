@@ -4,7 +4,6 @@
     <div class="search-header">
       <div class="page-title">
         <el-icon><Document /></el-icon>
-        <span>区域抄表报表</span>
       </div>
 
       <div class="search-form">
@@ -31,12 +30,11 @@
           </el-select>
         </div>
 
-        <div class="form-item">
+        <div class="form-item form-item-input">
           <el-input
             v-model="searchKeyword"
             placeholder="姓名/地址/用户号"
             clearable
-            style="width: 300px;"
             @input="handleSearch"
           >
             <template #prefix>
@@ -45,119 +43,140 @@
           </el-input>
         </div>
 
-        <div class="form-actions">
-          <el-button type="primary" @click="handleSearch">
-            <el-icon><Search /></el-icon>
-            <span>搜索</span>
-          </el-button>
+        <el-button type="primary" @click="handleSearch" class="header-btn">
+          <el-icon><Search /></el-icon>
+          <span>搜索</span>
+        </el-button>
 
-          <el-button @click="handleClearAll">
-            <el-icon><Delete /></el-icon>
-            <span>清空</span>
-          </el-button>
-        </div>
-      </div>
+        <el-button @click="handleClearAll" class="header-btn">
+          <el-icon><Delete /></el-icon>
+          <span>清空</span>
+        </el-button>
 
-      <div class="header-right">
-        <el-button type="success" @click="handleExportExcel">
+        <el-button type="success" @click="handleExportExcel" class="header-btn">
           <el-icon><Document /></el-icon>
           <span>导出Excel</span>
         </el-button>
 
-        <el-button type="primary" @click="handleExportPdf">
+        <el-button type="primary" @click="handleExportPdf" class="header-btn">
           <el-icon><Document /></el-icon>
           <span>导出PDF</span>
         </el-button>
 
-        <el-button @click="goBack">
+        <el-button @click="goBack" class="header-btn">
           <el-icon><ArrowLeft /></el-icon>
           <span>返回</span>
         </el-button>
       </div>
     </div>
 
-    <!-- 主体表格区域 -->
-    <div class="main-content">
-      <el-table
-        :data="paginatedReportList"
-        stripe
-        border
-        v-loading="loading"
-        height="100%"
-      >
-        <el-table-column prop="userId" label="用户号" min-width="120" align="center" />
-        <el-table-column prop="userName" label="用户姓名" min-width="120" align="center" />
-        <el-table-column prop="address" label="用户地址" min-width="200" align="center" show-overflow-tooltip />
-
-        <el-table-column prop="dataType" label="数据类型" min-width="100" align="center">
-          <template #default="{ row }">
-            <el-tag
-              :type="row.dataType === '未审核' ? 'warning' : row.dataType === '已审核' ? 'success' : 'info'"
-              size="small"
-              class="status-tag-large"
-            >
-              {{ row.dataType }}
-            </el-tag>
-          </template>
-        </el-table-column>
-
-        <el-table-column prop="reportStatus" label="抄表状态" min-width="100" align="center">
-          <template #default="{ row }">
-            <el-tag :type="row.reportStatus === '正常' ? 'success' : 'warning'" size="small" class="status-tag-large">
-              {{ row.reportStatus || '-' }}
-            </el-tag>
-          </template>
-        </el-table-column>
-
-        <el-table-column prop="startReading" label="起码(吨)" min-width="100" align="center">
-          <template #default="{ row }">
-            <span>{{ showMeterReadings(row) ? Math.floor(row.startReading || 0) : '-' }}</span>
-          </template>
-        </el-table-column>
-
-        <el-table-column prop="endReading" label="止码(吨)" min-width="100" align="center">
-          <template #default="{ row }">
-            <span>{{ showMeterReadings(row) ? Math.floor(row.endReading || 0) : '-' }}</span>
-          </template>
-        </el-table-column>
-
-        <el-table-column prop="deltaWater" label="本期用量(吨)" min-width="110" align="center">
-          <template #default="{ row }">
-            <span>{{ showMeterReadings(row) ? (row.deltaWater || 0) : '-' }}</span>
-          </template>
-        </el-table-column>
-
-        <el-table-column prop="feeThisTime" label="本次扣费(元)" min-width="110" align="center">
-          <template #default="{ row }">
-            {{ row.createTime ? formatMoney(row.feeThisTime) : '-' }}
-          </template>
-        </el-table-column>
-
-        <el-table-column prop="createTime" label="抄表日期" min-width="140" align="center">
-          <template #default="{ row }">
-            {{ formatDate(row.createTime) }}
-          </template>
-        </el-table-column>
-
-      </el-table>
-
-      <!-- 分页器 -->
-      <div class="pagination-container" v-if="filteredReportList.length > 0">
-        <span class="total-count">共 {{ filteredReportList.length }} 条</span>
-        <el-pagination
-          v-model:current-page="currentPage"
-          v-model:page-size="pageSize"
-          :page-sizes="[10, 20, 50, 100]"
-          :total="filteredReportList.length"
-          layout="sizes, prev, pager, next, jumper, total"
-          @size-change="handleSizeChange"
-          @current-change="handleCurrentChange"
-        />
+    <!-- 主体卡片：完全照搬登录安全页 .yuangong-info -->
+    <div class="info-card">
+      <!-- 工具行：与登录安全页 .command-box 对应 -->
+      <div class="command-bar">
+        <div class="cmd-btn refresh-btn" @click="reflush" title="刷新">
+          <img src="@/assets/yonghu/icon15.png" alt="" />
+        </div>
       </div>
 
-      <!-- 空数据提示 -->
-      <div v-if="filteredReportList.length === 0 && !loading" class="empty-state">
-        <el-empty description="暂无数据" />
+      <!-- 表格区域：与登录安全页 .yuangong-table 对应 -->
+      <div class="table-zone">
+        <el-table
+          :data="paginatedReportList"
+          ref="multipleTableRef"
+          row-key="id"
+          border
+          v-loading="loading"
+          :header-cell-style="{ background: '#46B97E', color: '#FFFFFF' }"
+          class="report-table"
+          style="width: 100%; height: 100%; table-layout: fixed; overflow-x: auto; overflow-y: auto"
+        >
+          <el-table-column prop="userId" label="用户号" :width="userIdWidth" align="center" />
+          <el-table-column prop="userName" label="用户姓名" :width="userNameWidth" align="center" />
+          <el-table-column prop="address" label="用户地址" :width="addressWidth" align="center" show-overflow-tooltip />
+
+          <el-table-column prop="dataType" label="数据类型" :width="dataTypeWidth" align="center">
+            <template #default="{ row }">
+              <span
+                class="status-badge"
+                :class="{
+                  'badge-warning': row.dataType === '未审核',
+                  'badge-success': row.dataType === '已审核',
+                  'badge-info': row.dataType === '无数据' || !row.dataType
+                }"
+              >
+                {{ row.dataType || '-' }}
+              </span>
+            </template>
+          </el-table-column>
+
+          <el-table-column prop="reportStatus" label="抄表状态" :width="reportStatusWidth" align="center">
+            <template #default="{ row }">
+              <span
+                class="status-badge"
+                :class="{
+                  'badge-success': row.reportStatus === '正常',
+                  'badge-warning': row.reportStatus && row.reportStatus !== '正常',
+                  'badge-info': !row.reportStatus
+                }"
+              >
+                {{ row.reportStatus || '-' }}
+              </span>
+            </template>
+          </el-table-column>
+
+          <el-table-column prop="startReading" label="起码(吨)" :width="startReadingWidth" align="center">
+            <template #default="{ row }">
+              <span>{{ showMeterReadings(row) ? Math.floor(row.startReading || 0) : '-' }}</span>
+            </template>
+          </el-table-column>
+
+          <el-table-column prop="endReading" label="止码(吨)" :width="endReadingWidth" align="center">
+            <template #default="{ row }">
+              <span>{{ showMeterReadings(row) ? Math.floor(row.endReading || 0) : '-' }}</span>
+            </template>
+          </el-table-column>
+
+          <el-table-column prop="deltaWater" label="本期用量(吨)" :width="deltaWaterWidth" align="center">
+            <template #default="{ row }">
+              <span>{{ showMeterReadings(row) ? (row.deltaWater || 0) : '-' }}</span>
+            </template>
+          </el-table-column>
+
+          <el-table-column prop="feeThisTime" label="本次扣费(元)" :width="feeThisTimeWidth" align="center">
+            <template #default="{ row }">
+              {{ row.createTime ? formatMoney(row.feeThisTime) : '-' }}
+            </template>
+          </el-table-column>
+
+          <el-table-column prop="createTime" label="抄表日期" :width="createTimeWidth" align="center">
+            <template #default="{ row }">
+              {{ formatDate(row.createTime) }}
+            </template>
+          </el-table-column>
+
+        </el-table>
+
+        <!-- 空状态：与登录安全页对空数据时的呈现保持一致 -->
+        <div v-if="!loading && filteredReportList.length === 0" class="empty-tip">
+          <span>暂无数据</span>
+        </div>
+      </div>
+
+      <!-- 分页：与登录安全页 .page-box 对应 -->
+      <div class="page-box">
+        <div class="demo-pagination-block">
+          <el-pagination
+            v-if="filteredReportList.length > 0"
+            v-model:current-page="currentPage"
+            v-model:page-size="pageSize"
+            :page-sizes="[10, 25, 50, 100]"
+            :total="filteredReportList.length"
+            layout="total, sizes, prev, pager, next, jumper"
+            @size-change="handleSizeChange"
+            @current-change="handleCurrentChange"
+          />
+        </div>
       </div>
     </div>
   </div>
@@ -213,7 +232,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted, nextTick } from 'vue';
+import { ref, reactive, computed, onMounted, onBeforeUnmount, nextTick } from 'vue';
 import { useRouter } from 'vue-router';
 import { ElMessage } from 'element-plus';
 import { Document, Search, Delete, ArrowLeft } from '@element-plus/icons-vue';
@@ -247,7 +266,7 @@ const searchKeyword = ref('');
 
 // 分页相关
 const currentPage = ref(1);
-const pageSize = ref(20);
+const pageSize = ref(25);
 
 // 加载状态
 const loading = ref(false);
@@ -312,6 +331,50 @@ const formatDate = (dateStr) => {
   const minute = String(date.getMinutes()).padStart(2, '0');
   return `${year}-${month}-${day} ${hour}:${minute}`;
 };
+
+// ============== 表格列宽（参考登录安全页做法，按容器百分比分配） ==============
+const columnPercentages = {
+  userId: 10,
+  userName: 8,
+  address: 14,
+  dataType: 9,
+  reportStatus: 9,
+  startReading: 8,
+  endReading: 8,
+  deltaWater: 10,
+  feeThisTime: 9,
+  createTime: 15
+};
+
+const tableContainer = ref(null);
+
+const userIdWidth = ref(0);
+const userNameWidth = ref(0);
+const addressWidth = ref(0);
+const dataTypeWidth = ref(0);
+const reportStatusWidth = ref(0);
+const startReadingWidth = ref(0);
+const endReadingWidth = ref(0);
+const deltaWaterWidth = ref(0);
+const feeThisTimeWidth = ref(0);
+const createTimeWidth = ref(0);
+
+const calculateColumnWidths = () => {
+  if (!tableContainer.value) return;
+  const w = tableContainer.value.offsetWidth;
+  userIdWidth.value = (columnPercentages.userId / 100) * w;
+  userNameWidth.value = (columnPercentages.userName / 100) * w;
+  addressWidth.value = (columnPercentages.address / 100) * w;
+  dataTypeWidth.value = (columnPercentages.dataType / 100) * w;
+  reportStatusWidth.value = (columnPercentages.reportStatus / 100) * w;
+  startReadingWidth.value = (columnPercentages.startReading / 100) * w;
+  endReadingWidth.value = (columnPercentages.endReading / 100) * w;
+  deltaWaterWidth.value = (columnPercentages.deltaWater / 100) * w;
+  feeThisTimeWidth.value = (columnPercentages.feeThisTime / 100) * w;
+  createTimeWidth.value = (columnPercentages.createTime / 100) * w;
+};
+
+let resizeObserver = null;
 
 // 是否显示起码、止码、本期用量
 // 已审核数据始终显示；未审核数据仅在抄表状态为“正常”时显示
@@ -415,6 +478,16 @@ const fetchCompanyList = async () => {
   }
 };
 
+// 刷新：直接调用 handleRegionChange 重新拉当前区域
+const reflush = () => {
+  if (!searchParams.region) {
+    ElMessage.warning('请先选择区域');
+    return;
+  }
+  currentPage.value = 1;
+  loadRegionReport(searchParams.region);
+};
+
 // 水厂变化时加载区域列表
 const handleCompanyChange = async (companyId) => {
   if (!companyId) {
@@ -479,7 +552,7 @@ const handleClearAll = () => {
   searchParams.region = '';
   reportList.value = [];
   currentPage.value = 1;
-  pageSize.value = 20;
+  pageSize.value = 25;
 };
 
 // 导出 Excel：按当前搜索条件导出全部数据
@@ -555,209 +628,327 @@ const handleExportPdf = async () => {
 };
 
 onMounted(() => {
+  // 表格列宽自适应
+  nextTick(() => {
+    tableContainer.value = document.querySelector('.table-zone') || document.querySelector('.info-card');
+    calculateColumnWidths();
+    if (typeof ResizeObserver !== 'undefined') {
+      resizeObserver = new ResizeObserver(calculateColumnWidths);
+      if (tableContainer.value) {
+        resizeObserver.observe(tableContainer.value);
+      }
+    } else {
+      window.addEventListener('resize', calculateColumnWidths);
+    }
+  });
   fetchCompanyList();
+});
+
+onBeforeUnmount(() => {
+  if (resizeObserver) {
+    resizeObserver.disconnect();
+  } else {
+    window.removeEventListener('resize', calculateColumnWidths);
+  }
 });
 </script>
 
 <style scoped lang="scss">
+/* 完全照搬登录安全页 loginLog.vue 的样式结构 */
+
+:deep(.el-table__body tr:nth-child(odd)) {
+  background-color: #edf8f2;
+}
+
+:deep(.el-table__body tr:nth-child(even)) {
+  background-color: #ffffff;
+}
+
+:deep(.el-table__body tr:hover > td) {
+  background-color: #fbf2cb !important;
+}
+
+:deep(.el-pagination) {
+  --el-color-primary: #46b97e;
+  font-size: 16px;
+}
+
+:deep(.el-pagination .el-pager li) {
+  font-size: 16px;
+  min-width: 35px;
+  height: 35px;
+  line-height: 35px;
+}
+
+:deep(.el-input) {
+  --el-color-primary: #46b97e;
+}
+
+:deep(.el-select .el-select__wrapper) {
+  height: 35px;
+}
+
+:deep(.el-select) {
+  --el-color-primary: #46b97e;
+}
+
+:deep(.el-input__inner) {
+  font-size: 16px !important;
+}
+
+:deep(.el-select__wrapper .el-select__placeholder) {
+  font-size: 16px !important;
+}
+
+:deep(.el-select__wrapper .el-select__selected-item) {
+  font-size: 16px !important;
+}
+
+:deep(.el-tag) {
+  font-size: 16px !important;
+}
+
+/* 数据类型 / 抄表状态徽章：字号 20px */
+.status-badge {
+  display: inline-block;
+  font-size: 20px;
+  line-height: 1;
+  padding: 5px 12px;
+  border-radius: 4px;
+  border: 1px solid transparent;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+
+.status-badge.badge-success {
+  color: #67c23a;
+  background-color: #f0f9eb;
+  border-color: #e1f3d8;
+}
+
+.status-badge.badge-warning {
+  color: #e6a23c;
+  background-color: #fdf6ec;
+  border-color: #faecd8;
+}
+
+.status-badge.badge-info {
+  color: #909399;
+  background-color: #f4f4f5;
+  border-color: #e9e9e9;
+}
+
+/* 最外层容器：与登录安全页 .yuangong-container 对齐 */
 .region-meter-report {
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
-  background-color: #f5f7fa;
-  padding: 20px;
-  gap: 20px;
+  align-content: center;
+  justify-content: center;
+  min-width: 94%;
+  height: 100%;
+  padding: 0 15px;
+}
 
-  // 顶部搜索栏
-  .search-header {
-    background-color: #fff;
-    border-radius: 8px;
-    padding: 20px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+/* 顶部搜索栏（横向单行排列，整体 1.5 倍放大） */
+.search-header {
+  margin-top: 5px;
+  margin-bottom: 10px;
+  width: 99.3%;
+  padding: 12px 15px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: nowrap;
+  gap: 12px;
+  border: 1px solid #e9e9e9;
+  border-radius: 5px;
+  background-color: #fff;
 
-    .page-title {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-size: 24px;
-      font-weight: 600;
-      color: #303133;
-      margin-bottom: 20px;
-      padding-bottom: 15px;
-      border-bottom: 2px solid #46b97e;
-
-      .el-icon {
-        color: #46b97e;
-        font-size: 28px;
-      }
-    }
-
-    .search-form {
-      display: flex;
-      align-items: center;
-      gap: 20px;
-      flex-wrap: wrap;
-      margin-bottom: 15px;
-
-      .form-item {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-
-        .form-label {
-          font-size: 24px;
-          color: #606266;
-          white-space: nowrap;
-        }
-
-        .company-name {
-          font-size: 24px;
-          color: #303133;
-          font-weight: 500;
-          min-width: 150px;
-          display: inline-block;
-        }
-
-        :deep(.el-select),
-        :deep(.el-input) {
-          width: 200px;
-
-          .el-select__wrapper,
-          .el-select__input,
-          .el-select__placeholder,
-          .el-select__selected-item {
-            font-size: 24px;
-          }
-
-          .el-select-dropdown__item {
-            font-size: 24px;
-          }
-        }
-
-        :deep(.el-input__inner) {
-          font-size: 24px;
-        }
-      }
-
-      .form-actions {
-        display: flex;
-        gap: 10px;
-      }
-    }
-
-    .header-right {
-      display: flex;
-      justify-content: flex-end;
-      gap: 10px;
-    }
-  }
-
-  // 主体内容区
-  .main-content {
-    flex: 1;
-    min-height: calc(100vh - 280px);
-    background-color: #fff;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-    padding: 20px;
+  .page-title {
     display: flex;
-    flex-direction: column;
-    overflow: hidden;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
 
-    :deep(.el-table) {
-      font-size: 20px;
+    .el-icon {
+      color: #46b97e;
+      font-size: 33px; /* 22 * 1.5 */
+    }
+  }
 
-      .el-table__header th {
-        background-color: #f5f7fa;
-        font-weight: 600;
-        color: #606266;
-      }
+  .search-form {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    flex: 1;
+    min-width: 0;
+    gap: 15px;
+  }
 
-      .el-table__body td {
-        color: #606266;
-      }
+  .form-item {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    flex-shrink: 0;
 
-      .el-table__empty-block {
-        min-height: calc(100vh - 360px);
-      }
+    .form-label {
+      font-size: 24px; /* 16 * 1.5 */
+      margin-right: 12px;
+      color: #606266;
+      white-space: nowrap;
+    }
 
-      .status-tag-large {
-        font-size: 22px !important;
-        padding: 6px 12px;
+    .company-name {
+      font-size: 24px; /* 16 * 1.5 */
+      font-weight: 500;
+      color: #303133;
+      min-width: 180px;
+      display: inline-block;
+      white-space: nowrap;
+    }
+
+    :deep(.el-select) {
+      width: 270px;
+
+      .el-select__wrapper,
+      .el-select__input,
+      .el-select__placeholder,
+      .el-select__selected-item {
+        font-size: 24px !important; /* 16 * 1.5，!important 覆盖 el-select 默认 */
+        line-height: 1.2;
       }
     }
 
-    .empty-state {
-      padding: 40px 0;
+    :deep(.el-select .el-select__wrapper) {
+      height: 48px !important;            /* 与区域选择框保持统一高度，24px 字体不截断 */
+      min-height: 48px !important;
+      box-sizing: border-box;
+      padding: 8px 15px;
+      font-size: 24px !important;
     }
 
-    .pagination-container {
-      margin-top: auto;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 15px 0;
-      flex-shrink: 0;
-      border-top: 1px solid #ebeef5;
+    :deep(.el-select .el-select__wrapper .el-select__placeholder) {
+      font-size: 24px !important;
+      line-height: 32px;
+    }
 
-      .total-count {
-        font-size: 20px;
-        color: #606266;
+    :deep(.el-select .el-select__wrapper .el-select__selected-item) {
+      font-size: 24px !important;
+      line-height: 32px;
+    }
+
+    :deep(.el-input) {
+      width: 100%;
+
+      .el-input__wrapper {
+        height: 48px !important;          /* 与 select__wrapper 保持统一高度 */
+        min-height: 48px !important;
+        box-sizing: border-box;
+        padding: 8px 15px;
+      }
+
+      .el-input__inner {
+        font-size: 24px !important; /* 16 * 1.5 */
+        line-height: 32px;       /* 与 select 文字垂直居中高度一致 */
+        height: 32px;
       }
     }
   }
-}
 
-@media (max-width: 1200px) {
-  .region-meter-report {
-    padding: 16px;
-    gap: 16px;
+  .form-item-input {
+    width: 390px; /* 260 * 1.5 */
+  }
 
-    .search-header {
-      .search-form {
-        gap: 16px;
+  .header-btn {
+    flex-shrink: 0;
+    font-size: 21px; /* 14 * 1.5 */
+  }
 
-        .form-item {
-          :deep(.el-select),
-          :deep(.el-input) {
-            width: 180px;
-          }
-        }
-      }
-    }
+  .header-btn :deep(.el-icon) {
+    font-size: 21px; /* 图标随文字同步放大 */
   }
 }
 
-@media (max-width: 768px) {
-  .region-meter-report {
-    padding: 12px;
-    gap: 12px;
-
-    .search-header {
-      .page-title {
-        font-size: 20px;
-      }
-
-      .search-form {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 12px;
-
-        .form-item {
-          justify-content: space-between;
-
-          :deep(.el-select),
-          :deep(.el-input) {
-            width: 100%;
-            flex: 1;
-          }
-        }
-      }
-    }
-  }
+/* 主体卡片：与登录安全页 .yuangong-info 对应 */
+.info-card {
+  width: 99.3%;
+  height: calc(100% - 120px);
+  margin-bottom: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border: 1px solid #e9e9e9;
+  border-radius: 5px;
+  background-color: #fff;
+  position: relative;
+  padding: 0 10px;
 }
 
-// PDF 导出专用区域：屏幕外渲染，供 html2pdf 捕获
+/* 工具行：与登录安全页 .command-box 对应 */
+.command-bar {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: auto;
+  margin-top: 10px;
+}
+
+.cmd-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 35px;
+  height: 35px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.3s;
+  background-color: #fff;
+  border: 2px solid #f2f2f2;
+  margin-right: 10px;
+}
+
+/* 表格区：与登录安全页 .yuangong-table 对应（固定高度，减去分页） */
+.table-zone {
+  width: 100%;
+  height: calc(100% - 100px);
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.empty-tip {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #909399;
+  font-size: 18px;
+  pointer-events: none;
+}
+
+/* 分页：完全照搬登录安全页 .page-box，绝对定位钉在底部 */
+.page-box {
+  width: 100%;
+  height: 40px;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.demo-pagination-block {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* PDF 导出专用区域：屏幕外渲染，供 html2pdf 捕获 */
 .print-wrapper {
   position: fixed;
   left: 0;
@@ -822,5 +1013,12 @@ onMounted(() => {
     text-align: right;
     font-size: 9pt;
   }
+}
+</style>
+
+<!-- 全局：与登录安全页保持一致（保留垂直滚动条，避免缩放抖动） -->
+<style>
+html {
+  overflow-y: scroll;
 }
 </style>
