@@ -1,6 +1,6 @@
 <template>
   <div class="change-dialog" v-if="dialogVisible">
-    <div class="combo-dialog-content" :style="{ height: companyId == 1 ? '780px' : '710px' }">
+    <div class="combo-dialog-content" :style="{ height: companyId == 1 ? '850px' : '780px' }">
       <div class="title">
         <div style="margin-left: 10px; display: flex; align-items: center">
           <img src="@/assets/yonghu/icon13.png" alt="" style="margin-right: 8px" />
@@ -35,6 +35,19 @@
             <span>所属区域</span>
             <el-select v-model="form.regionId" class="input-item big-font-el-select" placeholder="请选择所属区域">
               <el-option v-for="item in regionList" :key="item.id" :label="item.label" :value="item.id" />
+            </el-select>
+          </div>
+          <div class="edit-input">
+            <span>是否为普表用户</span>
+            <el-select v-model="form.isNormalMeterUser" class="input-item big-font-el-select" placeholder="请选择">
+              <el-option label="否" :value="false" />
+              <el-option label="是" :value="true" />
+            </el-select>
+          </div>
+          <div class="edit-input">
+            <span>所属表册</span>
+            <el-select v-model="form.codeBookId" class="input-item big-font-el-select" placeholder="请选择所属表册" :disabled="!form.isNormalMeterUser">
+              <el-option v-for="item in codeBookList" :key="item.id" :label="item.label" :value="item.id" />
             </el-select>
           </div>
           <div class="edit-input">
@@ -218,13 +231,16 @@ export default {
         reading: null,
         meterId: null,
         enableArrearsValve:  "default",
-        isNormalMeter: false
+        isNormalMeter: false,
+        isNormalMeterUser: false,
+        codeBookId: null,
       },
       companyList: [],
       regionList: [],
       priceList: [],
       smsConfigList: [],
       approverList: [],
+      codeBookList: [],
       currentStaffId: userData.staffId || null,
       allowEditReading: false,
       meterQueryError: "",
@@ -250,6 +266,11 @@ export default {
       this.form.regionId = null;
       this.refreshCompanyRelated();
     },
+    "form.isNormalMeterUser": function (newVal) {
+      if (!newVal) {
+        this.form.codeBookId = null;
+      }
+    },
   },
   methods: {
     handleClose() {
@@ -262,6 +283,7 @@ export default {
       this.getPriceList(cid);
       this.getSmsConfigList(cid);
       this.getApproverList(cid);
+      this.getCodeBookList(cid);
     },
     getCompanyList() {
       service
@@ -286,6 +308,22 @@ export default {
         })
         .catch(() => {
           ElMessage.error("获取区域数据失败");
+        });
+    },
+    getCodeBookList(companyId) {
+      if (!companyId) return;
+      service
+        .get(`/getCodeBook?companyId=${companyId}`)
+        .then((response) => {
+          if (response.code === 200) {
+            this.codeBookList = response.data.map((item) => ({
+              id: item.codeBookId,
+              label: item.codeBookName,
+            }));
+          }
+        })
+        .catch(() => {
+          ElMessage.error("获取表册列表失败");
         });
     },
     getPriceList(companyId) {
@@ -507,6 +545,8 @@ export default {
           companyName,
           companyId: effectiveCompanyId,
           createTime: this.form.createTime,
+          isNormalMeterUser: this.form.isNormalMeterUser,
+          codeBookId: this.form.isNormalMeterUser ? this.form.codeBookId : null,
         },
         userMeterBindDTO: {
           userId: this.form.userId ? Number(this.form.userId) : null,
@@ -570,7 +610,7 @@ export default {
   left: 50%;
   top: 50%;
   transform: translateX(-50%);
-  margin-top: -330px;
+  margin-top: -365px;
   display: flex;
   flex-direction: column;
   align-items: center;

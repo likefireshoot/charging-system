@@ -14,19 +14,19 @@
         </div>
 
         <div class="form-item">
-          <label class="form-label">区域</label>
-          <el-select 
-            v-model="searchParams.region" 
-            placeholder="选择区域"
+          <label class="form-label">表册</label>
+          <el-select
+            v-model="searchParams.codeBook"
+            placeholder="选择表册"
             clearable
-            @change="handleRegionChange"
+            @change="handleCodeBookChange"
             :disabled="!currentCompanyId"
           >
-            <el-option 
-              v-for="item in regionList" 
-              :key="item.regionId"
-              :label="item.regionName"
-              :value="item.regionId"
+            <el-option
+              v-for="item in codeBookList"
+              :key="item.codeBookId"
+              :label="item.codeBookName"
+              :value="item.codeBookId"
             />
           </el-select>
         </div>
@@ -223,7 +223,7 @@ const router = useRouter();
 // 搜索参数
 const searchParams = reactive({
   companyId: '',
-  region: ''
+  codeBook: ''
 });
 
 // 当前登录用户的公司信息
@@ -233,8 +233,8 @@ const currentCompanyName = ref('');
 // 水厂列表
 const companyList = ref([]);
 
-// 区域列表
-const regionList = ref([]);
+// 表册列表
+const codeBookList = ref([]);
 
 // 审核列表（原始数据）
 const reviewList = ref([]);
@@ -260,20 +260,9 @@ const endReadingInputRef = ref(null);
 // 表格引用
 const tableRef = ref(null);
 
-// 过滤后的审核列表（根据搜索关键词）
+// 审核列表（服务端已按关键词过滤）
 const filteredReviewList = computed(() => {
-  if (!searchKeyword.value.trim()) {
-    return reviewList.value;
-  }
-
-  const keyword = searchKeyword.value.trim().toLowerCase();
-  return reviewList.value.filter(item => {
-    return (
-      (item.userName && item.userName.toLowerCase().includes(keyword)) ||
-      (item.userId && item.userId.toString().toLowerCase().includes(keyword)) ||
-      (item.address && item.address.toLowerCase().includes(keyword))
-    );
-  });
+  return reviewList.value;
 });
 
 // 分页后的审核列表
@@ -320,7 +309,7 @@ const fetchCompanyList = async () => {
         currentCompanyName.value = currentUserCompany.companyName;
         searchParams.companyId = currentCompanyId.value;
 
-        // 自动加载该水厂的区域列表
+        // 自动加载该水厂的表册列表
         handleCompanyChange(currentCompanyId.value);
       } else {
         currentCompanyName.value = '-';
@@ -341,60 +330,57 @@ const fetchCompanyList = async () => {
   }
 };
 
-// 水厂变化时加载区域列表
+// 水厂变化时加载表册列表
 const handleCompanyChange = async (companyId) => {
   if (!companyId) {
-    regionList.value = [];
+    codeBookList.value = [];
     reviewList.value = [];
-    searchParams.region = '';
+    searchParams.codeBook = '';
     return;
   }
 
   try {
-    // 调用后端接口获取该水厂下的区域列表
-    const res = await service.get(`/getRegion?companyId=${companyId}`);
-    
+    const res = await service.get(`/getCodeBook?companyId=${companyId}`);
+
     if (res.code === 200) {
-      // 筛选普表区域：名称包含"普表"前缀（历史兼容），或 region_type === 3
-      const allRegions = res.data || [];
-      regionList.value = allRegions.filter(region =>
-        (region.regionName && region.regionName.includes('普表')) || region.regionType === 3
-      );
+      codeBookList.value = res.data || [];
 
-      // 清空审核列表和选中的区域
+      // 清空审核列表和选中的表册
       reviewList.value = [];
-      searchParams.region = '';
+      searchParams.codeBook = '';
 
-      if (regionList.value.length > 0) {
-        ElMessage.success(`已加载 ${regionList.value.length} 个普表区域`);
+      if (codeBookList.value.length > 0) {
+        ElMessage.success(`已加载 ${codeBookList.value.length} 个表册`);
       } else {
-        ElMessage.warning('该水厂下暂无普表区域');
+        ElMessage.warning('该水厂下暂无表册');
       }
     } else {
-      ElMessage.error(res.msg || '获取区域列表失败');
-      regionList.value = [];
+      ElMessage.error(res.msg || '获取表册列表失败');
+      codeBookList.value = [];
     }
   } catch (error) {
-    console.error('获取区域列表错误:', error);
+    console.error('获取表册列表错误:', error);
     ElMessage.error('网络请求失败');
-    regionList.value = [];
+    codeBookList.value = [];
   }
 };
 
-// 区域变化时加载审核列表
-const handleRegionChange = async (regionId) => {
-  if (!regionId) {
+// 表册变化时加载审核列表
+const handleCodeBookChange = async (codeBookId) => {
+  if (!codeBookId) {
     reviewList.value = [];
     return;
   }
 
   loading.value = true;
   try {
-    // 调用后端接口获取待审核的抄表记录
-    const res = await service.get(`/manual/charge/getPendingReviewList?regionId=${regionId}`);
-    
+    let url = `/manual/charge/getPendingReviewListByCodeBook?codeBookId=${codeBookId}`;
+    if (searchKeyword.value.trim()) {
+      url += `&keyword=${encodeURIComponent(searchKeyword.value.trim())}`;
+    }
+    const res = await service.get(url);
+
     if (res.code === 200) {
-      // 处理返回的数据
       reviewList.value = (res.data || []).map(item => ({
         id: item.id,
         userId: item.userId,
@@ -408,7 +394,7 @@ const handleRegionChange = async (regionId) => {
         createTime: item.createTime,
         balance: item.balance || 0
       }));
-      
+
     } else {
       ElMessage.error(res.msg || '获取审核列表失败');
       reviewList.value = [];
@@ -422,21 +408,22 @@ const handleRegionChange = async (regionId) => {
   }
 };
 
-// 搜索处理函数
+// 搜索处理函数（触发服务端搜索）
 const handleSearch = () => {
-  // 重置到第一页
   currentPage.value = 1;
-  
-  // 清空选中状态
   selectedRows.value = [];
   selectAll.value = false;
+
+  if (searchParams.codeBook) {
+    handleCodeBookChange(searchParams.codeBook);
+  }
 };
 
 // 清空所有数据
 const handleClearAll = async () => {
   try {
     await ElMessageBox.confirm(
-      '确定要清空所有数据吗？这将清除选中的区域、搜索条件和审核列表。',
+      '确定要清空所有数据吗？这将清除选中的表册、搜索条件和审核列表。',
       '提示',
       {
         confirmButtonText: '确定',
@@ -447,12 +434,12 @@ const handleClearAll = async () => {
     
     // 清空搜索条件
     searchParams.companyId = '';
-    searchParams.region = '';
+    searchParams.codeBook = '';
     searchKeyword.value = '';
-    
+
     // 清空列表
     reviewList.value = [];
-    regionList.value = [];
+    codeBookList.value = [];
     
     // 清空选中状态
     selectedRows.value = [];

@@ -9,20 +9,20 @@
         </div>
 
         <div class="form-item">
-          <label class="form-label">区域</label>
-          <el-select 
-            v-model="searchParams.region" 
-            placeholder="选择区域"
+          <label class="form-label">表册</label>
+          <el-select
+            v-model="searchParams.codeBook"
+            placeholder="选择表册"
             clearable
-            @change="handleRegionChange"
+            @change="handleCodeBookChange"
             :disabled="!currentCompanyId"
-            class="region-select"
+            class="codebook-select"
           >
-            <el-option 
-              v-for="item in regionList" 
-              :key="item.regionId"
-              :label="item.regionName"
-              :value="item.regionId"
+            <el-option
+              v-for="item in codeBookList"
+              :key="item.codeBookId"
+              :label="item.codeBookName"
+              :value="item.codeBookId"
             />
           </el-select>
         </div>
@@ -301,7 +301,7 @@ const router = useRouter();
 // 搜索参数
 const searchParams = reactive({
   companyId: '', // 新增：水厂ID
-  region: ''
+  codeBook: ''
 });
 
 // 当前登录用户的公司信息
@@ -311,8 +311,8 @@ const currentCompanyName = ref('');
 // 水厂列表
 const companyList = ref([]);
 
-// 区域列表
-const regionList = ref([]);
+// 表册列表
+const codeBookList = ref([]);
 
 // 用户列表（原始数据）
 const userList = ref([]);
@@ -425,7 +425,7 @@ const fetchCompanyList = async () => {
         currentCompanyName.value = currentUserCompany.companyName;
         searchParams.companyId = currentCompanyId.value;
 
-        // 自动加载该水厂的区域列表
+        // 自动加载该水厂的表册列表
         handleCompanyChange(currentCompanyId.value);
       } else {
         currentCompanyName.value = '-';
@@ -446,58 +446,51 @@ const fetchCompanyList = async () => {
   }
 };
 
-// 水厂变化时加载区域列表
+// 水厂变化时加载表册列表
 const handleCompanyChange = async (companyId) => {
   if (!companyId) {
-    regionList.value = [];
+    codeBookList.value = [];
     userList.value = [];
-    searchParams.region = '';
+    searchParams.codeBook = '';
     return;
   }
 
   try {
-    // 调用后端接口获取该水厂下的区域列表
-    const res = await service.get(`/getRegion?companyId=${companyId}`);
-    
+    const res = await service.get(`/getCodeBook?companyId=${companyId}`);
+
     if (res.code === 200) {
-      // 筛选普表区域：名称包含"普表"前缀（历史兼容），或 region_type === 3
-      const allRegions = res.data || [];
-      regionList.value = allRegions.filter(region =>
-        (region.regionName && region.regionName.includes('普表')) || region.regionType === 3
-      );
+      codeBookList.value = res.data || [];
 
-      // 清空用户列表和选中的区域
+      // 清空用户列表和选中的表册
       userList.value = [];
-      searchParams.region = '';
+      searchParams.codeBook = '';
 
-      if (regionList.value.length === 0) {
-        ElMessage.warning('该水厂下暂无普表区域');
+      if (codeBookList.value.length === 0) {
+        ElMessage.warning('该水厂下暂无表册');
       }
     } else {
-      ElMessage.error(res.msg || '获取区域列表失败');
-      regionList.value = [];
+      ElMessage.error(res.msg || '获取表册列表失败');
+      codeBookList.value = [];
     }
   } catch (error) {
-    console.error('获取区域列表错误:', error);
+    console.error('获取表册列表错误:', error);
     ElMessage.error('网络请求失败');
-    regionList.value = [];
+    codeBookList.value = [];
   }
 };
 
-// 区域变化时加载用户列表
-const handleRegionChange = async (regionId) => {
-  if (!regionId) {
+// 表册变化时加载用户列表
+const handleCodeBookChange = async (codeBookId) => {
+  if (!codeBookId) {
     userList.value = [];
     return;
   }
 
   loading.value = true;
   try {
-    // 调用后端接口获取用户列表
-    const res = await service.get(`/manual/charge/getUserListByRegion?regionId=${regionId}`);
-    
+    const res = await service.get(`/manual/charge/getUserListByCodeBook?codeBookId=${codeBookId}`);
+
     if (res.code === 200) {
-      // 处理返回的数据，添加 currentReadingInput 和 reportStatus 字段
       userList.value = (res.data || []).map(user => ({
         userId: user.userId,
         userName: user.userName,
@@ -508,9 +501,9 @@ const handleRegionChange = async (regionId) => {
         currentReadingInput: '',
         meterCode: user.meterCode || '',
         balance: user.balance || 0,
-        reportStatus: '正常' // 默认选择正常状态
+        reportStatus: '正常'
       }));
-      
+
       // 自动选中第一个用户
       if (userList.value.length > 0) {
         const firstUser = userList.value[0];
@@ -524,7 +517,6 @@ const handleRegionChange = async (regionId) => {
   } catch (error) {
     console.error('加载用户列表错误:', error);
 
-    // 如果接口不存在，给出明确提示
     if (error.response?.status === 404) {
       ElMessage.error('用户列表接口未找到，请确认后端服务已启动并包含最新代码');
       userList.value = [];
@@ -634,12 +626,12 @@ const handleClearAll = async () => {
     
     // 清空搜索条件
     searchParams.companyId = '';
-    searchParams.region = '';
+    searchParams.codeBook = '';
     userSearchKeyword.value = '';
-    
+
     // 清空列表
     userList.value = [];
-    regionList.value = [];
+    codeBookList.value = [];
     
     // 重置分页
     currentPage.value = 1;
@@ -865,7 +857,7 @@ fetchCompanyList();
     }
 
     // 区域下拉框专用样式 - 针对 el-select 的正确结构
-    :deep(.region-select) {
+    :deep(.codebook-select) {
       // 下拉框整体容器高度
       .el-select__wrapper {
         min-height: 40px !important;

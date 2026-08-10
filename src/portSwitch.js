@@ -13,5 +13,10 @@ export const portSwitch = reactive({
 export function getEffectivePort() {
   if (portSwitch.showMeter) return "92";
   if (portSwitch.showCharge) return "93";
+
+  const hostname = window.location.hostname;
+  if (hostname.startsWith("meter.")) return "92";
+  if (hostname.startsWith("charge.")) return "93";
+
   return window.location.port;
 }

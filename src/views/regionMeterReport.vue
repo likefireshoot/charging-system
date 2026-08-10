@@ -502,10 +502,17 @@ const handleCompanyChange = async (companyId) => {
 
     if (res.code === 200) {
       const allRegions = res.data || [];
-      // 筛选普表区域：名称包含"普表"前缀（历史兼容），或 region_type === 3
-      regionList.value = allRegions.filter(region =>
-        (region.regionName && region.regionName.includes('普表')) || region.regionType === 3
-      );
+
+      // 洪湖峰口（companyId=95）：放行全部区域，不做普表筛选
+      // 原因：洪湖峰口业务场景特殊，所有区域类型均需在区域抄表报表中可选
+      if (companyId === 95) {
+        regionList.value = allRegions;
+      } else {
+        // 其他水厂：仅筛选普表区域（名称含"普表"历史兼容，或 regionType === 3）
+        regionList.value = allRegions.filter(region =>
+          (region.regionName && region.regionName.includes('普表')) || region.regionType === 3
+        );
+      }
 
       reportList.value = [];
       searchParams.region = '';

@@ -36,6 +36,19 @@
           </el-select>
         </div>
         <div class="edit-input" style="margin-right: 1%">
+          <span>是否为普表用户</span>
+          <el-select v-model="addData.isNormalMeterUser" class="input-item big-font-el-select" placeholder="请选择">
+            <el-option label="否" :value="false" />
+            <el-option label="是" :value="true" />
+          </el-select>
+        </div>
+        <div class="edit-input" style="margin-right: 1%">
+          <span>所属表册</span>
+          <el-select v-model="addData.codeBookId" class="input-item big-font-el-select" placeholder="请选择所属表册" :disabled="!addData.isNormalMeterUser">
+            <el-option v-for="item in codeBookList" :key="item.id" :label="item.label" :value="item.id" />
+          </el-select>
+        </div>
+        <div class="edit-input" style="margin-right: 1%">
           <span>联系电话 (选填)</span>
           <el-input v-model="addData.userPhone" class="input-item" placeholder="选填"/>
         </div>
@@ -81,23 +94,33 @@ export default {
         companyId: null, // 新增水厂字段
         userPhone: "",
         createTime: currentDate,
+        isNormalMeterUser: false,
+        codeBookId: null,
       },
       companyId: JSON.parse(sessionStorage.getItem("userData")).companyId,
       price_list: [],
       quyu_data: [],
       companyList: [],
+      codeBookList: [],
       isSubmitting: false, // 新增:防止重复提交的标志位
     };
   },
   mounted() {
     this.getCompanyList();
     this.getRegionData();
+    this.getCodeBookList();
   },
   watch: {
     "addData.companyId": function (newVal) {
       if (newVal) {
         this.addData.regionName = ""; // 清空所属区域
         this.getRegionData();
+        this.getCodeBookList();
+      }
+    },
+    "addData.isNormalMeterUser": function (newVal) {
+      if (!newVal) {
+        this.addData.codeBookId = null;
       }
     },
   },
@@ -133,6 +156,23 @@ export default {
         })
         .catch((error) => {
           ElMessage.error("获取区域数据失败");
+        });
+    },
+    getCodeBookList() {
+      const effectiveCompanyId = this.companyId === 1 ? (this.addData.companyId || this.companyId) : this.companyId;
+      if (!effectiveCompanyId) return;
+      service
+        .get(`/getCodeBook?companyId=${effectiveCompanyId}`)
+        .then((response) => {
+          if (response.code === 200) {
+            this.codeBookList = response.data.map((item) => ({
+              id: item.codeBookId,
+              label: item.codeBookName,
+            }));
+          }
+        })
+        .catch(() => {
+          ElMessage.error("获取表册列表失败");
         });
     },
     getCompanyList() {
