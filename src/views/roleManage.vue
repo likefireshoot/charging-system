@@ -2,10 +2,10 @@
   <div class="yuangong-container">
     <div class="search-box">
       <div class="search-content">
-        <div class="search-input">
-          <span>角色编号</span>
-          <el-input v-model="params.roleId" placeholder="请输入..." />
-        </div>
+<!--        <div class="search-input">-->
+<!--          <span>角色编号</span>-->
+<!--          <el-input v-model="params.roleId" placeholder="请输入..." />-->
+<!--        </div>-->
         <div class="search-input">
           <span>角色名称</span>
           <el-input v-model="params.roleName" placeholder="请输入..." />
@@ -70,9 +70,9 @@
           <el-table-column label="序号" :width="indexWidth" align="center" fixed="left" #default="scope">
             <span class="table-bold-text">{{ scope.$index + 1 + (params.pageNo - 1) * params.pageSize }}</span>
           </el-table-column>
-          <el-table-column label="角色编号" :width="roleIdWidth" align="center" #default="scope">
-            <span class="table-bold-text">{{ scope.row.roleId }}</span>
-          </el-table-column>
+<!--          <el-table-column label="角色编号" :width="roleIdWidth" align="center" #default="scope">-->
+<!--            <span class="table-bold-text">{{ scope.row.roleId }}</span>-->
+<!--          </el-table-column>-->
           <el-table-column label="角色名称" :width="roleNameWidth" align="center" #default="scope">
             <span class="table-bold-text">{{ scope.row.roleName }}</span>
           </el-table-column>
@@ -497,7 +497,7 @@ export default {
         index: 6,
         roleId: 7,
         roleName: 9,
-        permissions: 74,
+        permissions: 81,
       };
     },
   },
