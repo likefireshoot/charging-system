@@ -30,6 +30,26 @@
           </el-select>
         </div>
 
+        <div class="form-item">
+          <label class="form-label">表册</label>
+          <el-select
+            v-model="searchParams.codeBook"
+            placeholder="选择表册"
+            clearable
+            @change="handleCodeBookChange"
+            :disabled="!currentCompanyId || !searchParams.region"
+            filterable
+            :filter-method="(val) => filterCodeBook(val)"
+          >
+            <el-option
+              v-for="item in codeBookList"
+              :key="item.codeBookId"
+              :label="item.codeBookName"
+              :value="item.codeBookId"
+            />
+          </el-select>
+        </div>
+
         <div class="form-item form-item-input">
           <el-input
             v-model="searchKeyword"
@@ -63,10 +83,6 @@
           <span>导出PDF</span>
         </el-button>
 
-        <el-button @click="goBack" class="header-btn">
-          <el-icon><ArrowLeft /></el-icon>
-          <span>返回</span>
-        </el-button>
       </div>
     </div>
 
@@ -189,6 +205,7 @@
       <div class="print-info">
         <span>水厂：{{ currentCompanyName || '-' }}</span>
         <span>区域：{{ printRegionName }}</span>
+        <span>表册：{{ printCodeBookName }}</span>
         <span>生成时间：{{ printTime }}</span>
       </div>
     </div>
@@ -233,19 +250,17 @@
 
 <script setup>
 import { ref, reactive, computed, onMounted, onBeforeUnmount, nextTick } from 'vue';
-import { useRouter } from 'vue-router';
 import { ElMessage } from 'element-plus';
-import { Document, Search, Delete, ArrowLeft } from '@element-plus/icons-vue';
+import { Document, Search, Delete } from '@element-plus/icons-vue';
 import service from '@/api/request';
 import html2pdf from 'html2pdf.js';
 import * as XLSX from 'xlsx';
 
-const router = useRouter();
-
 // 搜索参数
 const searchParams = reactive({
   companyId: '',
-  region: ''
+  region: '',
+  codeBook: ''
 });
 
 // 当前登录用户的公司信息
@@ -257,6 +272,11 @@ const companyList = ref([]);
 
 // 区域列表
 const regionList = ref([]);
+
+// 表册列表（全量，用于前端过滤）
+const allCodeBookList = ref([]);
+// 表册列表（过滤后用于显示）
+const codeBookList = ref([]);
 
 // 报表列表（原始数据）
 const reportList = ref([]);
@@ -283,6 +303,12 @@ const printData = reactive({
 const printRegionName = computed(() => {
   const region = regionList.value.find(item => item.regionId === searchParams.region);
   return region?.regionName || '-';
+});
+
+// 打印表册名称
+const printCodeBookName = computed(() => {
+  const codeBook = allCodeBookList.value.find(item => item.codeBookId === searchParams.codeBook);
+  return codeBook?.codeBookName || '-';
 });
 
 // 打印时间
@@ -384,7 +410,7 @@ const showMeterReadings = (row) => {
 };
 
 // 加载区域报表数据（使用后端聚合接口，只发 1 个请求）
-const loadRegionReport = async (regionId) => {
+const loadRegionReport = async (regionId, codeBookId) => {
   if (!regionId) {
     reportList.value = [];
     return;
@@ -392,7 +418,11 @@ const loadRegionReport = async (regionId) => {
 
   loading.value = true;
   try {
-    const res = await service.get(`/manual/charge/getRegionLatestReport?regionId=${regionId}`);
+    let url = `/manual/charge/getRegionLatestReport?regionId=${regionId}`;
+    if (codeBookId) {
+      url += `&codeBookId=${codeBookId}`;
+    }
+    const res = await service.get(url);
 
     if (res.code === 200) {
       const data = res.data || [];
@@ -485,7 +515,7 @@ const reflush = () => {
     return;
   }
   currentPage.value = 1;
-  loadRegionReport(searchParams.region);
+  loadRegionReport(searchParams.region, searchParams.codeBook);
 };
 
 // 水厂变化时加载区域列表
@@ -516,6 +546,9 @@ const handleCompanyChange = async (companyId) => {
 
       reportList.value = [];
       searchParams.region = '';
+      searchParams.codeBook = '';
+      allCodeBookList.value = [];
+      codeBookList.value = [];
 
       if (regionList.value.length === 0) {
         ElMessage.warning('该水厂下暂无普表区域');
@@ -531,10 +564,52 @@ const handleCompanyChange = async (companyId) => {
   }
 };
 
-// 区域变化时加载报表
+// 区域变化时加载表册并刷新报表
 const handleRegionChange = async (regionId) => {
   currentPage.value = 1;
-  await loadRegionReport(regionId);
+  searchParams.codeBook = '';
+  allCodeBookList.value = [];
+  codeBookList.value = [];
+
+  if (regionId) {
+    try {
+      const res = await service.get(`/getCodeBookByRegion?companyId=${searchParams.companyId}&regionId=${regionId}`);
+      if (res.code === 200) {
+        allCodeBookList.value = res.data || [];
+        codeBookList.value = allCodeBookList.value;
+      } else {
+        ElMessage.error(res.msg || '获取表册列表失败');
+        allCodeBookList.value = [];
+        codeBookList.value = [];
+      }
+    } catch (error) {
+      console.error('获取表册列表错误:', error);
+      ElMessage.error('网络请求失败');
+      allCodeBookList.value = [];
+      codeBookList.value = [];
+    }
+  }
+
+  await loadRegionReport(regionId, searchParams.codeBook);
+};
+
+// 表册变化时刷新报表
+const handleCodeBookChange = async (codeBookId) => {
+  currentPage.value = 1;
+  await loadRegionReport(searchParams.region, codeBookId);
+};
+
+// 表册下拉框前端过滤（输入关键字只显示匹配的表册）
+const filterCodeBook = (val) => {
+  if (!val) {
+    codeBookList.value = allCodeBookList.value;
+    return;
+  }
+  const keyword = val.toLowerCase();
+  codeBookList.value = (allCodeBookList.value || []).filter(item =>
+    (item.codeBookName && item.codeBookName.toLowerCase().includes(keyword)) ||
+    (item.codeBookId != null && item.codeBookId.toString().includes(keyword))
+  );
 };
 
 // 搜索
@@ -557,7 +632,10 @@ const handleCurrentChange = (val) => {
 const handleClearAll = () => {
   searchKeyword.value = '';
   searchParams.region = '';
+  searchParams.codeBook = '';
   reportList.value = [];
+  allCodeBookList.value = [];
+  codeBookList.value = [];
   currentPage.value = 1;
   pageSize.value = 25;
 };
@@ -587,14 +665,11 @@ const handleExportExcel = () => {
   const workbook = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(workbook, worksheet, '区域抄表报表');
 
-  const fileName = `区域抄表报表_${printRegionName.value || '-'}_${formatDate(new Date()).replace(/[:\s]/g, '-')}.xlsx`;
+  const fileName = `区域抄表报表_${printRegionName.value || '-'}_${printCodeBookName.value || '-'}_${formatDate(new Date()).replace(/[:\s]/g, '-')}.xlsx`;
   XLSX.writeFile(workbook, fileName);
 };
 
-// 返回
-const goBack = () => {
-  router.push('/meterReading/quickMeterReport');
-};
+
 
 // 导出 PDF：直接下载 A4 横向 PDF
 const handleExportPdf = async () => {
@@ -612,7 +687,7 @@ const handleExportPdf = async () => {
   if (!element) return;
 
   loading.value = true;
-  const fileName = `区域抄表报表_${printRegionName.value || '-'}_${formatDate(new Date()).replace(/[:\s]/g, '-')}.pdf`;
+  const fileName = `区域抄表报表_${printRegionName.value || '-'}_${printCodeBookName.value || '-'}_${formatDate(new Date()).replace(/[:\s]/g, '-')}.pdf`;
 
   try {
     await html2pdf()
@@ -815,7 +890,7 @@ onBeforeUnmount(() => {
     }
 
     :deep(.el-select) {
-      width: 270px;
+      width: 180px;
 
       .el-select__wrapper,
       .el-select__input,
@@ -863,7 +938,7 @@ onBeforeUnmount(() => {
   }
 
   .form-item-input {
-    width: 390px; /* 260 * 1.5 */
+    width: 260px; /* 260 * 1.5 */
   }
 
   .header-btn {

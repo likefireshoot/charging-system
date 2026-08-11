@@ -14,13 +14,34 @@
         </div>
 
         <div class="form-item">
+          <label class="form-label">区域</label>
+          <el-select
+            v-model="searchParams.region"
+            placeholder="选择区域"
+            clearable
+            @change="handleRegionChange"
+            :disabled="!currentCompanyId"
+            filterable
+          >
+            <el-option
+              v-for="item in regionList"
+              :key="item.regionId"
+              :label="item.regionName"
+              :value="item.regionId"
+            />
+          </el-select>
+        </div>
+
+        <div class="form-item">
           <label class="form-label">表册</label>
           <el-select
             v-model="searchParams.codeBook"
             placeholder="选择表册"
             clearable
             @change="handleCodeBookChange"
-            :disabled="!currentCompanyId"
+            :disabled="!currentCompanyId || !searchParams.region"
+            filterable
+            :filter-method="(val) => filterCodeBook(val)"
           >
             <el-option
               v-for="item in codeBookList"
@@ -223,6 +244,7 @@ const router = useRouter();
 // 搜索参数
 const searchParams = reactive({
   companyId: '',
+  region: '',
   codeBook: ''
 });
 
@@ -233,7 +255,12 @@ const currentCompanyName = ref('');
 // 水厂列表
 const companyList = ref([]);
 
-// 表册列表
+// 区域列表
+const regionList = ref([]);
+
+// 表册列表（全量，用于前端过滤）
+const allCodeBookList = ref([]);
+// 表册列表（过滤后用于显示）
 const codeBookList = ref([]);
 
 // 审核列表（原始数据）
@@ -330,39 +357,91 @@ const fetchCompanyList = async () => {
   }
 };
 
-// 水厂变化时加载表册列表
+// 水厂变化时加载区域列表
 const handleCompanyChange = async (companyId) => {
   if (!companyId) {
+    regionList.value = [];
+    allCodeBookList.value = [];
     codeBookList.value = [];
     reviewList.value = [];
+    searchParams.region = '';
     searchParams.codeBook = '';
     return;
   }
 
   try {
-    const res = await service.get(`/getCodeBook?companyId=${companyId}`);
+    const res = await service.get(`/getRegion?companyId=${companyId}`);
 
     if (res.code === 200) {
-      codeBookList.value = res.data || [];
+      regionList.value = res.data || [];
+      if (regionList.value.length === 0) {
+        ElMessage.warning('该水厂下暂无区域');
+      }
+    } else {
+      ElMessage.error(res.msg || '获取区域列表失败');
+      regionList.value = [];
+    }
+  } catch (error) {
+    console.error('获取区域列表错误:', error);
+    ElMessage.error('网络请求失败');
+    regionList.value = [];
+  }
 
-      // 清空审核列表和选中的表册
-      reviewList.value = [];
-      searchParams.codeBook = '';
+  // 清空审核列表、表册和选中项
+  reviewList.value = [];
+  allCodeBookList.value = [];
+  codeBookList.value = [];
+  searchParams.region = '';
+  searchParams.codeBook = '';
+};
 
-      if (codeBookList.value.length > 0) {
-        ElMessage.success(`已加载 ${codeBookList.value.length} 个表册`);
+// 区域变化时加载表册列表（按区域过滤）
+const handleRegionChange = async (regionId) => {
+  searchParams.codeBook = '';
+  reviewList.value = [];
+
+  if (!regionId) {
+    allCodeBookList.value = [];
+    codeBookList.value = [];
+    return;
+  }
+
+  try {
+    const res = await service.get(`/getCodeBookByRegion?companyId=${searchParams.companyId}&regionId=${regionId}`);
+
+    if (res.code === 200) {
+      allCodeBookList.value = res.data || [];
+      codeBookList.value = allCodeBookList.value;
+
+      if (allCodeBookList.value.length > 0) {
+        ElMessage.success(`已加载 ${allCodeBookList.value.length} 个表册`);
       } else {
-        ElMessage.warning('该水厂下暂无表册');
+        ElMessage.warning('该区域下暂无表册');
       }
     } else {
       ElMessage.error(res.msg || '获取表册列表失败');
+      allCodeBookList.value = [];
       codeBookList.value = [];
     }
   } catch (error) {
     console.error('获取表册列表错误:', error);
     ElMessage.error('网络请求失败');
+    allCodeBookList.value = [];
     codeBookList.value = [];
   }
+};
+
+// 表册下拉框前端过滤（输入关键字只显示匹配的表册）
+const filterCodeBook = (val) => {
+  if (!val) {
+    codeBookList.value = allCodeBookList.value;
+    return;
+  }
+  const keyword = val.toLowerCase();
+  codeBookList.value = (allCodeBookList.value || []).filter(item =>
+    (item.codeBookName && item.codeBookName.toLowerCase().includes(keyword)) ||
+    (item.codeBookId != null && item.codeBookId.toString().includes(keyword))
+  );
 };
 
 // 表册变化时加载审核列表
@@ -434,11 +513,14 @@ const handleClearAll = async () => {
     
     // 清空搜索条件
     searchParams.companyId = '';
+    searchParams.region = '';
     searchParams.codeBook = '';
     searchKeyword.value = '';
 
     // 清空列表
     reviewList.value = [];
+    regionList.value = [];
+    allCodeBookList.value = [];
     codeBookList.value = [];
     
     // 清空选中状态
