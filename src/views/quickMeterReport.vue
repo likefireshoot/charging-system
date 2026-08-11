@@ -87,8 +87,8 @@
               </template>
             </el-table-column>
             <el-table-column prop="userName" label="用户名" min-width="120" align="center" />
-            <el-table-column prop="lastReading" label="上月数" min-width="120" align="center" />
-            <el-table-column prop="currentReading" label="本月数" min-width="120" align="center">
+            <el-table-column prop="lastReading" label="上月数" width="80" align="center" />
+            <el-table-column prop="currentReading" label="本月数" width="80" align="center">
               <template #default="{ row }">
                 <span>{{ row.currentReading || '-' }}</span>
               </template>
