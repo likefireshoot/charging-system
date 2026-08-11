@@ -103,7 +103,7 @@
           </div>
         </div>
         <div class="test-content">
-          <div class="test-item">
+          <div class="test-item" v-if="!isCompany95">
             <div class="test-input" style="margin-right: 1%">
               <span>价格名称</span>
               <el-input v-model="addData.priceName" />
@@ -124,8 +124,38 @@
                 <el-option label="3" value="3"></el-option>
               </el-select>
             </div>
+            <div class="test-input">
+              <span>此日期后开户，开户当月不收保底费</span>
+              <el-input v-model="addData.firstMonthNoBaseFeeDay" placeholder="请输入1-31" />
+            </div>
+          </div>
+          <div class="test-item" v-if="isCompany95" style="height: auto; min-height: 300px">
+            <div class="test-input" style="width: 99%">
+              <span>价格名称</span>
+              <el-input v-model="addData.priceName" />
+            </div>
             <div class="test-input" style="margin-right: 1%">
-              <span>附加费用/元</span>
+              <span>保底吨数(元)</span>
+              <el-input v-model="addData.guaranteedTons" />
+            </div>
+            <div class="test-input" style="margin-right: 1%">
+              <span>保底水费(元)</span>
+              <el-input v-model="addData.guaranteedWaterFee" />
+            </div>
+            <div class="test-input">
+              <span>保底区间内单位污水费(元/吨)</span>
+              <el-input v-model="addData.guaranteedUnitSewage" />
+            </div>
+            <div class="test-input" style="margin-right: 1%">
+              <span>阶梯数</span>
+              <el-select v-model="addData.stepNumber">
+                <el-option label="1" value="1"></el-option>
+                <el-option label="2" value="2"></el-option>
+                <el-option label="3" value="3"></el-option>
+              </el-select>
+            </div>
+            <div class="test-input" style="margin-right: 1%">
+              <span>附加费用(元)</span>
               <el-input v-model="addData.additionPrice" />
             </div>
             <div class="test-input">
@@ -243,7 +273,7 @@
           </div>
         </div>
         <div class="test-content">
-          <div class="test-item">
+          <div class="test-item" v-if="editData.companyId !== 95">
             <div class="test-input" style="margin-right: 1%">
               <span>价格名称</span>
               <el-input v-model="editData.priceName" />
@@ -264,20 +294,44 @@
                 <el-option label="3" value="3"></el-option>
               </el-select>
             </div>
+            <div class="test-input">
+              <span>此日期后开户，开户当月不收保底费</span>
+              <el-input v-model="editData.firstMonthNoBaseFeeDay" placeholder="请输入1-31" />
+            </div>
+          </div>
+          <div class="test-item" v-if="editData.companyId === 95" style="height: auto; min-height: 300px">
+            <div class="test-input" style="width: 99%">
+              <span>价格名称</span>
+              <el-input v-model="editData.priceName" />
+            </div>
             <div class="test-input" style="margin-right: 1%">
-              <span>附加费用/元</span>
+              <span>保底吨数(元)</span>
+              <el-input v-model="editData.guaranteedTons" />
+            </div>
+            <div class="test-input" style="margin-right: 1%">
+              <span>保底水费(元)</span>
+              <el-input v-model="editData.guaranteedWaterFee" />
+            </div>
+            <div class="test-input">
+              <span>保底区间内单位污水费(元/吨)</span>
+              <el-input v-model="editData.guaranteedUnitSewage" />
+            </div>
+            <div class="test-input" style="margin-right: 1%">
+              <span>阶梯数</span>
+              <el-select v-model="editData.stepNumber">
+                <el-option label="1" value="1"></el-option>
+                <el-option label="2" value="2"></el-option>
+                <el-option label="3" value="3"></el-option>
+              </el-select>
+            </div>
+            <div class="test-input" style="margin-right: 1%">
+              <span>附加费用(元)</span>
               <el-input v-model="editData.additionPrice" />
             </div>
             <div class="test-input">
               <span>此日期后开户，开户当月不收保底费</span>
               <el-input v-model="editData.firstMonthNoBaseFeeDay" placeholder="请输入1-31" />
             </div>
-            <!-- <div class="test-input" style="margin-right: 0">
-              <span>所属水厂</span>
-              <el-select v-model="editData.company" placeholder="请选择所属水厂">
-                <el-option v-for="item in companyList" :key="item.id" :value="item.id" :label="item.name"></el-option>
-              </el-select>
-            </div> -->
           </div>
           <div class="test-item-jieti">
             <span style="font-size: 16px; color: #47b97e; margin-bottom: 10px">第一阶梯</span>
@@ -422,7 +476,7 @@
           </div>
         </div>
         <div class="test-content" style="min-height: 450px;max-height: 85vh ">
-          <div class="test-item">
+          <div class="test-item" v-if="viewData.guaranteedTons == null">
             <div class="test-input" style="margin-right: 1%">
               <span>价格名称</span>
               <el-input v-model="viewData.priceName" disabled />
@@ -439,18 +493,40 @@
               <span>阶梯数</span>
               <el-input v-model="viewData.stepNumber" disabled />
             </div>
+            <div class="test-input">
+              <span>此日期后开户，开户当月不收保底费</span>
+              <el-input v-model="viewData.firstMonthNoBaseFeeDay" disabled />
+            </div>
+          </div>
+          <div class="test-item" v-if="viewData.guaranteedTons != null" style="height: auto; min-height: 300px">
+            <div class="test-input" style="width: 99%">
+              <span>价格名称</span>
+              <el-input v-model="viewData.priceName" disabled />
+            </div>
             <div class="test-input" style="margin-right: 1%">
-              <span>附加费用/元</span>
+              <span>保底吨数(元)</span>
+              <el-input v-model="viewData.guaranteedTons" disabled />
+            </div>
+            <div class="test-input" style="margin-right: 1%">
+              <span>保底水费(元)</span>
+              <el-input v-model="viewData.guaranteedWaterFee" disabled />
+            </div>
+            <div class="test-input">
+              <span>保底区间内单位污水费(元/吨)</span>
+              <el-input v-model="viewData.guaranteedUnitSewage" disabled />
+            </div>
+            <div class="test-input" style="margin-right: 1%">
+              <span>阶梯数</span>
+              <el-input v-model="viewData.stepNumber" disabled />
+            </div>
+            <div class="test-input" style="margin-right: 1%">
+              <span>附加费用(元)</span>
               <el-input v-model="viewData.additionPrice" disabled />
             </div>
             <div class="test-input">
               <span>此日期后开户，开户当月不收保底费</span>
               <el-input v-model="viewData.firstMonthNoBaseFeeDay" disabled />
             </div>
-            <!-- <div class="test-input" style="margin-right: 0">
-              <span>所属水厂</span>
-              <el-input v-model="viewData.company" disabled />
-            </div> -->
           </div>
           <div class="test-item-jieti" v-if="viewData.stepNumber >= 1">
             <span style="font-size: 16px; color: #47b97e; margin-bottom: 10px">第一阶梯</span>
@@ -576,6 +652,10 @@ export default {
         priceWaterThird: null,
         priceSewageThird: null,
         companyId: null,
+        guaranteedTons: null,
+        guaranteedWaterFee: null,
+
+        guaranteedUnitSewage: null,
       },
       editData: {
         priceName: null,
@@ -602,6 +682,10 @@ export default {
         priceSewageThird: null,
         companyId: JSON.parse(sessionStorage.getItem("userData")).companyId,
         priceId: null,
+        guaranteedTons: null,
+        guaranteedWaterFee: null,
+
+        guaranteedUnitSewage: null,
       },
       viewData: {},
       total: null,
@@ -734,6 +818,9 @@ export default {
     "editData.priceSewageThird": "computeEditPrices",
   },
   computed: {
+    isCompany95() {
+      return this.companyId === 95;
+    },
     // 每列的百分比宽度
     columnPercentages() {
       return {
@@ -828,6 +915,10 @@ export default {
         priceThird: null,
         priceWaterThird: null,
         priceSewageThird: null,
+        guaranteedTons: null,
+        guaranteedWaterFee: null,
+
+        guaranteedUnitSewage: null,
       };
       this.add_dialogFormVisible = true;
     },
@@ -926,6 +1017,10 @@ export default {
         priceThird: null,
         priceWaterThird: null,
         priceSewageThird: null,
+        guaranteedTons: null,
+        guaranteedWaterFee: null,
+
+        guaranteedUnitSewage: null,
       };
     },
     getPriceData() {
@@ -1423,23 +1518,74 @@ export default {
       }
       const stepNumberVal = parseInt(stepNumber);
 
-      // 附加费：非空 + 非负 + 数字 + 最多2位小数
-      if (additionPrice === null || additionPrice === "" || isNaN(parseFloat(additionPrice))) {
-        ElMessage.error("附加费用不能为空且必须为有效数字");
-        return false;
-      }
-      const additionPriceVal = parseFloat(additionPrice);
-      if (additionPriceVal < 0) {
-        ElMessage.error("附加费用不能小于零");
-        return false;
-      }
-      if (additionPriceVal.toString().split(".")[1]?.length > 2) {
-        ElMessage.error("附加费用最多保留2位小数");
-        return false;
+      // 附加费：仅95水厂必填校验
+      if (this.isCompany95) {
+        if (additionPrice === null || additionPrice === "" || isNaN(parseFloat(additionPrice))) {
+          ElMessage.error("附加费用不能为空且必须为有效数字");
+          return false;
+        }
+        const additionPriceVal = parseFloat(additionPrice);
+        if (additionPriceVal < 0) {
+          ElMessage.error("附加费用不能小于零");
+          return false;
+        }
+        if (additionPriceVal.toString().split(".")[1]?.length > 2) {
+          ElMessage.error("附加费用最多保留2位小数");
+          return false;
+        }
       }
 
       if (!this.validateFirstMonthNoBaseFeeDay(firstMonthNoBaseFeeDay)) {
         return false;
+      }
+
+      // ========== 95水厂定制保底校验 ==========
+      if (this.isCompany95) {
+        const { guaranteedTons, guaranteedWaterFee, guaranteedUnitSewage } = this.addData;
+        if (guaranteedTons === null || guaranteedTons === "" || isNaN(parseFloat(guaranteedTons))) {
+          ElMessage.error("定制-保底吨数不能为空且必须为有效数字");
+          return false;
+        }
+        const guaranteedTonsVal = parseFloat(guaranteedTons);
+        if (guaranteedTonsVal < 0) {
+          ElMessage.error("定制-保底吨数不能小于零");
+          return false;
+        }
+        if (guaranteedTonsVal.toString().split(".")[1]?.length > 2) {
+          ElMessage.error("定制-保底吨数最多保留2位小数");
+          return false;
+        }
+        // 保底吨数必须等于第一起始吨数
+        if (guaranteedTonsVal !== parseFloat(amountFirstStart)) {
+          ElMessage.error("定制-保底吨数与1阶梯起始未衔接");
+          return false;
+        }
+        if (guaranteedWaterFee === null || guaranteedWaterFee === "" || isNaN(parseFloat(guaranteedWaterFee))) {
+          ElMessage.error("定制-保底水费不能为空且必须为有效数字");
+          return false;
+        }
+        const guaranteedWaterFeeVal = parseFloat(guaranteedWaterFee);
+        if (guaranteedWaterFeeVal < 0) {
+          ElMessage.error("定制-保底水费不能小于零");
+          return false;
+        }
+        if (guaranteedWaterFeeVal.toString().split(".")[1]?.length > 2) {
+          ElMessage.error("定制-保底水费最多保留2位小数");
+          return false;
+        }
+        if (guaranteedUnitSewage === null || guaranteedUnitSewage === "" || isNaN(parseFloat(guaranteedUnitSewage))) {
+          ElMessage.error("定制-单位污水费不能为空且必须为有效数字");
+          return false;
+        }
+        const guaranteedUnitSewageVal = parseFloat(guaranteedUnitSewage);
+        if (guaranteedUnitSewageVal < 0) {
+          ElMessage.error("定制-单位污水费不能小于零");
+          return false;
+        }
+        if (guaranteedUnitSewageVal.toString().split(".")[1]?.length > 2) {
+          ElMessage.error("定制-单位污水费最多保留2位小数");
+          return false;
+        }
       }
 
       // ========== 第一阶梯校验（必选） ==========
@@ -1680,22 +1826,74 @@ export default {
       }
       const stepNumberVal = parseInt(stepNumber);
 
-      if (additionPrice === null || additionPrice === "" || isNaN(parseFloat(additionPrice))) {
-        ElMessage.error("附加费用不能为空且必须为有效数字");
-        return false;
-      }
-      const additionPriceVal = parseFloat(additionPrice);
-      if (additionPriceVal < 0) {
-        ElMessage.error("附加费用不能小于零");
-        return false;
-      }
-      if (additionPriceVal.toString().split(".")[1]?.length > 2) {
-        ElMessage.error("附加费用最多保留2位小数");
-        return false;
+      // 附加费：仅95水厂必填校验
+      const isEdit95 = this.editData.companyId === 95;
+      if (isEdit95) {
+        if (additionPrice === null || additionPrice === "" || isNaN(parseFloat(additionPrice))) {
+          ElMessage.error("附加费用不能为空且必须为有效数字");
+          return false;
+        }
+        const additionPriceVal = parseFloat(additionPrice);
+        if (additionPriceVal < 0) {
+          ElMessage.error("附加费用不能小于零");
+          return false;
+        }
+        if (additionPriceVal.toString().split(".")[1]?.length > 2) {
+          ElMessage.error("附加费用最多保留2位小数");
+          return false;
+        }
       }
 
       if (!this.validateFirstMonthNoBaseFeeDay(firstMonthNoBaseFeeDay)) {
         return false;
+      }
+
+      // ========== 95水厂定制保底校验 ==========
+      if (isEdit95) {
+        const { guaranteedTons: gt, guaranteedWaterFee: gwf, guaranteedUnitSewage: gus } = this.editData;
+        if (gt === null || gt === "" || isNaN(parseFloat(gt))) {
+          ElMessage.error("定制-保底吨数不能为空且必须为有效数字");
+          return false;
+        }
+        const gtVal = parseFloat(gt);
+        if (gtVal < 0) {
+          ElMessage.error("定制-保底吨数不能小于零");
+          return false;
+        }
+        if (gtVal.toString().split(".")[1]?.length > 2) {
+          ElMessage.error("定制-保底吨数最多保留2位小数");
+          return false;
+        }
+        if (gtVal !== parseFloat(amountFirstStart)) {
+          ElMessage.error("定制-保底吨数与1阶梯起始未衔接");
+          return false;
+        }
+        if (gwf === null || gwf === "" || isNaN(parseFloat(gwf))) {
+          ElMessage.error("定制-保底水费不能为空且必须为有效数字");
+          return false;
+        }
+        const gwfVal = parseFloat(gwf);
+        if (gwfVal < 0) {
+          ElMessage.error("定制-保底水费不能小于零");
+          return false;
+        }
+        if (gwfVal.toString().split(".")[1]?.length > 2) {
+          ElMessage.error("定制-保底水费最多保留2位小数");
+          return false;
+        }
+        if (gus === null || gus === "" || isNaN(parseFloat(gus))) {
+          ElMessage.error("定制-单位污水费不能为空且必须为有效数字");
+          return false;
+        }
+        const gusVal = parseFloat(gus);
+        if (gusVal < 0) {
+          ElMessage.error("定制-单位污水费不能小于零");
+          return false;
+        }
+        if (gusVal.toString().split(".")[1]?.length > 2) {
+          ElMessage.error("定制-单位污水费最多保留2位小数");
+          return false;
+        }
       }
 
       // ========== 第一阶梯校验（必选） ==========
