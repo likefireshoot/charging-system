@@ -130,9 +130,11 @@
         <div class="export-dialog-body">
           <div class="export-dialog-row">
             <div class="export-dialog-item">
-              <span>收费人</span>
-              <el-select v-model="exportForm.rechargeUser" filterable placeholder="请选择收费人">
-                <el-option v-for="item in staffNameOptions" :key="item" :label="item" :value="item"></el-option>
+              <span>收费方式</span>
+              <el-select v-model="exportForm.rechargeType" placeholder="请选择收费方式">
+                <el-option label="现金" value="现金"></el-option>
+                <el-option label="微信支付" value="微信支付"></el-option>
+                <el-option label="全部" value="全部"></el-option>
               </el-select>
             </div>
             <div class="export-dialog-item">
@@ -192,6 +194,7 @@ export default {
         startDate: "",
         endDate: "",
         rechargeUser: "",
+        rechargeType: "现金",
       },
       weekchart: null,
       weekchart_option: {
@@ -465,15 +468,12 @@ export default {
         region: this.params.region || "",
         startDate: this.params.record_time || "",
         endDate: this.params.record_time || "",
-        rechargeUser: userData.staffName || this.params.rechargeUser || "",
+        rechargeUser: userData.staffName || "",
+        rechargeType: "现金",
       };
       this.exportDialogVisible = true;
     },
     async exportDailyCashierReport() {
-      if (!this.exportForm.rechargeUser) {
-        ElMessage.error("请选择收费人");
-        return;
-      }
       if (!this.exportForm.startDate) {
         ElMessage.error("请选择起始日期");
         return;
@@ -483,12 +483,17 @@ export default {
         return;
       }
 
-      const query = new URLSearchParams({
+      const params = {
         region: this.exportForm.region || "",
         startDate: this.exportForm.startDate,
         endDate: this.exportForm.endDate,
         rechargeUser: this.exportForm.rechargeUser,
-      }).toString();
+      };
+      if (this.exportForm.rechargeType !== "全部") {
+        params.rechargeType = this.exportForm.rechargeType;
+      }
+
+      const query = new URLSearchParams(params).toString();
 
       try {
         const response = await service.get(`/dailyCashierReport?${query}`, {
