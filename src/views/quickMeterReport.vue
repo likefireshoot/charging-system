@@ -9,14 +9,37 @@
         </div>
 
         <div class="form-item">
+          <label class="form-label">区域</label>
+          <el-select
+            v-model="searchParams.region"
+            placeholder="选择区域"
+            clearable
+            @change="handleRegionChange"
+            :disabled="!currentCompanyId"
+            class="codebook-select"
+            filterable
+            :filter-method="(val) => filterRegion(val)"
+          >
+            <el-option
+              v-for="item in regionList"
+              :key="item.regionId"
+              :label="item.regionName"
+              :value="item.regionId"
+            />
+          </el-select>
+        </div>
+
+        <div class="form-item">
           <label class="form-label">表册</label>
           <el-select
             v-model="searchParams.codeBook"
             placeholder="选择表册"
             clearable
             @change="handleCodeBookChange"
-            :disabled="!currentCompanyId"
+            :disabled="!currentCompanyId || !searchParams.region"
             class="codebook-select"
+            filterable
+            :filter-method="(val) => filterCodeBook(val)"
           >
             <el-option
               v-for="item in codeBookList"
@@ -87,8 +110,8 @@
               </template>
             </el-table-column>
             <el-table-column prop="userName" label="用户名" min-width="120" align="center" />
-            <el-table-column prop="lastReading" label="上月数" min-width="120" align="center" />
-            <el-table-column prop="currentReading" label="本月数" min-width="120" align="center">
+            <el-table-column prop="lastReading" label="上月数" width="80" align="center" />
+            <el-table-column prop="currentReading" label="本月数" width="80" align="center">
               <template #default="{ row }">
                 <span>{{ row.currentReading || '-' }}</span>
               </template>
@@ -301,6 +324,7 @@ const router = useRouter();
 // 搜索参数
 const searchParams = reactive({
   companyId: '', // 新增：水厂ID
+  region: '',
   codeBook: ''
 });
 
@@ -311,7 +335,12 @@ const currentCompanyName = ref('');
 // 水厂列表
 const companyList = ref([]);
 
-// 表册列表
+// 区域列表
+const regionList = ref([]);
+
+// 表册列表（全量，用于前端过滤）
+const allCodeBookList = ref([]);
+// 表册列表（过滤后用于显示）
 const codeBookList = ref([]);
 
 // 用户列表（原始数据）
@@ -446,38 +475,93 @@ const fetchCompanyList = async () => {
   }
 };
 
-// 水厂变化时加载表册列表
+// 水厂变化时加载区域列表
 const handleCompanyChange = async (companyId) => {
   if (!companyId) {
+    regionList.value = [];
+    allCodeBookList.value = [];
     codeBookList.value = [];
     userList.value = [];
+    searchParams.region = '';
     searchParams.codeBook = '';
     return;
   }
 
   try {
-    const res = await service.get(`/getCodeBook?companyId=${companyId}`);
+    const res = await service.get(`/getRegion?companyId=${companyId}`);
 
     if (res.code === 200) {
-      codeBookList.value = res.data || [];
+      regionList.value = res.data || [];
+      if (regionList.value.length === 0) {
+        ElMessage.warning('该水厂下暂无区域');
+      }
+    } else {
+      ElMessage.error(res.msg || '获取区域列表失败');
+      regionList.value = [];
+    }
+  } catch (error) {
+    console.error('获取区域列表错误:', error);
+    ElMessage.error('网络请求失败');
+    regionList.value = [];
+  }
 
-      // 清空用户列表和选中的表册
-      userList.value = [];
-      searchParams.codeBook = '';
+  // 清空用户列表、表册和选中项
+  userList.value = [];
+  allCodeBookList.value = [];
+  codeBookList.value = [];
+  searchParams.region = '';
+  searchParams.codeBook = '';
+};
 
-      if (codeBookList.value.length === 0) {
-        ElMessage.warning('该水厂下暂无表册');
+// 区域变化时加载表册列表（按区域过滤）
+const handleRegionChange = async (regionId) => {
+  searchParams.codeBook = '';
+  userList.value = [];
+
+  if (!regionId) {
+    allCodeBookList.value = [];
+    codeBookList.value = [];
+    return;
+  }
+
+  try {
+    const res = await service.get(`/getCodeBookByRegion?companyId=${searchParams.companyId}&regionId=${regionId}`);
+
+    if (res.code === 200) {
+      allCodeBookList.value = res.data || [];
+      codeBookList.value = allCodeBookList.value;
+
+      if (allCodeBookList.value.length === 0) {
+        ElMessage.warning('该区域下暂无表册');
       }
     } else {
       ElMessage.error(res.msg || '获取表册列表失败');
+      allCodeBookList.value = [];
       codeBookList.value = [];
     }
   } catch (error) {
     console.error('获取表册列表错误:', error);
     ElMessage.error('网络请求失败');
+    allCodeBookList.value = [];
     codeBookList.value = [];
   }
 };
+
+// 表册下拉框前端过滤（输入关键字只显示匹配的表册）
+const filterCodeBook = (val) => {
+  if (!val) {
+    codeBookList.value = allCodeBookList.value;
+    return;
+  }
+  const keyword = val.toLowerCase();
+  codeBookList.value = (allCodeBookList.value || []).filter(item =>
+    (item.codeBookName && item.codeBookName.toLowerCase().includes(keyword)) ||
+    (item.codeBookId != null && item.codeBookId.toString().includes(keyword))
+  );
+};
+
+// 区域下拉框前端过滤（el-select filterable 由组件内置完成，无需自定义逻辑）
+const filterRegion = () => {};
 
 // 表册变化时加载用户列表
 const handleCodeBookChange = async (codeBookId) => {
@@ -626,11 +710,14 @@ const handleClearAll = async () => {
     
     // 清空搜索条件
     searchParams.companyId = '';
+    searchParams.region = '';
     searchParams.codeBook = '';
     userSearchKeyword.value = '';
 
     // 清空列表
     userList.value = [];
+    regionList.value = [];
+    allCodeBookList.value = [];
     codeBookList.value = [];
     
     // 重置分页
