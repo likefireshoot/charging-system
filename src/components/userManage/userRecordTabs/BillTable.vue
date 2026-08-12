@@ -508,7 +508,7 @@ export default {
       try {
         const params = this.buildQueryParams();
         const response = await axios({
-          url: "/userManage/userCharge/exportChargeRecord",
+          url: "/userManage/userCharge/union/export",
           method: "GET",
           responseType: "blob",
           params: params
@@ -529,7 +529,7 @@ export default {
 
         const link = document.createElement("a");
         link.href = window.URL.createObjectURL(blob);
-        link.download = `${this.user.userName || "用户"}_历史扣费记录.xlsx`;
+        link.download = `${this.user.userName || "用户"}_用户账单.xlsx`;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);

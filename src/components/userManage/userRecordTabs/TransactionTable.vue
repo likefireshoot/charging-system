@@ -906,7 +906,7 @@ export default {
       try {
         const params = this.buildExportParams();
         const response = await axios({
-          url: "/userManage/userCharge/exportRechargeRecord",
+          url: "/userManage/userCharge/exportSingleRechargeRecord",
           method: "GET",
           responseType: "blob",
           params: params
@@ -927,7 +927,7 @@ export default {
 
         const link = document.createElement("a");
         link.href = window.URL.createObjectURL(blob);
-        link.download = `${this.user.userName || "用户"}_历史交易记录.xlsx`;
+        link.download = `${this.user.userName || "用户"}_历史充值记录.xlsx`;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
