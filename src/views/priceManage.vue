@@ -67,10 +67,16 @@
           </el-table-column>
           <el-table-column property="priceId" label="价格编号" :width="priceCodeWidth" align="center" />
           <el-table-column property="priceName" label="价格名称" :width="priceNameWidth" align="center" />
-          <el-table-column property="amountZeroEnd" label="保底数值/吨" :width="baodiNumWidth" align="center" />
-          <el-table-column property="priceZero" label="保底价格/元" :width="baodiPriceWidth" align="center" />
+          <el-table-column label="保底数值/吨" :width="baodiNumWidth" align="center" #default="scope">
+            {{ scope.row.companyId === 95 ? scope.row.guaranteedTons : scope.row.amountZeroEnd }}
+          </el-table-column>
+          <el-table-column label="保底价格/元" :width="baodiPriceWidth" align="center" #default="scope">
+            {{ scope.row.companyId === 95 ? scope.row.guaranteedWaterFee : scope.row.priceZero }}
+          </el-table-column>
           <el-table-column property="stepNumber" label="阶梯数" :width="jietiNumWidth" align="center" />
-          <el-table-column property="additionPrice" label="附加费/元" :width="fujiPriceWidth" align="center" />
+          <el-table-column v-if="isCompany95" label="附加费/元" :width="fujiPriceWidth" align="center" #default="scope">
+            {{ scope.row.additionPrice }}
+          </el-table-column>
           <el-table-column label="操作" :width="operationWidth" align="center">
             <template #default="scope">
               <span style="display: block; width: 100%; text-align: center; cursor: pointer"
@@ -135,7 +141,7 @@
               <el-input v-model="addData.priceName" />
             </div>
             <div class="test-input" style="margin-right: 1%">
-              <span>保底吨数(元)</span>
+              <span>保底吨数(吨)</span>
               <el-input v-model="addData.guaranteedTons" />
             </div>
             <div class="test-input" style="margin-right: 1%">
@@ -305,7 +311,7 @@
               <el-input v-model="editData.priceName" />
             </div>
             <div class="test-input" style="margin-right: 1%">
-              <span>保底吨数(元)</span>
+              <span>保底吨数(吨)</span>
               <el-input v-model="editData.guaranteedTons" />
             </div>
             <div class="test-input" style="margin-right: 1%">
@@ -504,7 +510,7 @@
               <el-input v-model="viewData.priceName" disabled />
             </div>
             <div class="test-input" style="margin-right: 1%">
-              <span>保底吨数(元)</span>
+              <span>保底吨数(吨)</span>
               <el-input v-model="viewData.guaranteedTons" disabled />
             </div>
             <div class="test-input" style="margin-right: 1%">
@@ -733,6 +739,14 @@ export default {
         this.addData.amountFirstStart = (parseFloat(newVal)).toFixed(2);
       }
     },
+    "addData.guaranteedTons": function (newVal) {
+      if (!this.isCompany95) return;
+      if (parseFloat(newVal) === 0) {
+        this.addData.amountFirstStart = "0";
+      } else {
+        this.addData.amountFirstStart = (parseFloat(newVal)).toFixed(2);
+      }
+    },
     "addData.amountFirstEnd": function (newVal) {
       if (parseInt(this.addData.stepNumber) > 1) {
         this.addData.amountSecondStart = (parseFloat(newVal)).toFixed(2);
@@ -765,6 +779,14 @@ export default {
     },
     "editData.amountZeroEnd": function (newVal) {
       if (!this.editData) return; // 如果 editData 还未初始化，直接返回
+      if (parseFloat(newVal) === 0) {
+        this.editData.amountFirstStart = "0";
+      } else {
+        this.editData.amountFirstStart = (parseFloat(newVal)).toFixed(2);
+      }
+    },
+    "editData.guaranteedTons": function (newVal) {
+      if (!this.editData || this.editData.companyId !== 95) return;
       if (parseFloat(newVal) === 0) {
         this.editData.amountFirstStart = "0";
       } else {
@@ -823,17 +845,31 @@ export default {
     },
     // 每列的百分比宽度
     columnPercentages() {
+      if (this.isCompany95) {
+        return {
+          selection: 4,
+          id: 8,
+          price_code: 9,
+          price_name: 18,
+          baodi_num: 9,
+          baodi_price: 9,
+          jieti_num: 8,
+          fuji_price: 9,
+          operation: 8,
+          company: 18,
+        };
+      }
       return {
         selection: 4,
-        id: 8,
-        price_code: 9,
-        price_name: 18,
-        baodi_num: 9,
-        baodi_price: 9,
-        jieti_num: 8,
-        fuji_price: 9,
-        operation: 8,
-        company: 18,
+        id: 9,
+        price_code: 10,
+        price_name: 19,
+        baodi_num: 10,
+        baodi_price: 10,
+        jieti_num: 9,
+        fuji_price: 0,
+        operation: 9,
+        company: 20,
       };
     },
   },
@@ -1481,34 +1517,37 @@ export default {
         return false;
       }
 
-      // 保底数值：非空 + 非负 + 数字 + 最多2位小数
-      if (amountZeroEnd === null || amountZeroEnd === "" || isNaN(parseFloat(amountZeroEnd))) {
-        ElMessage.error("保底数值不能为空且必须为有效数字");
-        return false;
-      }
-      const amountZeroEndVal = parseFloat(amountZeroEnd);
-      if (amountZeroEndVal < 0) {
-        ElMessage.error("保底数值不能小于零");
-        return false;
-      }
-      if (amountZeroEndVal.toString().split(".")[1]?.length > 2) {
-        ElMessage.error("保底数值最多保留2位小数");
-        return false;
-      }
+      // 保底数值：非空 + 非负 + 数字 + 最多2位小数（非定制水厂）
+      let amountZeroEndVal = 0;
+      if (!this.isCompany95) {
+        if (amountZeroEnd === null || amountZeroEnd === "" || isNaN(parseFloat(amountZeroEnd))) {
+          ElMessage.error("保底数值不能为空且必须为有效数字");
+          return false;
+        }
+        amountZeroEndVal = parseFloat(amountZeroEnd);
+        if (amountZeroEndVal < 0) {
+          ElMessage.error("保底数值不能小于零");
+          return false;
+        }
+        if (amountZeroEndVal.toString().split(".")[1]?.length > 2) {
+          ElMessage.error("保底数值最多保留2位小数");
+          return false;
+        }
 
-      // 保底价格：非空 + 非负 + 数字 + 最多2位小数
-      if (priceZero === null || priceZero === "" || isNaN(parseFloat(priceZero))) {
-        ElMessage.error("保底价格不能为空且必须为有效数字");
-        return false;
-      }
-      const priceZeroVal = parseFloat(priceZero);
-      if (priceZeroVal < 0) {
-        ElMessage.error("保底价格不能小于零");
-        return false;
-      }
-      if (priceZeroVal.toString().split(".")[1]?.length > 2) {
-        ElMessage.error("保底价格最多保留2位小数");
-        return false;
+        // 保底价格：非空 + 非负 + 数字 + 最多2位小数（非定制水厂）
+        if (priceZero === null || priceZero === "" || isNaN(parseFloat(priceZero))) {
+          ElMessage.error("保底价格不能为空且必须为有效数字");
+          return false;
+        }
+        const priceZeroVal = parseFloat(priceZero);
+        if (priceZeroVal < 0) {
+          ElMessage.error("保底价格不能小于零");
+          return false;
+        }
+        if (priceZeroVal.toString().split(".")[1]?.length > 2) {
+          ElMessage.error("保底价格最多保留2位小数");
+          return false;
+        }
       }
 
       // 阶梯数：非空 + 只能是1/2/3
@@ -1595,7 +1634,8 @@ export default {
         return false;
       }
       const amountFirstStartVal = parseFloat(amountFirstStart);
-      if (amountFirstStartVal < amountZeroEndVal) {
+      const addBaseAmount = this.isCompany95 ? parseFloat(this.addData.guaranteedTons || 0) : amountZeroEndVal;
+      if (amountFirstStartVal < addBaseAmount) {
         ElMessage.error("第一阶梯开始值不能小于保底数值");
         return false;
       }
@@ -1792,34 +1832,6 @@ export default {
         return false;
       }
 
-      if (amountZeroEnd === null || amountZeroEnd === "" || isNaN(parseFloat(amountZeroEnd))) {
-        ElMessage.error("保底数值不能为空且必须为有效数字");
-        return false;
-      }
-      const amountZeroEndVal = parseFloat(amountZeroEnd);
-      if (amountZeroEndVal < 0) {
-        ElMessage.error("保底数值不能小于零");
-        return false;
-      }
-      if (amountZeroEndVal.toString().split(".")[1]?.length > 2) {
-        ElMessage.error("保底数值最多保留2位小数");
-        return false;
-      }
-
-      if (priceZero === null || priceZero === "" || isNaN(parseFloat(priceZero))) {
-        ElMessage.error("保底价格不能为空且必须为有效数字");
-        return false;
-      }
-      const priceZeroVal = parseFloat(priceZero);
-      if (priceZeroVal < 0) {
-        ElMessage.error("保底价格不能小于零");
-        return false;
-      }
-      if (priceZeroVal.toString().split(".")[1]?.length > 2) {
-        ElMessage.error("保底价格最多保留2位小数");
-        return false;
-      }
-
       if (!stepNumber || !["1", "2", "3"].includes(String(stepNumber))) {
         ElMessage.error("阶梯数不能为空且只能选择1、2、3");
         return false;
@@ -1828,6 +1840,37 @@ export default {
 
       // 附加费：仅95水厂必填校验
       const isEdit95 = this.editData.companyId === 95;
+
+      let editAmountZeroEndVal = 0;
+      if (!isEdit95) {
+        if (amountZeroEnd === null || amountZeroEnd === "" || isNaN(parseFloat(amountZeroEnd))) {
+          ElMessage.error("保底数值不能为空且必须为有效数字");
+          return false;
+        }
+        editAmountZeroEndVal = parseFloat(amountZeroEnd);
+        if (editAmountZeroEndVal < 0) {
+          ElMessage.error("保底数值不能小于零");
+          return false;
+        }
+        if (editAmountZeroEndVal.toString().split(".")[1]?.length > 2) {
+          ElMessage.error("保底数值最多保留2位小数");
+          return false;
+        }
+
+        if (priceZero === null || priceZero === "" || isNaN(parseFloat(priceZero))) {
+          ElMessage.error("保底价格不能为空且必须为有效数字");
+          return false;
+        }
+        const priceZeroVal = parseFloat(priceZero);
+        if (priceZeroVal < 0) {
+          ElMessage.error("保底价格不能小于零");
+          return false;
+        }
+        if (priceZeroVal.toString().split(".")[1]?.length > 2) {
+          ElMessage.error("保底价格最多保留2位小数");
+          return false;
+        }
+      }
       if (isEdit95) {
         if (additionPrice === null || additionPrice === "" || isNaN(parseFloat(additionPrice))) {
           ElMessage.error("附加费用不能为空且必须为有效数字");
@@ -1902,7 +1945,8 @@ export default {
         return false;
       }
       const amountFirstStartVal = parseFloat(amountFirstStart);
-      if (amountFirstStartVal < amountZeroEndVal) {
+      const editBaseAmount = isEdit95 ? parseFloat(this.editData.guaranteedTons || 0) : editAmountZeroEndVal;
+      if (amountFirstStartVal < editBaseAmount) {
         ElMessage.error("第一阶梯开始值不能小于保底数值");
         return false;
       }
