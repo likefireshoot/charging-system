@@ -43,7 +43,7 @@
         </div>
         <div class="security-btn" @click="openLoginSecurity">
           <img src="@/assets/menu/icon32.png" alt="" />
-          <span style="margin-left: 6px; color: #5a5a5a">登录安全</span>
+          <span style="margin-left: 6px; color: #5a5a5a">登录方式设置</span>
         </div>
       </div>
       <div class="yuangong-table">
@@ -103,6 +103,9 @@
             :value="item.value"
           />
         </el-select>
+      </div>
+      <div class="tip" style="font-size: 15px; color: #ff0202">
+        <span>说明：若关闭账号密码登录方式，则仅可使用短信验证登录系统。</span>
       </div>
     </el-dialog>
   </div>

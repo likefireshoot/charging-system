@@ -67,6 +67,15 @@
     </div>
 
     <div class="tool-bar">
+<!--      <div class="export-btn" @click="downloadTemplate" v-if="staffPermissionIds.includes(54)">-->
+<!--        <img src="@/assets/yonghu/icon1.png" alt="" />-->
+<!--        <span>历史数据导⼊模版下载</span>-->
+<!--      </div>-->
+<!--      <div class="export-btn" @click="triggerFileInput" v-if="staffPermissionIds.includes(54)">-->
+<!--        <img src="@/assets/yonghu/icon2.png" alt="" />-->
+<!--        <span>历史数据导⼊</span>-->
+<!--        <input ref="fileInput" type="file" accept=".xls,.xlsx" style="display: none" @change="handleImport" />-->
+<!--      </div>-->
       <div class="export-btn" @click="exportExcel">
         <img src="@/assets/yonghu/icon1.3.png" alt="" />
         <span>导出</span>
@@ -87,23 +96,27 @@
           :row-style="{ height: '50px' }"
           height="100%"
       >
-        <el-table-column type="selection" width="50" align="center" fixed="left" />
-        <el-table-column property="theId" label="序号" width="70" align="center" fixed="left" />
+        <el-table-column type="selection" min-width="50" align="center" fixed="left" />
+<!--        <el-table-column property="theId" label="序号" width="70" align="center" fixed="left" />-->
         <el-table-column property="userId" label="用户号" min-width="100" align="center" />
         <el-table-column property="userName" label="用户名" min-width="140" align="center" />
 <!--        <el-table-column property="userAddr" label="地址" min-width="260" align="center" />-->
         <el-table-column property="startRead" label="起码" min-width="100" align="center" />
         <el-table-column property="endRead" label="止码" min-width="100" align="center" />
-        <el-table-column property="waterUse" label="用水量" min-width="100" align="center">
+        <el-table-column property="waterUse" label="结算量" min-width="100" align="center">
           <template #default="scope">{{ scope.row.waterUse }}</template>
         </el-table-column>
-        <el-table-column property="waterFee" label="水费" min-width="100" align="center">
+        <el-table-column property="chargeAmount" label="扣费" min-width="100" align="center"></el-table-column>
+        <el-table-column property="waterFee" min-width="110" align="center">
+          <template #header>扣费组成1:<br>水费</template>
           <template #default="scope">{{ scope.row.waterFee }}</template>
         </el-table-column>
-        <el-table-column property="sewageFee" label="污水处理费" min-width="130" align="center">
+        <el-table-column property="sewageFee" min-width="110" align="center">
+          <template #header>扣费组成2:<br>污水处理费</template>
           <template #default="scope">{{ scope.row.sewageFee }}</template>
         </el-table-column>
-        <el-table-column property="minFee" label="保底消费" min-width="110" align="center">
+        <el-table-column property="minFee" min-width="110" align="center">
+          <template #header>扣费组成3:<br>保底消费</template>
           <template #default="scope">{{ scope.row.minFee }}</template>
         </el-table-column>
         <el-table-column property="createTime" label="算费日期" min-width="140" align="center" />
@@ -117,14 +130,15 @@
         :show-header="false"
         row-class-name="summary-row"
       >
-        <el-table-column property="theId" width="120" align="center" fixed="left" />
-        <el-table-column property="userId" min-width="100" align="center" />
+        <el-table-column property="theId" min-width="150" align="center" fixed="left" />
+<!--        <el-table-column property="userId" min-width="100" align="center" />-->
         <el-table-column property="userName" min-width="140" align="center" />
         <el-table-column property="startRead" min-width="100" align="center" />
         <el-table-column property="endRead" min-width="100" align="center" />
         <el-table-column property="waterUse" min-width="100" align="center" />
-        <el-table-column property="waterFee" min-width="100" align="center" />
-        <el-table-column property="sewageFee" min-width="130" align="center" />
+        <el-table-column property="totalChargeAmount" min-width="100" align="center"></el-table-column>
+        <el-table-column property="waterFee" min-width="110" align="center" />
+        <el-table-column property="sewageFee" min-width="110" align="center" />
         <el-table-column property="minFee" min-width="110" align="center" />
         <el-table-column property="createTime" min-width="140" align="center" />
       </el-table>
@@ -186,6 +200,7 @@ export default {
           startRead: "",
           endRead: "",
           waterUse: "0",
+          totalChargeAmount: "0.00",
           waterFee: "0.00",
           sewageFee: "0.00",
           minFee: "0.00",
@@ -216,6 +231,89 @@ export default {
     }
   },
   methods: {
+    // 导出模板
+    downloadTemplate() {
+      // axios({
+      //   url: "/import/importChargeTemplate",
+      //   method: "GET",
+      //   responseType: "blob",
+      //   headers: {
+      //     Authorization: this.token
+      //   }
+      // })
+      //   .then((response) => {
+      //     if (response.status !== 200) {
+      //       throw new Error("下载失败: " + response.statusText);
+      //     }
+      //
+      //     const blob = new Blob([response.data], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+      //     const link = document.createElement("a");
+      //     link.href = window.URL.createObjectURL(blob);
+      //     link.download = "历史扣费数据导⼊模版下载.xlsx";
+      //     document.body.appendChild(link);
+      //     link.click();
+      //     document.body.removeChild(link);
+      //     window.URL.revokeObjectURL(link.href);
+      //   })
+      //   .catch((error) => {
+      //     console.error("下载失败:", error);
+      //     ElMessage.error("下载失败: " + error.message);
+      //   });
+    },
+
+    // 触发文件选择
+    triggerFileInput() {
+      // this.$refs.fileInput.value = "";
+      // this.$refs.fileInput.click();
+    },
+
+// 导入文件
+    async handleImport() {
+      // const fileInput = this.$refs.fileInput;
+      // const file = fileInput.files[0];
+      //
+      // if (!file) {
+      //   ElMessage.warning("请选择要上传的文件");
+      //   return;
+      // }
+      //
+      // const allowedTypes = ["application/vnd.ms-excel", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"];
+      // if (!allowedTypes.includes(file.type)) {
+      //   ElMessage.warning("仅支持上传 .xls 或 .xlsx 文件");
+      //   return;
+      // }
+      //
+      // const formData = new FormData();
+      // formData.append("file", file);
+      // formData.append("companyId", this.user.companyId);
+      //
+      // try {
+      //   const response = await service.post("/import/importChargeRecord", formData, { responseType: "blob" });
+      //   const blob = new Blob([response.data], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+      //
+      //   if (blob.size === 0) {
+      //     ElMessage.success("导入成功");
+      //     fileInput.value = "";
+      //     this.handleRefresh();
+      //     return;
+      //   }
+      //
+      //   ElMessage.warning("部分数据导入失败，等待下载失败列表");
+      //   const link = document.createElement("a");
+      //   link.href = window.URL.createObjectURL(blob);
+      //   link.download = "扣费记录导入失败列表.xlsx";
+      //   document.body.appendChild(link);
+      //   link.click();
+      //   document.body.removeChild(link);
+      //   window.URL.revokeObjectURL(link.href);
+      //   fileInput.value = "";
+      //   this.handleRefresh();
+      // } catch (error) {
+      //   const errorMessage = error.response?.data?.message || error.message || "未知错误";
+      //   ElMessage.error("导入失败: " + errorMessage);
+      //   console.error("上传失败:", error);
+      // }
+    },
     buildQueryParams() {
       let params = {
         userId: this.user.userId,
@@ -419,10 +517,11 @@ export default {
               userName: "",
               startRead: "",
               endRead: "",
-              waterUse: Number(sumData.totalWaterUse || 0).toFixed(2),
-              waterFee: Number(sumData.totalWaterFee || 0).toFixed(2),
-              sewageFee: Number(sumData.totalSewageFee || 0).toFixed(2),
-              minFee: Number(sumData.totalMinFee || 0).toFixed(2),
+              waterUse: sumData.totalWaterUse || 0,
+              totalChargeAmount: sumData.totalChargeAmount || 0,
+              waterFee: sumData.totalWaterFee || 0,
+              sewageFee: sumData.totalSewageFee || 0,
+              minFee: sumData.totalMinFee || 0,
               createTime: ""
             }
           ];

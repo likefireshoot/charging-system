@@ -101,6 +101,7 @@
     </div>
 
     <div class="table-wrapper">
+      <div class="table-scroll">
       <el-table
         ref="multipleTableRef"
         :data="list"
@@ -157,6 +158,29 @@
             </span>
           </template>
         </el-table-column>
+      </el-table>
+      </div>
+
+      <!-- 底部固定汇总行，无表头，紧贴表格下方 -->
+      <el-table
+        :data="totalSummaryRow"
+        border
+        style="width:100%;margin-top:-1px;"
+        :show-header="false"
+        row-class-name="summary-row"
+      >
+        <el-table-column width="50" align="center" fixed="left" />
+        <el-table-column property="userId" min-width="120" align="center" fixed="left" />
+        <el-table-column min-width="120" align="center" />
+        <el-table-column min-width="195" align="center"></el-table-column>
+        <el-table-column min-width="70" align="center" />
+        <el-table-column min-width="120" align="center"></el-table-column>
+        <el-table-column property="totalRechargeAmount" min-width="110" align="center"></el-table-column>
+        <el-table-column min-width="120" align="center"></el-table-column>
+        <el-table-column min-width="170" align="center" />
+        <el-table-column min-width="100" align="center" />
+        <el-table-column min-width="70" align="center"></el-table-column>
+        <el-table-column min-width="80" align="center"></el-table-column>
       </el-table>
     </div>
 
@@ -344,6 +368,14 @@ export default {
 
       // 微信退款防重
       refunding: false,
+
+      // 新增底部汇总行
+      totalSummaryRow: [
+        {
+          userId: "汇总",
+          totalRechargeAmount: 0.00,
+        }
+      ],
     };
   },
   mounted() {
@@ -528,19 +560,29 @@ export default {
         }
       } else if (baseParams.createTime && baseParams.timeType) {
         let formattedTime = "";
+        let endTimeVal = "";
         let timeTypeValue = null;
 
         switch (baseParams.timeType) {
           case "year":
             formattedTime = `${baseParams.createTime}-01-01 00:00:00`;
+            endTimeVal = `${baseParams.createTime}-12-31 23:59:59`;
             timeTypeValue = 1;
             break;
           case "month":
             formattedTime = `${baseParams.createTime}-01 00:00:00`;
+            const [y, m] = baseParams.createTime.split("-");
+            const nextMonth = Number(m) + 1;
+            if(nextMonth > 12){
+              endTimeVal = `${Number(y)+1}-01-01 00:00:00`;
+            }else{
+              endTimeVal = `${y}-${String(nextMonth).padStart(2,'0')}-01 00:00:00`;
+            }
             timeTypeValue = 2;
             break;
           case "day":
             formattedTime = `${baseParams.createTime} 00:00:00`;
+            endTimeVal = `${baseParams.createTime} 23:59:59`;
             timeTypeValue = 3;
             break;
         }
@@ -548,8 +590,10 @@ export default {
         if (timeTypeValue) {
           params.timeType = timeTypeValue;
           params.createTime = formattedTime;
+          params.endTime = endTimeVal;
         }
       }
+      params.startTime = params.createTime;
 
       return this.filterNonEmptyParams(params);
     },
@@ -570,7 +614,7 @@ export default {
       }
       return queryString;
     },
-    async fetchTransactionRecords() {
+    async fetchTransactionRecords(isPageChange = false) {
       if (this.isLoading) return;
 
       this.isLoading = true;
@@ -613,6 +657,9 @@ export default {
             console.log('第一条记录是否可退款:', canRefund);
             console.log('==============================');
           }
+          if (!isPageChange){
+            await this.fetchSumData();
+          }
         } else {
           ElMessage.error(response.msg);
         }
@@ -624,7 +671,7 @@ export default {
         this.isLoading = false;
       }
     },
-    async fetchWithSearch() {
+    async fetchWithSearch(isPageChange = false) {
       if (this.isLoading) return;
 
       this.isLoading = true;
@@ -666,6 +713,10 @@ export default {
 
           this.total = response.data.totalElements || 0;
           console.log('搜索结果:', this.list, '总数:', this.total);
+
+          if (!isPageChange){
+            await this.fetchSumData();
+          }
         } else {
           ElMessage.error(response.msg);
         }
@@ -731,14 +782,14 @@ export default {
       this.currentPage = page;
       if (this.transactionData.timeType === "custom") {
         if (this.transactionData.dateRange && this.transactionData.dateRange.length === 2) {
-          this.fetchWithSearch();
+          this.fetchWithSearch(true);
         } else {
-          this.fetchTransactionRecords();
+          this.fetchTransactionRecords(true);
         }
       } else if (this.transactionData.createTime && this.transactionData.timeType) {
-        this.fetchWithSearch();
+        this.fetchWithSearch(true);
       } else {
-        this.fetchTransactionRecords();
+        this.fetchTransactionRecords(true);
       }
     },
     handleSelectionChange(val) {
@@ -971,7 +1022,35 @@ export default {
           });
       }).catch(() => {
       });
-    }
+    },
+    // 获取汇总数据（仅搜索/切换条件调用，翻页不调用）
+    async fetchSumData() {
+      try {
+        // 复用当前查询参数
+        const params = this.buildQueryParams(true);
+        const queryString = this.buildQueryString(params);
+        // 【重点】替换成后端充值汇总接口地址
+        const url = `/userManage/userCharge/union/summary${queryString}`
+        const res = await service.get(url);
+        if (res.code === 200 && res.data) {
+          const sumData = res.data;
+          this.totalSummaryRow = [
+            {
+              userId: "汇总",
+              totalRechargeAmount: sumData.totalRechargeAmount || 0 ,
+            }
+          ];
+        }
+      } catch (err) {
+        console.error("获取充值汇总失败", err);
+        this.totalSummaryRow = [
+          {
+            userId: "汇总",
+            totalRechargeAmount: "0.00"
+          }
+        ];
+      }
+    },
   },
   watch: {
     "user.userId"(newVal, oldVal) {
@@ -1356,6 +1435,8 @@ export default {
 .table-wrapper {
   flex: 1;
   min-height: 0;
+  display: flex;
+  flex-direction: column;
   overflow: hidden;
 }
 
@@ -1367,4 +1448,20 @@ export default {
   font-size: 18px;
 }
 
+.table-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+/* 汇总行样式：绿色底色白色加粗文字 */
+:deep(.summary-row) {
+  height: 50px !important;
+  background-color: #46B97E !important;
+}
+:deep(.summary-row td) {
+  font-weight: bold;
+  color: #ffffff;
+  font-size: 20px;
+  text-align: center;
+}
 </style>

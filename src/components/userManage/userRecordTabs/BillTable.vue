@@ -110,23 +110,27 @@
         <el-table-column property="userName" label="用户名" min-width="140" align="center" />
         <el-table-column property="startRead" label="起码" min-width="100" align="center" />
         <el-table-column property="endRead" label="止码" min-width="100" align="center" />
-        <el-table-column property="waterUse" label="用水量" min-width="100" align="center">
+        <el-table-column property="waterUse" label="结算量" min-width="100" align="center">
           <template #default="scope">{{ scope.row.waterUse }}</template>
         </el-table-column>
         <el-table-column property="chargeAmount" label="扣费" min-width="110" align="center">
           <template #default="scope">{{ scope.row.chargeAmount }}</template>
         </el-table-column>
-<!--        <el-table-column property="meterCode" label="表号" min-width="160" align="center" />-->
         <el-table-column property="oldBalance" label="原金额" min-width="110" align="center">
           <template #default="scope">{{ scope.row.oldBalance }}</template>
+        </el-table-column>
+<!--        <el-table-column property="meterCode" label="表号" min-width="160" align="center" />-->
+        <el-table-column property="rechargeAmount" label="充值" min-width="110" align="center">
+          <template #default="scope">{{ scope.row.rechargeAmount }}</template>
         </el-table-column>
         <el-table-column property="newBalance" label="余额" min-width="110" align="center">
           <template #default="scope">{{ scope.row.newBalance }}</template>
         </el-table-column>
-        <el-table-column property="createTime" label="扣费时间" min-width="180" align="center" />
-        <el-table-column label="扣费类型" min-width="120" align="center">
+        <el-table-column property="createTime" label="时间" min-width="160" align="center" />
+        <el-table-column label="类型" min-width="120" align="center">
           <template #default="scope">
-            <span>{{ formatChargeType(scope.row.type) }}</span>
+<!--            <span>{{ formatChargeType(scope.row.billTypeName) }}</span>-->
+            <span>{{scope.row.billTypeName}}</span>
           </template>
         </el-table-column>
       </el-table>
@@ -143,11 +147,12 @@
         <el-table-column property="userName" min-width="140" align="center" />
         <el-table-column property="startRead" min-width="100" align="center" />
         <el-table-column property="endRead" min-width="100" align="center" />
-        <el-table-column property="totalWaterUse" min-width="100" align="center" />
+        <el-table-column min-width="100" align="center" />
         <el-table-column property="totalChargeAmount" min-width="110" align="center" />
-        <el-table-column property="oldBalance" min-width="110" align="center"/>
+        <el-table-column min-width="110" align="center" />
+        <el-table-column property="totalRechargeAmount" min-width="110" align="center"/>
         <el-table-column property="newBalance" min-width="110" align="center" />
-        <el-table-column property="createTime" min-width="180" align="center" />
+        <el-table-column property="createTime" min-width="160" align="center" />
         <el-table-column property="type" min-width="120" align="center"/>
       </el-table>
     </div>
@@ -206,7 +211,7 @@ export default {
           endRead: "",
           totalWaterUse: 0,
           totalChargeAmount: 0,
-          oldBalance: "",
+          totalRechargeAmount: 0,
           newBalance: "",
           createTime: "",
           type: ""
@@ -372,6 +377,7 @@ export default {
           params.endTime = endTimeVal;
         }
       }
+      params.startTime = params.createTime;
 
       return this.filterNonEmptyParams(params);
     },
@@ -400,13 +406,13 @@ export default {
       try {
         const params = this.buildQueryParams();
         const queryString = this.buildQueryString(params);
-        const url = `/userManage/userCharge/showMeterChargeRecords/${this.currentPage}${queryString}`;
+        const url = `/userManage/userCharge/union/${this.currentPage}${queryString}`;
         const response = await service.get(url);
 
         if (response.code === 200) {
-          const records = response.data.userSingleRechargeRecordData || [];
+          const records = response.data.records || [];
           records.map((item, index) => {
-            item.theId = this.pageSize * (response.data.currentPages - 1) + index + 1;
+            item.theId = this.pageSize * (this.currentPage - 1) + index + 1;
             return item;
           });
 
@@ -420,7 +426,7 @@ export default {
             return item;
           });
 
-          this.total = response.data.totalElements || 0;
+          this.total = response.data.total || 0;
           await this.fetchTotalMoney();
           await this.fetchSumData();
         } else {
@@ -539,12 +545,13 @@ export default {
       try {
         const params = this.buildQueryParams();
         const queryString = this.buildQueryString(params);
-        const url = `/charge/sum${queryString}`;
+        const url = `/userManage/userCharge/union/summary${queryString}`
         const res = await service.get(url);
         if(res.code === 200){
           const d = res.data;
           this.totalSummaryRow[0].totalWaterUse = d.totalWaterUse;
           this.totalSummaryRow[0].totalChargeAmount = d.totalChargeAmount;
+          this.totalSummaryRow[0].totalRechargeAmount = d.totalRechargeAmount;
         }
       }catch (e){
         console.error("获取汇总行失败",e);

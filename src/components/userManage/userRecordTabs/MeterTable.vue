@@ -118,10 +118,13 @@
             <span v-else>{{ row.readingCount }}</span>
           </template>
         </el-table-column>
-<!--        <el-table-column property="deltaWater" label="用水量" min-width="100" align="center" />-->
-        <el-table-column label="结算量" min-width="100" align="center">
-          <template #default="scope">{{ scope.row.settleTon }}</template>
-        </el-table-column>
+        <el-table-column property="deltaWater" label="用水量" min-width="100" align="center" />
+        <el-table-column property="startRead" label="起码" min-width="100" align="center" />
+        <el-table-column property="endRead" label="止码" min-width="100" align="center" />
+        <el-table-column property="waterUse" label="结算量" min-width="100" align="center" />
+<!--        <el-table-column label="结算量" min-width="100" align="center">-->
+<!--          <template #default="scope">{{ scope.row.settleTon }}</template>-->
+<!--        </el-table-column>-->
 <!--        <el-table-column label="扣费吨值" min-width="100" align="center">-->
 <!--          <template #default="scope">{{ scope.row.deductTon }}</template>-->
 <!--        </el-table-column>-->
