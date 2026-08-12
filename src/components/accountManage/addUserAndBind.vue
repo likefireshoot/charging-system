@@ -46,7 +46,7 @@
           </div>
           <div class="edit-input">
             <span>所属表册</span>
-            <el-select v-model="form.codeBookId" class="input-item big-font-el-select" placeholder="请选择所属表册" :disabled="!form.isNormalMeterUser">
+            <el-select v-model="form.codeBookId" class="input-item big-font-el-select" placeholder="请选择所属表册" :disabled="!form.isNormalMeterUser" filterable>
               <el-option v-for="item in codeBookList" :key="item.id" :label="item.label" :value="item.id" />
             </el-select>
           </div>
