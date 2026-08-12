@@ -31,6 +31,12 @@
             <el-option v-for="item in quyu_data" :key="item.id" :label="item.label" :value="item.label"> </el-option>
           </el-select>
         </div>
+        <div class="user-info-input" v-if="companyId === 95">
+          <span>所属表册</span>
+          <el-select v-model="userInfoData.codeBookId" class="big-font-el-select" :disabled="!userInfoData.regionName">
+            <el-option v-for="item in codeBookList" :key="item.id" :label="item.label" :value="item.id"></el-option>
+          </el-select>
+        </div>
         <div class="user-info-input">
           <span>联系电话</span>
           <el-input v-model="userInfoData.userPhone" />
@@ -236,6 +242,7 @@ export default {
         keepValveOpenFree: 1,
         isPause: 0,
         balance: 0,
+        codeBookId: null,
       },
       flag: 0,
       companyId: JSON.parse(sessionStorage.getItem("userData")).companyId,
@@ -252,6 +259,7 @@ export default {
         },
       ],
       quyu_data: [],
+      codeBookList: [],
       sms_config_list: [],
       approver_list: [],
       companyList: [],
@@ -287,10 +295,22 @@ export default {
         this.userInfoData.regionName = ""; // 清空区域选择
         this.userInfoData.priceName = ""; // 清空价格类型选择
         this.userInfoData.sms_config = ""; // 清空短信配置选择
+        this.userInfoData.codeBookId = null;
+        this.codeBookList = [];
         this.getRegionData();
         this.getPriceList();
         this.getSmsConfigList();
         this.getApproverList();
+      }
+    },
+    "userInfoData.regionName": function (newVal) {
+      if (this.companyId === 95 && this.flag === 1) {
+        this.userInfoData.codeBookId = null;
+        if (newVal) {
+          this.getCodeBookList();
+        } else {
+          this.codeBookList = [];
+        }
       }
     },
     flag: function (newVal) {
@@ -338,6 +358,7 @@ export default {
       this.userInfoData.keepValveOpenFree = this.data.keepValveOpenFree === null ? 1 : this.data.keepValveOpenFree;
       this.userInfoData.isPause = this.data.isPause ?? 0;
       this.userInfoData.balance = this.data.balance ?? 0;
+      this.userInfoData.codeBookId = this.data.codeBookId ?? null;
 
       console.log("初始化数据完成:", this.userInfoData);
 
@@ -379,10 +400,43 @@ export default {
               };
             });
             console.log(this.quyu_data);
+            // 区域加载完成后，如果是95水厂且已有区域，加载表册
+            if (this.companyId === 95 && this.userInfoData.regionName) {
+              this.getCodeBookList();
+            }
           }
         })
         .catch((error) => {
           ElMessage.error("获取区域数据失败");
+        });
+    },
+    getCodeBookList() {
+      const regionName = this.userInfoData.regionName;
+      if (!regionName) {
+        this.codeBookList = [];
+        return;
+      }
+      const region = this.quyu_data.find((item) => item.label === regionName);
+      const regionId = region ? region.id : null;
+      if (!regionId) {
+        this.codeBookList = [];
+        return;
+      }
+      const companyId = this.userInfoData.companyId || this.companyId;
+      service
+        .get(`/getCodeBookByRegion?companyId=${companyId}&regionId=${regionId}`)
+        .then((res) => {
+          if (res.code === 200) {
+            this.codeBookList = (res.data || []).map((item) => ({
+              id: item.codeBookId,
+              label: item.codeBookName,
+            }));
+          } else {
+            this.codeBookList = [];
+          }
+        })
+        .catch(() => {
+          this.codeBookList = [];
         });
     },
     getPriceList() {
@@ -470,6 +524,10 @@ export default {
           message: "用户所属区域不能为空！",
         },
         {
+          condition: this.companyId === 95 && (this.userInfoData.codeBookId === null || this.userInfoData.codeBookId === ""),
+          message: "所属表册不能为空！",
+        },
+        {
           condition: this.userInfoData.userPhone && !/^1[3-9]\d{9}$/.test(this.userInfoData.userPhone.trim()),
           message: "用户联系电话格式不正确！",
         },
@@ -536,6 +594,7 @@ export default {
         createTime: this.userInfoData.createTime,
         enableArrearsValve: this.userInfoData.enableArrearsValve === "default" ? null : this.userInfoData.enableArrearsValve,
         keepValveOpenFree: this.userInfoData.keepValveOpenFree,
+        codeBookId: this.companyId === 95 ? this.userInfoData.codeBookId : null,
       };
 
       console.log(dataParams);
@@ -752,6 +811,7 @@ export default {
       this.userInfoData.keepValveOpenFree = full.keepValveOpenFree ?? 1;
       this.userInfoData.isPause = full.isPause ?? 0;
       this.userInfoData.balance = full.balance ?? 0;
+      this.userInfoData.codeBookId = full.codeBookId ?? null;
       // 重新加载下拉选项（水厂/区域/价格/审批人）
       Promise.all([this.getCompanyList(), this.getRegionData(), this.getPriceList(), this.getSmsConfigList(), this.getApproverList()]).then(() => {
         this.flag = 1;

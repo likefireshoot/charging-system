@@ -12,37 +12,43 @@
       </div>
       <div class="recharge-record-content">
         <div class="serach-box">
-          <div class="search-input" style="width: 15%; margin-right: 10px" v-if="companyId === 1">
+          <div class="search-input" style="width: 10%; margin-right: 10px" v-if="companyId === 1">
             <span>所属水厂</span>
             <el-select v-model="rechargeRecordeData.companyId" placeholder="请选择所属水厂">
               <el-option v-for="item in companyList" :key="item.id" :value="item.id" :label="item.name"></el-option>
             </el-select>
           </div>
-          <div class="search-input" style="width: 18%; margin-right: 10px">
+          <div class="search-input" style="width: 10%; margin-right: 10px">
             <span>区域</span>
             <el-select v-model="rechargeRecordeData.region" clearable filterable placeholder="区域">
               <el-option v-for="item in quyu_data" :key="item.id" :label="item.label" :value="item.label"> </el-option>
             </el-select>
           </div>
-          <div class="search-input" style="width: 15%; margin-right: 10px">
+          <div class="search-input" style="width: 10%; margin-right: 10px" v-if="companyId === 95">
+            <span>表册</span>
+            <el-select v-model="rechargeRecordeData.codeBookId" clearable filterable placeholder="表册" :disabled="!rechargeRecordeData.region">
+              <el-option v-for="item in codeBookList" :key="item.id" :label="item.label" :value="item.id"></el-option>
+            </el-select>
+          </div>
+          <div class="search-input" style="width: 10%; margin-right: 10px">
             <span>用户号</span>
             <el-input v-model="rechargeRecordeData.userId" placeholder="请输入..." />
           </div>
-          <div class="search-input" style="width: 15%; margin-right: 10px">
+          <div class="search-input" style="width: 10%; margin-right: 10px">
             <span>用户名称</span>
             <el-input v-model="rechargeRecordeData.userName" placeholder="请输入..." />
           </div>
-          <div class="search-input" style="width: 18%; margin-right: 10px">
+          <div class="search-input" style="width: 12%; margin-right: 10px">
             <span>表号</span>
             <el-input v-model="rechargeRecordeData.meterCode" placeholder="请输入..." />
           </div>
-          <div class="search-input" style="width: 15%; margin-right: 10px">
+          <div class="search-input" style="width: 10%; margin-right: 10px">
             <span>收费人</span>
             <el-select v-model="rechargeRecordeData.rechargeUser" clearable filterable placeholder="请选择收费人">
               <el-option v-for="item in staffNameOptions" :key="item" :label="item" :value="item"></el-option>
             </el-select>
           </div>
-          <div class="search-input" style="width: 18%; margin-right: 10px">
+          <div class="search-input" style="width: 12%; margin-right: 10px">
             <span>收费类型</span>
             <el-select v-model="rechargeRecordeData.rechargeType" placeholder="请选择收费类型">
               <el-option label="现金" value="现金"></el-option>
@@ -50,7 +56,7 @@
               <el-option label="免费赠送" value="免费赠送"></el-option>
             </el-select>
           </div>
-          <div class="search-input" style="width: 25%; margin-right: 10px">
+          <div class="search-input" style="width: 38%; margin-right: 10px">
             <span>时间</span>
             <div class="time-input">
               <el-date-picker
@@ -125,6 +131,7 @@
               </el-table-column>
               <el-table-column property="userAddr" label="用户地址" min-width="75" align="center" />
               <el-table-column property="regionName" label="所属区域" min-width="75" align="center" />
+              <el-table-column v-if="companyId === 95" property="codeBookName" label="所属表册" min-width="75" align="center" />
               <el-table-column property="userPhone" label="联系电话" min-width="80" align="center" />
               <el-table-column property="meterCode" label="表号" min-width="80" align="center" />
               <el-table-column property="payerPhone" label="缴费人手机号" min-width="85" align="center" />
@@ -344,6 +351,7 @@ export default {
         userId: "",
         rechargeUser: "",
         rechargeType: "",
+        codeBookId: null,
       },
       companyId: JSON.parse(sessionStorage.getItem("userData")).companyId,
       staffPermissionIds: JSON.parse(sessionStorage.getItem("userData")).staffPermissionIds,
@@ -355,6 +363,7 @@ export default {
       multipleSelection: [],
       companyList: [],
       quyu_data: [],
+      codeBookList: [],
       staffNameOptions: [],
       rechargeSummary: {
         weChatTotalAmount: "0",
@@ -403,7 +412,19 @@ export default {
   watch: {
     "rechargeRecordeData.companyId"() {
       this.rechargeRecordeData.region = "";
+      this.rechargeRecordeData.codeBookId = null;
+      this.codeBookList = [];
       this.getRegionData();
+    },
+    "rechargeRecordeData.region"(newVal) {
+      if (this.companyId === 95) {
+        this.rechargeRecordeData.codeBookId = null;
+        if (newVal) {
+          this.getCodeBookList();
+        } else {
+          this.codeBookList = [];
+        }
+      }
     },
   },
   mounted() {
@@ -484,10 +505,42 @@ export default {
                 label: item.regionName,
               };
             });
+            if (this.companyId === 95 && this.rechargeRecordeData.region) {
+              this.getCodeBookList();
+            }
           }
         })
         .catch((error) => {
           ElMessage.error("获取区域数据失败");
+        });
+    },
+    getCodeBookList() {
+      const regionName = this.rechargeRecordeData.region;
+      if (!regionName) {
+        this.codeBookList = [];
+        return;
+      }
+      const region = this.quyu_data.find((item) => item.label === regionName);
+      const regionId = region ? region.id : null;
+      if (!regionId) {
+        this.codeBookList = [];
+        return;
+      }
+      const companyId = this.rechargeRecordeData.companyId || this.companyId;
+      service
+        .get(`/getCodeBookByRegion?companyId=${companyId}&regionId=${regionId}`)
+        .then((res) => {
+          if (res.code === 200) {
+            this.codeBookList = (res.data || []).map((item) => ({
+              id: item.codeBookId,
+              label: item.codeBookName,
+            }));
+          } else {
+            this.codeBookList = [];
+          }
+        })
+        .catch(() => {
+          this.codeBookList = [];
         });
     },
     getStaffNames() {
@@ -592,6 +645,7 @@ export default {
       this.rechargeRecordeData.userId = "";
       this.rechargeRecordeData.rechargeUser = "";
       this.rechargeRecordeData.rechargeType = "";
+      this.rechargeRecordeData.codeBookId = null;
       this.rechargeSummary = {
         weChatTotalAmount: "0",
         freeGiftTotalAmount: "0",
