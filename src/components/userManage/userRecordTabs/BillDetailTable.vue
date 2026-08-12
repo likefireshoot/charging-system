@@ -103,7 +103,7 @@
 <!--        <el-table-column property="userAddr" label="地址" min-width="260" align="center" />-->
         <el-table-column property="startRead" label="起码" min-width="100" align="center" />
         <el-table-column property="endRead" label="止码" min-width="100" align="center" />
-        <el-table-column property="waterUse" label="用水量" min-width="100" align="center">
+        <el-table-column property="waterUse" label="结算量" min-width="100" align="center">
           <template #default="scope">{{ scope.row.waterUse }}</template>
         </el-table-column>
         <el-table-column property="chargeAmount" label="扣费" min-width="100" align="center"></el-table-column>

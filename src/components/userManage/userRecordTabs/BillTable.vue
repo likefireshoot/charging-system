@@ -110,16 +110,16 @@
         <el-table-column property="userName" label="用户名" min-width="140" align="center" />
         <el-table-column property="startRead" label="起码" min-width="100" align="center" />
         <el-table-column property="endRead" label="止码" min-width="100" align="center" />
-        <el-table-column property="waterUse" label="用水量" min-width="100" align="center">
+        <el-table-column property="waterUse" label="结算量" min-width="100" align="center">
           <template #default="scope">{{ scope.row.waterUse }}</template>
         </el-table-column>
         <el-table-column property="chargeAmount" label="扣费" min-width="110" align="center">
           <template #default="scope">{{ scope.row.chargeAmount }}</template>
         </el-table-column>
+        <el-table-column property="oldBalance" label="原金额" min-width="110" align="center">
+          <template #default="scope">{{ scope.row.oldBalance }}</template>
+        </el-table-column>
 <!--        <el-table-column property="meterCode" label="表号" min-width="160" align="center" />-->
-<!--        <el-table-column property="oldBalance" label="原金额" min-width="110" align="center">-->
-<!--          <template #default="scope">{{ scope.row.oldBalance }}</template>-->
-<!--        </el-table-column>-->
         <el-table-column property="rechargeAmount" label="充值" min-width="110" align="center">
           <template #default="scope">{{ scope.row.rechargeAmount }}</template>
         </el-table-column>
@@ -149,6 +149,7 @@
         <el-table-column property="endRead" min-width="100" align="center" />
         <el-table-column min-width="100" align="center" />
         <el-table-column property="totalChargeAmount" min-width="110" align="center" />
+        <el-table-column min-width="110" align="center" />
         <el-table-column property="totalRechargeAmount" min-width="110" align="center"/>
         <el-table-column property="newBalance" min-width="110" align="center" />
         <el-table-column property="createTime" min-width="160" align="center" />
