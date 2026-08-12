@@ -373,9 +373,20 @@ const handleCompanyChange = async (companyId) => {
     const res = await service.get(`/getRegion?companyId=${companyId}`);
 
     if (res.code === 200) {
-      regionList.value = res.data || [];
+      const allRegions = res.data || [];
+
+      // 洪湖峰口（companyId=95）：放行全部区域，不做普表筛选
+      if (companyId === 95) {
+        regionList.value = allRegions;
+      } else {
+        // 其他水厂：仅筛选普表区域（名称含"普表"历史兼容，或 regionType === 3）
+        regionList.value = allRegions.filter(region =>
+          (region.regionName && region.regionName.includes('普表')) || region.regionType === 3
+        );
+      }
+
       if (regionList.value.length === 0) {
-        ElMessage.warning('该水厂下暂无区域');
+        ElMessage.warning('该水厂下暂无普表区域');
       }
     } else {
       ElMessage.error(res.msg || '获取区域列表失败');
