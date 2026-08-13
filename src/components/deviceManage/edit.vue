@@ -48,6 +48,20 @@
           <span>masterKey</span>
           <el-input v-model="editData.masterKey" class="input-item"></el-input>
         </div>
+        <div class="edit-input reading-edit-input" style="margin-right: 1%">
+          <span>水表读数（吨）</span>
+          <div class="reading-container">
+            <el-input
+              v-model="editData.reading"
+              class="input-item"
+              :disabled="!allowEditReading"
+              placeholder="勾选下方“确认修改吨数”后可输入"
+            />
+          </div>
+          <el-checkbox v-model="allowEditReading" class="edit-checkbox" @change="handleAllowEditChange">
+            <span style="font-size: 16px">确认修改吨数</span>
+          </el-checkbox>
+        </div>
       </div>
       <div class="btn">
         <div class="confirm-btn" @click="handleCommit">
@@ -59,6 +73,34 @@
           <span style="font-size: 16px; margin-left: 15%; color: #5a5a5a">取消</span>
         </div>
       </div>
+
+      <el-dialog
+        v-model="showBindingDialog"
+        :title="bindingStatus === 'bound' ? '重要提示' : '提示'"
+        class="binding-dialog"
+        width="680px"
+        :close-on-click-modal="false"
+        :close-on-press-escape="false"
+        :show-close="false"
+        :lock-scroll="false"
+        center
+      >
+        <div style="padding: 4px 0; line-height: 1.8;">
+          <el-alert v-if="bindingStatus === 'bound'" type="warning" :closable="false" show-icon>
+            <template #title>该表已绑定用户</template>
+            <template #default>
+              修改表数将同步更新用户的起始计费吨数，用户将从新设置的吨数开始重新计费，请确认无误后再修改。
+            </template>
+          </el-alert>
+          <el-alert v-else-if="bindingStatus === 'unbound'" type="success" :closable="false" show-icon title="该表没有绑定用户，可安全修改吨数。" />
+        </div>
+        <template #footer>
+          <div style="display: flex; justify-content: center; gap: 20px;">
+            <el-button v-if="bindingStatus === 'bound'" @click="cancelBindingEdit">取消</el-button>
+            <el-button type="primary" @click="confirmBindingEdit">{{ bindingStatus === 'bound' ? '确认修改' : '确定' }}</el-button>
+          </div>
+        </template>
+      </el-dialog>
     </div>
   </div>
 </template>
@@ -93,10 +135,14 @@ export default {
         productId: "",
         deviceId: "",
         masterKey: "",
+        reading: null,
         companyId: "",
         companyName: "",
       },
       companyId: JSON.parse(sessionStorage.getItem("userData")).companyId,
+      allowEditReading: false,
+      bindingStatus: "",
+      showBindingDialog: false,
       changshang_list: [
         { id: 1, label: "信驰", value: 1 },
         { id: 2, label: "集万讯", value: 2 },
@@ -106,7 +152,8 @@ export default {
         { id: 6, label: "旧信驰", value: 6 },
         { id: 7, label: "旧信驰KF01", value: 7 },
         { id: 8, label: "4G信驰", value: 8 },
-        { id: 9, label: "旧圣鑫", value: 9 }
+        { id: 9, label: "旧圣鑫", value: 9 },
+        { id: 10, label: "普通水表", value: 10 }
       ],
       shuibiao_list: [
         {
@@ -145,8 +192,63 @@ export default {
       this.editData.productId = this.data.productId;
       this.editData.deviceId = this.data.deviceId;
       this.editData.masterKey = this.data.masterKey;
+      this.editData.reading = this.data.newReading ?? this.data.reading ?? null;
       this.editData.companyId = this.data.companyId;
       this.editData.companyName = this.data.companyName;
+    },
+
+    handleAllowEditChange(value) {
+      if (value) {
+        this.checkMeterBinding();
+      } else {
+        this.resetReadingEdit();
+      }
+    },
+
+    async checkMeterBinding() {
+      const meterCode = this.editData.meterCode;
+      if (!meterCode) {
+        ElMessage.warning("缺少表号，无法查询绑定状态");
+        this.resetReadingEdit();
+        return;
+      }
+      this.bindingStatus = "loading";
+      try {
+        const res = await service.get(
+          `/userManage/meterRead/checkMeterBinding?meterCode=${encodeURIComponent(meterCode)}`,
+          { skipAutoMsg: true }
+        );
+        if (res.code === 200 && res.data && res.data.bound) {
+          this.bindingStatus = "bound";
+          this.showBindingDialog = true;
+        } else if (res.code === 200) {
+          this.bindingStatus = "unbound";
+          this.showBindingDialog = true;
+        } else {
+          this.bindingStatus = "";
+          ElMessage.error(res.msg || "查询绑定状态失败");
+          this.resetReadingEdit();
+        }
+      } catch (err) {
+        this.bindingStatus = "";
+        ElMessage.error("查询绑定状态失败：" + (err.message || "网络错误"));
+        this.resetReadingEdit();
+      }
+    },
+
+    resetReadingEdit() {
+      this.allowEditReading = false;
+      this.bindingStatus = "";
+      this.showBindingDialog = false;
+      this.editData.reading = this.data.newReading ?? this.data.reading ?? null;
+    },
+
+    confirmBindingEdit() {
+      this.showBindingDialog = false;
+    },
+
+    cancelBindingEdit() {
+      this.resetReadingEdit();
     },
 
     handleCommit() {
@@ -171,6 +273,21 @@ export default {
         companyId: this.editData.companyId,
         meterVendor: this.editData.vendor,
       };
+
+      // 勾选“确认修改吨数”后，校验并携带 reading 字段
+      if (this.allowEditReading) {
+        const reading = this.editData.reading;
+        if (reading === null || reading === undefined || reading === "") {
+          ElMessage.error("水表读数（吨）不能为空");
+          return;
+        }
+        const num = Number(reading);
+        if (isNaN(num) || num < 0) {
+          ElMessage.error("水表读数（吨）必须为不小于 0 的数字");
+          return;
+        }
+        formData.reading = num;
+      }
 
       // 定义字段名映射，将属性名映射为友好的显示名称
       const fieldNameMap = {
@@ -333,6 +450,45 @@ export default {
 .input-item {
   height: 35px;
   width: 100%;
+}
+
+.reading-edit-input {
+  height: auto;
+  min-height: 110px;
+}
+
+.reading-container {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.reading-container .input-item {
+  flex: 1;
+}
+
+.edit-checkbox {
+  margin-top: 6px;
+}
+
+.binding-dialog .el-dialog__title {
+  font-size: 22px;
+}
+
+.binding-dialog .el-alert {
+  padding: 18px 20px;
+  align-items: flex-start;
+}
+
+.binding-dialog .el-alert__title {
+  font-size: 19px;
+  line-height: 1.6;
+}
+
+.binding-dialog .el-alert__description {
+  font-size: 17px;
+  line-height: 1.8;
+  margin-top: 4px;
 }
 
 .title {
