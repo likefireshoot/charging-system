@@ -69,36 +69,6 @@
           <img src="@/assets/menu/icon3.png" alt="" />
           <span>销户列表</span>
         </div>
-        <div class="command-btn" @click="openAddRegionDialog"
-             v-if="staffPermissionIds.includes(31)">
-          <img src="@/assets/yuangong/icon6.png" alt="" />
-          <span>新增区域</span>
-        </div>
-        <div class="command-btn" @click="openDeleteRegionDialog"
-             v-if="staffPermissionIds.includes(32)">
-          <img src="@/assets/yuangong/icon4.png" alt="" />
-          <span>删除区域</span>
-        </div>
-        <div class="command-btn" @click="valveOpen_dialogFormVisible = true"
-             v-if="staffPermissionIds.includes(7)">
-          <img src="@/assets/yonghu/icon18.png" alt="" />
-          <span>区域开阀设置</span>
-        </div>
-        <div class="command-btn" @click="valve_dialogFormVisible = true"
-             v-if="staffPermissionIds.includes(8)">
-          <img src="@/assets/yonghu/icon17.png" alt="" />
-          <span>区域关阀设置</span>
-        </div>
-        <div class="water-meter-record-btn" @click="post_pay_list_btn_click"
-             v-if="staffPermissionIds.includes(67)">
-          <img src="@/assets/yonghu/icon7.png" alt="" />
-          <span>欠费不关阀列表（后付费）</span>
-        </div>
-        <div class="water-meter-record-btn" @click="can_close_no_arrears_btn_click"
-             v-if="staffPermissionIds.includes(68)">
-          <img src="@/assets/yonghu/icon7.png" alt="" />
-          <span>不欠费可关阀列表</span>
-        </div>
         <div class="command-btn" :class="{ 'btn-single-only-disabled': multipleSelection.length !== 1 || hasPauseUserSelected }" @click="(multipleSelection.length === 1 && !hasPauseUserSelected) && handleCommand()"
           v-if="staffPermissionIds.includes(89)">
           <img src="@/assets/yonghu/icon5.png" alt="" />
@@ -138,6 +108,36 @@
           v-if="staffPermissionIds.includes(90)">
           <img src="@/assets/jiage/icon3.png" alt="" />
           <span>修改水价</span>
+        </div>
+        <div class="command-btn" @click="openAddRegionDialog"
+             v-if="staffPermissionIds.includes(31)">
+          <img src="@/assets/yuangong/icon6.png" alt="" />
+          <span>新增区域</span>
+        </div>
+        <div class="command-btn" @click="openDeleteRegionDialog"
+             v-if="staffPermissionIds.includes(32)">
+          <img src="@/assets/yuangong/icon4.png" alt="" />
+          <span>删除区域</span>
+        </div>
+        <div class="command-btn" @click="valveOpen_dialogFormVisible = true"
+             v-if="staffPermissionIds.includes(7)">
+          <img src="@/assets/yonghu/icon18.png" alt="" />
+          <span>区域开阀设置</span>
+        </div>
+        <div class="command-btn" @click="valve_dialogFormVisible = true"
+             v-if="staffPermissionIds.includes(8)">
+          <img src="@/assets/yonghu/icon17.png" alt="" />
+          <span>区域关阀设置</span>
+        </div>
+        <div class="water-meter-record-btn" @click="post_pay_list_btn_click"
+             v-if="staffPermissionIds.includes(67)">
+          <img src="@/assets/yonghu/icon7.png" alt="" />
+          <span>欠费不关阀列表（后付费）</span>
+        </div>
+        <div class="water-meter-record-btn" @click="can_close_no_arrears_btn_click"
+             v-if="staffPermissionIds.includes(68)">
+          <img src="@/assets/yonghu/icon7.png" alt="" />
+          <span>不欠费可关阀列表</span>
         </div>
         <!-- <div class="export-out-btn" @click="common_meter_template_click">
           <img src="@/assets/yonghu/icon1.png" alt="" />

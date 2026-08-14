@@ -67,6 +67,10 @@
           <img src="@/assets/yuangong/icon3.png" alt="" style="margin-left: 8px" />
           <span style="font-size: 20px; margin-left: 10px; color: #5a5a5a">编辑设备</span>
         </div>
+        <div class="add-btn" style="margin-left: 10px; width: 130px" @click="handleChangeImei">
+          <img src="@/assets/yuangong/icon3.png" alt="" style="margin-left: 8px" />
+          <span style="font-size: 20px; margin-left: 10px; color: #5a5a5a">修改IMEI</span>
+        </div>
         <div class="command-btn" style="margin-left: 10px; width: 130px" :class="{ 'is-disabled': singleSelectionDisabled }"
           @click="!singleSelectionDisabled && handleCommand()">
           <img src="@/assets/yonghu/icon5.png" alt="" style="margin-left: 8px" />
@@ -134,6 +138,10 @@
     <!-- 编辑按钮弹出框 -->
     <editVue v-if="edit_dialogFormVisible" :edit_dialogFormVisible="edit_dialogFormVisible" :companyList="companyList"
       :data="multipleSelection[0]" @close="closeEditDialog"></editVue>
+
+    <!-- 修改IMEI弹出框 -->
+    <changeImeiVue v-if="changeImei_dialogFormVisible"
+      :changeImei_dialogFormVisible="changeImei_dialogFormVisible" @close="closeChangeImeiDialog"></changeImeiVue>
   </div>
 
   <!-- 命令下发弹出框-太阳能 -->
@@ -179,11 +187,12 @@
 
 <script>
 import service from "@/api/request";
-import { ElMessage } from "element-plus";
+import { ElMessage, ElMessageBox } from "element-plus";
 import axios from "axios";
 import deleteVue from "@/components/deviceManage/delete.vue";
 import addVue from "@/components/deviceManage/add.vue";
 import editVue from "@/components/deviceManage/edit.vue";
+import changeImeiVue from "@/components/deviceManage/changeImei.vue";
 import commandTaiYangNengVue from "@/components/userManage/commandDialog/command_taiyangneng.vue";
 import commandXinchiVue from "@/components/userManage/commandDialog/command_xinchi.vue";
 import commandJiWanXun from "@/components/userManage/commandDialog/command_jiwanxun.vue";
@@ -206,6 +215,7 @@ export default {
     deleteVue,
     addVue,
     editVue,
+    changeImeiVue,
   },
   data() {
     return {
@@ -269,6 +279,7 @@ export default {
       add_dialogFormVisible: false,
       delete_dialogFormVisible: false,
       edit_dialogFormVisible: false,
+      changeImei_dialogFormVisible: false,
       command_dialogFormVisible_taiyangneng: false,
       command_dialogFormVisible_xinchi: false,
       command_dialogFormVisible_jiwanxun: false,
@@ -428,6 +439,26 @@ export default {
 
     handleEdit() {
       this.edit_dialogFormVisible = true;
+    },
+    handleChangeImei() {
+      ElMessageBox.confirm(
+        "修改imei可能会导致历史记录丢失、上报数据无法解析等系统异常，请务必确认修改后的imei正确时谨慎修改！",
+        "重要提示",
+        {
+          confirmButtonText: "确认修改",
+          cancelButtonText: "取消",
+          type: "warning",
+          lockScroll: false,
+        }
+      )
+        .then(() => {
+          this.changeImei_dialogFormVisible = true;
+        })
+        .catch(() => {});
+    },
+    closeChangeImeiDialog() {
+      this.changeImei_dialogFormVisible = false;
+      this.getDeviceData();
     },
     async fetchCommandType() {
       if (this.multipleSelection.length === 0) {
