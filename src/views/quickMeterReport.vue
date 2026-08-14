@@ -544,6 +544,11 @@ const handleRegionChange = async (regionId) => {
 
       if (allCodeBookList.value.length === 0) {
         ElMessage.warning('该区域下暂无表册');
+      } else if (allCodeBookList.value.length === 1) {
+        // 只有一个表册时自动选中，并加载该表册下的用户
+        const onlyCodeBook = allCodeBookList.value[0];
+        searchParams.codeBook = onlyCodeBook.codeBookId;
+        handleCodeBookChange(onlyCodeBook.codeBookId);
       }
     } else {
       ElMessage.error(res.msg || '获取表册列表失败');
@@ -934,7 +939,10 @@ fetchCompanyList();
           }
         }
 
-        :deep(.el-select),
+        :deep(.el-select) {
+          width: 300px; /* 区域、表册下拉框宽度，200 * 1.5 */
+        }
+
         :deep(.el-input) {
           width: 200px;
         }
@@ -1406,7 +1414,10 @@ fetchCompanyList();
         gap: 16px;
 
         .form-item {
-          :deep(.el-select),
+          :deep(.el-select) {
+            width: 270px; /* 区域、表册下拉框宽度，180 * 1.5 */
+          }
+
           :deep(.el-input) {
             width: 180px;
           }
