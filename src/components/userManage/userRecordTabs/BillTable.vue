@@ -76,15 +76,15 @@
     </div>
 
     <div class="tool-bar">
-      <div class="export-btn" @click="downloadTemplate" v-if="staffPermissionIds.includes(54)">
-        <img src="@/assets/yonghu/icon1.png" alt="" />
-        <span>历史数据导⼊模版下载</span>
-      </div>
-      <div class="export-btn" @click="triggerFileInput" v-if="staffPermissionIds.includes(54)">
-        <img src="@/assets/yonghu/icon2.png" alt="" />
-        <span>历史数据导⼊</span>
-        <input ref="fileInput" type="file" accept=".xls,.xlsx" style="display: none" @change="handleImport" />
-      </div>
+<!--      <div class="export-btn" @click="downloadTemplate" v-if="staffPermissionIds.includes(54)">-->
+<!--        <img src="@/assets/yonghu/icon1.png" alt="" />-->
+<!--        <span>历史数据导⼊模版下载</span>-->
+<!--      </div>-->
+<!--      <div class="export-btn" @click="triggerFileInput" v-if="staffPermissionIds.includes(54)">-->
+<!--        <img src="@/assets/yonghu/icon2.png" alt="" />-->
+<!--        <span>历史数据导⼊</span>-->
+<!--        <input ref="fileInput" type="file" accept=".xls,.xlsx" style="display: none" @change="handleImport" />-->
+<!--      </div>-->
       <div class="export-btn" @click="exportExcel">
         <img src="@/assets/yonghu/icon1.3.png" alt="" />
         <span>导出</span>

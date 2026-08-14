@@ -115,7 +115,7 @@
       >
         <el-table-column type="selection" width="50" align="center" fixed="left" />
         <el-table-column property="userId" label="用户号" min-width="120" align="center" fixed="left" />
-        <el-table-column property="userName" label="用户名称" min-width="120" align="center" />
+        <el-table-column property="userName" label="用户名" min-width="120" align="center" />
 <!--        <el-table-column property="regionName" label="所属区域" min-width="120" align="center" />-->
 <!--        <el-table-column property="userPhone" label="联系电话" min-width="130" align="center" />-->
         <el-table-column label="表号" min-width="195" align="center">
@@ -132,13 +132,16 @@
 <!--        <el-table-column property="meterType" label="水表类型" min-width="100" align="center" />-->
 <!--        <el-table-column property="payerPhone" label="缴费人手机号" min-width="140" align="center" />-->
         <el-table-column property="rechargeType" label="交易方式" min-width="70" align="center" />
-        <el-table-column property="oldBalance" label="充值前余额" min-width="120" align="center">
+        <el-table-column property="oldBalance" min-width="120" align="center">
+          <template #header>充值前<br>余额</template>
           <template #default="scope">{{ scope.row.oldBalance }}</template>
         </el-table-column>
-        <el-table-column property="rechargeAmount" label="交易金额" min-width="110" align="center">
+        <el-table-column property="rechargeAmount" min-width="110" align="center">
+          <template #header>交易<br>金额</template>
           <template #default="scope">{{ scope.row.rechargeAmount }}</template>
         </el-table-column>
-        <el-table-column property="newBalance" label="充值后余额" min-width="120" align="center">
+        <el-table-column property="newBalance" min-width="120" align="center">
+          <template #header>充值后<br>余额</template>
           <template #default="scope">{{ scope.row.newBalance }}</template>
         </el-table-column>
         <el-table-column property="createTime" label="交易时间" min-width="170" align="center" />

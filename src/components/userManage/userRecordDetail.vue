@@ -148,7 +148,7 @@ export default {
       tabs: [
         { name: "抄表记录", type: "meter" },
         { name: "用户账单", type: "bill" },
-        { name: "扣费明细", type: "billDetail"},
+        { name: "扣费记录", type: "billDetail"},
         { name: "充值记录", type: "transaction" },
         { name: "充值撤销记录", type: "rechargeCancel" },
         { name: "命令下发", type: "commandDispatch" },
