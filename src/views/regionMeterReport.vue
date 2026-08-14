@@ -577,6 +577,13 @@ const handleRegionChange = async (regionId) => {
       if (res.code === 200) {
         allCodeBookList.value = res.data || [];
         codeBookList.value = allCodeBookList.value;
+
+        if (allCodeBookList.value.length === 1) {
+          // 只有一个表册时自动选中，并加载该表册下的报表
+          const onlyCodeBook = allCodeBookList.value[0];
+          searchParams.codeBook = onlyCodeBook.codeBookId;
+          handleCodeBookChange(onlyCodeBook.codeBookId);
+        }
       } else {
         ElMessage.error(res.msg || '获取表册列表失败');
         allCodeBookList.value = [];
@@ -890,7 +897,7 @@ onBeforeUnmount(() => {
     }
 
     :deep(.el-select) {
-      width: 180px;
+      width: 270px; /* 区域、表册下拉框宽度，180 * 1.5 */
 
       .el-select__wrapper,
       .el-select__input,
