@@ -63,6 +63,7 @@
             <div class="shebei-warning-item-text">
               <span style="font-size: 20px">欠费用户</span>
               <span class="warn-num-text" style="font-size: 20px; font-family: 'Microsoft YaHei'; font-weight: bold; margin-top: 5px" @click="toWarnPath('欠费用户')">{{ shebeiWarning.qianfeiUser }}</span>
+              <span style="font-size: 16px; color: #999;">包含智能表和普表</span>
             </div>
           </div>
           <div class="shebei-warning-item">
@@ -70,6 +71,7 @@
             <div class="shebei-warning-item-text">
               <span style="font-size: 20px">数据持续未上报</span>
               <span class="warn-num-text" style="font-size: 20px; font-family: 'Microsoft YaHei'; font-weight: bold; margin-top: 5px" @click="toWarnPath('数据长时间未上报')">{{ shebeiWarning.weishangbao }}</span>
+              <span style="font-size: 16px; color: #999;">仅适用于智能表</span>
             </div>
           </div>
           <div class="shebei-warning-item">
@@ -77,6 +79,7 @@
             <div class="shebei-warning-item-text">
               <span style="font-size: 20px">关阀状态读数增加</span>
               <span class="warn-num-text" style="font-size: 20px; font-family: 'Microsoft YaHei'; font-weight: bold; margin-top: 5px" @click="toWarnPath('关阀状态读数增加')">{{ shebeiWarning.abnormalWaterCount }}</span>
+              <span style="font-size: 16px; color: #999;">仅适用于智能表</span>
             </div>
           </div>
           <div class="shebei-warning-item">
@@ -84,6 +87,7 @@
             <div class="shebei-warning-item-text">
               <span style="font-size: 20px">设备异常</span>
               <span class="warn-num-text" style="font-size: 20px; font-family: 'Microsoft YaHei'; font-weight: bold; margin-top: 5px" @click="toWarnPath('设备异常')">{{ shebeiWarning.shebeiyichang }}</span>
+              <span style="font-size: 16px; color: #999;">仅适用于智能表</span>
             </div>
           </div>
           <div class="shebei-warning-item">
@@ -91,7 +95,7 @@
             <div class="shebei-warning-item-text">
               <span style="font-size: 20px">近期0用水用户</span>
               <span class="warn-num-text" style="font-size: 20px; font-family: 'Microsoft YaHei'; font-weight: bold; margin-top: 5px" @click="toWarnPath('水表0用量用户')">{{ shebeiWarning.zerouserL }}</span>
-              <span style="font-size: 16px; color: #999;">（该类型不计入预警表数）</span>
+              <span style="font-size: 16px; color: #999;">该类型不计入预警表数</span>
             </div>
           </div>
           <div class="shebei-warning-item">
@@ -99,7 +103,7 @@
             <div class="shebei-warning-item-text">
               <span style="font-size: 20px">大用水量用户</span>
               <span class="warn-num-text" style="font-size: 20px; font-family: 'Microsoft YaHei'; font-weight: bold; margin-top: 5px" @click="toWarnPath('水表大用量用户')">{{ shebeiWarning.dayongliang }}</span>
-              <span style="font-size: 16px; color: #999;">（该类型不计入预警表数）</span>
+              <span style="font-size: 16px; color: #999;">该类型不计入预警表数</span>
             </div>
           </div>
         </div>
