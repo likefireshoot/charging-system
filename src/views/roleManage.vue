@@ -636,7 +636,7 @@ export default {
                 });
 
                 // 将【小程序】分组挪到数组末尾
-                const miniIndex = result.findIndex(item => item.label === '小程序');
+                const miniIndex = result.findIndex(item => item.id === 85);
                 if (miniIndex > -1) {
                   const miniItem = result.splice(miniIndex, 1)[0];
                   result.push(miniItem);
@@ -717,7 +717,7 @@ export default {
                 const transformTableTree = (tree) => {
                   if(!Array.isArray(tree)) return tree;
                   const arr = [...tree];
-                  const miniIdx = arr.findIndex(x=>x.permissionName === '小程序');
+                  const miniIdx = arr.findIndex(x=>x.permissionId === 85);
                   if(miniIdx > -1){
                     const miniItem = arr.splice(miniIdx,1)[0];
                     arr.push(miniItem);
@@ -796,7 +796,7 @@ export default {
                 const transformTableTree = (tree) => {
                   if(!Array.isArray(tree)) return tree;
                   const arr = [...tree];
-                  const miniIdx = arr.findIndex(x=>x.permissionName === '小程序');
+                  const miniIdx = arr.findIndex(x=>x.permissionId === 85);
                   if(miniIdx > -1){
                     const miniItem = arr.splice(miniIdx,1)[0];
                     arr.push(miniItem);
