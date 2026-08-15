@@ -137,7 +137,11 @@
           </template>
         </el-table-column>
         
-        <el-table-column prop="userId" label="用户号" min-width="120" align="center" />
+        <el-table-column prop="userId" label="用户号" min-width="120" align="center">
+          <template #default="{ row }">
+            <span>{{ maskUserId(row.userId) }}</span>
+          </template>
+        </el-table-column>
         <el-table-column prop="userName" label="用户姓名" min-width="120" align="center" />
         <el-table-column prop="address" label="用户地址" min-width="200" align="center" show-overflow-tooltip />
         <el-table-column prop="reportStatus" label="抄表状态" min-width="100" align="center">
@@ -316,6 +320,13 @@ const formatDate = (dateStr) => {
   const hour = String(date.getHours()).padStart(2, '0');
   const minute = String(date.getMinutes()).padStart(2, '0');
   return `${year}-${month}-${day} ${hour}:${minute}`;
+};
+
+// 用户号脱敏：不展示前三位
+const maskUserId = (userId) => {
+  if (!userId) return '-';
+  const str = userId.toString();
+  return str.length > 3 ? str.slice(3) : str;
 };
 
 // 获取水厂列表

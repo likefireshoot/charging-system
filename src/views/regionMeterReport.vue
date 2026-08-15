@@ -107,7 +107,11 @@
           class="report-table"
           style="width: 100%; height: 100%; table-layout: fixed; overflow-x: auto; overflow-y: auto"
         >
-          <el-table-column prop="userId" label="用户号" :width="userIdWidth" align="center" />
+          <el-table-column prop="userId" label="用户号" :width="userIdWidth" align="center">
+            <template #default="{ row }">
+              <span>{{ maskUserId(row.userId) }}</span>
+            </template>
+          </el-table-column>
           <el-table-column prop="userName" label="用户姓名" :width="userNameWidth" align="center" />
           <el-table-column prop="address" label="用户地址" :width="addressWidth" align="center" show-overflow-tooltip />
 
@@ -356,6 +360,13 @@ const formatDate = (dateStr) => {
   const hour = String(date.getHours()).padStart(2, '0');
   const minute = String(date.getMinutes()).padStart(2, '0');
   return `${year}-${month}-${day} ${hour}:${minute}`;
+};
+
+// 用户号脱敏：不展示前三位
+const maskUserId = (userId) => {
+  if (!userId) return '-';
+  const str = userId.toString();
+  return str.length > 3 ? str.slice(3) : str;
 };
 
 // ============== 表格列宽（参考登录安全页做法，按容器百分比分配） ==============
@@ -656,7 +667,7 @@ const handleExportExcel = () => {
 
   const exportData = filteredReportList.value.map((row, index) => ({
     '序号': index + 1,
-    '用户号': row.userId,
+    '用户号': row.userId ? '\t' + maskUserId(row.userId) : '',
     '用户姓名': row.userName,
     '用户地址': row.address,
     '数据类型': row.dataType,
