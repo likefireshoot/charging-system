@@ -183,36 +183,7 @@
             <div class="reading-section">
               <div class="section-title">抄表数据</div>
               <div class="reading-grid">
-                <div class="reading-item highlight">
-                  <span class="label">上月读数</span>
-                  <span class="value">{{ selectedUserDetail.lastReading }} 吨</span>
-                </div>
-                              
-                <!-- 本月读数（仅正常状态时显示） -->
-                <div class="reading-item" v-if="selectedUserDetail.reportStatus === '正常'">
-                  <span class="label">本月读数</span>
-                  <el-input 
-                    v-model="selectedUserDetail.currentReadingInput" 
-                    type="text"
-                    inputmode="decimal"
-                    placeholder="请输入本月数"
-                    @input="handleCurrentReadingInput"
-                    class="current-reading-input"
-                  />
-                </div>
-                              
-                <!-- 异常状态提示 -->
-                <div class="reading-item abnormal-tip" v-else>
-                  <span class="label">状态说明</span>
-                  <span class="tip-text">当前选择"{{ selectedUserDetail.reportStatus }}"</span>
-                </div>
-                              
-                <div class="reading-item" v-if="selectedUserDetail.balance !== undefined">
-                  <span class="label">当前余额</span>
-                  <span class="value amount">{{ formatMoney(selectedUserDetail.balance) }} 元</span>
-                </div>
-                              
-                <!-- 抄表状态单选组 - 放在第二行 -->
+                <!-- 抄表状态单选组 - 放在最上方，先选状态 -->
                 <div class="reading-item status-row full-width">
                   <span class="label">抄表状态</span>
                   <el-radio-group v-model="selectedUserDetail.reportStatus" @change="handleReportStatusChange">
@@ -227,19 +198,37 @@
                     <el-radio label="无人在家">无人在家</el-radio>
                   </el-radio-group>
                 </div>
-              </div>
 
-              <!-- 提交按钮 - 移到抄表信息区域底部 -->
-              <div class="action-buttons-inline">
-                <el-button
-                  type="primary"
-                  @click="submitSingleUser"
-                  :disabled="!canSubmitSingle"
-                  size="large"
-                >
-                  <el-icon><Upload /></el-icon>
-                  <span>提交该用户</span>
-                </el-button>
+                <div class="reading-item highlight">
+                  <span class="label">上月读数</span>
+                  <span class="value">{{ selectedUserDetail.lastReading }} 吨</span>
+                </div>
+
+                <!-- 本月读数（仅正常状态时显示，默认带上月读数，回车提交） -->
+                <div class="reading-item" v-if="selectedUserDetail.reportStatus === '正常'">
+                  <span class="label">本月读数</span>
+                  <el-input
+                    ref="currentReadingRef"
+                    v-model="selectedUserDetail.currentReadingInput"
+                    type="text"
+                    inputmode="decimal"
+                    placeholder="请输入本月数"
+                    @input="handleCurrentReadingInput"
+                    @keyup.enter="submitSingleUser"
+                    class="current-reading-input"
+                  />
+                </div>
+
+                <!-- 异常状态提示 -->
+                <div class="reading-item abnormal-tip" v-else>
+                  <span class="label">状态说明</span>
+                  <span class="tip-text">当前选择"{{ selectedUserDetail.reportStatus }}"，按回车提交</span>
+                </div>
+
+                <div class="reading-item" v-if="selectedUserDetail.balance !== undefined">
+                  <span class="label">当前余额</span>
+                  <span class="value amount">{{ formatMoney(selectedUserDetail.balance) }} 元</span>
+                </div>
               </div>
             </div>
 
@@ -293,18 +282,6 @@
               </el-table>
             </div>
 
-            <!-- 提交按钮 -->
-            <div class="action-buttons">
-              <el-button 
-                type="primary" 
-                @click="submitSingleUser" 
-                :disabled="!canSubmitSingle"
-                size="large"
-              >
-                <el-icon><Upload /></el-icon>
-                <span>提交该用户</span>
-              </el-button>
-            </div>
           </div>
         </template>
       </div>
@@ -313,7 +290,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed } from 'vue';
+import { ref, reactive, computed, nextTick } from 'vue';
 import { useRouter } from 'vue-router';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import { ArrowDown, Close, Search, Document, Check, Upload, Delete } from '@element-plus/icons-vue';
@@ -387,6 +364,9 @@ const selectedUserDetail = ref(null);
 
 // 抄表历史记录
 const reportHistory = ref([]);
+
+// 本月读数输入框引用（用于回车后聚焦）
+const currentReadingRef = ref(null);
 
 // 加载状态
 const loading = ref(false);
@@ -598,7 +578,8 @@ const handleCodeBookChange = async (codeBookId) => {
         userPhone: user.userPhone || '',
         lastReading: user.lastReading || 0,
         currentReading: null,
-        currentReadingInput: '',
+        // 本月读数默认显示上月读数，减少输入
+        currentReadingInput: user.lastReading ? String(user.lastReading) : '',
         meterCode: user.meterCode || '',
         balance: user.balance || 0,
         reportStatus: '正常'
@@ -666,6 +647,13 @@ const loadUserDetail = (user) => {
   // 使用深拷贝确保响应式
   selectedUserDetail.value = JSON.parse(JSON.stringify(user));
   loadReportHistory(user.userId);
+
+  // 详情加载后，若处于正常状态则自动聚焦本月读数输入框
+  if (selectedUserDetail.value.reportStatus === '正常') {
+    nextTick(() => {
+      currentReadingRef.value?.focus();
+    });
+  }
 };
 
 // 分页大小变化
@@ -749,9 +737,17 @@ const handleClearAll = async () => {
 // 抄表状态变化处理
 const handleReportStatusChange = (status) => {
   if (!selectedUserDetail.value) return;
-  
-  // 如果切换到正常状态，清空本月数输入
+
+  // 切换到正常状态时，默认带上月读数，方便回车直接提交
   if (status === '正常') {
+    selectedUserDetail.value.currentReadingInput = selectedUserDetail.value.lastReading
+      ? String(selectedUserDetail.value.lastReading)
+      : '';
+    nextTick(() => {
+      currentReadingRef.value?.focus();
+    });
+  } else {
+    // 异常状态提交时不需要读数
     selectedUserDetail.value.currentReadingInput = '';
   }
 };
@@ -1333,20 +1329,6 @@ fetchCompanyList();
             }
           }
 
-          // 内联提交按钮样式
-          .action-buttons-inline {
-            display: flex;
-            justify-content: center;
-            padding: 20px 0 10px;
-            margin-top: 10px;
-            border-top: 1px solid #ebeef5;
-
-            :deep(.el-button) {
-              min-width: 180px;
-              height: 44px;
-              font-size: 20px;
-            }
-          }
         }
 
         // 抄表记录区域
