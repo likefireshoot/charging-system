@@ -30,8 +30,8 @@
             交易方式
           </span>
           <el-radio-group v-model="rechargeData.rechargeType">
-            <el-radio label="现金">现金</el-radio>
-            <el-radio label="免费赠送" v-if="isSuperAdmin">免费赠送</el-radio>
+            <el-radio label="现金" v-if="this.staffPermissionIds.includes(94)">现金</el-radio>
+            <el-radio label="免费赠送" v-if="this.staffPermissionIds.includes(95)">免费赠送</el-radio>
           </el-radio-group>
         </div>
         <div class="recharge-input" style="margin-right: 1%; width: 100%">
@@ -163,7 +163,7 @@ export default {
         balance: "",
         quickmoney: "",
         money: "",
-        rechargeType: "现金",
+        rechargeType: "",
         region: "",
       },
       printDialogVisible: false,
@@ -178,6 +178,7 @@ export default {
       confirmTipText: "",
       // 缓存请求参数，弹窗确认后使用
       tempDataParams: null,
+      staffPermissionIds: JSON.parse(sessionStorage.getItem("userData")).staffPermissionIds,
     };
   },
   computed: {
@@ -287,6 +288,12 @@ export default {
         // 验证是否为两位小数格式
         if (!/^\d+(\.\d{2})?$/.test(this.rechargeData.money)) {
           ElMessage.error("充值金额必须保留两位小数（例如：10.00）");
+          return;
+        }
+
+        // 新增：校验充值类型不能为空
+        if (!this.rechargeData.rechargeType || this.rechargeData.rechargeType.trim() === "") {
+          ElMessage.error("交易方式不能为空");
           return;
         }
       }
