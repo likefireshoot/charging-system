@@ -69,11 +69,11 @@
     <div class="tool-bar">
       <div class="export-btn" @click="downloadTemplate" v-if="staffPermissionIds.includes(54)">
         <img src="@/assets/yonghu/icon1.png" alt="" />
-        <span>历史数据导⼊模版下载</span>
+        <span>扣费记录导⼊模版</span>
       </div>
       <div class="export-btn" @click="triggerFileInput" v-if="staffPermissionIds.includes(54)">
         <img src="@/assets/yonghu/icon2.png" alt="" />
-        <span>历史数据导⼊</span>
+        <span>扣费记录导⼊</span>
         <input ref="fileInput" type="file" accept=".xls,.xlsx" style="display: none" @change="handleImport" />
       </div>
       <div class="export-btn" @click="exportExcel">
@@ -254,7 +254,7 @@ export default {
           const blob = new Blob([response.data], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
           const link = document.createElement("a");
           link.href = window.URL.createObjectURL(blob);
-          link.download = "历史扣费记录导⼊模版下载.xlsx";
+          link.download = "扣费记录导⼊模版.xlsx";
           document.body.appendChild(link);
           link.click();
           document.body.removeChild(link);
