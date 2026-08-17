@@ -1,20 +1,21 @@
 <template>
   <div class="review-meter-report">
     <!-- 顶部搜索栏 -->
-    <div class="search-header">
-      <div class="page-title">
-        <el-icon><Document /></el-icon>
-        <span>用户抄表审核</span>
-      </div>
+    <div class="search-box">
+<!--      <div class="page-title">-->
+<!--        <el-icon><Document /></el-icon>-->
+<!--        <span>用户抄表审核</span>-->
+<!--      </div>-->
       
-      <div class="search-form">
-        <div class="form-item">
-          <label class="form-label">水厂</label>
-          <span class="company-name">{{ currentCompanyName }}</span>
+      <div class="search-content">
+        <div class="search-input">
+          <span class="form-label">水厂</span>
+<!--          <span class="company-name">{{ currentCompanyName }}</span>-->
+          <el-input v-model="currentCompanyName" disabled />
         </div>
 
-        <div class="form-item">
-          <label class="form-label">区域</label>
+        <div class="search-input">
+          <span class="form-label">区域</span>
           <el-select
             v-model="searchParams.region"
             placeholder="选择区域"
@@ -32,8 +33,8 @@
           </el-select>
         </div>
 
-        <div class="form-item">
-          <label class="form-label">表册</label>
+        <div class="search-input">
+          <span class="form-label">表册</span>
           <el-select
             v-model="searchParams.codeBook"
             placeholder="选择表册"
@@ -52,82 +53,139 @@
           </el-select>
         </div>
 
-        <div class="form-item">
+        <div class="search-input">
+          <span>姓名/地址/用户号</span>
           <el-input
             v-model="searchKeyword"
-            placeholder="姓名/地址/用户号"
+            placeholder="请输入姓名/地址/用户号"
             clearable
-            style="width: 300px;"
             @input="handleSearch"
           >
-            <template #prefix>
-              <el-icon><Search /></el-icon>
-            </template>
+<!--            <template #prefix>-->
+<!--              <el-icon><Search /></el-icon>-->
+<!--            </template>-->
           </el-input>
         </div>
+      </div>
 
-        <div class="form-actions">
-          <el-button type="primary" @click="handleSearch">
-            <el-icon><Search /></el-icon>
-            <span>搜索</span>
+      <div class="buttons">
+          <el-button class="search-btn" @click="handleSearch">
+            <img src="@/assets/yonghu/icon16.png" alt="" />
+            <span style="margin-left:10%;">搜索</span>
           </el-button>
           
-          <el-button @click="handleClearAll">
-            <el-icon><Delete /></el-icon>
-            <span>清空</span>
+          <el-button class="clear-btn" @click="handleClearAll">
+            <img src="@/assets/yuangong/icon4.png" alt="" />
+            <span style="margin-left:10%; color: #5a5a5a">清空</span>
           </el-button>
-        </div>
       </div>
 
-      <div class="header-right">
-        <!-- 审核通过（针对单个用户） -->
-        <el-button 
-          type="success" 
-          @click="handleSingleReview"
-          :disabled="selectedRows.length !== 1"
-        >
-          <el-icon><Check /></el-icon>
-          <span>审核通过</span>
-        </el-button>
-        
-        <!-- 本页审核通过 -->
-        <el-button 
-          type="primary" 
-          @click="handleCurrentPageReview"
-          :disabled="paginatedReviewList.length === 0"
-        >
-          <el-icon><Check /></el-icon>
-          <span>本页审核通过</span>
-        </el-button>
-        
-        <!-- 全部审核通过 -->
-        <el-button 
-          type="warning" 
-          @click="handleAllReview"
-          :disabled="filteredReviewList.length === 0"
-        >
-          <el-icon><Check /></el-icon>
-          <span>全部审核通过</span>
-        </el-button>
-        
-        <!-- 返回 -->
-        <el-button @click="goBack">
-          <el-icon><ArrowLeft /></el-icon>
-          <span>返回</span>
-        </el-button>
-      </div>
+<!--      <div class="header-right">-->
+<!--        &lt;!&ndash; 审核通过（针对单个用户） &ndash;&gt;-->
+<!--        <el-button -->
+<!--          type="success" -->
+<!--          @click="handleSingleReview"-->
+<!--          :disabled="selectedRows.length !== 1"-->
+<!--        >-->
+<!--          <el-icon><Check /></el-icon>-->
+<!--          <span>审核通过</span>-->
+<!--        </el-button>-->
+<!--        -->
+<!--        &lt;!&ndash; 本页审核通过 &ndash;&gt;-->
+<!--        <el-button -->
+<!--          type="primary" -->
+<!--          @click="handleCurrentPageReview"-->
+<!--          :disabled="paginatedReviewList.length === 0"-->
+<!--        >-->
+<!--          <el-icon><Check /></el-icon>-->
+<!--          <span>本页审核通过</span>-->
+<!--        </el-button>-->
+<!--        -->
+<!--        &lt;!&ndash; 全部审核通过 &ndash;&gt;-->
+<!--        <el-button -->
+<!--          type="warning" -->
+<!--          @click="handleAllReview"-->
+<!--          :disabled="filteredReviewList.length === 0"-->
+<!--        >-->
+<!--          <el-icon><Check /></el-icon>-->
+<!--          <span>全部审核通过</span>-->
+<!--        </el-button>-->
+<!--        -->
+<!--        &lt;!&ndash; 返回 &ndash;&gt;-->
+<!--        <el-button @click="goBack">-->
+<!--          <el-icon><ArrowLeft /></el-icon>-->
+<!--          <span>返回</span>-->
+<!--        </el-button>-->
+<!--      </div>-->
     </div>
 
     <!-- 主体表格区域 -->
     <div class="main-content">
-      <el-table 
+      <div class="command-box">
+<!--        <el-button-->
+<!--          @click="toggleSelectCurrentPage"-->
+<!--          v-if="filteredReviewList.length > 0"-->
+<!--          class="command-btn"-->
+<!--          :class="{ 'command-btn-active': isCurrentPageAllSelected }"-->
+<!--        >-->
+<!--          <el-icon class="btn-icon"><Document /></el-icon>-->
+<!--          <span>{{ isCurrentPageAllSelected ? '取消本页' : '选择本页' }}</span>-->
+<!--        </el-button>-->
+
+<!--        <el-button-->
+<!--          @click="toggleSelectAll"-->
+<!--          v-if="filteredReviewList.length > 0"-->
+<!--          class="command-btn"-->
+<!--          :class="{ 'command-btn-active': isAllSelected }"-->
+<!--        >-->
+<!--          <el-icon class="btn-icon"><Document /></el-icon>-->
+<!--          <span>{{ isAllSelected ? '取消全部' : '选择全部' }}</span>-->
+<!--        </el-button>-->
+
+        <!-- 审核通过（针对单个用户） -->
+        <el-button
+          class="command-btn"
+          @click="handleSingleReview"
+          :disabled="selectedRows.length !== 1"
+        >
+          <el-icon class="btn-icon"><Check /></el-icon>
+          <span>本用户审核通过</span>
+        </el-button>
+
+        <!-- 本页审核通过 -->
+        <el-button
+          class="command-btn"
+          @click="handleCurrentPageReview"
+          :disabled="paginatedReviewList.length === 0"
+        >
+          <el-icon class="btn-icon"><Check /></el-icon>
+          <span>本页审核通过</span>
+        </el-button>
+
+        <!-- 全部审核通过 -->
+        <el-button
+          class="command-btn"
+          @click="handleAllReview"
+          :disabled="filteredReviewList.length === 0"
+        >
+          <el-icon class="btn-icon"><Check /></el-icon>
+          <span>全部审核通过</span>
+        </el-button>
+
+<!--        &lt;!&ndash; 返回 &ndash;&gt;-->
+<!--        <el-button @click="goBack">-->
+<!--          <el-icon><ArrowLeft /></el-icon>-->
+<!--          <span>返回</span>-->
+<!--        </el-button>-->
+      </div>
+      <div class="review-table">
+      <el-table
         :data="paginatedReviewList"
-        stripe
         border
         v-loading="loading"
-        height="650"
         @selection-change="handleSelectionChange"
         ref="tableRef"
+        style="height: 100%; width: 100%"
       >
         <el-table-column type="selection" width="55" align="center" />
         
@@ -146,7 +204,7 @@
         <el-table-column prop="address" label="用户地址" min-width="200" align="center" show-overflow-tooltip />
         <el-table-column prop="reportStatus" label="抄表状态" min-width="100" align="center">
           <template #default="{ row }">
-            <el-tag :type="row.reportStatus === '正常' ? 'success' : 'warning'" size="small" class="status-tag-large">
+            <el-tag :type="row.reportStatus === '正常' ? 'success' : 'warning'" class="status-tag-large">
               {{ row.reportStatus }}
             </el-tag>
           </template>
@@ -192,45 +250,46 @@
           </template>
         </el-table-column>
       </el-table>
+      </div>
 
       <!-- 分页器 -->
       <div class="pagination-container" v-if="filteredReviewList.length > 0">
-        <div class="pagination-info">
-          <el-button-group>
-            <el-button 
-              size="small" 
-              :type="isCurrentPageAllSelected ? 'primary' : 'default'"
-              @click="toggleSelectCurrentPage"
-            >
-              {{ isCurrentPageAllSelected ? '取消本页' : '选择本页' }}
-            </el-button>
-            <el-button 
-              size="small" 
-              :type="isAllSelected ? 'primary' : 'default'"
-              @click="toggleSelectAll"
-            >
-              {{ isAllSelected ? '取消全部' : '选择全部' }}
-            </el-button>
-          </el-button-group>
-          <span class="total-count">共 {{ filteredReviewList.length }} 条</span>
-        </div>
+<!--        <div class="pagination-info">-->
+<!--          <el-button-group>-->
+<!--            <el-button -->
+<!--              size="small" -->
+<!--              :type="isCurrentPageAllSelected ? 'primary' : 'default'"-->
+<!--              @click="toggleSelectCurrentPage"-->
+<!--            >-->
+<!--              {{ isCurrentPageAllSelected ? '取消本页' : '选择本页' }}-->
+<!--            </el-button>-->
+<!--            <el-button -->
+<!--              size="small" -->
+<!--              :type="isAllSelected ? 'primary' : 'default'"-->
+<!--              @click="toggleSelectAll"-->
+<!--            >-->
+<!--              {{ isAllSelected ? '取消全部' : '选择全部' }}-->
+<!--            </el-button>-->
+<!--          </el-button-group>-->
+<!--          <span class="total-count">共 {{ filteredReviewList.length }} 条</span>-->
+<!--        </div>-->
         
         <el-pagination
           v-model:current-page="currentPage"
           v-model:page-size="pageSize"
           :page-sizes="[1, 10, 20, 50, 100]"
           :total="filteredReviewList.length"
-          layout="sizes, prev, pager, next, jumper, total"
+          layout="total, sizes, prev, pager, next, jumper"
           @size-change="handleSizeChange"
           @current-change="handleCurrentChange"
         />
 
       </div>
 
-      <!-- 空数据提示 -->
-      <div v-if="filteredReviewList.length === 0 && !loading" class="empty-state">
-        <el-empty description="暂无待审核数据" />
-      </div>
+<!--      &lt;!&ndash; 空数据提示 &ndash;&gt;-->
+<!--      <div v-if="filteredReviewList.length === 0 && !loading" class="empty-state">-->
+<!--        <el-empty description="暂无待审核数据" />-->
+<!--      </div>-->
     </div>
   </div>
 
@@ -536,7 +595,9 @@ const handleClearAll = async () => {
       {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
-        type: 'warning'
+        type: 'warning',
+        lockScroll: false,
+        customClass: 'clear-all-message-box'
       }
     );
     
@@ -775,7 +836,8 @@ const handleSingleReview = async () => {
       {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
-        type: 'info'
+        type: 'info',
+        lockScroll: false,
       }
     );
     
@@ -823,7 +885,8 @@ const handleCurrentPageReview = async () => {
       {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
-        type: 'info'
+        type: 'info',
+        lockScroll: false,
       }
     );
     
@@ -891,7 +954,8 @@ const handleAllReview = async () => {
       {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
-        type: 'warning'
+        type: 'warning',
+        lockScroll: false,
       }
     );
     
@@ -949,7 +1013,8 @@ const handleBatchReview = async () => {
       {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
-        type: 'info'
+        type: 'info',
+        lockScroll: false,
       }
     );
     
@@ -1032,10 +1097,11 @@ onMounted(() => {
 .review-meter-report {
   display: flex;
   flex-direction: column;
-  height: 100vh;
-  background-color: #f5f7fa;
-  padding: 20px;
-  gap: 20px;
+  align-content: center;
+  justify-content: center;
+  min-width: 94%;
+  height: 100%;
+  padding: 0 15px;
 
   // 顶部搜索栏
   .search-header {
@@ -1130,22 +1196,26 @@ onMounted(() => {
 
   // 主体内容区
   .main-content {
-    flex: 1;
-    background-color: #fff;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-    padding: 20px;
+    width: 99.3%;
+    height: calc(100% - 120px);
+    margin-bottom: 0px;
     display: flex;
     flex-direction: column;
-    overflow: hidden;
+    align-items: center;
+    border: 1px solid #e9e9e9;
+    border-radius: 5px;
+    background-color: #fff;
+    position: relative;
+    padding: 0 10px;
+    flex: 1;
 
     :deep(.el-table) {
       font-size: 20px;
 
       .el-table__header th {
-        background-color: #f5f7fa;
+        background-color: #46b97e;
         font-weight: 600;
-        color: #606266;
+        color: #fff;
       }
 
       .el-table__body td {
@@ -1154,8 +1224,9 @@ onMounted(() => {
 
       // 抄表状态列字体加大到22px
       .status-tag-large {
-        font-size: 22px !important;
+        font-size: 20px !important;
         padding: 6px 12px;
+        height: 80%;
       }
     }
 
@@ -1165,21 +1236,20 @@ onMounted(() => {
 
     // 分页器样式
     .pagination-container {
-      margin-top: auto;
+      width: 100%;
       display: flex;
-      justify-content: space-between;
+      justify-content: center;
       align-items: center;
-      padding: 15px 0;
       flex-shrink: 0;
-      border-top: 1px solid #ebeef5;
+      margin-top: 5px;
+      font-size: 18px;
 
       .pagination-info {
         display: flex;
         align-items: center;
-        gap: 20px;
 
         .total-count {
-          font-size: 20px;
+          font-size: 18px;
           color: #606266;
         }
       }
@@ -1198,7 +1268,7 @@ onMounted(() => {
   display: inline-block;
   min-width: 40px;
   text-align: center;
-  font-size: 24px;
+  font-size: 20px;
 
   &:hover {
     background-color: #f0f9ff;
@@ -1302,6 +1372,171 @@ onMounted(() => {
         }
       }
     }
+  }
+}
+.search-box {
+  margin-top: 5px;
+  margin-bottom: 10px;
+  width: 99.3%;
+  height: 98px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border: 1px solid #e9e9e9;
+  border-radius: 5px;
+  background-color: #fff;
+  padding: 0 10px;
+}
+
+.search-content {
+  display: flex;
+  width: 75%;
+  height: 100%;
+}
+
+.search-input {
+  display: flex;
+  justify-content: center;
+  /* 确保子元素在父容器中垂直居中 */
+  flex-direction: column;
+  width: 18%;
+  height: 100%;
+  margin-right: 10px;
+}
+
+.search-input>span {
+  font-size: 18px;
+  margin-bottom: 5px;
+}
+.buttons {
+  display: flex;
+  width: 220px;
+  height: 100%;
+  align-items: center;
+  // 消除 ElementPlus 默认相邻按钮左边距
+  :deep(.el-button + .el-button) {
+    margin-left: 0;
+  }
+}
+
+.buttons > * {
+  width: 100px;
+  margin-right: 10px;
+}
+
+.search-btn,
+.clear-btn {
+  display: flex;
+  align-items: center;
+  height: 32px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.3s;
+  color: #fff;
+  font-size: 18px;
+}
+
+.search-btn {
+  background-color: #45ba7e;
+}
+.clear-btn {
+  background-color: #fff;
+  border: 2px solid #f2f2f2;
+  margin-right: 10px;
+}
+.review-table {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: calc(100% - 100px);
+  margin-top: 8px;
+}
+.command-box {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 40px;
+  margin-top: 10px;
+  :deep(.el-button + .el-button) {
+    margin-left: 0;
+  }
+}
+.command-box>* {
+  margin-right: 10px;
+}
+.command-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: auto;
+  min-width: 50px;
+  height: 35px;
+  padding: 0 8px;
+  color: #5a5a5a;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.3s;
+  font-size: 18px;
+  background-color: #fff;
+  border: 2px solid #f2f2f2;
+  .btn-icon {
+    color: #46b97e;
+    margin-right: 6px;
+  }
+}
+.command-btn-active {
+  background-color: #46b97e !important;
+  border-color: #46b97e !important;
+  color: #ffffff !important;
+
+  .btn-icon {
+    color: #ffffff !important;
+  }
+}
+/* 按钮禁用时图标变灰 */
+.command-btn:disabled .btn-icon {
+  color: #c0c4cc !important;
+}
+
+:deep(.el-input__inner) {
+  font-size: 16px !important;
+}
+
+:deep(.el-select__wrapper .el-select__placeholder) {
+  font-size: 16px !important;
+}
+
+:deep(.el-select__wrapper .el-select__selected-item) {
+  font-size: 16px !important;
+}
+
+:deep(.el-table__body tr:nth-child(odd)) {
+  background-color: #edf8f2;
+}
+
+:deep(.el-table__body tr:nth-child(even)) {
+  background-color: #ffffff;
+}
+
+:deep(.el-table__body tr:hover > td) {
+  background-color: #fbf2cb !important;
+}
+:deep(.el-pagination) {
+  font-size: 16px;
+}
+</style>
+
+<style lang="scss">
+.clear-all-message-box {
+  .el-message-box__title {
+    font-size: 18px;
+  }
+  .el-message-box__content {
+    font-size: 18px;
+  }
+  .el-message-box__btns .el-button {
+    font-size: 18px;
   }
 }
 </style>

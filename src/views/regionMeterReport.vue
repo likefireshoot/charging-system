@@ -2,18 +2,19 @@
   <div class="region-meter-report">
     <!-- 顶部搜索栏 -->
     <div class="search-header">
-      <div class="page-title">
-        <el-icon><Document /></el-icon>
-      </div>
+<!--      <div class="page-title">-->
+<!--        <el-icon><Document /></el-icon>-->
+<!--      </div>-->
 
       <div class="search-form">
-        <div class="form-item">
-          <label class="form-label">水厂</label>
-          <span class="company-name">{{ currentCompanyName }}</span>
+        <div class="search-input">
+          <span>水厂</span>
+<!--          <span class="company-name">{{ currentCompanyName }}</span>-->
+          <el-input v-model="currentCompanyName" disabled />
         </div>
 
-        <div class="form-item">
-          <label class="form-label">区域</label>
+        <div class="search-input">
+          <span>区域</span>
           <el-select
             v-model="searchParams.region"
             placeholder="选择区域"
@@ -30,8 +31,8 @@
           </el-select>
         </div>
 
-        <div class="form-item">
-          <label class="form-label">表册</label>
+        <div class="search-input">
+          <span>表册</span>
           <el-select
             v-model="searchParams.codeBook"
             placeholder="选择表册"
@@ -50,46 +51,59 @@
           </el-select>
         </div>
 
-        <div class="form-item form-item-input">
+        <div class="search-input">
+          <span>姓名/地址/用户号</span>
           <el-input
             v-model="searchKeyword"
-            placeholder="姓名/地址/用户号"
+            placeholder="请输入姓名/地址/用户号"
             clearable
             @input="handleSearch"
           >
-            <template #prefix>
-              <el-icon><Search /></el-icon>
-            </template>
+<!--            <template #prefix>-->
+<!--              <el-icon><Search /></el-icon>-->
+<!--            </template>-->
           </el-input>
         </div>
+        </div>
 
-        <el-button type="primary" @click="handleSearch" class="header-btn">
-          <el-icon><Search /></el-icon>
-          <span>搜索</span>
+        <div class="buttons">
+        <el-button @click="handleSearch" class="search-btn">
+          <img src="@/assets/yonghu/icon16.png" alt="" />
+          <span style="margin-left:10%;">搜索</span>
         </el-button>
 
-        <el-button @click="handleClearAll" class="header-btn">
-          <el-icon><Delete /></el-icon>
-          <span>清空</span>
+        <el-button @click="handleClearAll" class="clear-btn">
+          <img src="@/assets/yuangong/icon4.png" alt="" />
+          <span style="margin-left:10%; color: #5a5a5a">清空</span>
         </el-button>
+        </div>
 
-        <el-button type="success" @click="handleExportExcel" class="header-btn">
-          <el-icon><Document /></el-icon>
-          <span>导出Excel</span>
-        </el-button>
+<!--        <el-button type="success" @click="handleExportExcel" class="header-btn">-->
+<!--          <el-icon><Document /></el-icon>-->
+<!--          <span>导出Excel</span>-->
+<!--        </el-button>-->
 
-        <el-button type="primary" @click="handleExportPdf" class="header-btn">
-          <el-icon><Document /></el-icon>
-          <span>导出PDF</span>
-        </el-button>
+<!--        <el-button type="primary" @click="handleExportPdf" class="header-btn">-->
+<!--          <el-icon><Document /></el-icon>-->
+<!--          <span>导出PDF</span>-->
+<!--        </el-button>-->
 
-      </div>
     </div>
 
     <!-- 主体卡片：完全照搬登录安全页 .yuangong-info -->
     <div class="info-card">
       <!-- 工具行：与登录安全页 .command-box 对应 -->
-      <div class="command-bar">
+      <div class="command-box">
+        <div @click="handleExportExcel" class="command-btn">
+          <img src="@/assets/yonghu/icon1.3.png" alt="" />
+          <span>导出Excel</span>
+        </div>
+
+        <div @click="handleExportPdf" class="command-btn">
+          <img src="@/assets/yonghu/icon1.3.png" alt="" />
+          <span>导出PDF</span>
+        </div>
+
         <div class="cmd-btn refresh-btn" @click="reflush" title="刷新">
           <img src="@/assets/yonghu/icon15.png" alt="" />
         </div>
@@ -178,9 +192,9 @@
         </el-table>
 
         <!-- 空状态：与登录安全页对空数据时的呈现保持一致 -->
-        <div v-if="!loading && filteredReportList.length === 0" class="empty-tip">
-          <span>暂无数据</span>
-        </div>
+<!--        <div v-if="!loading && filteredReportList.length === 0" class="empty-tip">-->
+<!--          <span>暂无数据</span>-->
+<!--        </div>-->
       </div>
 
       <!-- 分页：与登录安全页 .page-box 对应 -->
@@ -854,12 +868,12 @@ onBeforeUnmount(() => {
   margin-top: 5px;
   margin-bottom: 10px;
   width: 99.3%;
-  padding: 12px 15px;
+  height: 98px;
+  padding: 0px 10px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   flex-wrap: nowrap;
-  gap: 12px;
   border: 1px solid #e9e9e9;
   border-radius: 5px;
   background-color: #fff;
@@ -882,7 +896,6 @@ onBeforeUnmount(() => {
     align-items: center;
     flex: 1;
     min-width: 0;
-    gap: 15px;
   }
 
   .form-item {
@@ -892,14 +905,14 @@ onBeforeUnmount(() => {
     flex-shrink: 0;
 
     .form-label {
-      font-size: 24px; /* 16 * 1.5 */
+      font-size: 18px; /* 16 * 1.5 */
       margin-right: 12px;
       color: #606266;
       white-space: nowrap;
     }
 
     .company-name {
-      font-size: 24px; /* 16 * 1.5 */
+      font-size: 18px; /* 16 * 1.5 */
       font-weight: 500;
       color: #303133;
       min-width: 180px;
@@ -1114,11 +1127,94 @@ onBeforeUnmount(() => {
     font-size: 9pt;
   }
 }
-</style>
 
-<!-- 全局：与登录安全页保持一致（保留垂直滚动条，避免缩放抖动） -->
-<style>
-html {
-  overflow-y: scroll;
+.search-input {
+  display: flex;
+  justify-content: center; /* 确保子元素在父容器中垂直居中 */
+  flex-direction: column;
+  width: 18%;
+  height: 100%;
+  margin-right: 10px;
+}
+
+.search-input > span {
+  font-size: 18px;
+  margin-bottom: 5px;
+}
+
+.buttons {
+  display: flex;
+  width: 220px;
+  height: 100%;
+  align-items: center;
+  // 消除 ElementPlus 默认相邻按钮左边距
+  :deep(.el-button + .el-button) {
+    margin-left: 0;
+  }
+}
+
+.buttons > * {
+  width: 100px;
+  margin-right: 10px;
+}
+
+.search-btn,
+.clear-btn {
+  display: flex;
+  align-items: center;
+  height: 32px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.3s;
+  color: #fff;
+  font-size: 18px;
+}
+
+.search-btn {
+  background-color: #45ba7e;
+}
+.clear-btn {
+  background-color: #fff;
+  border: 2px solid #f2f2f2;
+  margin-right: 10px;
+}
+.command-box {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 40px;
+  margin-top: 10px;
+}
+
+.command-box>* {
+  margin-right: 10px;
+}
+
+.command-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: auto;
+  min-width: 50px;
+  height: 35px;
+  padding: 0 8px;
+  color: #5a5a5a;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.3s;
+  font-size: 18px;
+  background-color: #fff;
+  border: 2px solid #f2f2f2;
+}
+.command-btn img {
+  margin-right: 6px;
+  flex-shrink: 0;
 }
 </style>
+
+<!--&lt;!&ndash; 全局：与登录安全页保持一致（保留垂直滚动条，避免缩放抖动） &ndash;&gt;-->
+<!--<style>-->
+<!--html {-->
+<!--  overflow-y: scroll;-->
+<!--}-->
+<!--</style>-->
