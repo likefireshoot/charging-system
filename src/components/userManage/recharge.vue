@@ -30,8 +30,8 @@
             交易方式
           </span>
           <el-radio-group v-model="rechargeData.rechargeType">
-            <el-radio label="现金" v-if="this.staffPermissionIds.includes(94)">现金</el-radio>
-            <el-radio label="免费赠送" v-if="this.staffPermissionIds.includes(95)">免费赠送</el-radio>
+            <el-radio label="现金" v-if="staffPermissionIds.includes(94)">现金</el-radio>
+            <el-radio label="免费赠送" v-if="staffPermissionIds.includes(95)">免费赠送</el-radio>
           </el-radio-group>
         </div>
         <div class="recharge-input" style="margin-right: 1%; width: 100%">
@@ -202,6 +202,19 @@ export default {
       this.rechargeData.balance = this.data.balance;
       this.rechargeData.meterCode = this.data.meterCode;
       this.rechargeData.region = this.data.regionName;
+
+      // ========== 新增：自动默认选中交易方式 ==========
+      const hasCash = this.staffPermissionIds.includes(94);
+      const hasFreeGift = this.staffPermissionIds.includes(95);
+
+      if (hasCash) {
+        this.rechargeData.rechargeType = "现金";
+      } else if (hasFreeGift) {
+        this.rechargeData.rechargeType = "免费赠送";
+      } else {
+        // 两个权限都没有，置空
+        this.rechargeData.rechargeType = "";
+      }
     },
     // 处理金额输入
     handleMoneyInput(value) {
