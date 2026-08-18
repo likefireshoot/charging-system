@@ -65,29 +65,29 @@
           </el-input>
         </div>
 
-<!--        new 本月用水量相关-->
-<!--        <div class="search-input">-->
-<!--          <span>本月用水量</span>-->
-<!--          <div style="display:flex;gap:4px;align-items:center;">-->
-<!--            <el-select-->
-<!--              v-model="waterCompareOpt"-->
-<!--              placeholder="条件"-->
-<!--              style="width:40%"-->
-<!--              clearable-->
-<!--            >-->
-<!--              <el-option label="大于" value="gt" />-->
-<!--              <el-option label="小于" value="lt" />-->
-<!--            </el-select>-->
-<!--            <span style="font-size: 16px">上月</span>-->
-<!--            <el-input-->
-<!--              v-model.number="waterCompareVal"-->
-<!--              placeholder="吨"-->
-<!--              style="width:30%"-->
-<!--              min="0"-->
-<!--            />-->
-<!--            <span style="font-size: 16px">吨</span>-->
-<!--          </div>-->
-<!--        </div>-->
+        <!-- 本月用水量相关 -->
+        <div class="search-input">
+          <span>本月用水量</span>
+          <div style="display:flex;gap:4px;align-items:center;">
+            <el-select
+              v-model="waterCompareOpt"
+              placeholder="条件"
+              style="width:40%"
+              clearable
+            >
+              <el-option label="大于" value="gt" />
+              <el-option label="小于" value="lt" />
+            </el-select>
+            <span style="font-size: 16px">上月</span>
+            <el-input
+              v-model.number="waterCompareVal"
+              placeholder="吨"
+              style="width:30%"
+              min="0"
+            />
+            <span style="font-size: 16px">吨</span>
+          </div>
+        </div>
         </div>
 
         <div class="buttons">
@@ -201,12 +201,12 @@
             </template>
           </el-table-column>
 
-<!--          new 本月用水量相关-->
-<!--          <el-table-column prop="lastDeltaWater" label="上月增减量" :width="lastDeltaWaterWidth" align="center">-->
-<!--            <template #default="{ row }">-->
-<!--              <span>{{ showMeterReadings(row) ? (row.lastDeltaWater || 0) : '-' }}</span>-->
-<!--            </template>-->
-<!--          </el-table-column>-->
+          <!-- 本月用水量相关 -->
+          <el-table-column prop="lastDeltaWater" label="较上月增减量" :width="lastDeltaWaterWidth" align="center">
+            <template #default="{ row }">
+              <span>{{ showMeterReadings(row) ? (row.lastDeltaWater || 0) : '-' }}</span>
+            </template>
+          </el-table-column>
 
           <el-table-column prop="feeThisTime" label="本次扣费(元)" :width="feeThisTimeWidth" align="center">
             <template #default="{ row }">
@@ -284,8 +284,8 @@
           <td>{{ showMeterReadings(row) ? Math.floor(row.startReading || 0) : '-' }}</td>
           <td>{{ showMeterReadings(row) ? Math.floor(row.endReading || 0) : '-' }}</td>
           <td>{{ showMeterReadings(row) ? (row.deltaWater || 0) : '-' }}</td>
-<!--          new 本月用水量相关-->
-<!--          <td>{{ showMeterReadings(row) ? (row.lastDeltaWater || 0) : '-' }}</td>-->
+          <!-- 本月用水量相关 -->
+          <td>{{ showMeterReadings(row) ? (row.lastDeltaWater || 0) : '-' }}</td>
           <td>{{ row.createTime ? formatMoney(row.feeThisTime) : '-' }}</td>
           <td>{{ formatDate(row.createTime) }}</td>
         </tr>
@@ -335,10 +335,10 @@ const reportList = ref([]);
 // 搜索关键词
 const searchKeyword = ref('');
 
-// new 本月用水量相关
+// 本月用水量相关
 // 用水量对比筛选
-// const waterCompareOpt = ref('') // gt 大于 / lt 小于
-// const waterCompareVal = ref(40) // 默认40吨
+const waterCompareOpt = ref('') // gt 大于 / lt 小于
+const waterCompareVal = ref(40) // 默认40吨
 
 // 分页相关
 const currentPage = ref(1);
@@ -425,17 +425,15 @@ const maskUserId = (userId) => {
 const columnPercentages = {
   userId: 10,
   userName: 8,
-  address: 14,
-  // address: 11,  // new 本月用水量相关
+  address: 11,  // 本月用水量相关（原14改为11）
   dataType: 9,
   reportStatus: 9,
   startReading: 8,
   endReading: 8,
   deltaWater: 10,
-  // lastDeltaWater: 8,  // new 本月用水量相关
+  lastDeltaWater: 8,  // 本月用水量相关
   feeThisTime: 9,
-  createTime: 15
-  // createTime: 10  // new 本月用水量相关
+  createTime: 10  // 本月用水量相关（原15改为10）
 };
 
 const tableContainer = ref(null);
@@ -448,7 +446,7 @@ const reportStatusWidth = ref(0);
 const startReadingWidth = ref(0);
 const endReadingWidth = ref(0);
 const deltaWaterWidth = ref(0);
-// const lastDeltaWaterWidth = ref(0); // new 本月用水量相关
+const lastDeltaWaterWidth = ref(0); // 本月用水量相关
 const feeThisTimeWidth = ref(0);
 const createTimeWidth = ref(0);
 
@@ -463,7 +461,7 @@ const calculateColumnWidths = () => {
   startReadingWidth.value = (columnPercentages.startReading / 100) * w;
   endReadingWidth.value = (columnPercentages.endReading / 100) * w;
   deltaWaterWidth.value = (columnPercentages.deltaWater / 100) * w;
-  // lastDeltaWaterWidth.value = (columnPercentages.lastDeltaWater / 100) * w; // new 本月用水量相关
+  lastDeltaWaterWidth.value = (columnPercentages.lastDeltaWater / 100) * w; // 本月用水量相关
   feeThisTimeWidth.value = (columnPercentages.feeThisTime / 100) * w;
   createTimeWidth.value = (columnPercentages.createTime / 100) * w;
 };
@@ -490,6 +488,11 @@ const loadRegionReport = async (regionId, codeBookId) => {
     if (codeBookId) {
       url += `&codeBookId=${codeBookId}`;
     }
+    // 本月用水量相关：筛选条件（大于/小于）+ 对比数值，仅已填写时拼接
+    if (waterCompareOpt.value) {
+      url += `&waterCompareOpt=${encodeURIComponent(waterCompareOpt.value)}`;
+      url += `&waterCompareVal=${encodeURIComponent(waterCompareVal.value ?? 40)}`;
+    }
     const res = await service.get(url);
 
     if (res.code === 200) {
@@ -507,7 +510,7 @@ const loadRegionReport = async (regionId, codeBookId) => {
 
         const readingCount = item.readingCount || 0;
         const deltaWater = item.deltaWater || 0;
-        // const lastDeltaWater = item.lastDeltaWater || 0;  // new 本月用水量相关
+        const lastDeltaWater = item.lastDeltaWater || 0;  // 本月用水量相关
         const reportStatus = item.reportStatus || '';
 
         return {
@@ -522,7 +525,7 @@ const loadRegionReport = async (regionId, codeBookId) => {
           startReading: readingCount - deltaWater,
           endReading: readingCount,
           deltaWater: reportStatus === '正常' ? deltaWater : 0,
-          // lastDeltaWater: reportStatus === '正常' ? lastDeltaWater : 0, // new 本月用水量相关
+          lastDeltaWater: reportStatus === '正常' ? lastDeltaWater : 0, // 本月用水量相关
           createTime: item.createTime,
           feeThisTime: item.feeThisTime || 0
         };
@@ -692,6 +695,7 @@ const filterCodeBook = (val) => {
 // 搜索
 const handleSearch = () => {
   currentPage.value = 1;
+  loadRegionReport(searchParams.region, searchParams.codeBook);
 };
 
 // 分页大小变化
@@ -734,7 +738,7 @@ const handleExportExcel = () => {
     '起码(吨)': showMeterReadings(row) ? Math.floor(row.startReading || 0) : '-',
     '止码(吨)': showMeterReadings(row) ? Math.floor(row.endReading || 0) : '-',
     '本期用量(吨)': showMeterReadings(row) ? (row.deltaWater || 0) : '-',
-    // '上月增减量' : showMeterReadings(row) ? (row.lastDeltaWater || 0) : '-', // new 本月用水量相关
+    '较上月增减量' : showMeterReadings(row) ? (row.lastDeltaWater || 0) : '-', // 本月用水量相关
     '本次扣费(元)': row.createTime ? row.feeThisTime : '-',
     '抄表日期': formatDate(row.createTime)
   }));
