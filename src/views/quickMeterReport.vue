@@ -232,7 +232,7 @@
               </div>
 
               <!-- 提交按钮 - 移到抄表信息区域底部 -->
-              <div class="action-buttons-inline" style="justify-items: center">
+              <div class="action-buttons-inline" style="display: flex; justify-content: center">
                 <el-button
                   class="submit-btn"
                   @click="submitSingleUser"

@@ -423,15 +423,15 @@ const maskUserId = (userId) => {
 
 // ============== 表格列宽（参考登录安全页做法，按容器百分比分配） ==============
 const columnPercentages = {
-  userId: 10,
+  userId: 9,
   userName: 8,
   address: 11,  // 本月用水量相关（原14改为11）
   dataType: 9,
   reportStatus: 9,
   startReading: 8,
   endReading: 8,
-  deltaWater: 10,
-  lastDeltaWater: 8,  // 本月用水量相关
+  deltaWater: 9,
+  lastDeltaWater: 10,  // 本月用水量相关
   feeThisTime: 9,
   createTime: 10  // 本月用水量相关（原15改为10）
 };
