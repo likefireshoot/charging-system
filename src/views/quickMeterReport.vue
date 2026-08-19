@@ -104,6 +104,7 @@
                 </el-radio>
               </template>
             </el-table-column>
+            <el-table-column type="index" label="序号" width="60" align="center" />
             <el-table-column prop="userId" label="用户号" min-width="120" align="center">
               <template #default="{ row }">
                 <span>{{ maskUserId(row.userId) }}</span>
@@ -225,9 +226,9 @@
                   <span class="tip-text">当前选择“{{ selectedUserDetail.reportStatus }}”，按回车提交</span>
                 </div>
 
-                <div class="reading-item highlight" v-if="selectedUserDetail.balance !== undefined">
-                  <span class="label">当前余额</span>
-                  <span class="value amount">{{ formatMoney(selectedUserDetail.balance) }} 元</span>
+                <div class="reading-item highlight" v-if="selectedUserDetail.reportStatus === '正常'">
+                  <span class="label">本月用水量</span>
+                  <span class="value amount">{{ formatMoney(waterUsage) }} 吨</span>
                 </div>
               </div>
 
@@ -399,6 +400,15 @@ const canSubmitSingle = computed(() => {
   
   // 异常状态可以直接提交
   return true;
+});
+
+// 本月用水量 = 本月读数 - 上月读数
+const waterUsage = computed(() => {
+  if (!selectedUserDetail.value) return 0;
+  const current = parseFloat(selectedUserDetail.value.currentReadingInput);
+  const last = parseFloat(selectedUserDetail.value.lastReading);
+  if (isNaN(current) || isNaN(last)) return 0;
+  return Math.max(0, current - last);
 });
 
 // 用户号脱敏：不展示前三位
@@ -589,10 +599,8 @@ const handleCodeBookChange = async (codeBookId) => {
         userPhone: user.userPhone || '',
         lastReading: user.lastReading || 0,
         currentReading: user.currentReading ?? null,   // 读取后端本月数
-        // 本月读数默认显示本月数（后端已返回时），否则取上月数减少输入
-        currentReadingInput: (user.currentReading ?? user.lastReading) != null
-          ? String(user.currentReading ?? user.lastReading)
-          : '',
+        // 本月读数不再默认填充，让用户手动输入
+        currentReadingInput: '',
         meterCode: user.meterCode || '',
         balance: user.balance || 0,
         reportStatus: '正常'
@@ -751,11 +759,9 @@ const handleClearAll = async () => {
 const handleReportStatusChange = (status) => {
   if (!selectedUserDetail.value) return;
 
-  // 切换到正常状态时，默认带上月读数，方便回车直接提交
+  // 切换到正常状态时，本月读数保持空，让用户手动输入
   if (status === '正常') {
-    selectedUserDetail.value.currentReadingInput = selectedUserDetail.value.lastReading
-      ? String(selectedUserDetail.value.lastReading)
-      : '';
+    selectedUserDetail.value.currentReadingInput = '';
     nextTick(() => {
       currentReadingRef.value?.focus();
     });
@@ -831,7 +837,7 @@ const submitSingleUser = async () => {
         const userInList = userList.value.find(u => u.userId === selectedUserDetail.value.userId);
         if (userInList) {
           userInList.currentReading = parseFloat(selectedUserDetail.value.currentReadingInput) || null;
-          userInList.balance = res.data.newBalance || userInList.balance;
+          userInList.waterUsage = waterUsage.value;
         }
       }
       
