@@ -119,8 +119,9 @@
               v-loading="isLoading"
             >
               <el-table-column type="selection" :selectable="selectable" min-width="40" align="center" fixed="left" />
+              <el-table-column label="序号" prop="theId" min-width="60" align="center" fixed="left" />
               <el-table-column property="userId" label="用户号" min-width="70" align="center" fixed="left" />
-              <el-table-column property="userName" label="用户名称" min-width="65" align="center" >
+              <el-table-column property="userName" label="用户名" min-width="65" align="center" >
                 <template #default="scope">
                   <span>{{ scope.row.userName }}</span>
                   <!-- 当isPause=1 显示暂停气泡 -->
@@ -134,14 +135,21 @@
               <el-table-column v-if="companyId === 95" property="codeBookName" label="所属表册" min-width="75" align="center" />
               <el-table-column property="userPhone" label="联系电话" min-width="80" align="center" />
               <el-table-column property="meterCode" label="表号" min-width="80" align="center" />
-              <el-table-column property="payerPhone" label="缴费人手机号" min-width="85" align="center" />
+              <el-table-column property="payerPhone" label="缴费人手机号" min-width="80" align="center" >
+                <template #header>缴费人<br>手机号</template>
+              </el-table-column>
               <el-table-column property="rechargeUser" label="收费人" min-width="65" align="center" />
               <el-table-column property="rechargeType" label="交易方式" min-width="75" align="center" />
-              <el-table-column property="rechargeAmount" label="充值金额/元" min-width="85" align="center" />
-              <el-table-column property="oldBalance" label="充值前余额/元" min-width="85" align="center" />
-              <el-table-column property="newBalance" label="充值后余额/元" min-width="85" align="center" />
+              <el-table-column property="rechargeAmount" label="充值金额" min-width="85" align="center" />
+              <el-table-column property="oldBalance" label="充值前余额" min-width="85" align="center">
+                <template #header>充值前<br>余额</template>
+              </el-table-column>
+              <el-table-column property="newBalance" label="充值后余额" min-width="85" align="center" >
+                <template #header>充值后<br>余额</template>
+              </el-table-column>
               <el-table-column property="createTime" label="充值时间" min-width="85" align="center" />
               <el-table-column property="status" label="微信是否已退费" min-width="80" align="center">
+                <template #header>微信是否<br>已退费</template>
                 <template #default="{ row }">
                   <span v-if="row.rechargeType === '微信支付'" class="refund-status-badge" :class="row.status === 2 ? 'refunded' : 'not-refunded'">
                     {{ row.status === 2 ? '是' : '否' }}
@@ -150,6 +158,7 @@
                 </template>
               </el-table-column>
               <el-table-column property="hasShouju" label="是否开收据" min-width="75" align="center">
+                <template #header>是否<br>开收据</template>
                 <template #default="{ row }">
                   <span class="receipt-badge" :class="row.hasShouju ? 'receipt-yes' : 'receipt-no'">
                     {{ row.hasShouju ? '已开收据' : '未开收据' }}
@@ -1024,7 +1033,7 @@ export default {
 
           const link = document.createElement("a");
           link.href = window.URL.createObjectURL(blob);
-          link.download = "用户充值记录.xlsx";
+          link.download = "充值记录明细报表.xlsx";
           document.body.appendChild(link);
           link.click();
           document.body.removeChild(link);
@@ -1322,6 +1331,8 @@ export default {
   color: #1b7a4a;
   background: #d4f0de;
   border: 2px solid #46b97e;
+  font-size: 12px;
+  padding: 2px 10px;
 }
 
 .receipt-no {
