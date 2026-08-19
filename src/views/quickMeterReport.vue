@@ -588,9 +588,11 @@ const handleCodeBookChange = async (codeBookId) => {
         address: user.userAddr,
         userPhone: user.userPhone || '',
         lastReading: user.lastReading || 0,
-        currentReading: null,
-        // 本月读数默认显示上月读数，减少输入
-        currentReadingInput: user.lastReading ? String(user.lastReading) : '',
+        currentReading: user.currentReading ?? null,   // 读取后端本月数
+        // 本月读数默认显示本月数（后端已返回时），否则取上月数减少输入
+        currentReadingInput: (user.currentReading ?? user.lastReading) != null
+          ? String(user.currentReading ?? user.lastReading)
+          : '',
         meterCode: user.meterCode || '',
         balance: user.balance || 0,
         reportStatus: '正常'
