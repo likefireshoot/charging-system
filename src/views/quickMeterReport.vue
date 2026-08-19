@@ -104,7 +104,7 @@
                 </el-radio>
               </template>
             </el-table-column>
-            <el-table-column type="index" label="序号" width="60" align="center" />
+            <el-table-column type="index" label="序号" min-width="65" align="center" />
             <el-table-column prop="userId" label="用户号" min-width="120" align="center">
               <template #default="{ row }">
                 <span>{{ maskUserId(row.userId) }}</span>
@@ -227,7 +227,7 @@
                 </div>
 
                 <div class="reading-item highlight" v-if="selectedUserDetail.reportStatus === '正常'">
-                  <span class="label">本月用水量</span>
+                  <span class="label" style="width: 100px">本月用水量</span>
                   <span class="value amount">{{ formatMoney(waterUsage) }} 吨</span>
                 </div>
               </div>
@@ -1593,7 +1593,13 @@ fetchCompanyList();
   box-shadow: 0 8px 20px rgba(64, 158, 255, 0.36);
   color: #fff;
 }
-
+// 新增：禁用状态
+.submit-btn:is(:disabled) {
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12); // 灰色阴影
+}
+.submit-btn:is(:disabled):hover {
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+}
 :deep(.el-input__inner) {
   font-size: 16px !important;
 }
