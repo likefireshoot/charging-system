@@ -48,6 +48,13 @@
           <span>新表读数</span>
           <el-input v-model="changeData.newMeterReading" type="number" />
         </div>
+        <div class="change-input input-23">
+          <span>是否为普表</span>
+          <el-select v-model="isNormalMeter" placeholder="请选择" style="width: 100%">
+            <el-option label="否" :value="false" />
+            <el-option label="是" :value="true" />
+          </el-select>
+        </div>
       </div>
 
       <div class="btn">
@@ -91,6 +98,7 @@ export default {
         newMeterReading: "",
         changeCount: "",
       },
+      isNormalMeter: false,
       previewCharge: "0.00",
     };
   },
@@ -169,6 +177,7 @@ export default {
         newMeterCode: this.changeData.newMeterCode,
         newMeterReading: this.changeData.newMeterReading,
         changeCount: this.changeData.changeCount,
+        isNormalMeter: this.isNormalMeter,
       };
 
       const fieldNameMap = {
@@ -215,6 +224,7 @@ export default {
             newMeterCode: formData.newMeterCode,
             newReading: newMeterReading,
             changeReading: changeCount,
+            isNormalMeter: formData.isNormalMeter,
           })
           .then((res) => {
             if (res.code === 200) {
@@ -252,6 +262,7 @@ export default {
             <div class="section-row">
               <span class="field"><label>表号：</label>${formData.newMeterCode}</span>
               <span class="field"><label>新表读数：</label><b>${formData.newMeterReading}</b></span>
+              ${formData.isNormalMeter ? '<span class="field"><label>表类型：</label><b style="color: #e6a23c">普通水表(不含远传功能)</b></span>' : ''}
             </div>
           </div>
           <div class="confirm-warning">⚠ 新表将从该读数开始计费，请务必确认清楚，否则可能造成不必要的扣费。</div>

@@ -79,6 +79,10 @@
           <img src="@/assets/yonghu/icon20.png" alt="" />
           <span>余额调整</span>
         </div>
+        <div class="recharge-btn" :class="{ 'btn-single-only-disabled': multipleSelection.length !== 1 || hasPauseUserSelected }" @click="(multipleSelection.length === 1 && !hasPauseUserSelected) && change_tonnage_btn_click()">
+          <img src="@/assets/jiage/icon3.png" alt="" />
+          <span>吨数调整</span>
+        </div>
         <div class="recharge-btn" :class="{ 'btn-single-only-disabled': multipleSelection.length !== 1 || hasPauseUserSelected }" @click="(multipleSelection.length === 1 && !hasPauseUserSelected) && recharge_btn_click()"
           v-if="staffPermissionIds.includes(10)">
           <img src="@/assets/yonghu/icon6.png" alt="" />
@@ -312,6 +316,11 @@
     <changeBalanceVue v-if="changeBalance_dialogFormVisible"
       :changeBalance_dialogFormVisible="changeBalance_dialogFormVisible" :data="multipleSelection[0]"
       @close="closeChangeBalanceDialog"></changeBalanceVue>
+
+    <!-- 吨数调整弹出框 -->
+    <changeTonnageVue v-if="changeTonnage_dialogFormVisible"
+      :changeTonnage_dialogFormVisible="changeTonnage_dialogFormVisible" :data="multipleSelection[0]"
+      @close="closeChangeTonnageDialog"></changeTonnageVue>
 
     <!-- 充值弹出框 -->
     <rechargeVue v-if="recharge_dialogFormVisible" :recharge_dialogFormVisible="recharge_dialogFormVisible"
@@ -747,6 +756,7 @@ import changeRecord from "@/components/userManage/changeRecord.vue";
 import userInfoVue from "@/components/userManage/userInfo.vue";
 import transactionRecord from "@/components/userManage/transactionRecord.vue";
 import changeBalanceVue from "@/components/userManage/changeBalance.vue";
+import changeTonnageVue from "@/components/userManage/changeTonnage.vue";
 import rechargeCancelRecordVue from "@/components/userManage/RechargeCancelRecord.vue";
 import pauseRecord from "@/components/userManage/pauseRecord.vue";
 import closeRecord from "@/components/userManage/closeRecord.vue";
@@ -774,6 +784,7 @@ export default {
     valveVue,
     valueOpenVue,
     changeBalanceVue,
+    changeTonnageVue,
     commandTaiYangNengVue,
     commandXinchiVue,
     commandShengXin,
@@ -879,6 +890,7 @@ export default {
       valve_dialogFormVisible: false,
       valveOpen_dialogFormVisible: false,
       changeBalance_dialogFormVisible: false,
+      changeTonnage_dialogFormVisible: false,
       // 充值撤销记录
       recharge_cancel_record_dialogFormVisible: false,
       // 新增暂停、销户弹窗标记
@@ -1614,6 +1626,13 @@ export default {
         ElMessage.warning("请选择要调整余额的数据");
       }
     },
+    change_tonnage_btn_click() {
+      if (this.multipleSelection.length > 0) {
+        this.changeTonnage_dialogFormVisible = true;
+      } else {
+        ElMessage.warning("请选择要调整吨数的数据");
+      }
+    },
     recharge_btn_click() {
       if (this.multipleSelection.length > 0) {
         this.recharge_dialogFormVisible = true;
@@ -1733,6 +1752,11 @@ export default {
     },
     closeChangeBalanceDialog() {
       this.changeBalance_dialogFormVisible = false;
+      this.multipleSelection = [];
+      this.reflush();
+    },
+    closeChangeTonnageDialog() {
+      this.changeTonnage_dialogFormVisible = false;
       this.multipleSelection = [];
       this.reflush();
     },
