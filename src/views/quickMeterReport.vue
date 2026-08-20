@@ -53,10 +53,10 @@
       </div>
 
         <div class="buttons">
-          <el-button class="clear-btn" @click="handleClearAll">
-            <img src="@/assets/yuangong/icon4.png" alt="" />
-            <span style="margin-left:10%; color: #5a5a5a">清空</span>
-          </el-button>
+<!--          <el-button class="clear-btn" @click="handleClearAll">-->
+<!--            <img src="@/assets/yuangong/icon4.png" alt="" />-->
+<!--            <span style="margin-left:10%; color: #5a5a5a">清空</span>-->
+<!--          </el-button>-->
         </div>
     </div>
 
@@ -1595,9 +1595,14 @@ fetchCompanyList();
 }
 // 新增：禁用状态
 .submit-btn:is(:disabled) {
+  cursor: not-allowed;
+  background: #c0c4cc;
+  color: #fff;
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12); // 灰色阴影
 }
 .submit-btn:is(:disabled):hover {
+  background: #c0c4cc;
+  color: #fff;
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
 }
 :deep(.el-input__inner) {

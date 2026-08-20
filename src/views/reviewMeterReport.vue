@@ -74,10 +74,10 @@
             <span style="margin-left:10%;">搜索</span>
           </el-button>
           
-          <el-button class="clear-btn" @click="handleClearAll">
-            <img src="@/assets/yuangong/icon4.png" alt="" />
-            <span style="margin-left:10%; color: #5a5a5a">清空</span>
-          </el-button>
+<!--          <el-button class="clear-btn" @click="handleClearAll">-->
+<!--            <img src="@/assets/yuangong/icon4.png" alt="" />-->
+<!--            <span style="margin-left:10%; color: #5a5a5a">清空</span>-->
+<!--          </el-button>-->
       </div>
 
 <!--      <div class="header-right">-->
@@ -1608,7 +1608,7 @@ onMounted(() => {
 }
 .buttons {
   display: flex;
-  width: 220px;
+  width: 110px;
   height: 100%;
   align-items: center;
   // 消除 ElementPlus 默认相邻按钮左边距
@@ -1708,11 +1708,16 @@ onMounted(() => {
     color: #ffffff !important;
   }
 }
-/* 按钮禁用时图标变灰 */
-.command-btn:disabled .btn-icon {
-  color: #c0c4cc !important;
+/* 按钮禁用时图标、文字一起变灰 */
+.command-btn:disabled {
+  cursor: not-allowed;
+  :deep(.btn-icon) {
+    color: #c0c4cc !important;
+  }
+  span {
+    color: #c0c4cc !important;
+  }
 }
-
 :deep(.el-input__inner) {
   font-size: 16px !important;
 }

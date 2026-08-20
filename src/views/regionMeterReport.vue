@@ -96,10 +96,10 @@
           <span style="margin-left:10%;">搜索</span>
         </el-button>
 
-        <el-button @click="handleClearAll" class="clear-btn">
-          <img src="@/assets/yuangong/icon4.png" alt="" />
-          <span style="margin-left:10%; color: #5a5a5a">清空</span>
-        </el-button>
+<!--        <el-button @click="handleClearAll" class="clear-btn">-->
+<!--          <img src="@/assets/yuangong/icon4.png" alt="" />-->
+<!--          <span style="margin-left:10%; color: #5a5a5a">清空</span>-->
+<!--        </el-button>-->
         </div>
 
 <!--        <el-button type="success" @click="handleExportExcel" class="header-btn">-->
@@ -1194,7 +1194,7 @@ onBeforeUnmount(() => {
 
 .buttons {
   display: flex;
-  width: 220px;
+  width: 110px;
   height: 100%;
   align-items: center;
   // 消除 ElementPlus 默认相邻按钮左边距
