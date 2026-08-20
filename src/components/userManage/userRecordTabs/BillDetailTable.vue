@@ -100,22 +100,22 @@
 <!--        <el-table-column property="theId" label="序号" width="70" align="center" fixed="left" />-->
         <el-table-column property="userId" label="用户号" min-width="100" align="center" />
         <el-table-column property="userName" label="用户名" min-width="120" align="center" />
-        <el-table-column property="userAddr" label="地址" min-width="140" align="center" />
+        <el-table-column property="userAddr" label="地址" min-width="120" align="center" />
         <el-table-column property="startRead" label="起码" min-width="100" align="center" />
         <el-table-column property="endRead" label="止码" min-width="100" align="center" />
         <el-table-column property="waterUse" label="结算量" min-width="100" align="center">
           <template #default="scope">{{ scope.row.waterUse }}</template>
         </el-table-column>
         <el-table-column property="chargeAmount" label="扣费" min-width="100" align="center"></el-table-column>
-        <el-table-column property="waterFee" min-width="110" align="center" v-if="companyId !== 95">
+        <el-table-column property="waterFee" min-width="140" align="center" v-if="companyId !== 95">
           <template #header>扣费组成1:<br>水费</template>
           <template #default="scope">{{ scope.row.waterFee }}</template>
         </el-table-column>
-        <el-table-column property="sewageFee" min-width="110" align="center" v-if="companyId !== 95">
+        <el-table-column property="sewageFee" min-width="140" align="center" v-if="companyId !== 95">
           <template #header>扣费组成2:<br>污水处理费</template>
           <template #default="scope">{{ scope.row.sewageFee }}</template>
         </el-table-column>
-        <el-table-column property="minFee" min-width="110" align="center" v-if="companyId !== 95">
+        <el-table-column property="minFee" min-width="140" align="center" v-if="companyId !== 95">
           <template #header>扣费组成3:<br>保底消费</template>
           <template #default="scope">{{ scope.row.minFee }}</template>
         </el-table-column>
@@ -132,14 +132,15 @@
       >
         <el-table-column property="theId" min-width="150" align="center" fixed="left" />
 <!--        <el-table-column property="userId" min-width="100" align="center" />-->
-        <el-table-column property="userName" min-width="140" align="center" />
+        <el-table-column property="userName" min-width="120" align="center" />
+        <el-table-column property="userAddr" min-width="120" align="center" />
         <el-table-column property="startRead" min-width="100" align="center" />
         <el-table-column property="endRead" min-width="100" align="center" />
         <el-table-column property="waterUse" min-width="100" align="center" />
         <el-table-column property="totalChargeAmount" min-width="100" align="center"></el-table-column>
-        <el-table-column property="waterFee" min-width="110" align="center" v-if="companyId !== 95"/>
-        <el-table-column property="sewageFee" min-width="110" align="center" v-if="companyId !== 95"/>
-        <el-table-column property="minFee" min-width="110" align="center" v-if="companyId !== 95"/>
+        <el-table-column property="waterFee" min-width="140" align="center" v-if="companyId !== 95"/>
+        <el-table-column property="sewageFee" min-width="140" align="center" v-if="companyId !== 95"/>
+        <el-table-column property="minFee" min-width="140" align="center" v-if="companyId !== 95"/>
         <el-table-column property="createTime" min-width="140" align="center" />
       </el-table>
     </div>
