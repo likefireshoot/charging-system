@@ -202,11 +202,7 @@
           </template>
         </el-table-column>
         
-        <el-table-column prop="userId" label="用户号" min-width="120" align="center">
-          <template #default="{ row }">
-            <span>{{ maskUserId(row.userId) }}</span>
-          </template>
-        </el-table-column>
+        <el-table-column prop="userId" label="用户号" min-width="120" align="center"></el-table-column>
         <el-table-column prop="userName" label="用户姓名" min-width="120" align="center" />
         <el-table-column prop="address" label="用户地址" min-width="200" align="center" show-overflow-tooltip />
         <el-table-column prop="reportStatus" label="抄表状态" min-width="100" align="center">

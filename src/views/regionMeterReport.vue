@@ -145,11 +145,7 @@
           class="report-table"
           style="width: 100%; height: 100%; table-layout: fixed; overflow-x: auto; overflow-y: auto"
         >
-          <el-table-column prop="userId" label="用户号" :width="userIdWidth" align="center">
-            <template #default="{ row }">
-              <span>{{ maskUserId(row.userId) }}</span>
-            </template>
-          </el-table-column>
+          <el-table-column prop="userId" label="用户号" :width="userIdWidth" align="center"></el-table-column>
           <el-table-column prop="userName" label="用户姓名" :width="userNameWidth" align="center" />
           <el-table-column prop="address" label="用户地址" :width="addressWidth" align="center" show-overflow-tooltip />
 
@@ -730,7 +726,7 @@ const handleExportExcel = () => {
 
   const exportData = filteredReportList.value.map((row, index) => ({
     '序号': index + 1,
-    '用户号': row.userId ? '\t' + maskUserId(row.userId) : '',
+    '用户号': row.userId ? '\t' + row.userId : '',
     '用户姓名': row.userName,
     '用户地址': row.address,
     '数据类型': row.dataType,
