@@ -105,7 +105,11 @@
               </template>
             </el-table-column>
             <el-table-column type="index" label="序号" min-width="65" align="center" />
-            <el-table-column prop="userId" label="用户号" min-width="120" align="center"></el-table-column>
+            <el-table-column prop="userId" label="用户号" min-width="120" align="center">
+              <template #default="{ row }">
+                <span>{{ row.userId % 10000000 }}</span>
+              </template>
+            </el-table-column>
             <el-table-column prop="userName" label="用户名" min-width="120" align="center" />
             <el-table-column prop="lastReading" label="上月数" min-width="120" align="center" />
             <el-table-column prop="currentReading" label="本月数" min-width="120" align="center">
@@ -155,7 +159,7 @@
               <div class="info-grid">
                 <div class="info-item">
                   <span class="label">用户号</span>
-                  <span class="value">{{ selectedUserDetail.userId }}</span>
+                  <span class="value">{{ selectedUserDetail.userId % 10000000 }}</span>
                 </div>
                 <div class="info-item">
                   <span class="label">用户名</span>
