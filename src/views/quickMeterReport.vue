@@ -86,7 +86,7 @@
 
         <div class="table-container">
           <el-table 
-            :data="paginatedUserList"
+            :data="userList"
             stripe
             border
             @row-click="handleRowClick"
@@ -121,12 +121,12 @@
           </el-table>
 
           <!-- 分页器 -->
-          <div class="pagination-container" v-if="userList.length > 0">
+          <div class="pagination-container" v-if="total > 0">
             <el-pagination
               v-model:current-page="currentPage"
               v-model:page-size="pageSize"
               :page-sizes="[10, 20, 50, 100]"
-              :total="filteredUserList.length"
+              :total="total"
               layout="total, sizes, prev, pager, next, jumper"
               @size-change="handleSizeChange"
               @current-change="handleCurrentChange"
@@ -341,8 +341,11 @@ const userSearchKeyword = ref('');
 // 分页相关
 const currentPage = ref(1);
 const pageSize = ref(20);
+// 该表册下总户数（后端分页返回，用于分页控件）
+const total = ref(0);
 
-// 过滤后的用户列表（根据搜索关键词）
+// 过滤后的用户列表（根据搜索关键词，仅在本页已加载数据内过滤；
+// 后端接口目前仅支持 page/pageSize，不做关键词搜索，所以搜索只作用于当前页）
 const filteredUserList = computed(() => {
   if (!userSearchKeyword.value.trim()) {
     return userList.value;
@@ -356,13 +359,6 @@ const filteredUserList = computed(() => {
       (user.address && user.address.toLowerCase().includes(keyword))
     );
   });
-});
-
-// 分页后的用户列表
-const paginatedUserList = computed(() => {
-  const start = (currentPage.value - 1) * pageSize.value;
-  const end = start + pageSize.value;
-  return filteredUserList.value.slice(start, end);
 });
 
 // 选中的用户
@@ -580,19 +576,28 @@ const filterCodeBook = (val) => {
 // 区域下拉框前端过滤（el-select filterable 由组件内置完成，无需自定义逻辑）
 const filterRegion = () => {};
 
-// 表册变化时加载用户列表
+// 表册变化时加载用户列表（后端分页）
 const handleCodeBookChange = async (codeBookId) => {
   if (!codeBookId) {
     userList.value = [];
+    total.value = 0;
     return;
   }
 
+  // 切换表册时重置分页与搜索
+  currentPage.value = 1;
+  userSearchKeyword.value = '';
+
   loading.value = true;
   try {
-    const res = await service.get(`/manual/charge/getUserListByCodeBook?codeBookId=${codeBookId}`);
+    const res = await service.get(`/manual/charge/getUserListByCodeBook?codeBookId=${codeBookId}&page=${currentPage.value}&pageSize=${pageSize.value}`);
 
     if (res.code === 200) {
-      userList.value = (res.data || []).map(user => ({
+      const pageData = res.data || {};
+      const list = pageData.list || [];
+      total.value = pageData.total || 0;
+
+      userList.value = list.map(user => ({
         userId: user.userId,
         userName: user.userName,
         address: user.userAddr,
@@ -615,6 +620,7 @@ const handleCodeBookChange = async (codeBookId) => {
     } else {
       ElMessage.error(res.msg || '获取用户列表失败');
       userList.value = [];
+      total.value = 0;
     }
   } catch (error) {
     console.error('加载用户列表错误:', error);
@@ -622,20 +628,70 @@ const handleCodeBookChange = async (codeBookId) => {
     if (error.response?.status === 404) {
       ElMessage.error('用户列表接口未找到，请确认后端服务已启动并包含最新代码');
       userList.value = [];
+      total.value = 0;
     } else {
       ElMessage.error(error.message || '加载用户列表失败');
       userList.value = [];
+      total.value = 0;
     }
   } finally {
     loading.value = false;
   }
 };
 
-// 用户搜索处理函数
+// 请求指定页（切页/改每页大小时调用，真正走后端分页）
+const fetchUserListByPage = async () => {
+  const codeBookId = searchParams.codeBook;
+  if (!codeBookId) return;
+
+  loading.value = true;
+  try {
+    const res = await service.get(`/manual/charge/getUserListByCodeBook?codeBookId=${codeBookId}&page=${currentPage.value}&pageSize=${pageSize.value}`);
+
+    if (res.code === 200) {
+      const pageData = res.data || {};
+      const list = pageData.list || [];
+      total.value = pageData.total || 0;
+
+      userList.value = list.map(user => ({
+        userId: user.userId,
+        userName: user.userName,
+        address: user.userAddr,
+        userPhone: user.userPhone || '',
+        lastReading: user.lastReading || 0,
+        currentReading: user.currentReading ?? null,
+        currentReadingInput: '',
+        meterCode: user.meterCode || '',
+        balance: user.balance || 0,
+        reportStatus: '正常'
+      }));
+
+      // 切页后默认选中本页第一个用户
+      if (userList.value.length > 0) {
+        const firstUser = userList.value[0];
+        selectedUserId.value = firstUser.userId;
+        loadUserDetail(firstUser);
+      }
+    } else {
+      ElMessage.error(res.msg || '获取用户列表失败');
+      userList.value = [];
+      total.value = 0;
+    }
+  } catch (error) {
+    console.error('加载用户列表错误:', error);
+    ElMessage.error(error.message || '加载用户列表失败');
+    userList.value = [];
+    total.value = 0;
+  } finally {
+    loading.value = false;
+  }
+};
+
+// 用户搜索处理函数（仅在本页已加载数据内过滤；切页会重新请求后端并清空搜索）
 const handleUserSearch = () => {
-  // 重置到第一页
+  // 重置到第一页（搜索只作用于当前页，切回第一页以便看到过滤结果）
   currentPage.value = 1;
-  
+
   // 清空选中状态，因为过滤后可能不包含之前选中的用户
   if (filteredUserList.value.length === 0) {
     selectedUserId.value = null;
@@ -681,11 +737,15 @@ const loadUserDetail = (user) => {
 const handleSizeChange = (val) => {
   pageSize.value = val;
   currentPage.value = 1; // 重置到第一页
+  userSearchKeyword.value = ''; // 跨页搜索无意义，清空搜索
+  fetchUserListByPage();
 };
 
 // 当前页变化
 const handleCurrentChange = (val) => {
   currentPage.value = val;
+  userSearchKeyword.value = ''; // 跨页搜索无意义，清空搜索
+  fetchUserListByPage();
 };
 
 // 加载用户抄表记录
@@ -859,38 +919,41 @@ const submitSingleUser = async () => {
   }
 };
 
-// 选中下一个用户
+// 选中下一个用户（后端分页场景：先在本页 userList 内找下一个；
+// 若已是本页最后一个，则请求下一页并选中其第一个用户）
 const selectNextUser = () => {
-  if (!selectedUserId.value || filteredUserList.value.length === 0) {
+  if (!selectedUserId.value || userList.value.length === 0) {
     return;
   }
 
-  // 找到当前选中的用户在过滤后列表中的索引（使用过滤后的列表）
-  const currentIndex = filteredUserList.value.findIndex(user => user.userId === selectedUserId.value);
+  const currentIndex = userList.value.findIndex(user => user.userId === selectedUserId.value);
 
   if (currentIndex === -1) {
     return;
   }
 
-  // 计算下一个用户的索引
-  const nextIndex = currentIndex + 1;
-
-  // 如果还有下一个用户，选中它
-  if (nextIndex < filteredUserList.value.length) {
-    const nextUser = filteredUserList.value[nextIndex];
+  // 本页还有下一个用户，直接选中
+  if (currentIndex + 1 < userList.value.length) {
+    const nextUser = userList.value[currentIndex + 1];
     selectedUserId.value = nextUser.userId;
     loadUserDetail(nextUser);
+    return;
+  }
 
-    // 如果在分页列表中看不到下一个用户，调整当前页
-    const currentPageFirstIndex = (currentPage.value - 1) * pageSize.value;
-    const currentPageLastIndex = currentPageFirstIndex + pageSize.value - 1;
-
-    if (nextIndex > currentPageLastIndex) {
-      // 下一页
-      currentPage.value++;
-    }
+  // 已是本页最后一个：如果还有下一页，请求下一页并选中第一个用户
+  const totalPages = Math.ceil(total.value / pageSize.value);
+  if (currentPage.value < totalPages) {
+    currentPage.value++;
+    userSearchKeyword.value = '';
+    fetchUserListByPage().then(() => {
+      if (userList.value.length > 0) {
+        const firstUser = userList.value[0];
+        selectedUserId.value = firstUser.userId;
+        loadUserDetail(firstUser);
+      }
+    });
   } else {
-    // 已经是最后一个用户，清空选中状态
+    // 已是最后一页最后一个用户
     selectedUserId.value = null;
     closeDetailPanel();
     ElMessage.info('已是最后一个用户');
