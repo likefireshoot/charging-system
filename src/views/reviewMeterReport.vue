@@ -285,7 +285,7 @@
           v-model:current-page="currentPage"
           v-model:page-size="pageSize"
           :page-sizes="[1, 10, 20, 50, 100]"
-          :total="filteredReviewList.length"
+          :total="total"
           layout="total, sizes, prev, pager, next, jumper"
           @size-change="handleSizeChange"
           @current-change="handleCurrentChange"
@@ -349,6 +349,8 @@ const searchKeyword = ref('');
 // 分页相关
 const currentPage = ref(1);
 const pageSize = ref(20);
+// 总条数（表册级来自后端分页 res.data.total；区域级为前端合并后的全量长度）
+const total = ref(0);
 
 // 选中的行
 const selectedRows = ref([]);
@@ -370,10 +372,9 @@ const filteredReviewList = computed(() => {
 });
 
 // 分页后的审核列表
+// 表册级与区域级后端均已按 page/pageSize 返回本页数据，直接返回 reviewList
 const paginatedReviewList = computed(() => {
-  const start = (currentPage.value - 1) * pageSize.value;
-  const end = start + pageSize.value;
-  return filteredReviewList.value.slice(start, end);
+  return filteredReviewList.value;
 });
 
 // 格式化金额
@@ -522,6 +523,7 @@ const handleRegionChange = async (regionId) => {
           handleCodeBookChange(onlyCodeBook.codeBookId);
         } else {
           // 多个表册：未选择具体表册时，加载整个区域的所有内容
+          currentPage.value = 1; // 切换区域重置分页
           loadRegionReviewData(regionId);
         }
       } else {
@@ -563,6 +565,7 @@ const handleCodeBookChange = async (codeBookId) => {
     isRegionLevel.value = !!searchParams.region;
     reviewList.value = [];
     if (isRegionLevel.value) {
+      currentPage.value = 1; // 回到区域级重置分页
       loadRegionReviewData(searchParams.region);
     } else {
       resetReviewStats();
@@ -571,17 +574,22 @@ const handleCodeBookChange = async (codeBookId) => {
   }
 
   isRegionLevel.value = false;
+  currentPage.value = 1; // 切换表册重置分页
 
   loading.value = true;
   try {
-    let url = `/manual/charge/getPendingReviewListByCodeBook?codeBookId=${codeBookId}`;
+    let url = `/manual/charge/getPendingReviewListByCodeBook?codeBookId=${codeBookId}&page=${currentPage.value}&pageSize=${pageSize.value}`;
     if (searchKeyword.value.trim()) {
       url += `&keyword=${encodeURIComponent(searchKeyword.value.trim())}`;
     }
     const res = await service.get(url);
 
     if (res.code === 200) {
-      reviewList.value = (res.data || []).map(item => ({
+      const pageData = res.data || {};
+      const list = pageData.list || [];
+      total.value = pageData.total || 0;
+
+      reviewList.value = list.map(item => ({
         id: item.id,
         userId: item.userId,
         userName: item.userName,
@@ -601,12 +609,14 @@ const handleCodeBookChange = async (codeBookId) => {
     } else {
       ElMessage.error(res.msg || '获取审核列表失败');
       reviewList.value = [];
+      total.value = 0;
       fetchReviewStatistics(codeBookId);
     }
   } catch (error) {
     console.error('加载审核列表错误:', error);
     ElMessage.error(error.message || '加载审核列表失败');
     reviewList.value = [];
+    total.value = 0;
     fetchReviewStatistics(codeBookId);
   } finally {
     loading.value = false;
@@ -614,7 +624,7 @@ const handleCodeBookChange = async (codeBookId) => {
 };
 
 // 加载“整个区域”的审核数据（选了区域但未选表册时）
-// 通过遍历区域下所有二级表册，逐个调用现有接口并合并结果
+// 直接调用按区域分页接口（getPendingReviewList），单次请求即可，不再逐表册遍历
 const loadRegionReviewData = async (regionId) => {
   if (!regionId) return;
 
@@ -625,57 +635,51 @@ const loadRegionReviewData = async (regionId) => {
   reviewList.value = [];
   resetReviewStats();
 
-  const codeBooks = allCodeBookList.value || [];
-  if (codeBooks.length === 0) {
-    loading.value = false;
-    ElMessage.warning('该区域下暂无表册，无待审核数据');
-    return;
-  }
-
-  // 并行请求所有表册的待审核列表与统计信息
   try {
     const keyword = searchKeyword.value.trim();
-    const tasks = codeBooks.map(async (cb) => {
-      let url = `/manual/charge/getPendingReviewListByCodeBook?codeBookId=${cb.codeBookId}`;
-      if (keyword) {
-        url += `&keyword=${encodeURIComponent(keyword)}`;
+    let url = `/manual/charge/getPendingReviewList?regionId=${regionId}&page=${currentPage.value}&pageSize=${pageSize.value}`;
+    if (keyword) {
+      url += `&keyword=${encodeURIComponent(keyword)}`;
+    }
+    const res = await service.get(url);
+
+    if (res.code === 200) {
+      const pageData = res.data || {};
+      const list = pageData.list || [];
+      total.value = pageData.total || 0;
+
+      reviewList.value = list.map(item => ({
+        id: item.id,
+        userId: item.userId,
+        userName: item.userName,
+        address: item.userAddr,
+        meterCode: item.meterCode,
+        startReading: item.startReading || 0,
+        endReading: item.endReading || 0,
+        deltaWater: Math.floor(item.endReading || 0) - Math.floor(item.startReading || 0),
+        reportStatus: item.reportStatus || '正常',
+        createTime: item.createTime,
+        balance: item.balance || 0,
+        // 按区域查询时后端已带 codeBookId 字段，直接取用
+        codeBookId: item.codeBookId
+      }));
+
+      // 累加区域统计信息（按区域单次聚合接口，1 次请求）
+      await fetchRegionReviewStatistics(regionId);
+
+      if (reviewList.value.length === 0) {
+        ElMessage.info('该区域下暂无待审核数据');
       }
-      const res = await service.get(url);
-      let list = [];
-      if (res.code === 200) {
-        list = (res.data || []).map(item => ({
-          id: item.id,
-          userId: item.userId,
-          userName: item.userName,
-          address: item.userAddr,
-          meterCode: item.meterCode,
-          startReading: item.startReading || 0,
-          endReading: item.endReading || 0,
-          deltaWater: Math.floor(item.endReading || 0) - Math.floor(item.startReading || 0),
-          reportStatus: item.reportStatus || '正常',
-          createTime: item.createTime,
-          balance: item.balance || 0,
-          // 记录所属表册，便于后续定位
-          codeBookId: cb.codeBookId
-        }));
-      }
-      return list;
-    });
-
-    const results = await Promise.all(tasks);
-    const merged = results.flat();
-    reviewList.value = merged;
-
-    // 累加各表册统计信息
-    await fetchRegionReviewStatistics(regionId);
-
-    if (merged.length === 0) {
-      ElMessage.info('该区域下暂无待审核数据');
+    } else {
+      ElMessage.error(res.msg || '获取审核列表失败');
+      reviewList.value = [];
+      total.value = 0;
     }
   } catch (error) {
     console.error('加载区域审核数据错误:', error);
     ElMessage.error(error.message || '加载区域审核数据失败');
     reviewList.value = [];
+    total.value = 0;
   } finally {
     loading.value = false;
   }
@@ -708,41 +712,26 @@ const fetchReviewStatistics = async (codeBookId) => {
   }
 };
 
-// 获取区域级统计信息（累加区域内所有表册）
+// 获取区域级统计信息（按区域单次聚合，不再遍历表册）
 const fetchRegionReviewStatistics = async (regionId) => {
   if (!regionId) {
     resetReviewStats();
     return;
   }
 
-  const codeBooks = allCodeBookList.value || [];
-  if (codeBooks.length === 0) {
+  try {
+    const res = await service.get(`/manual/charge/getReviewStatisticsByRegion?regionId=${regionId}`);
+    if (res.code === 200 && res.data) {
+      reviewStats.totalCount = res.data.totalCount || 0;
+      reviewStats.readCount = res.data.readCount || 0;
+      reviewStats.reviewedCount = res.data.reviewedCount || 0;
+    } else {
+      resetReviewStats();
+    }
+  } catch (error) {
+    console.error('获取区域统计信息失败:', error);
     resetReviewStats();
-    return;
   }
-
-  let total = 0;
-  let read = 0;
-  let reviewed = 0;
-
-  await Promise.all(
-    codeBooks.map(async (cb) => {
-      try {
-        const res = await service.get(`/manual/charge/getReviewStatisticsByCodeBook?codeBookId=${cb.codeBookId}`);
-        if (res.code === 200 && res.data) {
-          total += res.data.totalCount || 0;
-          read += res.data.readCount || 0;
-          reviewed += res.data.reviewedCount || 0;
-        }
-      } catch (error) {
-        console.error(`获取表册 ${cb.codeBookId} 统计信息失败:`, error);
-      }
-    })
-  );
-
-  reviewStats.totalCount = total;
-  reviewStats.readCount = read;
-  reviewStats.reviewedCount = reviewed;
 };
 
 // 根据当前加载级别刷新统计信息（区域级或表册级）
@@ -975,6 +964,13 @@ const handleSizeChange = (val) => {
   pageSize.value = val;
   currentPage.value = 1;
 
+  // 表册级/区域级都走后端真分页，重新请求
+  if (searchParams.codeBook) {
+    handleCodeBookChange(searchParams.codeBook);
+  } else if (searchParams.region) {
+    loadRegionReviewData(searchParams.region);
+  }
+
   // 恢复选中状态
   nextTick(() => {
     restoreSelection();
@@ -984,6 +980,13 @@ const handleSizeChange = (val) => {
 // 当前页变化
 const handleCurrentChange = (val) => {
   currentPage.value = val;
+
+  // 表册级/区域级都走后端真分页，重新请求
+  if (searchParams.codeBook) {
+    handleCodeBookChange(searchParams.codeBook);
+  } else if (searchParams.region) {
+    loadRegionReviewData(searchParams.region);
+  }
 
   // 恢复选中状态
   nextTick(() => {
@@ -1110,9 +1113,15 @@ const handleCurrentPageReview = async () => {
       
       // 自动加载下一页
       setTimeout(() => {
-        if (paginatedReviewList.value.length > 0 && currentPage.value < Math.ceil(filteredReviewList.value.length / pageSize.value)) {
-          // 还有下一页，自动跳转
+        const totalPages = Math.ceil(total.value / pageSize.value);
+        if (paginatedReviewList.value.length > 0 && currentPage.value < totalPages) {
+          // 还有下一页，自动跳转（表册级/区域级都触发后端分页请求）
           currentPage.value++;
+          if (searchParams.codeBook) {
+            handleCodeBookChange(searchParams.codeBook);
+          } else if (searchParams.region) {
+            loadRegionReviewData(searchParams.region);
+          }
         } else {
           // 已经是最后一页或没有数据了
           ElMessage.info('已审核完所有数据');

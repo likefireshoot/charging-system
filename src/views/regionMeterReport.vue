@@ -136,7 +136,7 @@
       <!-- 表格区域：与登录安全页 .yuangong-table 对应 -->
       <div class="table-zone">
         <el-table
-          :data="paginatedReportList"
+          :data="filteredReportList"
           ref="multipleTableRef"
           row-key="id"
           border
@@ -232,11 +232,11 @@
       <div class="page-box">
         <div class="demo-pagination-block">
           <el-pagination
-            v-if="filteredReportList.length > 0"
+            v-if="total > 0"
             v-model:current-page="currentPage"
             v-model:page-size="pageSize"
             :page-sizes="[10, 25, 50, 100]"
-            :total="filteredReportList.length"
+            :total="total"
             layout="total, sizes, prev, pager, next, jumper"
             @size-change="handleSizeChange"
             @current-change="handleCurrentChange"
@@ -343,6 +343,8 @@ const waterCompareVal = ref(40) // 默认40吨
 // 分页相关
 const currentPage = ref(1);
 const pageSize = ref(25);
+// 该区域/表册下总条数（后端分页返回，用于分页控件）
+const total = ref(0);
 
 // 加载状态
 const loading = ref(false);
@@ -373,6 +375,7 @@ const printTime = computed(() => {
 });
 
 // 过滤后的报表列表
+// 后端已按 page/pageSize 返回本页数据，searchKeyword 仅在本页已加载数据内过滤
 const filteredReportList = computed(() => {
   if (!searchKeyword.value.trim()) {
     return reportList.value;
@@ -386,13 +389,6 @@ const filteredReportList = computed(() => {
       (item.address && item.address.toLowerCase().includes(keyword))
     );
   });
-});
-
-// 分页后的报表列表
-const paginatedReportList = computed(() => {
-  const start = (currentPage.value - 1) * pageSize.value;
-  const end = start + pageSize.value;
-  return filteredReportList.value.slice(start, end);
 });
 
 // 格式化金额
@@ -484,7 +480,7 @@ const loadRegionReport = async (regionId, codeBookId) => {
 
   loading.value = true;
   try {
-    let url = `/manual/charge/getRegionLatestReport?regionId=${regionId}`;
+    let url = `/manual/charge/getRegionLatestReport?regionId=${regionId}&page=${currentPage.value}&pageSize=${pageSize.value}`;
     if (codeBookId) {
       url += `&codeBookId=${codeBookId}`;
     }
@@ -496,7 +492,9 @@ const loadRegionReport = async (regionId, codeBookId) => {
     const res = await service.get(url);
 
     if (res.code === 200) {
-      const data = res.data || [];
+      const pageData = res.data || {};
+      const data = pageData.list || [];
+      total.value = pageData.total || 0;
       reportList.value = data.map(item => {
         const hasUnreviewed = item.hasUnreviewed === true || item.hasUnreviewed === 1;
         const reviewStatus = item.reviewStatus;
@@ -533,6 +531,7 @@ const loadRegionReport = async (regionId, codeBookId) => {
     } else {
       ElMessage.error(res.msg || '获取区域报表失败');
       reportList.value = [];
+      total.value = 0;
     }
   } catch (error) {
     if (error.response && error.response.status === 404) {
@@ -542,6 +541,7 @@ const loadRegionReport = async (regionId, codeBookId) => {
       ElMessage.error('加载区域报表失败，请稍后重试');
     }
     reportList.value = [];
+    total.value = 0;
   } finally {
     loading.value = false;
   }
@@ -702,11 +702,15 @@ const handleSearch = () => {
 const handleSizeChange = (val) => {
   pageSize.value = val;
   currentPage.value = 1;
+  // 重新请求后端分页
+  loadRegionReport(searchParams.region, searchParams.codeBook);
 };
 
 // 当前页变化
 const handleCurrentChange = (val) => {
   currentPage.value = val;
+  // 重新请求后端分页
+  loadRegionReport(searchParams.region, searchParams.codeBook);
 };
 
 // 清空
