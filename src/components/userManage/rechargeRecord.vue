@@ -54,6 +54,7 @@
               <el-option label="现金" value="现金"></el-option>
               <el-option label="微信支付" value="微信支付"></el-option>
               <el-option label="免费赠送" value="免费赠送"></el-option>
+              <el-option label="微信生活缴费" value="微信生活缴费"></el-option>
             </el-select>
           </div>
           <div class="search-input" style="width: 38%; margin-right: 10px">
@@ -169,7 +170,7 @@
           </div>
           <div class="summary-box">
             <div class="summary-item">
-              <span class="summary-label">微信总金额</span>
+              <span class="summary-label">微信支付总金额</span>
               <span class="summary-value">{{ rechargeSummary.weChatTotalAmount }}</span>
             </div>
             <div class="summary-item">
@@ -179,6 +180,10 @@
             <div class="summary-item">
               <span class="summary-label">现金总金额</span>
               <span class="summary-value">{{ rechargeSummary.cashTotalAmount }}</span>
+            </div>
+            <div class="summary-item">
+              <span class="summary-label">微信生活缴费总金额</span>
+              <span class="summary-value">{{ rechargeSummary.wxLifeFengKouTotalAmount }}</span>
             </div>
             <div class="summary-item">
               <span class="summary-label">全部总金额</span>
@@ -379,6 +384,7 @@ export default {
         // alipayTotalAmount: "0",
         freeGiftTotalAmount: "0",
         cashTotalAmount: "0",
+        wxLifeFengKouTotalAmount: "0",
         totalAmount: "0",
       },
       // ****** 锁
@@ -608,6 +614,7 @@ export default {
         // alipayTotalAmount: response.data.alipayTotalAmount ?? "0",
         freeGiftTotalAmount: response.data.freeGiftTotalAmount ?? "0",
         cashTotalAmount: response.data.cashTotalAmount ?? "0",
+        wxLifeFengKouTotalAmount: response.data.wxLifeFengKouTotalAmount ?? "0",
         totalAmount: response.data.totalAmount ?? "0",
       };
     },
@@ -659,6 +666,7 @@ export default {
         weChatTotalAmount: "0",
         freeGiftTotalAmount: "0",
         cashTotalAmount: "0",
+        wxLifeFengKouTotalAmount: "0",
         totalAmount: "0",
       };
       if (typeof isSearch != 'number' || isNaN(isSearch)) {
@@ -1212,7 +1220,7 @@ export default {
 .summary-box {
   width: 100%;
   display: grid;
-  grid-template-columns: repeat(4, minmax(180px, 1fr));
+  grid-template-columns: repeat(5, minmax(180px, 1fr));
   gap: 12px;
   margin-top: 12px;
   margin-bottom: 8px;

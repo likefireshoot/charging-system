@@ -8,6 +8,7 @@
           <el-option label="现金" value="现金" />
           <el-option label="微信支付" value="微信支付" />
           <el-option label="免费赠送" value="免费赠送" />
+          <el-option label="微信生活缴费" value="微信生活缴费" />
         </el-select>
       </div>
       <div class="search-input-item">
