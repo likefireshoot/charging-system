@@ -343,7 +343,7 @@ export default {
           },
           // [底部留白百分比, 顶部留白百分比]
           boundaryGap: false,
-          data: ["缴费总额", "现金总额", "微信总额", "支付宝总额"],
+          data: ["总额", "现金", "微信小程序", "微信生活缴费", "支付宝"],
         },
         yAxis: {
           type: "value",
@@ -696,7 +696,7 @@ export default {
         .then((response) => {
           if (response.code === 200) {
             let trade_data = response.data.currentDurationReport;
-            this.monthchart_option.series[0].data = [trade_data.totalMoney, trade_data.cashMoney, trade_data.weChatMoney, trade_data.alipayMoney];
+            this.monthchart_option.series[0].data = [trade_data.totalMoney, trade_data.cashMoney, trade_data.weChatMoney, trade_data.weChatLifeMoney, trade_data.alipayMoney];
             this.monthChart();
           } else {
             ElMessage.error(response.msg);
