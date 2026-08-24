@@ -749,13 +749,14 @@ const refreshCurrentStatistics = async () => {
 const handleSearch = () => {
   currentPage.value = 1;
   selectedRows.value = [];
-  selectAll.value = false;
 
   if (searchParams.codeBook) {
     handleCodeBookChange(searchParams.codeBook);
   } else if (searchParams.region) {
     // 只选了区域未选表册：按区域重新加载
     loadRegionReviewData(searchParams.region);
+  } else {
+    ElMessage.warning('请先选择区域或表册，再输入关键词进行搜索');
   }
 };
 
@@ -790,8 +791,7 @@ const handleClearAll = async () => {
     
     // 清空选中状态
     selectedRows.value = [];
-    selectAll.value = false;
-    
+
     // 重置分页
     currentPage.value = 1;
     pageSize.value = 20;
