@@ -86,7 +86,7 @@
 
         <div class="table-container">
           <el-table 
-            :data="userList"
+            :data="filteredUserList"
             stripe
             border
             @row-click="handleRowClick"
