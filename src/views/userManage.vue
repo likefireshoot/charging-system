@@ -983,7 +983,8 @@ export default {
             { label: "旧信驰KF01", value: "旧信驰KF01" },
             { label: "4G信驰", value: "4G信驰" },
             { label: "集万讯", value: "集万讯" },
-            { label: "千宝通", value: "千宝通" }
+            { label: "千宝通", value: "千宝通" },
+            { label: "数控表", value: "数控表" }
           ]
         },
         { key: "meterType", label: "水表类型", type: "select", optionsKey: "shuibiao_list", defaultVisible: false },
