@@ -25,16 +25,23 @@ const inputValue = propValue ? propValue : 'value';
 
 
 
-const selectName = ref(select);
+const selectName = ref(
+  options && select != null
+    ? (options.find((o) => o.id === select)?.name ?? select)
+    : select
+);
 
-watch(() => select, (a, b) => {
-  selectName.value = a;
+watch(() => select, (a) => {
+  selectName.value =
+    options && a != null
+      ? (options.find((o) => o.id === a)?.name ?? a)
+      : a;
 })
 
 function selectItem(item) {
   slideToggle(false);
   selectName.value = item.name;
-  emit('update:select', item.name);
+  emit('update:select', item.id);
   emit('selectItem', item);
 
 }
