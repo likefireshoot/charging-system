@@ -96,8 +96,8 @@
             <el-table-column label="选择" width="65" align="center">
               <template #default="{ row }">
                 <el-radio
-                  v-model="selectedUserId"
-                  :label="row.userId"
+                  v-model="selectedRowKey"
+                  :label="getRowKey(row)"
                   @change="handleRadioChange(row)"
                 >
                   &nbsp;
@@ -365,7 +365,7 @@ const filteredUserList = computed(() => {
 const selectedUsers = ref([]);
 
 // 选中的用户ID（单选）
-const selectedUserId = ref(null);
+const selectedRowKey = ref(null);
 
 // 选中的用户详情
 const selectedUserDetail = ref(null);
@@ -614,7 +614,7 @@ const handleCodeBookChange = async (codeBookId) => {
       // 自动选中第一个用户
       if (userList.value.length > 0) {
         const firstUser = userList.value[0];
-        selectedUserId.value = firstUser.userId;
+        selectedRowKey.value = getRowKey(firstUser);
         loadUserDetail(firstUser);
       }
     } else {
@@ -669,7 +669,7 @@ const fetchUserListByPage = async () => {
       // 切页后默认选中本页第一个用户
       if (userList.value.length > 0) {
         const firstUser = userList.value[0];
-        selectedUserId.value = firstUser.userId;
+        selectedRowKey.value = getRowKey(firstUser);
         loadUserDetail(firstUser);
       }
     } else {
@@ -694,23 +694,28 @@ const handleUserSearch = () => {
 
   // 清空选中状态，因为过滤后可能不包含之前选中的用户
   if (filteredUserList.value.length === 0) {
-    selectedUserId.value = null;
+    selectedRowKey.value = null;
     closeDetailPanel();
   } else {
     // 如果搜索结果不为空，检查当前选中的用户是否还在结果中
-    const currentSelected = filteredUserList.value.find(user => user.userId === selectedUserId.value);
+    const currentSelected = filteredUserList.value.find(user => getRowKey(user) === selectedRowKey.value);
 
-    if (!currentSelected && selectedUserId.value) {
+    if (!currentSelected && selectedRowKey.value) {
       // 选中的用户不在搜索结果中，清空选中状态
-      selectedUserId.value = null;
+      selectedRowKey.value = null;
       closeDetailPanel();
     }
   }
 };
 
+// 获取行的唯一标识（同一户号多表时用 meterCode 区分）
+const getRowKey = (row) => {
+  return row.meterCode || `${row.userId}_${row.meterCode}`;
+};
+
 // 行点击事件
 const handleRowClick = (row) => {
-  selectedUserId.value = row.userId;
+  selectedRowKey.value = getRowKey(row);
   loadUserDetail(row);
 };
 
@@ -723,7 +728,7 @@ const handleRadioChange = (row) => {
 const loadUserDetail = (user) => {
   // 使用深拷贝确保响应式
   selectedUserDetail.value = JSON.parse(JSON.stringify(user));
-  loadReportHistory(user.userId);
+  loadReportHistory(user);
 
   // 详情加载后，若处于正常状态则自动聚焦本月读数输入框
   if (selectedUserDetail.value.reportStatus === '正常') {
@@ -748,15 +753,15 @@ const handleCurrentChange = (val) => {
   fetchUserListByPage();
 };
 
-// 加载用户抄表记录
-const loadReportHistory = async (userId) => {
-  if (!userId) {
+// 加载用户抄表记录（按 meterCode 查询，同一户号多表时只显示所选表的记录）
+const loadReportHistory = async (user) => {
+  if (!user || !user.meterCode) {
     reportHistory.value = [];
     return;
   }
 
   try {
-    const res = await service.get(`/manual/charge/getUserReportHistory?userId=${userId}`);
+    const res = await service.get(`/manual/charge/getUserReportHistory?userId=${user.userId}&meterCode=${user.meterCode}`);
 
     if (res.code === 200) {
       reportHistory.value = res.data || [];
@@ -789,7 +794,7 @@ const handleClearAll = async () => {
     );
     
     // 清空选中状态
-    selectedUserId.value = null;
+    selectedRowKey.value = null;
     selectedUserDetail.value = null;
     reportHistory.value = [];
     
@@ -922,11 +927,11 @@ const submitSingleUser = async () => {
 // 选中下一个用户（后端分页场景：先在本页 userList 内找下一个；
 // 若已是本页最后一个，则请求下一页并选中其第一个用户）
 const selectNextUser = () => {
-  if (!selectedUserId.value || userList.value.length === 0) {
+  if (!selectedRowKey.value || userList.value.length === 0) {
     return;
   }
 
-  const currentIndex = userList.value.findIndex(user => user.userId === selectedUserId.value);
+  const currentIndex = userList.value.findIndex(user => getRowKey(user) === selectedRowKey.value);
 
   if (currentIndex === -1) {
     return;
@@ -935,7 +940,7 @@ const selectNextUser = () => {
   // 本页还有下一个用户，直接选中
   if (currentIndex + 1 < userList.value.length) {
     const nextUser = userList.value[currentIndex + 1];
-    selectedUserId.value = nextUser.userId;
+    selectedRowKey.value = getRowKey(nextUser);
     loadUserDetail(nextUser);
     return;
   }
@@ -948,13 +953,13 @@ const selectNextUser = () => {
     fetchUserListByPage().then(() => {
       if (userList.value.length > 0) {
         const firstUser = userList.value[0];
-        selectedUserId.value = firstUser.userId;
+        selectedRowKey.value = getRowKey(firstUser);
         loadUserDetail(firstUser);
       }
     });
   } else {
     // 已是最后一页最后一个用户
-    selectedUserId.value = null;
+    selectedRowKey.value = null;
     closeDetailPanel();
     ElMessage.info('已是最后一个用户');
   }
