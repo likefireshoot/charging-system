@@ -150,24 +150,8 @@
               <span>{{ row.userId % 10000000 }}</span>
             </template>
           </el-table-column>
-          <el-table-column prop="userName" label="用户姓名" :width="userNameWidth" align="center" />
-          <el-table-column prop="address" label="用户地址" :width="addressWidth" align="center" show-overflow-tooltip />
-
-          <el-table-column prop="dataType" label="数据类型" :width="dataTypeWidth" align="center">
-            <template #default="{ row }">
-              <span
-                class="status-badge"
-                :class="{
-                  'badge-warning': row.dataType === '未审核',
-                  'badge-success': row.dataType === '已审核',
-                  'badge-info': row.dataType === '无数据' || !row.dataType
-                }"
-              >
-                {{ row.dataType || '-' }}
-              </span>
-            </template>
-          </el-table-column>
-
+          <el-table-column prop="userName" label="用户名" :width="userNameWidth" align="center" />
+          <el-table-column prop="address" label="地址" :width="addressWidth" align="center" />
           <el-table-column prop="reportStatus" label="抄表状态" :width="reportStatusWidth" align="center">
             <template #default="{ row }">
               <span
@@ -182,35 +166,51 @@
               </span>
             </template>
           </el-table-column>
+          <el-table-column prop="dataType" label="处理状态" :width="dataTypeWidth" align="center">
+            <template #default="{ row }">
+              <span
+                class="status-badge"
+                :class="{
+                  'badge-warning': row.dataType === '未审核',
+                  'badge-success': row.dataType === '已审核',
+                  'badge-info': row.dataType === '无数据' || !row.dataType
+                }"
+              >
+                {{ row.dataType || '-' }}
+              </span>
+            </template>
+          </el-table-column>
 
-          <el-table-column prop="startReading" label="起码(吨)" :width="startReadingWidth" align="center">
+          <el-table-column prop="startReading" label="起码" :width="startReadingWidth" align="center">
             <template #default="{ row }">
               <span>{{ showMeterReadings(row) ? Math.floor(row.startReading || 0) : '-' }}</span>
             </template>
           </el-table-column>
 
-          <el-table-column prop="endReading" label="止码(吨)" :width="endReadingWidth" align="center">
+          <el-table-column prop="endReading" label="止码" :width="endReadingWidth" align="center">
             <template #default="{ row }">
               <span>{{ showMeterReadings(row) ? Math.floor(row.endReading || 0) : '-' }}</span>
             </template>
           </el-table-column>
 
-          <el-table-column prop="deltaWater" label="本期用量(吨)" :width="deltaWaterWidth" align="center">
+          <el-table-column prop="deltaWater" label="本月用量" :width="deltaWaterWidth" align="center">
             <template #default="{ row }">
               <span>{{ showMeterReadings(row) ? (row.deltaWater || 0) : '-' }}</span>
             </template>
           </el-table-column>
-
-          <!-- 本月用水量相关 -->
-          <el-table-column prop="lastDeltaWater" label="较上月增减量" :width="lastDeltaWaterWidth" align="center">
-            <template #default="{ row }">
-              <span>{{ showMeterReadings(row) ? (row.lastDeltaWater || 0) : '-' }}</span>
-            </template>
-          </el-table-column>
-
-          <el-table-column prop="feeThisTime" label="本次扣费(元)" :width="feeThisTimeWidth" align="center">
+          <el-table-column prop="feeThisTime" label="本次扣费" :width="feeThisTimeWidth" align="center">
             <template #default="{ row }">
               {{ row.createTime ? formatMoney(row.feeThisTime) : '-' }}
+            </template>
+          </el-table-column>
+          <el-table-column prop="lastMonthDeltaWater" label="上月用量" :width="lastMonthDeltaWaterWidth" align="center">
+            <template #default="{ row }">
+              <span>{{ showMeterReadings(row) ? (row.lastMonthDeltaWater || 0) : '-' }}</span>
+            </template>
+          </el-table-column>
+          <el-table-column prop="lastDeltaWater" label="环比增减量" :width="lastDeltaWaterWidth" align="center">
+            <template #default="{ row }">
+              <span>{{ showMeterReadings(row) ? (row.lastDeltaWater || 0) : '-' }}</span>
             </template>
           </el-table-column>
 
@@ -419,16 +419,17 @@ const maskUserId = (userId) => {
 
 // ============== 表格列宽（参考登录安全页做法，按容器百分比分配） ==============
 const columnPercentages = {
-  userId: 9,
+  userId: 7,
   userName: 8,
-  address: 11,  // 本月用水量相关（原14改为11）
-  dataType: 9,
-  reportStatus: 9,
+  address: 10,  // 本月用水量相关（原14改为11）
+  dataType: 8,
+  reportStatus: 8,
   startReading: 8,
   endReading: 8,
-  deltaWater: 9,
-  lastDeltaWater: 10,  // 本月用水量相关
-  feeThisTime: 9,
+  deltaWater: 8,
+  lastMonthDeltaWater: 8,
+  lastDeltaWater: 9,  // 本月用水量相关
+  feeThisTime: 8,
   createTime: 10  // 本月用水量相关（原15改为10）
 };
 
@@ -442,6 +443,7 @@ const reportStatusWidth = ref(0);
 const startReadingWidth = ref(0);
 const endReadingWidth = ref(0);
 const deltaWaterWidth = ref(0);
+const lastMonthDeltaWaterWidth = ref(0);
 const lastDeltaWaterWidth = ref(0); // 本月用水量相关
 const feeThisTimeWidth = ref(0);
 const createTimeWidth = ref(0);
@@ -457,7 +459,8 @@ const calculateColumnWidths = () => {
   startReadingWidth.value = (columnPercentages.startReading / 100) * w;
   endReadingWidth.value = (columnPercentages.endReading / 100) * w;
   deltaWaterWidth.value = (columnPercentages.deltaWater / 100) * w;
-  lastDeltaWaterWidth.value = (columnPercentages.lastDeltaWater / 100) * w; // 本月用水量相关
+  lastMonthDeltaWaterWidth.value = (columnPercentages.lastMonthDeltaWater / 100) * w;
+  lastDeltaWaterWidth.value = (columnPercentages.lastDeltaWater / 100) * w;
   feeThisTimeWidth.value = (columnPercentages.feeThisTime / 100) * w;
   createTimeWidth.value = (columnPercentages.createTime / 100) * w;
 };
@@ -508,6 +511,7 @@ const loadRegionReport = async (regionId, codeBookId) => {
 
         const readingCount = item.readingCount || 0;
         const deltaWater = item.deltaWater || 0;
+        const lastMonthDeltaWater = item.lastMonthDeltaWater || 0;
         const lastDeltaWater = item.lastDeltaWater || 0;  // 本月用水量相关
         const reportStatus = item.reportStatus || '';
 
@@ -523,6 +527,7 @@ const loadRegionReport = async (regionId, codeBookId) => {
           startReading: readingCount - deltaWater,
           endReading: readingCount,
           deltaWater: reportStatus === '正常' ? deltaWater : 0,
+          lastMonthDeltaWater: reportStatus === '正常' ? lastMonthDeltaWater : 0,
           lastDeltaWater: reportStatus === '正常' ? lastDeltaWater : 0, // 本月用水量相关
           createTime: item.createTime,
           feeThisTime: item.feeThisTime || 0
