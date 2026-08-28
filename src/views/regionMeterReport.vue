@@ -2,14 +2,10 @@
   <div class="region-meter-report">
     <!-- 顶部搜索栏 -->
     <div class="search-header">
-<!--      <div class="page-title">-->
-<!--        <el-icon><Document /></el-icon>-->
-<!--      </div>-->
 
       <div class="search-form">
         <div class="search-input">
           <span>水厂</span>
-<!--          <span class="company-name">{{ currentCompanyName }}</span>-->
           <el-input v-model="currentCompanyName" disabled />
         </div>
 
@@ -59,9 +55,6 @@
             clearable
             @input="handleSearch"
           >
-<!--            <template #prefix>-->
-<!--              <el-icon><Search /></el-icon>-->
-<!--            </template>-->
           </el-input>
         </div>
 
@@ -95,35 +88,20 @@
           <img src="@/assets/yonghu/icon16.png" alt="" />
           <span style="margin-left:10%;">搜索</span>
         </el-button>
-
-<!--        <el-button @click="handleClearAll" class="clear-btn">-->
-<!--          <img src="@/assets/yuangong/icon4.png" alt="" />-->
-<!--          <span style="margin-left:10%; color: #5a5a5a">清空</span>-->
-<!--        </el-button>-->
         </div>
-
-<!--        <el-button type="success" @click="handleExportExcel" class="header-btn">-->
-<!--          <el-icon><Document /></el-icon>-->
-<!--          <span>导出Excel</span>-->
-<!--        </el-button>-->
-
-<!--        <el-button type="primary" @click="handleExportPdf" class="header-btn">-->
-<!--          <el-icon><Document /></el-icon>-->
-<!--          <span>导出PDF</span>-->
-<!--        </el-button>-->
 
     </div>
 
-    <!-- 主体卡片：完全照搬登录安全页 .yuangong-info -->
+    <!-- 主体卡片 -->
     <div class="info-card">
-      <!-- 工具行：与登录安全页 .command-box 对应 -->
+      <!-- 工具行 -->
       <div class="command-box">
-        <div @click="handleExportExcel" class="command-btn">
+        <div @click="exportReport('excel')" class="command-btn">
           <img src="@/assets/yonghu/icon1.3.png" alt="" />
           <span>导出Excel</span>
         </div>
 
-        <div @click="handleExportPdf" class="command-btn">
+        <div @click="exportReport('pdf')" class="command-btn">
           <img src="@/assets/yonghu/icon1.3.png" alt="" />
           <span>导出PDF</span>
         </div>
@@ -133,7 +111,7 @@
         </div>
       </div>
 
-      <!-- 表格区域：与登录安全页 .yuangong-table 对应 -->
+      <!-- 表格区域 -->
       <div class="table-zone">
         <el-table
           :data="filteredReportList"
@@ -150,24 +128,8 @@
               <span>{{ row.userId % 10000000 }}</span>
             </template>
           </el-table-column>
-          <el-table-column prop="userName" label="用户姓名" :width="userNameWidth" align="center" />
-          <el-table-column prop="address" label="用户地址" :width="addressWidth" align="center" show-overflow-tooltip />
-
-          <el-table-column prop="dataType" label="数据类型" :width="dataTypeWidth" align="center">
-            <template #default="{ row }">
-              <span
-                class="status-badge"
-                :class="{
-                  'badge-warning': row.dataType === '未审核',
-                  'badge-success': row.dataType === '已审核',
-                  'badge-info': row.dataType === '无数据' || !row.dataType
-                }"
-              >
-                {{ row.dataType || '-' }}
-              </span>
-            </template>
-          </el-table-column>
-
+          <el-table-column prop="userName" label="用户名" :width="userNameWidth" align="center" />
+          <el-table-column prop="address" label="地址" :width="addressWidth" align="center" />
           <el-table-column prop="reportStatus" label="抄表状态" :width="reportStatusWidth" align="center">
             <template #default="{ row }">
               <span
@@ -182,35 +144,51 @@
               </span>
             </template>
           </el-table-column>
+          <el-table-column prop="dataType" label="处理状态" :width="dataTypeWidth" align="center">
+            <template #default="{ row }">
+              <span
+                class="status-badge"
+                :class="{
+                  'badge-warning': row.dataType === '未审核',
+                  'badge-success': row.dataType === '已审核',
+                  'badge-info': row.dataType === '无数据' || !row.dataType
+                }"
+              >
+                {{ row.dataType || '-' }}
+              </span>
+            </template>
+          </el-table-column>
 
-          <el-table-column prop="startReading" label="起码(吨)" :width="startReadingWidth" align="center">
+          <el-table-column prop="startReading" label="起码" :width="startReadingWidth" align="center">
             <template #default="{ row }">
               <span>{{ showMeterReadings(row) ? Math.floor(row.startReading || 0) : '-' }}</span>
             </template>
           </el-table-column>
 
-          <el-table-column prop="endReading" label="止码(吨)" :width="endReadingWidth" align="center">
+          <el-table-column prop="endReading" label="止码" :width="endReadingWidth" align="center">
             <template #default="{ row }">
               <span>{{ showMeterReadings(row) ? Math.floor(row.endReading || 0) : '-' }}</span>
             </template>
           </el-table-column>
 
-          <el-table-column prop="deltaWater" label="本期用量(吨)" :width="deltaWaterWidth" align="center">
+          <el-table-column prop="deltaWater" label="本月用量" :width="deltaWaterWidth" align="center">
             <template #default="{ row }">
               <span>{{ showMeterReadings(row) ? (row.deltaWater || 0) : '-' }}</span>
             </template>
           </el-table-column>
-
-          <!-- 本月用水量相关 -->
-          <el-table-column prop="lastDeltaWater" label="较上月增减量" :width="lastDeltaWaterWidth" align="center">
-            <template #default="{ row }">
-              <span>{{ showMeterReadings(row) ? (row.lastDeltaWater || 0) : '-' }}</span>
-            </template>
-          </el-table-column>
-
-          <el-table-column prop="feeThisTime" label="本次扣费(元)" :width="feeThisTimeWidth" align="center">
+          <el-table-column prop="feeThisTime" label="本次扣费" :width="feeThisTimeWidth" align="center">
             <template #default="{ row }">
               {{ row.createTime ? formatMoney(row.feeThisTime) : '-' }}
+            </template>
+          </el-table-column>
+          <el-table-column prop="lastMonthDeltaWater" label="上月用量" :width="lastMonthDeltaWaterWidth" align="center">
+            <template #default="{ row }">
+              <span>{{ showMeterReadings(row) ? (row.lastMonthDeltaWater || 0) : '-' }}</span>
+            </template>
+          </el-table-column>
+          <el-table-column prop="lastDeltaWater" label="环比增减量" :width="lastDeltaWaterWidth" align="center">
+            <template #default="{ row }">
+              <span>{{ showMeterReadings(row) ? (row.lastDeltaWater || 0) : '-' }}</span>
             </template>
           </el-table-column>
 
@@ -221,14 +199,9 @@
           </el-table-column>
 
         </el-table>
-
-        <!-- 空状态：与登录安全页对空数据时的呈现保持一致 -->
-<!--        <div v-if="!loading && filteredReportList.length === 0" class="empty-tip">-->
-<!--          <span>暂无数据</span>-->
-<!--        </div>-->
       </div>
 
-      <!-- 分页：与登录安全页 .page-box 对应 -->
+      <!-- 分页 -->
       <div class="page-box">
         <div class="demo-pagination-block">
           <el-pagination
@@ -245,67 +218,12 @@
       </div>
     </div>
   </div>
-
-  <!-- PDF 导出专用区域：屏幕外渲染，供 html2pdf 捕获 -->
-  <div class="print-wrapper">
-    <div class="print-area" ref="printAreaRef">
-    <div class="print-header">
-      <h1>区域抄表报表</h1>
-      <div class="print-info">
-        <span>水厂：{{ currentCompanyName || '-' }}</span>
-        <span>区域：{{ printRegionName }}</span>
-        <span>表册：{{ printCodeBookName }}</span>
-        <span>生成时间：{{ printTime }}</span>
-      </div>
-    </div>
-
-    <table class="print-table">
-      <thead>
-        <tr>
-          <th style="width: 10%">用户号</th>
-          <th style="width: 9%">用户姓名</th>
-          <th style="width: 16%">用户地址</th>
-          <th style="width: 9%">数据类型</th>
-          <th style="width: 9%">抄表状态</th>
-          <th style="width: 8%">起码(吨)</th>
-          <th style="width: 8%">止码(吨)</th>
-          <th style="width: 9%">本期用量(吨)</th>
-          <th style="width: 10%">本次扣费(元)</th>
-          <th style="width: 22%">抄表日期</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="row in printData.list" :key="row.userId">
-          <td>{{ row.userId % 10000000 }}</td>
-          <td>{{ row.userName }}</td>
-          <td>{{ row.address }}</td>
-          <td>{{ row.dataType }}</td>
-          <td>{{ row.reportStatus || '-' }}</td>
-          <td>{{ showMeterReadings(row) ? Math.floor(row.startReading || 0) : '-' }}</td>
-          <td>{{ showMeterReadings(row) ? Math.floor(row.endReading || 0) : '-' }}</td>
-          <td>{{ showMeterReadings(row) ? (row.deltaWater || 0) : '-' }}</td>
-          <!-- 本月用水量相关 -->
-          <td>{{ showMeterReadings(row) ? (row.lastDeltaWater || 0) : '-' }}</td>
-          <td>{{ row.createTime ? formatMoney(row.feeThisTime) : '-' }}</td>
-          <td>{{ formatDate(row.createTime) }}</td>
-        </tr>
-      </tbody>
-    </table>
-
-    <div class="print-footer">
-      共 {{ printData.list.length }} 条记录
-    </div>
-    </div>
-  </div>
 </template>
 
 <script setup>
 import { ref, reactive, computed, onMounted, onBeforeUnmount, nextTick } from 'vue';
 import { ElMessage } from 'element-plus';
-import { Document, Search, Delete } from '@element-plus/icons-vue';
 import service from '@/api/request';
-import html2pdf from 'html2pdf.js';
-import * as XLSX from 'xlsx';
 
 // 搜索参数
 const searchParams = reactive({
@@ -349,29 +267,16 @@ const total = ref(0);
 // 加载状态
 const loading = ref(false);
 
-// 打印区域 ref
-const printAreaRef = ref(null);
-
-// 打印数据
-const printData = reactive({
-  list: []
-});
-
-// 打印区域名称
-const printRegionName = computed(() => {
+// 区域名称
+const regionName = computed(() => {
   const region = regionList.value.find(item => item.regionId === searchParams.region);
-  return region?.regionName || '-';
+  return region?.regionName || '';
 });
 
-// 打印表册名称
-const printCodeBookName = computed(() => {
+// 表册名称
+const codeBookName = computed(() => {
   const codeBook = allCodeBookList.value.find(item => item.codeBookId === searchParams.codeBook);
-  return codeBook?.codeBookName || '-';
-});
-
-// 打印时间
-const printTime = computed(() => {
-  return formatDate(new Date());
+  return codeBook?.codeBookName || '';
 });
 
 // 过滤后的报表列表
@@ -410,26 +315,20 @@ const formatDate = (dateStr) => {
   return `${year}-${month}-${day} ${hour}:${minute}`;
 };
 
-// 用户号脱敏：不展示前三位
-const maskUserId = (userId) => {
-  if (!userId) return '-';
-  const str = userId.toString();
-  return str.length > 3 ? str.slice(3) : str;
-};
-
 // ============== 表格列宽（参考登录安全页做法，按容器百分比分配） ==============
 const columnPercentages = {
-  userId: 9,
+  userId: 7,
   userName: 8,
-  address: 11,  // 本月用水量相关（原14改为11）
-  dataType: 9,
-  reportStatus: 9,
+  address: 10,  // 本月用水量相关
+  dataType: 8,
+  reportStatus: 8,
   startReading: 8,
   endReading: 8,
-  deltaWater: 9,
-  lastDeltaWater: 10,  // 本月用水量相关
-  feeThisTime: 9,
-  createTime: 10  // 本月用水量相关（原15改为10）
+  deltaWater: 8,
+  lastMonthDeltaWater: 8,
+  lastDeltaWater: 9,  // 本月用水量相关
+  feeThisTime: 8,
+  createTime: 10
 };
 
 const tableContainer = ref(null);
@@ -442,6 +341,7 @@ const reportStatusWidth = ref(0);
 const startReadingWidth = ref(0);
 const endReadingWidth = ref(0);
 const deltaWaterWidth = ref(0);
+const lastMonthDeltaWaterWidth = ref(0);
 const lastDeltaWaterWidth = ref(0); // 本月用水量相关
 const feeThisTimeWidth = ref(0);
 const createTimeWidth = ref(0);
@@ -457,7 +357,8 @@ const calculateColumnWidths = () => {
   startReadingWidth.value = (columnPercentages.startReading / 100) * w;
   endReadingWidth.value = (columnPercentages.endReading / 100) * w;
   deltaWaterWidth.value = (columnPercentages.deltaWater / 100) * w;
-  lastDeltaWaterWidth.value = (columnPercentages.lastDeltaWater / 100) * w; // 本月用水量相关
+  lastMonthDeltaWaterWidth.value = (columnPercentages.lastMonthDeltaWater / 100) * w;
+  lastDeltaWaterWidth.value = (columnPercentages.lastDeltaWater / 100) * w;
   feeThisTimeWidth.value = (columnPercentages.feeThisTime / 100) * w;
   createTimeWidth.value = (columnPercentages.createTime / 100) * w;
 };
@@ -465,7 +366,7 @@ const calculateColumnWidths = () => {
 let resizeObserver = null;
 
 // 是否显示起码、止码、本期用量
-// 已审核数据始终显示；未审核数据仅在抄表状态为“正常”时显示
+// 已审核数据始终显示；未审核数据仅在抄表状态为"正常"时显示
 const showMeterReadings = (row) => {
   if (row.dataType === '已审核') return true;
   return row.reportStatus === '正常';
@@ -508,6 +409,7 @@ const loadRegionReport = async (regionId, codeBookId) => {
 
         const readingCount = item.readingCount || 0;
         const deltaWater = item.deltaWater || 0;
+        const lastMonthDeltaWater = item.lastMonthDeltaWater || 0;
         const lastDeltaWater = item.lastDeltaWater || 0;  // 本月用水量相关
         const reportStatus = item.reportStatus || '';
 
@@ -523,6 +425,7 @@ const loadRegionReport = async (regionId, codeBookId) => {
           startReading: readingCount - deltaWater,
           endReading: readingCount,
           deltaWater: reportStatus === '正常' ? deltaWater : 0,
+          lastMonthDeltaWater: reportStatus === '正常' ? lastMonthDeltaWater : 0,
           lastDeltaWater: reportStatus === '正常' ? lastDeltaWater : 0, // 本月用水量相关
           createTime: item.createTime,
           feeThisTime: item.feeThisTime || 0
@@ -713,83 +616,70 @@ const handleCurrentChange = (val) => {
   loadRegionReport(searchParams.region, searchParams.codeBook);
 };
 
-// 清空
-const handleClearAll = () => {
-  searchKeyword.value = '';
-  searchParams.region = '';
-  searchParams.codeBook = '';
-  reportList.value = [];
-  allCodeBookList.value = [];
-  codeBookList.value = [];
-  currentPage.value = 1;
-  pageSize.value = 25;
-};
-
-// 导出 Excel：按当前搜索条件导出全部数据
-const handleExportExcel = () => {
-  if (filteredReportList.value.length === 0) {
-    ElMessage.warning('暂无数据可导出');
+// 导出：请求后端生成文件并下载
+// type: 'excel' | 'pdf'
+const exportReport = async (type) => {
+  if (!searchParams.region) {
+    ElMessage.warning('请先选择区域');
     return;
   }
 
-  const exportData = filteredReportList.value.map((row, index) => ({
-    '序号': index + 1,
-    '用户号': row.userId ? '\t' + (row.userId % 10000000) : '',
-    '用户姓名': row.userName,
-    '用户地址': row.address,
-    '数据类型': row.dataType,
-    '抄表状态': row.reportStatus || '-',
-    '起码(吨)': showMeterReadings(row) ? Math.floor(row.startReading || 0) : '-',
-    '止码(吨)': showMeterReadings(row) ? Math.floor(row.endReading || 0) : '-',
-    '本期用量(吨)': showMeterReadings(row) ? (row.deltaWater || 0) : '-',
-    '较上月增减量' : showMeterReadings(row) ? (row.lastDeltaWater || 0) : '-', // 本月用水量相关
-    '本次扣费(元)': row.createTime ? row.feeThisTime : '-',
-    '抄表日期': formatDate(row.createTime)
-  }));
+  const path = type === 'excel'
+    ? '/manual/charge/exportRegionReportExcel'
+    : '/manual/charge/exportRegionReportPdf';
 
-  const worksheet = XLSX.utils.json_to_sheet(exportData);
-  const workbook = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(workbook, worksheet, '区域抄表报表');
-
-  const fileName = `区域抄表报表_${printRegionName.value || '-'}_${printCodeBookName.value || '-'}_${formatDate(new Date()).replace(/[:\s]/g, '-')}.xlsx`;
-  XLSX.writeFile(workbook, fileName);
-};
-
-
-
-// 导出 PDF：直接下载 A4 横向 PDF
-const handleExportPdf = async () => {
-  if (filteredReportList.value.length === 0) {
-    ElMessage.warning('暂无数据可导出');
-    return;
-  }
-
-  // 按当前搜索条件导出全部数据（不分页）
-  printData.list = filteredReportList.value;
-
-  await nextTick();
-
-  const element = printAreaRef.value;
-  if (!element) return;
+  // 本工程 request 拦截器会覆盖 GET 的 params，因此筛选参数拼进 URL 字符串
+  const query = new URLSearchParams({
+    regionId: searchParams.region,
+    keyword: searchKeyword.value || '',
+    waterCompareOpt: waterCompareOpt.value || '',
+    waterCompareVal: waterCompareVal.value ?? 40,
+    regionName: regionName.value,
+    codeBookName: codeBookName.value,
+    companyName: currentCompanyName.value || ''  // 仅 PDF 用到，可始终传
+  });
 
   loading.value = true;
-  const fileName = `区域抄表报表_${printRegionName.value || '-'}_${printCodeBookName.value || '-'}_${formatDate(new Date()).replace(/[:\s]/g, '-')}.pdf`;
-
   try {
-    await html2pdf()
-      .set({
-        margin: 10,
-        filename: fileName,
-        image: { type: 'jpeg', quality: 0.95 },
-        html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff', logging: false },
-        jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' },
-        pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
-      })
-      .from(element)
-      .save();
+    const resp = await service.get(`${path}?${query}`, { responseType: 'blob', skipAutoMsg: true });
+    const headers = resp.headers || {};
+
+    // 空数据处理：后端返回 X-Empty-Data: true，不保存文件
+    if (String(headers['x-empty-data']).toLowerCase() === 'true') {
+      ElMessage.warning('暂无数据可导出');
+      return;
+    }
+
+    const blob = resp.data;
+
+    // 文件名优先从响应头 filename*=UTF-8'' 解析（已 URL 编码，需 decodeURIComponent）
+    let fileName = '';
+    const cd = headers['content-disposition'] || '';
+    const m = cd.match(/filename\*=UTF-8''(.+)/i);
+    if (m) {
+      fileName = decodeURIComponent(m[1]);
+    } else {
+      fileName = `区域抄表报表_${regionName.value}_${codeBookName.value}.${type}`;
+    }
+
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = fileName;
+    link.click();
+    URL.revokeObjectURL(link.href);
   } catch (error) {
-    console.error('PDF导出失败:', error);
-    ElMessage.error('PDF导出失败');
+    // 后端出错返回 JSON，解析出错误信息给用户
+    const data = error.response?.data || error.data;
+    if (data && data instanceof Blob && data.type.includes('json')) {
+      try {
+        const json = JSON.parse(await data.text());
+        ElMessage.error(json.msg || '导出失败');
+        return;
+      } catch (e) {
+        // fallthrough
+      }
+    }
+    ElMessage.error('导出失败，请稍后重试');
   } finally {
     loading.value = false;
   }
@@ -822,8 +712,6 @@ onBeforeUnmount(() => {
 </script>
 
 <style scoped lang="scss">
-/* 完全照搬登录安全页 loginLog.vue 的样式结构 */
-
 :deep(.el-table__body tr:nth-child(odd)) {
   background-color: #edf8f2;
 }
@@ -906,7 +794,7 @@ onBeforeUnmount(() => {
   border-color: #e9e9e9;
 }
 
-/* 最外层容器：与登录安全页 .yuangong-container 对齐 */
+/* 最外层容器 */
 .region-meter-report {
   display: flex;
   flex-direction: column;
@@ -931,112 +819,18 @@ onBeforeUnmount(() => {
   border: 1px solid #e9e9e9;
   border-radius: 5px;
   background-color: #fff;
-
-  .page-title {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    flex-shrink: 0;
-
-    .el-icon {
-      color: #46b97e;
-      font-size: 33px; /* 22 * 1.5 */
-    }
-  }
-
-  .search-form {
-    display: flex;
-    flex-wrap: nowrap;
-    align-items: center;
-    flex: 1;
-    min-width: 0;
-  }
-
-  .form-item {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    flex-shrink: 0;
-
-    .form-label {
-      font-size: 18px; /* 16 * 1.5 */
-      margin-right: 12px;
-      color: #606266;
-      white-space: nowrap;
-    }
-
-    .company-name {
-      font-size: 18px; /* 16 * 1.5 */
-      font-weight: 500;
-      color: #303133;
-      min-width: 180px;
-      display: inline-block;
-      white-space: nowrap;
-    }
-
-    :deep(.el-select) {
-      width: 270px; /* 区域、表册下拉框宽度，180 * 1.5 */
-
-      .el-select__wrapper,
-      .el-select__input,
-      .el-select__placeholder,
-      .el-select__selected-item {
-        font-size: 24px !important; /* 16 * 1.5，!important 覆盖 el-select 默认 */
-        line-height: 1.2;
-      }
-    }
-
-    :deep(.el-select .el-select__wrapper) {
-      height: 48px !important;            /* 与区域选择框保持统一高度，24px 字体不截断 */
-      min-height: 48px !important;
-      box-sizing: border-box;
-      padding: 8px 15px;
-      font-size: 24px !important;
-    }
-
-    :deep(.el-select .el-select__wrapper .el-select__placeholder) {
-      font-size: 24px !important;
-      line-height: 32px;
-    }
-
-    :deep(.el-select .el-select__wrapper .el-select__selected-item) {
-      font-size: 24px !important;
-      line-height: 32px;
-    }
-
-    :deep(.el-input) {
-      width: 100%;
-
-      .el-input__wrapper {
-        height: 48px !important;          /* 与 select__wrapper 保持统一高度 */
-        min-height: 48px !important;
-        box-sizing: border-box;
-        padding: 8px 15px;
-      }
-
-      .el-input__inner {
-        font-size: 24px !important; /* 16 * 1.5 */
-        line-height: 32px;       /* 与 select 文字垂直居中高度一致 */
-        height: 32px;
-      }
-    }
-  }
-
-  .form-item-input {
-    width: 260px; /* 260 * 1.5 */
-  }
-
-  .header-btn {
-    flex-shrink: 0;
-    font-size: 21px; /* 14 * 1.5 */
-  }
-
-  .header-btn :deep(.el-icon) {
-    font-size: 21px; /* 图标随文字同步放大 */
-  }
 }
 
-/* 主体卡片：与登录安全页 .yuangong-info 对应 */
+/* 筛选表单：横向单行排列，撑满剩余空间 */
+.search-form {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+}
+
+/* 主体卡片 */
 .info-card {
   width: 99.3%;
   height: calc(100% - 120px);
@@ -1051,30 +845,7 @@ onBeforeUnmount(() => {
   padding: 0 10px;
 }
 
-/* 工具行：与登录安全页 .command-box 对应 */
-.command-bar {
-  display: flex;
-  align-items: center;
-  width: 100%;
-  height: auto;
-  margin-top: 10px;
-}
-
-.cmd-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 35px;
-  height: 35px;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: all 0.3s;
-  background-color: #fff;
-  border: 2px solid #f2f2f2;
-  margin-right: 10px;
-}
-
-/* 表格区：与登录安全页 .yuangong-table 对应（固定高度，减去分页） */
+/* 表格区：固定高度，减去分页 */
 .table-zone {
   width: 100%;
   height: calc(100% - 100px);
@@ -1084,18 +855,7 @@ onBeforeUnmount(() => {
   position: relative;
 }
 
-.empty-tip {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #909399;
-  font-size: 18px;
-  pointer-events: none;
-}
-
-/* 分页：完全照搬登录安全页 .page-box，绝对定位钉在底部 */
+/* 分页：绝对定位钉在底部 */
 .page-box {
   width: 100%;
   height: 40px;
@@ -1113,73 +873,6 @@ onBeforeUnmount(() => {
   display: flex;
   justify-content: center;
   align-items: center;
-}
-
-/* PDF 导出专用区域：屏幕外渲染，供 html2pdf 捕获 */
-.print-wrapper {
-  position: fixed;
-  left: 0;
-  top: 0;
-  width: 0;
-  height: 0;
-  overflow: visible;
-  z-index: -9999;
-  opacity: 1;
-  pointer-events: none;
-}
-
-.print-area {
-  position: relative;
-  width: 277mm;
-  padding: 0;
-  background: #fff;
-  color: #000;
-  font-family: 'Microsoft YaHei', 'SimSun', sans-serif;
-  font-size: 9pt;
-  line-height: 1.4;
-
-  .print-header {
-    text-align: center;
-    margin-bottom: 8px;
-
-    h1 {
-      font-size: 16pt;
-      margin: 0 0 4px 0;
-    }
-
-    .print-info {
-      display: flex;
-      justify-content: center;
-      gap: 20px;
-      font-size: 9pt;
-      color: #333;
-    }
-  }
-
-  .print-table {
-    width: 100%;
-    border-collapse: collapse;
-    table-layout: fixed;
-
-    th,
-    td {
-      border: 1px solid #333;
-      padding: 3px 5px;
-      text-align: center;
-      word-break: break-all;
-    }
-
-    th {
-      background-color: #f2f2f2;
-      font-weight: bold;
-    }
-  }
-
-  .print-footer {
-    margin-top: 8px;
-    text-align: right;
-    font-size: 9pt;
-  }
 }
 
 .search-input {
@@ -1227,11 +920,13 @@ onBeforeUnmount(() => {
 .search-btn {
   background-color: #45ba7e;
 }
+
 .clear-btn {
   background-color: #fff;
   border: 2px solid #f2f2f2;
   margin-right: 10px;
 }
+
 .command-box {
   display: flex;
   align-items: center;
@@ -1260,15 +955,9 @@ onBeforeUnmount(() => {
   background-color: #fff;
   border: 2px solid #f2f2f2;
 }
+
 .command-btn img {
   margin-right: 6px;
   flex-shrink: 0;
 }
 </style>
-
-<!--&lt;!&ndash; 全局：与登录安全页保持一致（保留垂直滚动条，避免缩放抖动） &ndash;&gt;-->
-<!--<style>-->
-<!--html {-->
-<!--  overflow-y: scroll;-->
-<!--}-->
-<!--</style>-->
