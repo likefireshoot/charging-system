@@ -45,7 +45,7 @@ import log from "@/views/log.vue";
 import operateLog from "@/components/logManage/operateLog.vue";
 import loginLog from "@/components/logManage/loginLog.vue";
 import meterReadingReport from "@/views/meterReadingReport.vue";
-import meterBookReport from "@/views/meterBookReport.vue";
+// import meterBookReport from "@/views/meterBookReport.vue";
 
 const routes = [
   {
@@ -110,11 +110,11 @@ const routes = [
             name: "meterReadingReport",
             component: meterReadingReport,
           },
-          {
-            path: "meterBookReport",
-            name: "meterBookReport",
-            component: meterBookReport,
-          }
+          // {
+          //   path: "meterBookReport",
+          //   name: "meterBookReport",
+          //   component: meterBookReport,
+          // }
         ]
       },
       {

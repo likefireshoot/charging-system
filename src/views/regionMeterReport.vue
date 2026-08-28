@@ -659,7 +659,8 @@ const exportReport = async (type) => {
     if (m) {
       fileName = decodeURIComponent(m[1]);
     } else {
-      fileName = `区域抄表报表_${regionName.value}_${codeBookName.value}.${type}`;
+      const ext = type === 'excel' ? 'xlsx' : type;
+      fileName = `区域抄表报表_${regionName.value}_${codeBookName.value}.${ext}`;
     }
 
     const link = document.createElement('a');
