@@ -311,6 +311,17 @@ import service from '@/api/request';
 
 const router = useRouter();
 
+// 简易防抖：用于用户搜索输入
+let searchTimer = null;
+const debounceSearch = (fn, wait = 400) => {
+  return (...args) => {
+    if (searchTimer) clearTimeout(searchTimer);
+    searchTimer = setTimeout(() => {
+      fn(...args);
+    }, wait);
+  };
+};
+
 // 搜索参数
 const searchParams = reactive({
   companyId: '',
@@ -745,8 +756,8 @@ const refreshCurrentStatistics = async () => {
   }
 };
 
-// 搜索处理函数（触发服务端搜索）
-const handleSearch = () => {
+// 搜索处理函数（触发服务端搜索，防抖避免高频请求）
+const handleSearch = debounceSearch(() => {
   currentPage.value = 1;
   selectedRows.value = [];
 
@@ -758,7 +769,7 @@ const handleSearch = () => {
   } else {
     ElMessage.warning('请先选择区域或表册，再输入关键词进行搜索');
   }
-};
+});
 
 // 清空所有数据
 const handleClearAll = async () => {
