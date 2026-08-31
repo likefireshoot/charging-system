@@ -104,7 +104,11 @@
                 </el-radio>
               </template>
             </el-table-column>
-            <el-table-column type="index" label="序号" min-width="65" align="center" />
+            <el-table-column label="序号" min-width="65" align="center">
+              <template #default="{ $index }">
+                {{ (currentPage - 1) * pageSize + $index + 1 }}
+              </template>
+            </el-table-column>
             <el-table-column prop="userId" label="用户号" min-width="120" align="center">
               <template #default="{ row }">
                 <span>{{ row.userId % 10000000 }}</span>
@@ -310,6 +314,17 @@ import service from '@/api/request';
 
 const router = useRouter();
 
+// 简易防抖：用于用户搜索输入
+let searchTimer = null;
+const debounceSearch = (fn, wait = 400) => {
+  return (...args) => {
+    if (searchTimer) clearTimeout(searchTimer);
+    searchTimer = setTimeout(() => {
+      fn(...args);
+    }, wait);
+  };
+};
+
 // 搜索参数
 const searchParams = reactive({
   companyId: '', // 新增：水厂ID
@@ -341,25 +356,14 @@ const userSearchKeyword = ref('');
 // 分页相关
 const currentPage = ref(1);
 const pageSize = ref(20);
-// 该表册下总户数（后端分页返回，用于分页控件）
+// 该表册/区域下总户数（后端分页返回，用于分页控件）
 const total = ref(0);
 
-// 过滤后的用户列表（根据搜索关键词，仅在本页已加载数据内过滤；
-// 后端接口目前仅支持 page/pageSize，不做关键词搜索，所以搜索只作用于当前页）
-const filteredUserList = computed(() => {
-  if (!userSearchKeyword.value.trim()) {
-    return userList.value;
-  }
+// 当前是否按区域加载（未选表册时，加载该区域下所有用户）
+const isRegionLevel = ref(false);
 
-  const keyword = userSearchKeyword.value.trim().toLowerCase();
-  return userList.value.filter(user => {
-    return (
-      (user.userName && user.userName.toLowerCase().includes(keyword)) ||
-      (user.userId && user.userId.toString().toLowerCase().includes(keyword)) ||
-      (user.address && user.address.toLowerCase().includes(keyword))
-    );
-  });
-});
+// 过滤后的用户列表（搜索改为走服务端全局匹配，前端不再对当前页二次过滤）
+const filteredUserList = computed(() => userList.value);
 
 // 选中的用户
 const selectedUsers = ref([]);
@@ -525,6 +529,7 @@ const handleCompanyChange = async (companyId) => {
 const handleRegionChange = async (regionId) => {
   searchParams.codeBook = '';
   userList.value = [];
+  isRegionLevel.value = false;
 
   if (!regionId) {
     allCodeBookList.value = [];
@@ -546,6 +551,12 @@ const handleRegionChange = async (regionId) => {
         const onlyCodeBook = allCodeBookList.value[0];
         searchParams.codeBook = onlyCodeBook.codeBookId;
         handleCodeBookChange(onlyCodeBook.codeBookId);
+      } else {
+        // 多个表册时按区域加载所有用户，无需再点表册
+        isRegionLevel.value = true;
+        currentPage.value = 1;
+        userSearchKeyword.value = '';
+        await fetchUserListByRegion();
       }
     } else {
       ElMessage.error(res.msg || '获取表册列表失败');
@@ -576,181 +587,10 @@ const filterCodeBook = (val) => {
 // 区域下拉框前端过滤（el-select filterable 由组件内置完成，无需自定义逻辑）
 const filterRegion = () => {};
 
-// 表册变化时加载用户列表（后端分页）
-const handleCodeBookChange = async (codeBookId) => {
-  if (!codeBookId) {
-    userList.value = [];
-    total.value = 0;
-    return;
-  }
-
-  // 切换表册时重置分页与搜索
-  currentPage.value = 1;
-  userSearchKeyword.value = '';
-
-  loading.value = true;
-  try {
-    const res = await service.get(`/manual/charge/getUserListByCodeBook?codeBookId=${codeBookId}&page=${currentPage.value}&pageSize=${pageSize.value}`);
-
-    if (res.code === 200) {
-      const pageData = res.data || {};
-      const list = pageData.list || [];
-      total.value = pageData.total || 0;
-
-      userList.value = list.map(user => ({
-        userId: user.userId,
-        userName: user.userName,
-        address: user.userAddr,
-        userPhone: user.userPhone || '',
-        lastReading: user.lastReading || 0,
-        currentReading: user.currentReading ?? null,   // 读取后端本月数
-        // 本月读数不再默认填充，让用户手动输入
-        currentReadingInput: '',
-        meterCode: user.meterCode || '',
-        balance: user.balance || 0,
-        reportStatus: '正常'
-      }));
-
-      // 自动选中第一个用户
-      if (userList.value.length > 0) {
-        const firstUser = userList.value[0];
-        selectedRowKey.value = getRowKey(firstUser);
-        loadUserDetail(firstUser);
-      }
-    } else {
-      ElMessage.error(res.msg || '获取用户列表失败');
-      userList.value = [];
-      total.value = 0;
-    }
-  } catch (error) {
-    console.error('加载用户列表错误:', error);
-
-    if (error.response?.status === 404) {
-      ElMessage.error('用户列表接口未找到，请确认后端服务已启动并包含最新代码');
-      userList.value = [];
-      total.value = 0;
-    } else {
-      ElMessage.error(error.message || '加载用户列表失败');
-      userList.value = [];
-      total.value = 0;
-    }
-  } finally {
-    loading.value = false;
-  }
-};
-
-// 请求指定页（切页/改每页大小时调用，真正走后端分页）
-const fetchUserListByPage = async () => {
-  const codeBookId = searchParams.codeBook;
-  if (!codeBookId) return;
-
-  loading.value = true;
-  try {
-    const res = await service.get(`/manual/charge/getUserListByCodeBook?codeBookId=${codeBookId}&page=${currentPage.value}&pageSize=${pageSize.value}`);
-
-    if (res.code === 200) {
-      const pageData = res.data || {};
-      const list = pageData.list || [];
-      total.value = pageData.total || 0;
-
-      userList.value = list.map(user => ({
-        userId: user.userId,
-        userName: user.userName,
-        address: user.userAddr,
-        userPhone: user.userPhone || '',
-        lastReading: user.lastReading || 0,
-        currentReading: user.currentReading ?? null,
-        currentReadingInput: '',
-        meterCode: user.meterCode || '',
-        balance: user.balance || 0,
-        reportStatus: '正常'
-      }));
-
-      // 切页后默认选中本页第一个用户
-      if (userList.value.length > 0) {
-        const firstUser = userList.value[0];
-        selectedRowKey.value = getRowKey(firstUser);
-        loadUserDetail(firstUser);
-      }
-    } else {
-      ElMessage.error(res.msg || '获取用户列表失败');
-      userList.value = [];
-      total.value = 0;
-    }
-  } catch (error) {
-    console.error('加载用户列表错误:', error);
-    ElMessage.error(error.message || '加载用户列表失败');
-    userList.value = [];
-    total.value = 0;
-  } finally {
-    loading.value = false;
-  }
-};
-
-// 用户搜索处理函数（仅在本页已加载数据内过滤；切页会重新请求后端并清空搜索）
-const handleUserSearch = () => {
-  // 重置到第一页（搜索只作用于当前页，切回第一页以便看到过滤结果）
-  currentPage.value = 1;
-
-  // 清空选中状态，因为过滤后可能不包含之前选中的用户
-  if (filteredUserList.value.length === 0) {
-    selectedRowKey.value = null;
-    closeDetailPanel();
-  } else {
-    // 如果搜索结果不为空，检查当前选中的用户是否还在结果中
-    const currentSelected = filteredUserList.value.find(user => getRowKey(user) === selectedRowKey.value);
-
-    if (!currentSelected && selectedRowKey.value) {
-      // 选中的用户不在搜索结果中，清空选中状态
-      selectedRowKey.value = null;
-      closeDetailPanel();
-    }
-  }
-};
-
-// 获取行的唯一标识（同一户号多表时用 meterCode 区分）
-const getRowKey = (row) => {
-  return row.meterCode || `${row.userId}_${row.meterCode}`;
-};
-
-// 行点击事件
-const handleRowClick = (row) => {
-  selectedRowKey.value = getRowKey(row);
-  loadUserDetail(row);
-};
-
-// 单选按钮变化事件
-const handleRadioChange = (row) => {
-  loadUserDetail(row);
-};
-
-// 加载用户详情
-const loadUserDetail = (user) => {
-  // 使用深拷贝确保响应式
-  selectedUserDetail.value = JSON.parse(JSON.stringify(user));
-  loadReportHistory(user);
-
-  // 详情加载后，若处于正常状态则自动聚焦本月读数输入框
-  if (selectedUserDetail.value.reportStatus === '正常') {
-    nextTick(() => {
-      currentReadingRef.value?.focus();
-    });
-  }
-};
-
-// 分页大小变化
-const handleSizeChange = (val) => {
-  pageSize.value = val;
-  currentPage.value = 1; // 重置到第一页
-  userSearchKeyword.value = ''; // 跨页搜索无意义，清空搜索
-  fetchUserListByPage();
-};
-
-// 当前页变化
-const handleCurrentChange = (val) => {
-  currentPage.value = val;
-  userSearchKeyword.value = ''; // 跨页搜索无意义，清空搜索
-  fetchUserListByPage();
+// 关闭详情面板
+const closeDetailPanel = () => {
+  selectedUserDetail.value = null;
+  reportHistory.value = [];
 };
 
 // 加载用户抄表记录（按 meterCode 查询，同一户号多表时只显示所选表的记录）
@@ -774,10 +614,213 @@ const loadReportHistory = async (user) => {
   }
 };
 
-// 关闭详情面板
-const closeDetailPanel = () => {
-  selectedUserDetail.value = null;
-  reportHistory.value = [];
+// 加载用户详情
+const loadUserDetail = (user) => {
+  // 使用深拷贝确保响应式
+  selectedUserDetail.value = JSON.parse(JSON.stringify(user));
+  loadReportHistory(user);
+
+  // 详情加载后，若处于正常状态则自动聚焦本月读数输入框
+  if (selectedUserDetail.value.reportStatus === '正常') {
+    nextTick(() => {
+      currentReadingRef.value?.focus();
+    });
+  }
+};
+
+// 把后端用户对象映射为前端列表项
+const mapUserItem = (user) => ({
+  userId: user.userId,
+  userName: user.userName,
+  address: user.userAddr,
+  userPhone: user.userPhone || '',
+  lastReading: user.lastReading || 0,
+  currentReading: user.currentReading ?? null,   // 读取后端本月数
+  // 本月读数不再默认填充，让用户手动输入
+  currentReadingInput: '',
+  meterCode: user.meterCode || '',
+  balance: user.balance || 0,
+  reportStatus: '正常'
+});
+
+// 设置用户列表并自动选中第一个
+const setUserList = (list) => {
+  userList.value = list;
+
+  // 自动选中第一个用户
+  if (userList.value.length > 0) {
+    const firstUser = userList.value[0];
+    selectedRowKey.value = getRowKey(firstUser);
+    loadUserDetail(firstUser);
+  } else {
+    selectedRowKey.value = null;
+    closeDetailPanel();
+  }
+};
+
+// 按区域加载用户列表（后端分页）
+// 依赖后端接口：GET /manual/charge/getUserListByRegion?regionId=xxx&page=xxx&pageSize=xxx&keyword=xxx
+const fetchUserListByRegion = async (keyword = '') => {
+  const regionId = searchParams.region;
+  if (!regionId) return;
+
+  loading.value = true;
+  try {
+    const k = encodeURIComponent(keyword || userSearchKeyword.value || '');
+    const res = await service.get(`/manual/charge/getUserListByRegion?regionId=${regionId}&page=${currentPage.value}&pageSize=${pageSize.value}&keyword=${k}`);
+
+    if (res.code === 200) {
+      const pageData = res.data || {};
+      const list = pageData.list || [];
+      total.value = pageData.total || 0;
+      setUserList(list.map(mapUserItem));
+    } else {
+      ElMessage.error(res.msg || '获取用户列表失败');
+      userList.value = [];
+      total.value = 0;
+    }
+  } catch (error) {
+    console.error('加载区域用户列表错误:', error);
+
+    if (error.response?.status === 404) {
+      ElMessage.error('区域用户列表接口未找到，请确认后端服务已启动并包含最新代码');
+    } else {
+      ElMessage.error(error.message || '加载用户列表失败');
+    }
+    userList.value = [];
+    total.value = 0;
+  } finally {
+    loading.value = false;
+  }
+};
+
+// 表册变化时加载用户列表（后端分页）
+const handleCodeBookChange = async (codeBookId) => {
+  if (!codeBookId) {
+    // 清空表册后回到区域级加载
+    isRegionLevel.value = true;
+    currentPage.value = 1;
+    userSearchKeyword.value = '';
+    await fetchUserListByRegion();
+    return;
+  }
+
+  isRegionLevel.value = false;
+
+  // 切换表册时重置分页与搜索
+  currentPage.value = 1;
+  userSearchKeyword.value = '';
+
+  loading.value = true;
+  try {
+    const res = await service.get(`/manual/charge/getUserListByCodeBook?codeBookId=${codeBookId}&page=${currentPage.value}&pageSize=${pageSize.value}&keyword=`);
+
+    if (res.code === 200) {
+      const pageData = res.data || {};
+      const list = pageData.list || [];
+      total.value = pageData.total || 0;
+      setUserList(list.map(mapUserItem));
+    } else {
+      ElMessage.error(res.msg || '获取用户列表失败');
+      userList.value = [];
+      total.value = 0;
+    }
+  } catch (error) {
+    console.error('加载用户列表错误:', error);
+
+    if (error.response?.status === 404) {
+      ElMessage.error('用户列表接口未找到，请确认后端服务已启动并包含最新代码');
+    } else {
+      ElMessage.error(error.message || '加载用户列表失败');
+    }
+    userList.value = [];
+    total.value = 0;
+  } finally {
+    loading.value = false;
+  }
+};
+
+// 请求指定页（切页/改每页大小时调用，真正走后端分页；keyword 由服务端全局匹配）
+const fetchUserListByPage = async (keyword = '') => {
+  if (isRegionLevel.value) {
+    await fetchUserListByRegion(keyword);
+  } else {
+    const codeBookId = searchParams.codeBook;
+    if (!codeBookId) return;
+
+    loading.value = true;
+    try {
+      const k = encodeURIComponent(keyword || userSearchKeyword.value || '');
+      const res = await service.get(`/manual/charge/getUserListByCodeBook?codeBookId=${codeBookId}&page=${currentPage.value}&pageSize=${pageSize.value}&keyword=${k}`);
+
+      if (res.code === 200) {
+        const pageData = res.data || {};
+        const list = pageData.list || [];
+        total.value = pageData.total || 0;
+        setUserList(list.map(mapUserItem));
+      } else {
+        ElMessage.error(res.msg || '获取用户列表失败');
+        userList.value = [];
+        total.value = 0;
+      }
+    } catch (error) {
+      console.error('加载用户列表错误:', error);
+      ElMessage.error(error.message || '加载用户列表失败');
+      userList.value = [];
+      total.value = 0;
+    } finally {
+      loading.value = false;
+    }
+  }
+};
+
+// 用户搜索处理函数（提交 keyword 给后端做全局匹配，结果从第一页开始重新分页）
+const handleUserSearch = debounceSearch(async () => {
+  currentPage.value = 1;
+  await fetchUserListByPage();
+
+  // 清空选中状态，因为过滤后可能不包含之前选中的用户
+  if (filteredUserList.value.length === 0) {
+    selectedRowKey.value = null;
+    closeDetailPanel();
+  } else {
+    // 如果搜索结果不为空，检查当前选中的用户是否还在结果中
+    const currentSelected = filteredUserList.value.find(user => getRowKey(user) === selectedRowKey.value);
+
+    if (!currentSelected && selectedRowKey.value) {
+      selectedRowKey.value = null;
+      closeDetailPanel();
+    }
+  }
+});
+
+// 获取行的唯一标识（同一户号多表时用 meterCode 区分）
+const getRowKey = (row) => {
+  return row.meterCode || `${row.userId}_${row.meterCode}`;
+};
+
+// 行点击事件
+const handleRowClick = (row) => {
+  selectedRowKey.value = getRowKey(row);
+  loadUserDetail(row);
+};
+
+// 单选按钮变化事件
+const handleRadioChange = (row) => {
+  loadUserDetail(row);
+};
+
+// 分页大小变化
+const handleSizeChange = (val) => {
+  pageSize.value = val;
+  currentPage.value = 1; // 重置到第一页
+  fetchUserListByPage();
+};
+
+// 当前页变化
+const handleCurrentChange = (val) => {
+  currentPage.value = val;
+  fetchUserListByPage();
 };
 
 // 清空所有数据
