@@ -355,6 +355,7 @@ watch(
           { id: 133, name: "区域报表", permissionId: 83, icon: require("@/assets/menu/icon15.png"), icon2: require("@/assets/menu/icon16.png"), path: "/meterReading/regionMeterReport" },
           { id: 134, name: "抄表统计表", permissionId: 96, icon: require("@/assets/add/icon-10.png"), icon2: require("@/assets/add/icon-11.png"), path: "/meterReading/meterReadingReport" },
           { id: 135, name: "抄表册报表", permissionId: 97, icon: require("@/assets/menu/icon17.png"), icon2: require("@/assets/menu/icon18.png"), path: "/meterReading/meterBookReport" },
+          { id: 136, name: "月回收报表", permissionId: 98, icon: require("@/assets/menu/icon15.png"), icon2: require("@/assets/menu/icon16.png"), path: "/meterReading/monthRecoveryReport" },
         ]
       };
 
