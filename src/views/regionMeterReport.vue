@@ -113,6 +113,7 @@
 
       <!-- 表格区域 -->
       <div class="table-zone">
+        <div class="table-scroll">
         <el-table
           :data="filteredReportList"
           ref="multipleTableRef"
@@ -199,6 +200,36 @@
           </el-table-column>
 
         </el-table>
+        </div>
+
+        <!-- 底部汇总行 -->
+        <el-table
+          v-if="total > 0"
+          :data="summaryRow"
+          border
+          :show-header="false"
+          row-class-name="summary-row"
+          style="width: 100%; flex-shrink: 0; table-layout: fixed; margin-top: -1px;"
+        >
+          <el-table-column :width="userIdWidth" align="center">
+            <template #default><span>汇总</span></template>
+          </el-table-column>
+          <el-table-column :width="userNameWidth" align="center"></el-table-column>
+          <el-table-column :width="addressWidth" align="center"></el-table-column>
+          <el-table-column :width="reportStatusWidth" align="center"></el-table-column>
+          <el-table-column :width="dataTypeWidth" align="center"></el-table-column>
+          <el-table-column :width="startReadingWidth" align="center"></el-table-column>
+          <el-table-column :width="endReadingWidth" align="center"></el-table-column>
+          <el-table-column :width="deltaWaterWidth" align="center">
+            <template #default>{{ summaryRow[0].totalDeltaWater }}</template>
+          </el-table-column>
+          <el-table-column :width="feeThisTimeWidth" align="center">
+            <template #default>{{ formatMoney(summaryRow[0].totalFeeThisTime) }}</template>
+          </el-table-column>
+          <el-table-column :width="lastMonthDeltaWaterWidth" align="center"></el-table-column>
+          <el-table-column :width="lastDeltaWaterWidth" align="center"></el-table-column>
+          <el-table-column :width="createTimeWidth" align="center"></el-table-column>
+        </el-table>
       </div>
 
       <!-- 分页 -->
@@ -260,6 +291,9 @@ const codeBookList = ref([]);
 
 // 报表列表（原始数据）
 const reportList = ref([]);
+
+// 底部汇总行（后端全量口径返回，不随翻页变化）
+const summaryRow = ref([{ totalDeltaWater: 0, totalFeeThisTime: 0 }]);
 
 // 搜索关键词
 const searchKeyword = ref('');
@@ -373,6 +407,8 @@ const showMeterReadings = (row) => {
 const loadRegionReport = async (regionId, codeBookId, keyword = '') => {
   if (!regionId) {
     reportList.value = [];
+    summaryRow.value[0].totalDeltaWater = 0;
+    summaryRow.value[0].totalFeeThisTime = 0;
     return;
   }
 
@@ -394,6 +430,8 @@ const loadRegionReport = async (regionId, codeBookId, keyword = '') => {
       const pageData = res.data || {};
       const data = pageData.list || [];
       total.value = pageData.total || 0;
+      summaryRow.value[0].totalDeltaWater = pageData.totalDeltaWater || 0;
+      summaryRow.value[0].totalFeeThisTime = pageData.totalFeeThisTime || 0;
       reportList.value = data.map(item => {
         const hasUnreviewed = item.hasUnreviewed === true || item.hasUnreviewed === 1;
         const reviewStatus = item.reviewStatus;
@@ -433,6 +471,8 @@ const loadRegionReport = async (regionId, codeBookId, keyword = '') => {
       ElMessage.error(res.msg || '获取区域报表失败');
       reportList.value = [];
       total.value = 0;
+      summaryRow.value[0].totalDeltaWater = 0;
+      summaryRow.value[0].totalFeeThisTime = 0;
     }
   } catch (error) {
     if (error.response && error.response.status === 404) {
@@ -443,6 +483,8 @@ const loadRegionReport = async (regionId, codeBookId, keyword = '') => {
     }
     reportList.value = [];
     total.value = 0;
+    summaryRow.value[0].totalDeltaWater = 0;
+    summaryRow.value[0].totalFeeThisTime = 0;
   } finally {
     loading.value = false;
   }
@@ -852,6 +894,26 @@ onBeforeUnmount(() => {
   display: flex;
   flex-direction: column;
   position: relative;
+}
+
+/* 主表滚动容器：让出底部汇总行高度 */
+.table-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* 汇总行样式：绿色底白色加粗文字，与表头风格统一 */
+:deep(.summary-row) {
+  height: 50px !important;
+  background-color: #46B97E !important;
+}
+
+:deep(.summary-row td) {
+  font-weight: bold;
+  color: #ffffff;
+  font-size: 20px;
+  text-align: center;
 }
 
 /* 分页：绝对定位钉在底部 */

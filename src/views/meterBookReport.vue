@@ -64,7 +64,11 @@
       <div class="report-title">
         <div class="export-out-btn" @click="handleExport">
           <img src="@/assets/yonghu/icon1.3.png" alt="" />
-          <span style="margin-left: 6px; color: #5a5a5a">导出</span>
+          <span style="margin-left: 6px; color: #5a5a5a">导出excel</span>
+        </div>
+        <div class="export-out-btn" @click="handleExportPdf" style="margin-left: 10px">
+          <img src="@/assets/yonghu/icon1.3.png" alt="" />
+          <span style="margin-left: 6px; color: #5a5a5a">导出pdf</span>
         </div>
 <!--        <div class="code-book-title" style="color: #575556;padding: 3px" >{{ currentCodeBookName }}</div>-->
       </div>
@@ -323,6 +327,51 @@ export default {
         console.error(err);
       }
     },
+    async handleExportPdf() {
+      if (!this.params.companyId || !this.params.region || !this.params.codeBook || !this.params.queryYear) {
+        ElMessage.warning("请先完成查询条件选择");
+        return;
+      }
+      let token = "";
+      const userData = sessionStorage.getItem("userData");
+      if (userData) token = JSON.parse(userData).token;
+      try {
+        const res = await service.get(`/manual/charge/meterBookYearReport/exportpdf?regionId=${this.params.region}&codeBookId=${this.params.codeBook}&queryYear=${this.params.queryYear}`, {
+          responseType: "blob",
+          headers: { authentication: token, Authorization: token, token: token }
+        });
+        const blob = new Blob([res.data], { type: "application/pdf" });
+        const downloadUrl = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = downloadUrl;
+        a.download = this.getPdfFileName(res.headers && res.headers["content-disposition"]);
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(downloadUrl);
+        ElMessage.success("导出成功");
+      }catch (err) {
+        ElMessage.error("导出失败");
+        console.error(err);
+      }
+    },
+    getPdfFileName(contentDisposition) {
+      if (contentDisposition) {
+        const starMatch = contentDisposition.match(/filename\*=([^']*)''([^;]+)/i);
+        let name = "";
+        if (starMatch && starMatch[2]) {
+          try {
+            name = decodeURIComponent(starMatch[2].trim());
+          } catch (e) {}
+        }
+        if (!name) {
+          const plainMatch = contentDisposition.match(/filename="?([^";]+)"?/i);
+          if (plainMatch && plainMatch[1]) name = plainMatch[1].trim();
+        }
+        if (name) return name;
+      }
+      return `抄表册报表-${this.currentCodeBookName}.pdf`;
+    },
     async fetchReport() {
       this.isLoading = true;
       let token = "";
@@ -482,7 +531,7 @@ export default {
 .export-out-btn {
   display: flex;
   align-items: center;
-  width: 70px;
+  width: auto;
   height: 32px;
   color: white;
   border-radius: 5px;
@@ -492,6 +541,7 @@ export default {
   background-color: #fff;
   border: 2px solid #f2f2f2;
   padding: 0 8px;
+  white-space: nowrap;
 }
 
 .export-out-btn:hover {
