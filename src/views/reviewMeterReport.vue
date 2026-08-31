@@ -162,11 +162,11 @@
           <span>本页审核通过</span>
         </el-button>
 
-        <!-- 全部审核通过 -->
+        <!-- 全部审核通过（整区域/整表册） -->
         <el-button
           class="command-btn"
           @click="handleAllReview"
-          :disabled="filteredReviewList.length === 0"
+          :disabled="total === 0"
         >
           <el-icon class="btn-icon"><Check /></el-icon>
           <span>全部审核通过</span>
@@ -1150,18 +1150,60 @@ const handleCurrentPageReview = async () => {
   }
 };
 
-// 全部审核通过
+// 拉取当前区域/表册下所有待审核记录的 ID（用于整批审核）
+const fetchAllPendingReviewIds = async () => {
+  const keyword = searchKeyword.value.trim();
+  const BIG = 5000; // 单次拉取的最大条数
+  let page = 1;
+  const ids = [];
+
+  const buildUrl = (p) => {
+    if (isRegionLevel.value && searchParams.region) {
+      let url = `/manual/charge/getPendingReviewList?regionId=${searchParams.region}&page=${p}&pageSize=${BIG}`;
+      if (keyword) url += `&keyword=${encodeURIComponent(keyword)}`;
+      return url;
+    } else if (searchParams.codeBook) {
+      let url = `/manual/charge/getPendingReviewListByCodeBook?codeBookId=${searchParams.codeBook}&page=${p}&pageSize=${BIG}`;
+      if (keyword) url += `&keyword=${encodeURIComponent(keyword)}`;
+      return url;
+    }
+    return null;
+  };
+
+  const firstUrl = buildUrl(1);
+  if (!firstUrl) return [];
+
+  // 循环分页拉取，直到取完整个区域/表册
+  while (true) {
+    const res = await service.get(buildUrl(page));
+    if (res.code !== 200) break;
+    const pageData = res.data || {};
+    const list = pageData.list || [];
+    list.forEach(item => {
+      if (item.id) ids.push(item.id);
+    });
+    const totalCount = pageData.total || 0;
+    if (list.length === 0 || ids.length >= totalCount) break;
+    page++;
+  }
+  return ids;
+};
+
+// 全部审核通过（整区域 / 整表册）
 const handleAllReview = async () => {
-  const allRows = filteredReviewList.value;
-  
-  if (allRows.length === 0) {
-    ElMessage.warning('没有可审核的记录');
+  // 确定审核范围
+  const isRegionScope = isRegionLevel.value && searchParams.region;
+  const scopeText = isRegionScope ? '整个区域' : '整个表册';
+  const totalCount = total.value;
+
+  if (totalCount === 0) {
+    ElMessage.warning(`当前${scopeText}没有可审核的记录`);
     return;
   }
-  
+
   try {
     await ElMessageBox.confirm(
-      `确认审核全部的 ${allRows.length} 条记录吗？此操作不可撤销！`,
+      `确认审核${scopeText}的 ${totalCount} 条记录吗？此操作不可撤销！`,
       '全部审核确认',
       {
         confirmButtonText: '确定',
@@ -1170,38 +1212,45 @@ const handleAllReview = async () => {
         lockScroll: false,
       }
     );
-    
+
     loading.value = true;
-    
-    // 构建审核数据
-    const reviewIds = allRows.map(row => row.id);
-    
+
+    // 拉取当前范围下所有待审核记录的 ID（不仅是当前页）
+    const reviewIds = await fetchAllPendingReviewIds();
+
     // 验证ID是否有效
     if (!reviewIds || reviewIds.length === 0 || reviewIds.some(id => !id)) {
       ElMessage.error('记录ID无效，请刷新页面后重试');
       return;
     }
-    
+
     // 调用批量审核接口
     const res = await service.post('/manual/charge/batchReview', {
       ids: reviewIds,
       approved: true
     });
-    
+
     if (res.code === 200) {
       ElMessage.success(`成功审核 ${reviewIds.length} 条记录`);
-      
-      // 从列表中移除已审核的记录
+
+      // 从当前列表中移除已审核的记录
       reviewList.value = reviewList.value.filter(item => !reviewIds.includes(item.id));
-      
+
       // 刷新统计信息
       refreshCurrentStatistics();
-      
+
       // 清空选中状态
       selectedRows.value = [];
-      
-      // 重置到第一页
-      currentPage.value = 1;
+
+      // 重新加载当前范围（回到第一页查看最新数据）
+      setTimeout(() => {
+        currentPage.value = 1;
+        if (searchParams.codeBook) {
+          handleCodeBookChange(searchParams.codeBook);
+        } else if (searchParams.region) {
+          loadRegionReviewData(searchParams.region);
+        }
+      }, 500);
     } else {
       ElMessage.error(res.msg || '审核失败');
     }
