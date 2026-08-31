@@ -46,6 +46,7 @@ import operateLog from "@/components/logManage/operateLog.vue";
 import loginLog from "@/components/logManage/loginLog.vue";
 import meterReadingReport from "@/views/meterReadingReport.vue";
 import meterBookReport from "@/views/meterBookReport.vue";
+import monthRecoveryReport from "@/views/monthRecoveryReport.vue";
 
 const routes = [
   {
@@ -114,6 +115,11 @@ const routes = [
             path: "meterBookReport",
             name: "meterBookReport",
             component: meterBookReport,
+          },
+          {
+            path: "monthRecoveryReport",
+            name: "monthRecoveryReport",
+            component: monthRecoveryReport,
           }
         ]
       },
