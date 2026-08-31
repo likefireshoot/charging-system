@@ -256,6 +256,17 @@ import { ref, reactive, computed, onMounted, onBeforeUnmount, nextTick } from 'v
 import { ElMessage } from 'element-plus';
 import service from '@/api/request';
 
+// 简易防抖：用于用户搜索输入
+let searchTimer = null;
+const debounceSearch = (fn, wait = 400) => {
+  return (...args) => {
+    if (searchTimer) clearTimeout(searchTimer);
+    searchTimer = setTimeout(() => {
+      fn(...args);
+    }, wait);
+  };
+};
+
 // 搜索参数
 const searchParams = reactive({
   companyId: '',
@@ -313,22 +324,8 @@ const codeBookName = computed(() => {
   return codeBook?.codeBookName || '';
 });
 
-// 过滤后的报表列表
-// 后端已按 page/pageSize 返回本页数据，searchKeyword 仅在本页已加载数据内过滤
-const filteredReportList = computed(() => {
-  if (!searchKeyword.value.trim()) {
-    return reportList.value;
-  }
-
-  const keyword = searchKeyword.value.trim().toLowerCase();
-  return reportList.value.filter(item => {
-    return (
-      (item.userName && item.userName.toLowerCase().includes(keyword)) ||
-      (item.userId && item.userId.toString().toLowerCase().includes(keyword)) ||
-      (item.address && item.address.toLowerCase().includes(keyword))
-    );
-  });
-});
+// 过滤后的报表列表（搜索改为走服务端全局匹配，前端不再对当前页二次过滤）
+const filteredReportList = computed(() => reportList.value);
 
 // 格式化金额
 const formatMoney = (value) => {
@@ -406,8 +403,8 @@ const showMeterReadings = (row) => {
   return row.reportStatus === '正常';
 };
 
-// 加载区域报表数据（使用后端聚合接口，只发 1 个请求）
-const loadRegionReport = async (regionId, codeBookId) => {
+// 加载区域报表数据（使用后端聚合接口，只发 1 个请求；keyword 由服务端全局匹配）
+const loadRegionReport = async (regionId, codeBookId, keyword = '') => {
   if (!regionId) {
     reportList.value = [];
     summaryRow.value[0].totalDeltaWater = 0;
@@ -421,6 +418,7 @@ const loadRegionReport = async (regionId, codeBookId) => {
     if (codeBookId) {
       url += `&codeBookId=${codeBookId}`;
     }
+    url += `&keyword=${encodeURIComponent(keyword || searchKeyword.value || '')}`;
     // 本月用水量相关：筛选条件（大于/小于）+ 对比数值，仅已填写时拼接
     if (waterCompareOpt.value) {
       url += `&waterCompareOpt=${encodeURIComponent(waterCompareOpt.value)}`;
@@ -637,11 +635,11 @@ const filterCodeBook = (val) => {
   );
 };
 
-// 搜索
-const handleSearch = () => {
+// 搜索（keyword 提交服务端全局匹配，结果从第一页开始重新分页）
+const handleSearch = debounceSearch(() => {
   currentPage.value = 1;
   loadRegionReport(searchParams.region, searchParams.codeBook);
-};
+});
 
 // 分页大小变化
 const handleSizeChange = (val) => {
