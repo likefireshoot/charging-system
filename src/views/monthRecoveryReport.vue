@@ -71,7 +71,7 @@
           <el-table-column prop="counterAmount" label="现金" align="center" min-width="100"/>
           <el-table-column prop="miniProgramAmount" label="微信小程序" align="center" min-width="100"/>
           <el-table-column prop="lifePayAmount" label="微信生活缴费" align="center" min-width="100"/>
-          <el-table-column prop="freeGiftAmount" label="免费赠送" align="center" min-width="100"/>
+<!--          <el-table-column prop="freeGiftAmount" label="免费赠送" align="center" min-width="100"/>-->
           <el-table-column prop="tradeCount" label="交易笔数" align="center" min-width="100"/>
           <el-table-column prop="totalReceiveAmount" label="实收合计" align="center" min-width="100"/>
           <el-table-column prop="periodChargeAmount" label="当月扣款" align="center" min-width="100"/>
@@ -90,7 +90,7 @@
         <el-table-column prop="counterAmount" label="现金" align="center" min-width="100"/>
         <el-table-column prop="miniProgramAmount" label="微信小程序" align="center" min-width="100"/>
         <el-table-column prop="lifePayAmount" label="微信生活缴费" align="center" min-width="100"/>
-        <el-table-column prop="freeGiftAmount" label="免费赠送" align="center" min-width="100"/>
+<!--        <el-table-column prop="freeGiftAmount" label="免费赠送" align="center" min-width="100"/>-->
         <el-table-column prop="tradeCount" label="交易笔数" align="center" min-width="100"/>
         <el-table-column prop="totalReceiveAmount" label="实收合计" align="center" min-width="100"/>
         <el-table-column prop="periodChargeAmount" label="当月扣款" align="center" min-width="100"/>
