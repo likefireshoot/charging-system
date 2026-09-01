@@ -55,6 +55,13 @@
             <el-option label="是" :value="true" />
           </el-select>
         </div>
+        <div class="change-input input-23" v-if="isNormalMeter">
+          <span>是否为数控表(金水来)</span>
+          <el-select v-model="isNumberControlMeter" placeholder="请选择" style="width: 100%">
+            <el-option label="否" :value="false" />
+            <el-option label="是" :value="true" />
+          </el-select>
+        </div>
       </div>
 
       <div class="btn">
@@ -99,6 +106,7 @@ export default {
         changeCount: "",
       },
       isNormalMeter: false,
+      isNumberControlMeter: false,
       previewCharge: "0.00",
     };
   },
@@ -178,6 +186,7 @@ export default {
         newMeterReading: this.changeData.newMeterReading,
         changeCount: this.changeData.changeCount,
         isNormalMeter: this.isNormalMeter,
+        isNumberControlMeter: this.isNormalMeter ? this.isNumberControlMeter : undefined,
       };
 
       const fieldNameMap = {
@@ -225,6 +234,7 @@ export default {
             newReading: newMeterReading,
             changeReading: changeCount,
             isNormalMeter: formData.isNormalMeter,
+            ...(formData.isNormalMeter && formData.isNumberControlMeter ? { isNumberControlMeter: true } : {})
           })
           .then((res) => {
             if (res.code === 200) {

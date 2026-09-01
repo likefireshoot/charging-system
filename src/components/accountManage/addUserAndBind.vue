@@ -1,6 +1,6 @@
 <template>
   <div class="change-dialog" v-if="dialogVisible">
-    <div class="combo-dialog-content" :style="{ height: companyId == 1 ? '850px' : '780px' }">
+    <div class="combo-dialog-content" :style="{ height: companyId == 1 ? '990px' : '920px' }">
       <div class="title">
         <div style="margin-left: 10px; display: flex; align-items: center">
           <img src="@/assets/yonghu/icon13.png" alt="" style="margin-right: 8px" />
@@ -38,6 +38,18 @@
             </el-select>
           </div>
           <div class="edit-input">
+            <span>联系电话（选填）</span>
+            <el-input v-model="form.userPhone" class="input-item" placeholder="选填"/>
+          </div>
+          <div class="edit-input">
+            <span>开户时间</span>
+            <el-date-picker v-model="form.createTime" type="date" placeholder="选择日期" style="flex-grow: 1; width: 100%; max-height: 35px" format="YYYY-MM-DD" value-format="YYYY-MM-DD" />
+          </div>
+        </div>
+
+        <div class="section-title" style="margin-top: 30px">普表专栏（NB-IoT表忽略即可）</div>
+        <div class="section-grid">
+          <div class="edit-input">
             <span>是否为普表用户</span>
             <el-select v-model="form.isNormalMeterUser" class="input-item big-font-el-select" placeholder="请选择">
               <el-option label="否" :value="false" />
@@ -51,33 +63,26 @@
             </el-select>
           </div>
           <div class="edit-input">
-            <span>联系电话（选填）</span>
-            <el-input v-model="form.userPhone" class="input-item" placeholder="选填"/>
-          </div>
-          <div class="edit-input">
-            <span>开户时间</span>
-            <el-date-picker v-model="form.createTime" type="date" placeholder="选择日期" style="flex-grow: 1; width: 100%; max-height: 35px" format="YYYY-MM-DD" value-format="YYYY-MM-DD" />
-          </div>
-        </div>
-
-        <div class="section-title" style="margin-top: 10px">绑定信息</div>
-        <div class="section-grid">
-          <div class="edit-input">
-            <span>表号</span>
-            <el-input v-model="form.meterCode" class="input-item" @blur="handleMeterCodeBlur" />
-          </div>
-          <div class="edit-input">
             <span>是否为普通水表</span>
             <el-select v-model="form.isNormalMeter" class="input-item big-font-el-select" placeholder="请选择">
               <el-option label="是" :value="true" />
               <el-option label="否" :value="false" />
             </el-select>
           </div>
-          <div class="edit-input">
-            <span>开户审批人</span>
-            <el-select v-model="form.approver_1" class="input-item big-font-el-select" placeholder="请选择">
-              <el-option v-for="item in approverList" :key="item.id" :label="item.label" :value="item.label" />
+          <div class="edit-input" v-if="form.isNormalMeter">
+            <span>是否为数控表(金水来)</span>
+            <el-select v-model="form.isNumberControlMeter" class="input-item big-font-el-select" placeholder="请选择">
+              <el-option label="否" :value="false" />
+              <el-option label="是" :value="true" />
             </el-select>
+          </div>
+        </div>
+
+        <div class="section-title" style="margin-top: 30px">绑定信息</div>
+        <div class="section-grid">
+          <div class="edit-input">
+            <span>表号</span>
+            <el-input v-model="form.meterCode" class="input-item" @blur="handleMeterCodeBlur" />
           </div>
           <div class="edit-input">
             <span>价格类型</span>
@@ -89,14 +94,6 @@
             <span>短信配置</span>
             <el-select v-model="form.smsConfigId" class="input-item big-font-el-select" placeholder="请选择短信配置">
               <el-option v-for="item in smsConfigList" :key="item.id" :label="item.label" :value="item.id" />
-            </el-select>
-          </div>
-          <div class="edit-input">
-            <span>结算关阀类型</span>
-            <el-select v-model="form.enableArrearsValve" class="input-item big-font-el-select"  placeholder="请选择结算关阀类型">
-              <el-option label="默认(自动关阀,随区域设置变化)" value="default" />
-              <el-option label="预付费(自动关阀,不随区域设置变化)" :value="0" />
-              <el-option label="后付费(手动关阀,不随区域设置变化)" :value="1" />
             </el-select>
           </div>
           <div class="edit-input has-checkbox">
@@ -118,6 +115,20 @@
             >
               <span style="font-size: 18px;">确认修改水表吨数</span>
             </el-checkbox>
+          </div>
+          <div class="edit-input">
+            <span>结算关阀类型</span>
+            <el-select v-model="form.enableArrearsValve" class="input-item big-font-el-select"  placeholder="请选择结算关阀类型">
+              <el-option label="默认(自动关阀,随区域设置变化)" value="default" />
+              <el-option label="预付费(自动关阀,不随区域设置变化)" :value="0" />
+              <el-option label="后付费(手动关阀,不随区域设置变化)" :value="1" />
+            </el-select>
+          </div>
+          <div class="edit-input">
+            <span>开户审批人</span>
+            <el-select v-model="form.approver_1" class="input-item big-font-el-select" placeholder="请选择">
+              <el-option v-for="item in approverList" :key="item.id" :label="item.label" :value="item.label" />
+            </el-select>
           </div>
           <div class="edit-input">
             <span>出厂日期（选填，不填默认为当前日期）</span>
@@ -233,6 +244,7 @@ export default {
         enableArrearsValve:  "default",
         isNormalMeter: false,
         isNormalMeterUser: false,
+        isNumberControlMeter: false,
         codeBookId: null,
       },
       companyList: [],
@@ -269,6 +281,7 @@ export default {
     "form.isNormalMeterUser": function (newVal) {
       if (!newVal) {
         this.form.codeBookId = null;
+        this.form.isNumberControlMeter = false;
       }
     },
   },
@@ -547,6 +560,7 @@ export default {
           createTime: this.form.createTime,
           isNormalMeterUser: this.form.isNormalMeterUser,
           codeBookId: this.form.isNormalMeterUser ? this.form.codeBookId : null,
+          isNumberControlMeter: this.form.isNormalMeter ? this.form.isNumberControlMeter : undefined,
         },
         userMeterBindDTO: {
           userId: this.form.userId ? Number(this.form.userId) : null,
@@ -609,8 +623,7 @@ export default {
   position: absolute;
   left: 50%;
   top: 50%;
-  transform: translateX(-50%);
-  margin-top: -365px;
+  transform: translate(-50%, -50%);
   display: flex;
   flex-direction: column;
   align-items: center;

@@ -10,18 +10,28 @@
           <img src="@/assets/close.png" alt="" />
         </div>
       </div>
-      <div class="account-add-content">
-        <div class="edit-input" style="margin-right: 1%">
+      <div class="add-content">
+        <div class="add-input input-31">
           <span>表号</span>
-          <el-input v-model="addData.meterCode" class="input-item" @input="onMeterCodeChange" />
+          <el-input v-model="addData.meterCode" @input="onMeterCodeChange" />
         </div>
-        <div class="edit-input" style="margin-right: 1%">
+        <div class="add-input input-23">
           <span>水表吨位数</span>
-          <el-input v-model.number="addData.tonnage" type="number" class="input-item" placeholder="默认为 0" />
+          <el-input v-model.number="addData.tonnage" type="number" placeholder="默认为 0" />
         </div>
-        <div class="edit-input edit-input-checkbox">
+        <div class="add-input input-23">
           <span>是否为普通水表</span>
-          <el-checkbox v-model="isNormalMeter" @change="onNormalMeterChange" class="normal-meter-checkbox" />
+          <el-select v-model="isNormalMeter" placeholder="请选择" style="width: 100%" @change="onNormalMeterChange">
+            <el-option label="否" :value="false" />
+            <el-option label="是" :value="true" />
+          </el-select>
+        </div>
+        <div class="add-input input-23" v-if="isNormalMeter">
+          <span>是否为数控表（金水来）</span>
+          <el-select v-model="isNumberControlMeter" placeholder="请选择" style="width: 100%" @change="onNumberControlMeterChange">
+            <el-option label="否" :value="false" />
+            <el-option label="是" :value="true" />
+          </el-select>
         </div>
         <div v-if="addData.meterVendor" class="auto-info">
           <span>自动识别：</span>
@@ -60,6 +70,7 @@ export default {
   data() {
     return {
       isNormalMeter: false,
+      isNumberControlMeter: false,
       addData: {
         meterCode: "",
         imei: "",
@@ -76,10 +87,17 @@ export default {
   methods: {
     handleAddClose() {
       this.isNormalMeter = false;
+      this.isNumberControlMeter = false;
       this.$emit("close");
     },
 
     onNormalMeterChange() {
+      if (this.addData.meterCode) {
+        this.onMeterCodeChange();
+      }
+    },
+
+    onNumberControlMeterChange() {
       if (this.addData.meterCode) {
         this.onMeterCodeChange();
       }
@@ -94,7 +112,7 @@ export default {
 
       if (this.isNormalMeter) {
         this.addData.imei = code + "_普通水表";
-        this.addData.meterVendor = "";
+        this.addData.meterVendor = this.isNumberControlMeter ? "数控表" : "普通水表";
         this.addData.masterKey = "无";
         this.addData.productId = "无";
         this.addData.deviceId = "无";
@@ -151,6 +169,7 @@ export default {
       this.addData.masterKey = null;
       this.addData.companyId = null;
       this.isNormalMeter = false;
+      this.isNumberControlMeter = false;
     },
 
     handleCommit() {
@@ -217,59 +236,62 @@ export default {
   left: 0;
   right: 0;
   z-index: 199;
-  background-color: rgba(31, 33, 38, 0.6);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  background-color: rgb(31 33 38 / 15%);
 }
 
-.account-dialog-content {
-  width: min(95%, 1200px);
+.add-dialog-content {
+  width: 75%;
+  min-height: 300px;
   border: 1px solid #fafafa;
   background-color: #fafafa;
-  border-radius: 8px;
+  border-radius: 5px;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  margin-top: -150px;
+  transform: translateX(-50%);
   display: flex;
   flex-direction: column;
   align-items: center;
-  box-sizing: border-box;
-  overflow-x: hidden;
 }
 
-.account-add-content {
-  width: 100%;
+.add-content {
+  width: 94%;
   background-color: #fff;
   border-radius: 5px;
-  margin-top: 10px;
+  margin-top: 20px;
   margin-bottom: 10px;
   display: flex;
   justify-content: flex-start;
   flex-wrap: wrap;
-  gap: 10px;
-  padding: 15px 10px;
-  box-sizing: border-box;
-  overflow-x: hidden;
-  max-width: 100%;
+  gap: 0 1%;
+  padding: 5px;
+  overflow-y: auto;
 }
 
-.edit-input {
+.add-input {
   display: flex;
   justify-content: center;
   flex-direction: column;
-  flex: 1;
-  min-width: 0;
-  box-sizing: border-box;
+  height: 75px;
 }
 
-.edit-input > span {
-  font-size: 22px;
+.input-31 {
+  width: 31%;
+}
+
+.input-23 {
+  width: 23%;
+}
+
+.add-input > span {
+  font-size: 20px;
   color: #747374;
-  margin-bottom: 8px;
-  white-space: nowrap;
-  width: 100%;
+  margin-bottom: 5px;
 }
 
-.input-item {
-  height: 42px;
+.add-input > .el-input {
+  height: 35px;
   width: 100%;
 }
 
@@ -277,9 +299,9 @@ export default {
   width: 100%;
   background-color: #fff;
   border-radius: 5px 5px 0 0;
-  box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
-  height: 55px;
-  line-height: 55px;
+  box-shadow: 0 0 5px rgb(0 0 0 / 10%);
+  height: 45px;
+  line-height: 45px;
   text-align: center;
   display: flex;
   justify-content: space-between;
@@ -287,15 +309,23 @@ export default {
 
 .btn {
   width: 100%;
-  height: 50px;
+  height: 40px;
   display: flex;
   justify-content: flex-end;
   align-items: center;
-  margin-top: 20px;
-  margin-bottom: 20px;
-  flex-wrap: wrap;
-  gap: 10px;
+  margin-top: 15px;
+  margin-bottom: 15px;
+}
+
+.confirm-btn,
+.cancel-btn {
+  height: 42px;
+  width: 110px;
+  cursor: pointer;
+  border: 1px solid #f2f2f2;
   border-radius: 5px;
+  display: flex;
+  align-items: center;
 }
 
 .confirm-btn {
@@ -322,26 +352,5 @@ export default {
   color: #45ba7e;
   font-weight: bold;
   margin-left: 8px;
-}
-
-.edit-input-checkbox {
-  flex-direction: row;
-  align-items: center;
-  gap: 10px;
-}
-
-.edit-input-checkbox > span {
-  width: auto;
-  margin-bottom: 0;
-}
-
-.normal-meter-checkbox {
-  transform: scale(1.4);
-  transform-origin: left center;
-}
-
-.edit-input-full {
-  flex: 0 0 100%;
-  max-width: 100%;
 }
 </style>
