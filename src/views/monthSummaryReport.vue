@@ -72,7 +72,7 @@
           v-loading="isLoading"
         >
           <el-table-column prop="regionName" label="区域" align="center" min-width="80"/>
-          <el-table-column prop="priceName" label="价格类型" align="center" min-width="180"/>
+          <el-table-column prop="priceName" label="价格类型" align="center" min-width="150"/>
           <el-table-column prop="shouldReadUser" label="应抄" align="center" min-width="80"/>
           <el-table-column prop="realReadUser" label="实抄" align="center" min-width="80"/>
           <el-table-column prop="readRate" label="抄表率" align="center" min-width="90">
@@ -93,6 +93,8 @@
             </el-table-column>
           </el-table-column>
           <el-table-column prop="currentTotalFee" label="本期金额" align="center" min-width="100"/>
+          <el-table-column prop="additionFee" label="卫生费" align="center" min-width="100"/>
+          <el-table-column prop="sewageFee" label="污水费" align="center" min-width="100"/>
           <el-table-column prop="lastYearTotalFee" label="同期金额" align="center" min-width="100"/>
           <el-table-column label="金额对比" align="center">
             <el-table-column prop="feeDiff" align="center" min-width="100"/>
@@ -116,7 +118,7 @@
         <el-table-column label="区域" align="center" min-width="80" fixed="left">
           <template #default>总计</template>
         </el-table-column>
-        <el-table-column label="价格类型" align="center" min-width="180"/>
+        <el-table-column label="价格类型" align="center" min-width="150"/>
         <el-table-column prop="shouldReadUser" label="应抄" align="center" min-width="80"/>
         <el-table-column prop="realReadUser" label="实抄" align="center" min-width="80"/>
         <el-table-column prop="readRate" label="抄表率" align="center" min-width="90"/>
@@ -132,6 +134,8 @@
           </el-table-column>
         </el-table-column>
         <el-table-column prop="currentTotalFee" label="本期金额" align="center" min-width="100"/>
+        <el-table-column prop="additionFee" label="卫生费" align="center" min-width="100"/>
+        <el-table-column prop="sewageFee" label="污水费" align="center" min-width="100"/>
         <el-table-column prop="lastYearTotalFee" label="同期金额" align="center" min-width="100"/>
         <el-table-column label="金额对比" align="center">
           <el-table-column prop="feeDiff" align="center" min-width="100"/>
