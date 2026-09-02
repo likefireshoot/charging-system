@@ -78,6 +78,10 @@
         <img src="@/assets/yonghu/icon1.3.png" alt="" />
         <span>导出</span>
       </div>
+      <div class="tool-btn" :class="{ 'disabled-btn': multipleSelection.length === 0 }" @click="multipleSelection.length > 0 && openDeleteDialog()">
+        <img src="@/assets/yonghu/icon4.png" alt="" />
+        <span>调账-记录删除</span>
+      </div>
       <div class="refresh-btn" @click="handleRefresh">
         <img src="@/assets/yonghu/icon15.png" alt="" />
       </div>
@@ -146,6 +150,54 @@
       />
     </div>
   </div>
+
+  <!-- 调账-记录删除确认弹窗 -->
+  <el-dialog
+    v-model="deleteDialogVisible"
+    title="调账-记录删除"
+    width="640"
+    :close-on-click-modal="false"
+    :lock-scroll="false"
+    append-to-body
+  >
+    <div class="delete-warning">
+      <div class="delete-warning-icon">
+        <el-icon><WarningFilled /></el-icon>
+      </div>
+      <div>
+        <p class="delete-warning-title">即将删除 {{ deleteTargets.length }} 条抄表记录</p>
+        <p class="delete-warning-desc">删除后数据将不可恢复，请仔细核对下方记录后再决定是否继续。</p>
+      </div>
+    </div>
+
+    <div class="record-list-wrap">
+      <el-table :data="deleteTargets" border size="small" max-height="280" class="record-list-table">
+        <el-table-column label="序号" width="70" align="center">
+          <template #default="{ $index }">{{ $index + 1 }}</template>
+        </el-table-column>
+        <el-table-column label="读数" align="center">
+          <template #default="{ row }">
+            <span v-if="row.reportStatus && row.reportStatus !== '正常'">{{ row.reportStatus }}</span>
+            <span v-else>{{ row.readingCount }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="deltaWater" label="用水量" align="center" />
+        <el-table-column prop="startRead" label="起码" align="center" />
+        <el-table-column prop="endRead" label="止码" align="center" />
+        <el-table-column prop="createTime" label="时间" align="center" min-width="150" />
+      </el-table>
+    </div>
+
+    <template #footer>
+      <div class="delete-footer">
+        <el-checkbox v-model="acknowledgeDelete">我已知晓删除后不可恢复</el-checkbox>
+        <div class="delete-footer-btns">
+          <el-button @click="closeDeleteDialog">取消</el-button>
+          <el-button type="danger" :disabled="!acknowledgeDelete" :loading="deleting" @click="confirmDelete">确认删除</el-button>
+        </div>
+      </div>
+    </template>
+  </el-dialog>
 </template>
 
 <script>
@@ -177,7 +229,11 @@ export default {
         timeType: "day",
         accurateTime: "",
         dateRange: null
-      }
+      },
+      deleteDialogVisible: false,
+      deleteTargets: [],
+      acknowledgeDelete: false,
+      deleting: false
     };
   },
   mounted() {
@@ -543,6 +599,46 @@ export default {
         console.error("导出失败:", error);
         ElMessage.error("导出失败: " + error.message);
       }
+    },
+    openDeleteDialog() {
+      if (this.multipleSelection.length === 0) return;
+      this.deleteTargets = this.multipleSelection.map(item => ({ ...item }));
+      this.acknowledgeDelete = false;
+      this.deleting = false;
+      this.deleteDialogVisible = true;
+    },
+    closeDeleteDialog() {
+      this.deleteDialogVisible = false;
+      this.deleteTargets = [];
+      this.acknowledgeDelete = false;
+    },
+    async confirmDelete() {
+      if (!this.acknowledgeDelete || this.deleting) return;
+      const meterReportRecordIdList = this.deleteTargets
+        .map(item => item.meterReportRecordId)
+        .filter(id => id !== undefined && id !== null && id !== "");
+      if (meterReportRecordIdList.length === 0) {
+        ElMessage.warning("所选记录缺少记录ID，无法删除");
+        return;
+      }
+      this.deleting = true;
+      try {
+        const response = await service.post("/userManage/meterRead/delMeterReportRecord", { meterReportRecordIdList });
+        if (response.code === 200) {
+          ElMessage.success(`已删除 ${meterReportRecordIdList.length} 条记录`);
+          this.closeDeleteDialog();
+          if (this.$refs.multipleTableRef) {
+            this.$refs.multipleTableRef.clearSelection();
+          }
+          this.handleRefresh();
+        } else if (response.code === -1) {
+          ElMessage.error(response.msg || "删除失败");
+        }
+      } catch (error) {
+        ElMessage.error("删除失败，请稍后重试");
+      } finally {
+        this.deleting = false;
+      }
     }
   }
 };
@@ -770,6 +866,74 @@ export default {
   justify-content: center;
   flex-shrink: 0;
   font-size: 18px;
+}
+
+.disabled-btn {
+  opacity: 0.5;
+  cursor: not-allowed !important;
+  pointer-events: none;
+}
+
+.delete-warning {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  background: #fff7f7;
+  border: 1px solid #fbe2e2;
+  border-radius: 6px;
+  margin-bottom: 14px;
+}
+
+.delete-warning-icon {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: #fde2e2;
+  color: #f56c6c;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.delete-warning-icon .el-icon {
+  font-size: 22px;
+}
+
+.delete-warning-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #f56c6c;
+  margin: 0 0 4px;
+}
+
+.delete-warning-desc {
+  font-size: 14px;
+  color: #909399;
+  margin: 0;
+}
+
+.record-list-wrap {
+  border: 1px solid #ebeef5;
+  border-radius: 4px;
+}
+
+/* 记录列表隐藏滚动条，仍可鼠标滚动查看 */
+.record-list-wrap :deep(.el-scrollbar__bar) {
+  display: none;
+}
+
+.delete-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.delete-footer :deep(.el-checkbox__label) {
+  font-size: 14px;
+  color: #606266;
 }
 
 </style>
