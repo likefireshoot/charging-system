@@ -72,7 +72,7 @@
           >
             <el-table-column property="businessDate" label="营业时间" align="center" />
             <el-table-column property="totalCount" label="交易笔数" align="center" />
-            <el-table-column property="giveAmount" label="赠送金额（元）" align="center" />
+<!--            <el-table-column property="giveAmount" label="赠送金额（元）" align="center" />-->
             <el-table-column property="cashAmount" label="现金（元）" align="center" />
             <el-table-column property="wxAmount" label="微信支付（元）" align="center" />
             <el-table-column property="actualAmount" label="实收总金额（元）" align="center" />
@@ -89,7 +89,7 @@
         >
           <el-table-column property="businessDate" align="center" />
           <el-table-column property="totalCount" align="center" />
-          <el-table-column property="giveAmount" align="center" />
+<!--          <el-table-column property="giveAmount" align="center" />-->
           <el-table-column property="cashAmount" align="center" />
           <el-table-column property="wxAmount" align="center" />
           <el-table-column property="actualAmount" align="center" />
