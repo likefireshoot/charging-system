@@ -73,6 +73,11 @@
             <el-table-column property="businessDate" label="营业时间" align="center" />
             <el-table-column property="totalCount" label="交易笔数" align="center" />
 <!--            <el-table-column property="giveAmount" label="赠送金额（元）" align="center" />-->
+            <el-table-column property="lifeAmount" label="生活缴费（元）" align="center">
+              <template #default="scope">
+                {{ scope.row.lifeAmount || 0 }}
+              </template>
+            </el-table-column>
             <el-table-column property="cashAmount" label="现金（元）" align="center" />
             <el-table-column property="wxAmount" label="微信支付（元）" align="center" />
             <el-table-column property="actualAmount" label="实收总金额（元）" align="center" />
@@ -90,6 +95,7 @@
           <el-table-column property="businessDate" align="center" />
           <el-table-column property="totalCount" align="center" />
 <!--          <el-table-column property="giveAmount" align="center" />-->
+          <el-table-column property="lifeAmount" align="center" />
           <el-table-column property="cashAmount" align="center" />
           <el-table-column property="wxAmount" align="center" />
           <el-table-column property="actualAmount" align="center" />
@@ -162,7 +168,8 @@ export default {
           giveAmount: "0.00",
           cashAmount: "0.00",
           wxAmount: "0.00",
-          actualAmount: "0.00"
+          actualAmount: "0.00",
+          lifeAmount: "0.00",
         }
       ],
       totalNum: 0, // 总条数
@@ -287,7 +294,8 @@ export default {
               giveAmount: Number(total.giveAmount).toFixed(2),
               cashAmount: Number(total.cashAmount).toFixed(2),
               wxAmount: Number(total.wxAmount).toFixed(2),
-              actualAmount: Number(total.actualAmount).toFixed(2)
+              actualAmount: Number(total.actualAmount).toFixed(2),
+              lifeAmount: Number(total.lifeAmount).toFixed(2),
             }
           ];
         } else {
