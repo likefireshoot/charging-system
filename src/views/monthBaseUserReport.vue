@@ -73,39 +73,12 @@
         >
           <el-table-column prop="regionName" label="区域" align="center" min-width="80"/>
           <el-table-column prop="priceName" label="价格类型" align="center" min-width="150"/>
-          <el-table-column prop="shouldReadUser" label="应抄" align="center" min-width="80"/>
-          <el-table-column prop="realReadUser" label="实抄" align="center" min-width="80"/>
-          <el-table-column prop="readRate" label="抄表率" align="center" min-width="90">
-            <template #default="scope">
-              {{ scope.row.readRate != null ? (scope.row.readRate * 100).toFixed(2) + '%' : '-' }}
-            </template>
-          </el-table-column>
-          <el-table-column prop="currentWater" label="本月水量" align="center" min-width="100" />
-          <el-table-column prop="lastYearWater" label="同期水量" align="center" min-width="100"/>
-          <el-table-column label="水量对比" align="center">
-            <el-table-column prop="waterDiff" align="center" min-width="100"/>
-            <el-table-column align="center" min-width="40">
-              <template #default="scope">
-                <span v-if="Number(scope.row.waterDiff) > 0" style="color:#67c23a;font-size:20px;">↑</span>
-                <span v-else-if="Number(scope.row.waterDiff) < 0" style="color:#f56c6c;font-size:20px;">↓</span>
-                <span v-else>−</span>
-              </template>
-            </el-table-column>
-          </el-table-column>
-          <el-table-column prop="currentTotalFee" label="本期金额" align="center" min-width="100"/>
-          <el-table-column prop="additionFee" label="卫生费" align="center" min-width="100"/>
-          <el-table-column prop="sewageFee" label="污水费" align="center" min-width="100"/>
-          <el-table-column prop="lastYearTotalFee" label="同期金额" align="center" min-width="100"/>
-          <el-table-column label="金额对比" align="center">
-            <el-table-column prop="feeDiff" align="center" min-width="100"/>
-            <el-table-column align="center" min-width="40">
-              <template #default="scope">
-                <span v-if="Number(scope.row.feeDiff) > 0" style="color:#67c23a;font-size:20px;">↑</span>
-                <span v-else-if="Number(scope.row.feeDiff) < 0" style="color:#f56c6c;font-size:20px;">↓</span>
-                <span v-else>−</span>
-              </template>
-            </el-table-column>
-          </el-table-column>
+          <el-table-column prop="ton0Count" label="0吨" align="center" min-width="80"/>
+          <el-table-column prop="ton1Count" label="1吨" align="center" min-width="80"/>
+          <el-table-column prop="ton2Count" label="2吨" align="center" min-width="80" />
+          <el-table-column prop="ton3Count" label="3吨" align="center" min-width="80"/>
+          <el-table-column prop="ton4Count" label="4吨" align="center" min-width="80"/>
+          <el-table-column prop="fourTonSubtotal" label="小计" align="center" min-width="100"/>
         </el-table>
       </div>
       <el-table
@@ -118,38 +91,13 @@
         <el-table-column label="区域" align="center" min-width="80" fixed="left">
           <template #default>总计</template>
         </el-table-column>
-        <el-table-column label="价格类型" align="center" min-width="150"/>
-        <el-table-column prop="shouldReadUser" label="应抄" align="center" min-width="80"/>
-        <el-table-column prop="realReadUser" label="实抄" align="center" min-width="80"/>
-        <el-table-column prop="readRate" label="抄表率" align="center" min-width="90">
-          <template #default="scope">
-            {{ scope.row.readRate != null ? (scope.row.readRate * 100).toFixed(2) + '%' : '-' }}
-          </template>
-        </el-table-column>
-        <el-table-column prop="currentWater" label="本月水量" align="center" min-width="100" />
-        <el-table-column prop="lastYearWater" label="同期水量" align="center" min-width="100"/>
-        <el-table-column label="水量对比" align="center">
-          <el-table-column prop="waterDiff" align="center" min-width="100"/>
-          <el-table-column align="center" min-width="40">
-            <template #default="scope">
-              <span v-if="Number(scope.row.waterDiff) > 0" style="color:#67c23a;font-size:20px;">↑</span>
-              <span v-else-if="Number(scope.row.waterDiff) < 0" style="color:#f56c6c;font-size:20px;">↓</span>
-            </template>
-          </el-table-column>
-        </el-table-column>
-        <el-table-column prop="currentTotalFee" label="本期金额" align="center" min-width="100"/>
-        <el-table-column prop="additionFee" label="卫生费" align="center" min-width="100"/>
-        <el-table-column prop="sewageFee" label="污水费" align="center" min-width="100"/>
-        <el-table-column prop="lastYearTotalFee" label="同期金额" align="center" min-width="100"/>
-        <el-table-column label="金额对比" align="center">
-          <el-table-column prop="feeDiff" align="center" min-width="100"/>
-          <el-table-column align="center" min-width="40">
-            <template #default="scope">
-              <span v-if="Number(scope.row.feeDiff) > 0" style="color:#67c23a;font-size:20px;">↑</span>
-              <span v-else-if="Number(scope.row.feeDiff) < 0" style="color:#f56c6c;font-size:20px;">↓</span>
-            </template>
-          </el-table-column>
-        </el-table-column>
+        <el-table-column prop="priceName" label="价格类型" align="center" min-width="150"/>
+        <el-table-column prop="ton0Count" label="0吨" align="center" min-width="80"/>
+        <el-table-column prop="ton1Count" label="1吨" align="center" min-width="80"/>
+        <el-table-column prop="ton2Count" label="2吨" align="center" min-width="80" />
+        <el-table-column prop="ton3Count" label="3吨" align="center" min-width="80"/>
+        <el-table-column prop="ton4Count" label="4吨" align="center" min-width="80"/>
+        <el-table-column prop="fourTonSubtotal" label="小计" align="center" min-width="100"/>
       </el-table>
     </div>
   </div>
@@ -164,7 +112,7 @@ export default {
   data() {
     return {
       timeRange: this.getCurMonthStr(),
-      pageTitle: "自来水公司月账务汇总",
+      pageTitle: "自来水公司月底数户汇总",
       params: {
         companyId: null,
         reportYear: null,
@@ -180,15 +128,12 @@ export default {
       tableData: [],
       isLoading: false,
       totalSummaryRow: {
-        shouldReadUser:0,
-        realReadUser:0,
-        readRate:0,
-        currentWater:0,
-        lastYearWater:0,
-        waterDiff:0,
-        currentTotalFee:0,
-        lastYearTotalFee:0,
-        feeDiff:0
+        ton0Count: 0,
+        ton1Count: 0,
+        ton2Count: 0,
+        ton3Count: 0,
+        ton4Count: 0,
+        fourTonSubtotal: 0
       },
       priceOptionList: [],
     };
@@ -271,7 +216,7 @@ export default {
       const [year, month] = this.timeRange.split("-");
       this.params.reportYear = year;
       this.params.reportMonth = Number(month);
-      this.pageTitle = `自来水公司${year}-${month}月账务汇总`;
+      this.pageTitle = `自来水公司${year}-${month}月底数户汇总`;
       if (this.companyId === 1) {
         this.params.companyId = this.params.companyId || 1;
       } else {
@@ -318,7 +263,7 @@ export default {
         } catch (e) {}
       }
       try {
-        const res = await service.post(`/meterSummaryReport/export`, this.params,{
+        const res = await service.post(`lowWaterFourTonReport/export`, this.params,{
           responseType: "blob",
           headers: { Authorization: token, token: token }
         });
@@ -350,7 +295,7 @@ export default {
         this.params.companyId = this.companyId;
       }
       try {
-        const res = await service.post(`/meterSummaryReport/query`, this.params,{
+        const res = await service.post(`lowWaterFourTonReport/query`, this.params,{
           headers: { Authorization: token, token: token },
         });
         if(res.code===200){
@@ -679,14 +624,6 @@ export default {
 </style>
 
 <style scoped>
-:deep(.el-table__header tr:nth-child(2)) {
-  display: none !important;
-}
-/* 让第一行的父单元格自动撑开合并2列宽度 */
-:deep(.el-table__header tr:first-child th[colspan="2"]) {
-  colspan:2;
-  text-align: center;
-}
 :deep(.summary-subtotal) {
   font-weight: bold !important;
 }

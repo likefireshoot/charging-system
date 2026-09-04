@@ -48,6 +48,7 @@ import meterReadingReport from "@/views/meterReadingReport.vue";
 import meterBookReport from "@/views/meterBookReport.vue";
 import monthRecoveryReport from "@/views/monthRecoveryReport.vue";
 import monthSummaryReport from "@/views/monthSummaryReport.vue";
+import monthBaseUserReport from "@/views/monthBaseUserReport.vue";
 
 const routes = [
   {
@@ -126,6 +127,11 @@ const routes = [
             path: "monthSummaryReport",
             name: "monthSummaryReport",
             component: monthSummaryReport,
+          },
+          {
+            path: "monthBaseUserReport",
+            name: "monthBaseUserReport",
+            component: monthBaseUserReport,
           }
         ]
       },
