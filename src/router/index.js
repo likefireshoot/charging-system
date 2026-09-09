@@ -37,6 +37,7 @@ import historyDataManage from "@/views/historyDataManage.vue";
 import deviceManage from "@/views/deviceManage.vue";
 import billDetailReport from "@/components/report/billDetailReport.vue";
 import abnormalChargeReport from "@/components/report/abnormalChargeReport.vue";
+import twoFeeMonthlyReport from "@/views/twoFeeMonthlyReport.vue";
 import quickMeterReport from "@/views/quickMeterReport.vue";
 import rechargeDetailReport from "@/components/report/rechargeDetailReport.vue";
 import reviewMeterReport from "@/views/reviewMeterReport.vue";
@@ -122,6 +123,11 @@ const routes = [
             path: "monthRecoveryReport",
             name: "monthRecoveryReport",
             component: monthRecoveryReport,
+          },
+          {
+            path: "twoFeeMonthlyReport",
+            name: "twoFeeMonthlyReport",
+            component: twoFeeMonthlyReport,
           },
           {
             path: "monthSummaryReport",
