@@ -381,14 +381,12 @@ export default {
         if(res.code===200){
           const allRegions = res.data||[];
           if(companyId ===95){
-            this.regionList = allRegions;
+            this.regionList = allRegions.filter(r=> r.regionType ===1)
           }else{
-            this.regionList = allRegions.filter(r=>
-              (r.regionName && r.regionName.includes('普表')) || r.regionType ===3
-            )
+            this.regionList = allRegions;
           }
           if(this.regionList.length ===0){
-            ElMessage.warning('该水厂下暂无普表区域')
+            ElMessage.warning(companyId ===95 ? '该水厂下暂无远传表区域' : '该水厂下暂无区域')
           }
           await this.getPriceOptionList();
         }else{

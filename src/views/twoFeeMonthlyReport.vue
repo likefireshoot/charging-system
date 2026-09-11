@@ -5,9 +5,9 @@
     element-loading-text="正在生成报表，为确保数据准确，统计过程需要一点时间，请耐心等待……"
     element-loading-custom-class="export-loading"
   >
-    <!-- 本报表仅面向峰口水厂(companyId=95)开放 -->
+    <!-- 本报表按权限(101)控制展示 -->
     <div v-if="!isAllowed" class="not-allowed">
-      <el-empty description="该报表仅对峰口水厂开放，如需要请与管理员联系"></el-empty>
+      <el-empty description="暂无权限查看该报表，如需要请与管理员联系"></el-empty>
     </div>
 
     <template v-else>
@@ -115,7 +115,8 @@
 import service from "@/api/request";
 import { ElMessage } from "element-plus";
 
-const FENGKOU_COMPANY_ID = 95;
+// 月实收报表查看权限 id
+const TWO_FEE_REPORT_PERMISSION_ID = 101;
 // 新系统上线时间：2026年8月起数据接入，早于该时间的数据不支持在线查询
 const MIN_SUPPORT_YEAR = 2026;
 const MIN_SUPPORT_MONTH = 8;
@@ -126,6 +127,7 @@ export default {
     return {
       timeRange: this.getCurrentMonth(),
       companyId: JSON.parse(sessionStorage.getItem("userData")).companyId,
+      staffPermissionIds: JSON.parse(sessionStorage.getItem("userData")).staffPermissionIds,
       loading: false,
       exporting: false,
       showTipDialog: false,
@@ -136,7 +138,7 @@ export default {
   },
   computed: {
     isAllowed() {
-      return this.companyId === FENGKOU_COMPANY_ID;
+      return (this.staffPermissionIds || []).includes(TWO_FEE_REPORT_PERMISSION_ID) && !!this.companyId;
     },
     // 3 行 × 3 列 矩阵（不含底部合计）
     tableData() {
@@ -203,7 +205,7 @@ export default {
       this.loading = true;
       service
         .post("/twoFeeMonthlyReport", {
-          companyId: FENGKOU_COMPANY_ID,
+          companyId: this.companyId,
           reportYear,
           reportMonth,
         })
@@ -250,7 +252,7 @@ export default {
         const res = await service.post(
           "/exportTwoFeeMonthlyReport",
           {
-            companyId: FENGKOU_COMPANY_ID,
+            companyId: this.companyId,
             reportYear: valid.reportYear,
             reportMonth: valid.reportMonth,
           },
