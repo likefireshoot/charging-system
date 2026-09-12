@@ -817,7 +817,7 @@ export default {
         // }
 
         // 临时模拟成功
-        ElMessage.success("添加成功（接口尚未对接）");
+        ElMessage.success("接口测试中，暂未上线");
         this.closeAddDialog();
         this.handleRefresh();
       } catch (err) {
