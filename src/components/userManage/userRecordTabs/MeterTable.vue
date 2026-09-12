@@ -78,10 +78,10 @@
         <img src="@/assets/yonghu/icon1.3.png" alt="" />
         <span>导出</span>
       </div>
-      <div class="tool-btn"  @click="openAddDialog">
-        <img src="@/assets/yuangong/icon6.png" alt="" />
-        <span>调账-记录添加</span>
-      </div>
+<!--      <div class="tool-btn"  @click="openAddDialog">-->
+<!--        <img src="@/assets/yuangong/icon6.png" alt="" />-->
+<!--        <span>调账-记录添加</span>-->
+<!--      </div>-->
       <div class="tool-btn" :class="{ 'disabled-btn': multipleSelection.length === 0 }" @click="multipleSelection.length > 0 && openDeleteDialog()">
         <img src="@/assets/yonghu/icon4.png" alt="" />
         <span>调账-记录删除</span>
@@ -105,7 +105,7 @@
       >
         <el-table-column type="selection" width="50" align="center" fixed="left" />
         <el-table-column property="userId" label="用户号" min-width="110" align="center" fixed="left" />
-        <el-table-column property="userName" label="用户名称" min-width="120" align="center" />
+        <el-table-column property="userName" label="用户名" min-width="120" align="center" />
         <el-table-column label="表号" min-width="120" align="center">
           <template #default="scope">
             <div class="meter-code-cell">
@@ -136,8 +136,8 @@
 <!--        <el-table-column label="扣费吨值" min-width="100" align="center">-->
 <!--          <template #default="scope">{{ scope.row.deductTon }}</template>-->
 <!--        </el-table-column>-->
-<!--        <el-table-column property="feeThisTime" label="扣费" min-width="100" align="center" />-->
-<!--        <el-table-column property="balanceThisTime" label="余额" min-width="100" align="center" />-->
+        <el-table-column property="feeThisTime" label="扣费" min-width="100" align="center" />
+        <el-table-column property="balanceThisTime" label="余额" min-width="100" align="center" />
         <el-table-column property="valveStatus" label="阀门" min-width="60" align="center" />
         <el-table-column property="createTime" label="抄表时间" min-width="150" align="center" />
 <!--        <el-table-column property="userPhone" label="手机号" min-width="180" align="center" />-->
@@ -815,7 +815,7 @@ export default {
         // }
 
         // 临时模拟成功
-        ElMessage.success("添加成功（接口尚未对接）");
+        ElMessage.success("接口测试中，暂未上线");
         this.closeAddDialog();
         this.handleRefresh();
       } catch (err) {
