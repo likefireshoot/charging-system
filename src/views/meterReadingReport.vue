@@ -201,12 +201,8 @@ export default {
       const y = this.timeRange.split("-")[0];
       const m = this.timeRange.split("-")[1];
       this.params.startTime = `${this.timeRange}-01`;
-      const nextMonth = Number(m) + 1;
-      if(nextMonth > 12){
-        this.params.endTime = `${Number(y)+1}-01-01`
-      }else{
-        this.params.endTime = `${y}-${String(nextMonth).padStart(2,'0')}-01`
-      }
+      const lastDay = new Date(y, m, 0).getDate();
+      this.params.endTime = `${y}-${m}-${lastDay}`;
       this.pageTitle = `${y}年${m}月城区抄表情况报表`;
       if (this.companyId === 1) {
         this.params.companyId = this.params.companyId || 1;
@@ -287,6 +283,8 @@ export default {
       } catch (err) {
         ElMessage.error("获取报表失败");
         console.error(err);
+        this.tableData = [];
+        this.totalSummaryRow = {};
       } finally {
         this.isLoading = false;
       }
