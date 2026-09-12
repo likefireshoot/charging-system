@@ -101,7 +101,7 @@
       >
         <el-table-column type="selection" width="50" align="center" fixed="left" />
         <el-table-column property="userId" label="用户号" min-width="110" align="center" fixed="left" />
-        <el-table-column property="userName" label="用户名称" min-width="120" align="center" />
+        <el-table-column property="userName" label="用户名" min-width="120" align="center" />
         <el-table-column label="表号" min-width="120" align="center">
           <template #default="scope">
             <div class="meter-code-cell">
@@ -132,8 +132,8 @@
 <!--        <el-table-column label="扣费吨值" min-width="100" align="center">-->
 <!--          <template #default="scope">{{ scope.row.deductTon }}</template>-->
 <!--        </el-table-column>-->
-<!--        <el-table-column property="feeThisTime" label="扣费" min-width="100" align="center" />-->
-<!--        <el-table-column property="balanceThisTime" label="余额" min-width="100" align="center" />-->
+        <el-table-column property="feeThisTime" label="扣费" min-width="100" align="center" />
+        <el-table-column property="balanceThisTime" label="余额" min-width="100" align="center" />
         <el-table-column property="valveStatus" label="阀门" min-width="60" align="center" />
         <el-table-column property="createTime" label="抄表时间" min-width="150" align="center" />
 <!--        <el-table-column property="userPhone" label="手机号" min-width="180" align="center" />-->
