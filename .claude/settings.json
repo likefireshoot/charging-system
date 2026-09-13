@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run *)",
+      "Bash(Get-Content \"C:\\\\Users\\\\Chase\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-Chase-Desktop-water-charging-system\\\\77678c3b-31d6-45af-a33a-0c9047204c0a\\\\tasks\\\\b61nxh143.output\" -Tail 15)"
+    ]
+  }
+}

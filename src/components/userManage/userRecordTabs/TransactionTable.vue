@@ -96,10 +96,18 @@
         <img src="@/assets/yonghu/icon1.3.png" alt="" />
         <span>导出</span>
       </div>
-      <div class="tool-btn" :class="{ 'disabled-btn': multipleSelection.length === 0 }" @click="multipleSelection.length > 0 && openDeleteDialog()">
-        <img src="@/assets/yonghu/icon4.png" alt="" />
-        <span>调账-记录删除</span>
-      </div>
+      <el-tooltip content="至少选择一条记录" placement="top" :disabled="multipleSelection.length > 0">
+        <div class="tool-btn" :class="{ 'disabled-btn-tip': multipleSelection.length === 0 }" @click="openEditDialog()">
+          <img src="@/assets/yuangong/icon6.png" alt="" />
+          <span>调账-记录编辑</span>
+        </div>
+      </el-tooltip>
+      <el-tooltip content="至少选择一条记录" placement="top" :disabled="multipleSelection.length > 0">
+        <div class="tool-btn" :class="{ 'disabled-btn-tip': multipleSelection.length === 0 }" @click="multipleSelection.length > 0 && openDeleteDialog()">
+          <img src="@/assets/yonghu/icon4.png" alt="" />
+          <span>调账-记录删除</span>
+        </div>
+      </el-tooltip>
       <div class="refresh-btn" @click="handleRefresh">
         <img src="@/assets/yonghu/icon15.png" alt="" />
       </div>
@@ -337,6 +345,81 @@
       </div>
     </template>
   </el-dialog>
+
+  <!-- 调账-记录编辑弹窗 -->
+  <div class="recharge-dialog" v-if="editDialogVisible">
+    <div class="change-balance-dialog-content">
+      <div class="title">
+        <div style="margin-left: 10px; display: flex; align-items: center">
+          <img src="@/assets/yonghu/icon20.png" alt="" style="margin-right: 8px" />
+          <span style="font-size: 20px">调账-记录编辑</span>
+        </div>
+        <div style="margin-right: 10px; cursor: pointer" @click="closeEditDialog">
+          <img src="@/assets/close.png" alt="" />
+        </div>
+      </div>
+      <div class="recharge-content">
+        <div class="recharge-input">
+          <span>用户号</span>
+          <el-input :value="editForm.userId ?? '-'" :disabled="true" />
+        </div>
+        <div class="recharge-input">
+          <span>用户名</span>
+          <el-input :value="editForm.userName ?? '-'" :disabled="true" />
+        </div>
+        <div class="recharge-input">
+          <span>表号</span>
+          <el-input :value="editForm.meterCode ?? '-'" :disabled="true" />
+        </div>
+        <div class="recharge-input">
+          <span>交易方式</span>
+          <el-input :value="editForm.rechargeType ?? '-'" :disabled="true" />
+        </div>
+        <div class="recharge-input">
+          <span>交易金额</span>
+          <el-input :value="editForm.rechargeAmount ?? '-'" :disabled="true" />
+        </div>
+        <div class="recharge-input">
+          <span>交易时间</span>
+          <el-input :value="editForm.createTime ?? '-'" :disabled="true" />
+        </div>
+        <div class="recharge-input">
+          <span>充值前余额（可修改）</span>
+          <el-input v-model="editForm.oldBalance" placeholder="请输入充值前余额" @input="handleOldBalanceInput" @blur="handleOldBalanceBlur" />
+        </div>
+        <div class="recharge-input">
+          <span>充值后余额</span>
+          <el-input :value="editForm.newBalance" :disabled="true" />
+        </div>
+        <div class="recharge-input">
+          <span>收费人</span>
+          <el-input :value="editForm.rechargeUser ?? '-'" :disabled="true" />
+        </div>
+        <div class="recharge-input">
+          <span>微信退费</span>
+          <el-input :value="refundText" :disabled="true" />
+        </div>
+        <div class="recharge-input">
+          <span>开收据</span>
+          <el-input :value="editForm.hasShouju ? '是' : '否'" :disabled="true" />
+        </div>
+        <div class="edit-tip">
+          <el-icon style="color: #E6A23C; margin-right: 8px; font-size: 22px;"><InfoFilled /></el-icon>
+          <span>温馨提示：本次仅可修改「充值前余额」。「充值后余额」将在「充值前余额」失去焦点时，按「充值前余额 + 交易金额」自动计算并同步更新，无需手动填写，请核对无误后再提交。</span>
+        </div>
+      </div>
+      <div class="btn">
+        <div class="confirm-btn" :class="{ saving: editSaving }" @click="confirmEdit">
+          <el-icon style="margin-left: 5%"><Check /></el-icon>
+          <span style="font-size: 20px; margin-left: 15%">确认</span>
+        </div>
+        <div class="cancel-btn" @click="closeEditDialog">
+          <el-icon style="margin-left: 5%; color: #45ba7e"><Close /></el-icon>
+          <span style="font-size: 20px; margin-left: 15%; color: #5a5a5a">取消</span>
+        </div>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script>
@@ -381,6 +464,11 @@ export default {
         !row.hasShouju &&
         row.status == 1
       );
+    },
+    // 微信退费状态展示（仅微信支付记录有意义）
+    refundText() {
+      if (!this.editForm || this.editForm.rechargeType !== "微信支付") return "-";
+      return this.editForm.status == 2 ? "是" : "否";
     }
   },
   data() {
@@ -425,6 +513,24 @@ export default {
       deleteTargets: [],
       acknowledgeDelete: false,
       deleting: false,
+
+      // 调账-记录编辑弹窗
+      editDialogVisible: false,
+      editSaving: false,
+      editForm: {
+        recordId: null,
+        userId: "",
+        userName: "",
+        meterCode: "",
+        rechargeType: "",
+        rechargeAmount: "",
+        oldBalance: "",
+        newBalance: "",
+        createTime: "",
+        rechargeUser: "",
+        status: null,
+        hasShouju: false
+      },
 
       // 新增底部汇总行
       totalSummaryRow: [
@@ -1108,6 +1214,126 @@ export default {
         ];
       }
     },
+    // 调账-记录编辑 - 打开编辑弹窗
+    openEditDialog() {
+      if (this.multipleSelection.length === 0) return;
+      if (this.multipleSelection.length > 1) {
+        ElMessage.warning("一次只能编辑一条充值记录，请取消多选后再试");
+        return;
+      }
+      const row = this.multipleSelection[0];
+      const oldB = parseFloat(row.oldBalance);
+      const amount = parseFloat(row.rechargeAmount) || 0;
+      // 充值后余额优先取记录原值，缺省时按「充值前余额 + 交易金额」兜底
+      const fallbackNewBalance = !isNaN(oldB) ? (oldB + amount).toFixed(2) : "";
+      this.editForm = {
+        recordId: row.recordId,
+        userId: row.userId,
+        userName: row.userName,
+        meterCode: row.meterCode,
+        rechargeType: row.rechargeType,
+        rechargeAmount: row.rechargeAmount,
+        oldBalance: row.oldBalance ?? "",
+        newBalance: row.newBalance ?? fallbackNewBalance,
+        createTime: row.createTime,
+        rechargeUser: row.rechargeUser,
+        status: row.status,
+        hasShouju: row.hasShouju
+      };
+      this.editSaving = false;
+      this.editDialogVisible = true;
+    },
+    closeEditDialog() {
+      this.editDialogVisible = false;
+      this.editSaving = false;
+      this.editForm = {
+        recordId: null,
+        userId: "",
+        userName: "",
+        meterCode: "",
+        rechargeType: "",
+        rechargeAmount: "",
+        oldBalance: "",
+        newBalance: "",
+        createTime: "",
+        rechargeUser: "",
+        status: null,
+        hasShouju: false
+      };
+    },
+    // 限制充值前余额只能输入合法数字（最多两位小数）
+    handleOldBalanceInput(value) {
+      let cleaned = String(value).replace(/[^\d.]/g, "");
+      const dotIndex = cleaned.indexOf(".");
+      if (dotIndex !== -1) {
+        cleaned = cleaned.slice(0, dotIndex + 1) + cleaned.slice(dotIndex + 1).replace(/\./g, "");
+        const [intPart, decPart] = cleaned.split(".");
+        if (decPart && decPart.length > 2) {
+          cleaned = `${intPart}.${decPart.slice(0, 2)}`;
+        }
+      }
+      this.editForm.oldBalance = cleaned;
+    },
+    // 充值前余额失去焦点：统一两位小数展示，并联动更新充值后余额
+    handleOldBalanceBlur() {
+      const cleaned = this.editForm.oldBalance;
+      if (cleaned === "" || cleaned == null) {
+        this.editForm.newBalance = "";
+        return;
+      }
+      const oldBalance = parseFloat(cleaned);
+      if (isNaN(oldBalance)) {
+        this.editForm.newBalance = "";
+        return;
+      }
+      this.editForm.oldBalance = oldBalance.toFixed(2);
+      const rechargeAmount = parseFloat(this.editForm.rechargeAmount) || 0;
+      this.editForm.newBalance = (oldBalance + rechargeAmount).toFixed(2);
+    },
+    // 调账-记录编辑 - 提交
+    async confirmEdit() {
+      if (this.editSaving) return;
+      const oldBalance = parseFloat(this.editForm.oldBalance);
+      if (this.editForm.oldBalance === "" || this.editForm.oldBalance == null || isNaN(oldBalance)) {
+        ElMessage.warning("请输入有效的充值前余额");
+        return;
+      }
+      if (oldBalance < 0) {
+        ElMessage.warning("充值前余额不能为负数");
+        return;
+      }
+      const rechargeAmount = parseFloat(this.editForm.rechargeAmount) || 0;
+      const newBalance = Number((oldBalance + rechargeAmount).toFixed(2));
+      const userInfo = JSON.parse(sessionStorage.getItem("userData") || "{}");
+
+      const reqData = {
+        recordId: this.editForm.recordId,
+        oldBalance: oldBalance,
+        newBalance: newBalance,
+        operatorStaffId: userInfo.staffId,
+        operatorStaffName: userInfo.staffName
+      };
+
+      this.editSaving = true;
+      try {
+        const res = await service.post("/userManage/userCharge/updateRechargeRecord", reqData);
+        if (res.code === 200) {
+          ElMessage.success(res.msg || "调账成功");
+          this.closeEditDialog();
+          if (this.$refs.multipleTableRef) {
+            this.$refs.multipleTableRef.clearSelection();
+          }
+          this.handleRefresh();
+        } else {
+          ElMessage.error(res.msg || "调账失败");
+        }
+      } catch (error) {
+        console.error("调账失败:", error);
+        ElMessage.error("调账失败，请稍后重试");
+      } finally {
+        this.editSaving = false;
+      }
+    },
     openDeleteDialog() {
       if (this.multipleSelection.length === 0) return;
       this.deleteTargets = this.multipleSelection.map(item => ({ ...item }));
@@ -1307,6 +1533,12 @@ export default {
   opacity: 0.5;
   cursor: not-allowed !important;
   pointer-events: none;
+}
+
+/* 调账类按钮禁用态：保留鼠标事件，保证悬浮时能显示「至少选择一条记录」提示 */
+.disabled-btn-tip {
+  opacity: 0.5;
+  cursor: not-allowed !important;
 }
 
 .meter-code-cell {
@@ -1629,5 +1861,132 @@ export default {
 .delete-footer :deep(.el-checkbox__label) {
   font-size: 14px;
   color: #606266;
+}
+
+/* ===== 调账-记录编辑弹窗 ===== */
+.recharge-dialog {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 199;
+  background-color: rgb(31 33 38 / 15%);
+}
+
+.change-balance-dialog-content {
+  width: 60%;
+  border: 1px solid #fafafa;
+  background-color: #fafafa;
+  border-radius: 5px;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.recharge-content {
+  width: 94%;
+  background-color: #fff;
+  border-radius: 5px;
+  margin-top: 15px;
+  margin-bottom: 5px;
+  display: flex;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  padding: 10px;
+  overflow-y: auto;
+  max-height: 55vh;
+}
+
+.recharge-input {
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  width: 31%;
+  height: 75px;
+  margin-right: 2.3%;
+}
+
+.recharge-input > span {
+  font-size: 20px;
+  color: #747374;
+  margin-bottom: 5px;
+}
+
+.recharge-input > .el-input {
+  height: 35px;
+  width: 100%;
+}
+
+.recharge-input :deep(.el-input__inner.is-disabled) {
+  background-color: #f5f7fa;
+  color: #909399;
+}
+
+.edit-tip {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  padding: 12px 14px;
+  margin: 6px 0 0;
+  background: #fdf6ec;
+  border: 1px solid #faecd8;
+  border-radius: 6px;
+  font-size: 18px;
+  color: #606266;
+  line-height: 1.7;
+}
+
+.title {
+  width: 100%;
+  background-color: #fff;
+  border-radius: 5px 5px 0 0;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+  height: 45px;
+  line-height: 45px;
+  text-align: center;
+  display: flex;
+  justify-content: space-between;
+}
+
+.btn {
+  width: 100%;
+  height: 40px;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  margin-top: 15px;
+  margin-bottom: 15px;
+}
+
+.confirm-btn,
+.cancel-btn {
+  height: 42px;
+  width: 110px;
+  cursor: pointer;
+  border: 1px solid #f2f2f2;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+}
+
+.confirm-btn {
+  background-color: #45ba7e;
+  margin-right: 15px;
+  color: #fff;
+}
+
+.confirm-btn.saving {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.cancel-btn {
+  background-color: #fff;
+  margin-right: 3%;
 }
 </style>

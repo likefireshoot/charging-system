@@ -78,10 +78,16 @@
         <img src="@/assets/yonghu/icon1.3.png" alt="" />
         <span>导出</span>
       </div>
-      <div class="tool-btn" :class="{ 'disabled-btn': multipleSelection.length === 0 }" @click="multipleSelection.length > 0 && openDeleteDialog()">
-        <img src="@/assets/yonghu/icon4.png" alt="" />
-        <span>调账-记录删除</span>
-      </div>
+<!--      <div class="tool-btn"  @click="openAddDialog">-->
+<!--        <img src="@/assets/yuangong/icon6.png" alt="" />-->
+<!--        <span>调账-记录添加</span>-->
+<!--      </div>-->
+      <el-tooltip content="至少选择一条记录" placement="top" :disabled="multipleSelection.length > 0">
+        <div class="tool-btn" :class="{ 'disabled-btn-tip': multipleSelection.length === 0 }" @click="multipleSelection.length > 0 && openDeleteDialog()">
+          <img src="@/assets/yonghu/icon4.png" alt="" />
+          <span>调账-记录删除</span>
+        </div>
+      </el-tooltip>
       <div class="refresh-btn" @click="handleRefresh">
         <img src="@/assets/yonghu/icon15.png" alt="" />
       </div>
@@ -872,6 +878,12 @@ export default {
   opacity: 0.5;
   cursor: not-allowed !important;
   pointer-events: none;
+}
+
+/* 调账类按钮禁用态：保留鼠标事件，保证悬浮时能显示「至少选择一条记录」提示 */
+.disabled-btn-tip {
+  opacity: 0.5;
+  cursor: not-allowed !important;
 }
 
 .delete-warning {

@@ -21,6 +21,7 @@
               type="month"
               placeholder="选择月份"
               value-format="YYYY-MM"
+              :disabled-date="disabledDate"
               style="width:100%"
             ></el-date-picker>
           </div>
@@ -100,8 +101,8 @@
           <span class="tip-title">温馨提示</span>
         </div>
         <div class="tip-card-body">
-          <p class="tip-desc">为保障数据准确，本报表仅支持查询 <b class="tip-highlight">2026年8月及以后</b> 的费用数据。</p>
-          <p class="tip-desc">2026年7月及以前处于新旧系统切换期间，其数据格式与现行系统不一致，暂不支持在线查询 / 导出，敬请谅解。</p>
+          <p class="tip-desc">为保障数据准确，本报表仅支持查询 <b class="tip-highlight">{{ minSupportYear }}年{{ minSupportMonth }}月及以后</b> 的费用数据。</p>
+          <p class="tip-desc">{{ minSupportYear }}年{{ minSupportMonth - 1 }}月及以前处于新旧系统切换期间，其数据格式与现行系统不一致，暂不支持在线查询 / 导出，敬请谅解。</p>
         </div>
         <div class="tip-card-foot">
           <div class="tip-confirm" @click="showTipDialog = false">我知道了</div>
@@ -117,9 +118,12 @@ import { ElMessage } from "element-plus";
 
 // 月实收报表查看权限 id
 const TWO_FEE_REPORT_PERMISSION_ID = 101;
-// 新系统上线时间：2026年8月起数据接入，早于该时间的数据不支持在线查询
+// 95号水厂公司id
+const COMPANY_95_ID = 95;
+// 新系统上线时间：95号水厂2026年8月起数据接入，其余水厂2026年9月起，早于对应时间的数据不支持在线查询
 const MIN_SUPPORT_YEAR = 2026;
-const MIN_SUPPORT_MONTH = 8;
+const OTHER_PLANT_MIN_SUPPORT_MONTH = 9;
+const COMPANY95_MIN_SUPPORT_MONTH = 8;
 
 export default {
   name: "TwoFeeMonthlyReport",
@@ -139,6 +143,13 @@ export default {
   computed: {
     isAllowed() {
       return (this.staffPermissionIds || []).includes(TWO_FEE_REPORT_PERMISSION_ID) && !!this.companyId;
+    },
+    // 当前水厂支持查询的最早月份
+    minSupportYear() {
+      return MIN_SUPPORT_YEAR;
+    },
+    minSupportMonth() {
+      return this.companyId === COMPANY_95_ID ? COMPANY95_MIN_SUPPORT_MONTH : OTHER_PLANT_MIN_SUPPORT_MONTH;
     },
     // 3 行 × 3 列 矩阵（不含底部合计）
     tableData() {
@@ -173,7 +184,7 @@ export default {
       const base = "月实收报表";
       return year && month ? `${base}（${year}年${month}月）` : base;
     },
-    // 月份前置校验：2026年7月及以前拒绝查询/导出，友好提示
+    // 月份前置校验：早于当前水厂支持的最早月份拒绝查询/导出，友好提示
     validateMonth() {
       if (!this.timeRange) {
         ElMessage.warning("请先选择统计月份");
@@ -182,11 +193,20 @@ export default {
       const [year, month] = this.timeRange.split("-");
       const reportYear = Number(year);
       const reportMonth = Number(month);
-      if (reportYear < MIN_SUPPORT_YEAR || (reportYear === MIN_SUPPORT_YEAR && reportMonth < MIN_SUPPORT_MONTH)) {
+      if (
+        reportYear < this.minSupportYear ||
+        (reportYear === this.minSupportYear && reportMonth < this.minSupportMonth)
+      ) {
         this.showTipDialog = true;
         return "";
       }
       return { reportYear, reportMonth };
+    },
+    // 日期选择器：早于当前水厂支持的最早月份的选项置灰不可选
+    disabledDate(date) {
+      const y = date.getFullYear();
+      const m = date.getMonth() + 1;
+      return y < this.minSupportYear || (y === this.minSupportYear && m < this.minSupportMonth);
     },
     search() {
       if (!this.isAllowed) {
