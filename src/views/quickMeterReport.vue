@@ -67,11 +67,13 @@
         <div class="panel-header">
           <h3>用户列表</h3>
           <el-input
+            ref="userSearchInputRef"
             v-model="userSearchKeyword"
             placeholder="搜索用户名、用户号或地址"
             clearable
             style="width: 300px;"
             @input="handleUserSearch"
+            @clear="handleUserSearch"
           >
             <template #prefix>
               <el-icon><Search /></el-icon>
@@ -353,6 +355,12 @@ const userList = ref([]);
 // 用户搜索关键词
 const userSearchKeyword = ref('');
 
+// 用户搜索框引用：搜索刷新后用于重新聚焦，避免光标丢失
+const userSearchInputRef = ref(null);
+
+// 是否正在执行搜索（用于抑制自动聚焦本月读数框，避免抢走搜索框光标）
+let isSearching = false;
+
 // 分页相关
 const currentPage = ref(1);
 const pageSize = ref(20);
@@ -621,7 +629,8 @@ const loadUserDetail = (user) => {
   loadReportHistory(user);
 
   // 详情加载后，若处于正常状态则自动聚焦本月读数输入框
-  if (selectedUserDetail.value.reportStatus === '正常') {
+  // 搜索刷新期间不要抢焦点（由 handleUserSearch 负责把焦点还给搜索框）
+  if (!isSearching && selectedUserDetail.value.reportStatus === '正常') {
     nextTick(() => {
       currentReadingRef.value?.focus();
     });
@@ -776,6 +785,8 @@ const fetchUserListByPage = async (keyword = '') => {
 
 // 用户搜索处理函数（提交 keyword 给后端做全局匹配，结果从第一页开始重新分页）
 const handleUserSearch = debounceSearch(async () => {
+  // 标记搜索中，抑制 loadUserDetail 的自动聚焦，避免光标跳到本月读数框
+  isSearching = true;
   currentPage.value = 1;
   await fetchUserListByPage();
 
@@ -792,6 +803,12 @@ const handleUserSearch = debounceSearch(async () => {
       closeDetailPanel();
     }
   }
+
+  // 数据刷新后把焦点还给搜索框，保证可连续输入
+  await nextTick();
+  userSearchInputRef.value?.focus();
+
+  isSearching = false;
 });
 
 // 获取行的唯一标识（同一户号多表时用 meterCode 区分）

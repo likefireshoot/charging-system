@@ -56,10 +56,12 @@
         <div class="search-input">
           <span>姓名/地址/用户号</span>
           <el-input
+            ref="searchKeywordInputRef"
             v-model="searchKeyword"
             placeholder="请输入姓名/地址/用户号"
             clearable
             @input="handleSearch"
+            @clear="handleSearch"
           >
 <!--            <template #prefix>-->
 <!--              <el-icon><Search /></el-icon>-->
@@ -357,6 +359,9 @@ const reviewStats = reactive({
 // 搜索关键词
 const searchKeyword = ref('');
 
+// 搜索框引用：数据刷新后用于重新聚焦，避免输入时光标丢失
+const searchKeywordInputRef = ref(null);
+
 // 分页相关
 const currentPage = ref(1);
 const pageSize = ref(20);
@@ -570,7 +575,8 @@ const filterCodeBook = (val) => {
 const isRegionLevel = ref(false);
 
 // 表册变化时加载审核列表（同时标记为非区域级）
-const handleCodeBookChange = async (codeBookId) => {
+// resetPage：true 表示用户主动切换/搜索需重置到第一页；false 表示翻页/改页大小等请求，不要覆盖当前页码
+const handleCodeBookChange = async (codeBookId, resetPage = true) => {
   if (!codeBookId) {
     // 清空表册：回到区域级加载（若有区域）
     isRegionLevel.value = !!searchParams.region;
@@ -585,7 +591,9 @@ const handleCodeBookChange = async (codeBookId) => {
   }
 
   isRegionLevel.value = false;
-  currentPage.value = 1; // 切换表册重置分页
+  if (resetPage) {
+    currentPage.value = 1; // 切换表册重置分页
+  }
 
   loading.value = true;
   try {
@@ -757,18 +765,23 @@ const refreshCurrentStatistics = async () => {
 };
 
 // 搜索处理函数（触发服务端搜索，防抖避免高频请求）
-const handleSearch = debounceSearch(() => {
+const handleSearch = debounceSearch(async () => {
   currentPage.value = 1;
   selectedRows.value = [];
 
   if (searchParams.codeBook) {
-    handleCodeBookChange(searchParams.codeBook);
+    await handleCodeBookChange(searchParams.codeBook);
   } else if (searchParams.region) {
     // 只选了区域未选表册：按区域重新加载
-    loadRegionReviewData(searchParams.region);
+    await loadRegionReviewData(searchParams.region);
   } else {
     ElMessage.warning('请先选择区域或表册，再输入关键词进行搜索');
+    return;
   }
+
+  // 数据刷新后把焦点还给搜索框，避免输入时光标丢失导致无法连续输入
+  await nextTick();
+  searchKeywordInputRef.value?.focus();
 });
 
 // 清空所有数据
@@ -977,7 +990,7 @@ const handleSizeChange = (val) => {
 
   // 表册级/区域级都走后端真分页，重新请求
   if (searchParams.codeBook) {
-    handleCodeBookChange(searchParams.codeBook);
+    handleCodeBookChange(searchParams.codeBook, false);
   } else if (searchParams.region) {
     loadRegionReviewData(searchParams.region);
   }
@@ -994,7 +1007,7 @@ const handleCurrentChange = (val) => {
 
   // 表册级/区域级都走后端真分页，重新请求
   if (searchParams.codeBook) {
-    handleCodeBookChange(searchParams.codeBook);
+    handleCodeBookChange(searchParams.codeBook, false);
   } else if (searchParams.region) {
     loadRegionReviewData(searchParams.region);
   }
@@ -1129,7 +1142,7 @@ const handleCurrentPageReview = async () => {
           // 还有下一页，自动跳转（表册级/区域级都触发后端分页请求）
           currentPage.value++;
           if (searchParams.codeBook) {
-            handleCodeBookChange(searchParams.codeBook);
+            handleCodeBookChange(searchParams.codeBook, false);
           } else if (searchParams.region) {
             loadRegionReviewData(searchParams.region);
           }

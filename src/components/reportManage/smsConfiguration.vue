@@ -62,6 +62,10 @@
           <img src="@/assets/yonghu/icon1.3.png" alt="" />
           <span style="margin-left: 6px; color: #5a5a5a">导出</span>
         </div>
+        <div class="manual-send-btn" style="width: 190px" @click="openManualDialog">
+          <img src="@/assets/yonghu/icon1.3.png" alt="" />
+          <span style="margin-left: 6px; color: #5a5a5a; white-space: nowrap">短信通知手工补发</span>
+        </div>
         <div class="reflush" @click="reflush">
           <img src="@/assets/yonghu/icon15.png" alt="" />
         </div>
@@ -304,12 +308,78 @@
         </div>
       </div>
     </div>
+
+    <!-- 短信通知手工补发弹出框 -->
+    <el-dialog
+      v-model="manualVisible"
+      title="短信通知手工补发"
+      width="960px"
+      :close-on-click-modal="false"
+      @open="fetchCandidates"
+    >
+      <div class="manual-toolbar">
+        <el-input
+          v-model="manualSearch"
+          class="manual-search"
+          placeholder="用户号 / 用户名 / 手机号 / 表号"
+          clearable
+          @input="handleManualSearch"
+          @clear="handleManualSearch"
+        >
+          <template #prefix>
+            <el-icon><Search /></el-icon>
+          </template>
+        </el-input>
+      </div>
+      <el-table
+        ref="candTable"
+        :data="pagedCandidates"
+        height="420"
+        border
+        row-key="userMeterBindId"
+        @selection-change="onSelect"
+        :header-cell-style="{ background: '#46B97E', color: '#FFFFFF' }"
+        v-loading="manualLoading"
+      >
+        <el-table-column type="selection" width="50" align="center"></el-table-column>
+        <el-table-column prop="userName" label="姓名" width="100" align="center"></el-table-column>
+        <el-table-column prop="userPhone" label="手机号" align="center"></el-table-column>
+        <el-table-column prop="meterCode" label="表号" align="center"></el-table-column>
+        <el-table-column prop="balance" label="余额" align="center"></el-table-column>
+        <el-table-column prop="minimumBalanceThreshold" label="预警值" align="center"></el-table-column>
+        <el-table-column prop="smsConfigName" label="短信配置" align="center"></el-table-column>
+        <el-table-column prop="regionName" label="区域" align="center"></el-table-column>
+      </el-table>
+      <div class="manual-pager">
+        <el-pagination
+          v-model:current-page="manualPage"
+          v-model:page-size="manualPageSize"
+          :page-sizes="[10, 20, 50, 100]"
+          :total="filteredCandidates.length"
+          layout="total, sizes, prev, pager, next, jumper"
+          @current-change="handleManualPageChange"
+          @size-change="handleManualSearch"
+        />
+      </div>
+      <template #footer>
+        <el-button @click="selectCurrentPage">选择本页</el-button>
+        <el-button @click="selectAll">选择全部</el-button>
+        <el-button @click="clearManualSelection">取消选择</el-button>
+        <el-button
+          type="primary"
+          :disabled="!selectedIds.length || manualSending"
+          @click="confirmSend"
+        >
+          发送（已选 {{ selectedIds.length }} 人）
+        </el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script>
 import service from "@/api/request";
-import { ElMessage } from "element-plus";
+import { ElMessage, ElMessageBox } from "element-plus";
 import axios from "axios";
 
 export default {
@@ -404,6 +474,18 @@ export default {
       edit_dialogFormVisible: false,
       water_outage_dialogFormVisible: false,
 
+      manualVisible: false,
+      candidates: [],
+      selectedIds: [],
+      manualLoading: false,
+      manualSending: false,
+      manualSearch: "",
+      manualPage: 1,
+      manualPageSize: 10,
+      syncingSelection: false,
+      // 搜索匹配的字段（用户号 / 用户名 / 手机号 / 表号）
+      manualSearchFields: ["userId", "userName", "userPhone", "meterCode"],
+
       //表格勾选行
       selection: [],
 
@@ -460,6 +542,24 @@ export default {
     },
   },
   computed: {
+    // 按搜索关键字过滤后的候选用户
+    filteredCandidates() {
+      const kw = (this.manualSearch || "").trim().toLowerCase();
+      if (!kw) return this.candidates;
+      return this.candidates.filter((item) =>
+        this.manualSearchFields.some((field) => {
+          const val = item[field];
+          return val != null && String(val).toLowerCase().includes(kw);
+        })
+      );
+    },
+
+    // 当前页展示的候选用户
+    pagedCandidates() {
+      const start = (this.manualPage - 1) * this.manualPageSize;
+      return this.filteredCandidates.slice(start, start + this.manualPageSize);
+    },
+
     // 每列的百分比宽度
     columnPercentages() {
       return {
@@ -1171,6 +1271,136 @@ export default {
         });
     },
 
+    // ===== 短信通知手工补发 =====
+    openManualDialog() {
+      this.manualVisible = true;
+    },
+
+    // 取当前生效水厂（与 querySmsConfig 口径一致）
+    getManualCompanyId() {
+      return this.companyId === 1 ? this.params.company || null : this.companyId;
+    },
+
+    async fetchCandidates() {
+      // 重新打开弹窗时重置搜索、分页与勾选
+      this.manualSearch = "";
+      this.manualPage = 1;
+      this.selectedIds = [];
+
+      const companyId = this.getManualCompanyId();
+      if (!companyId) {
+        this.candidates = [];
+        ElMessage.warning("请先在上方选择所属水厂");
+        return;
+      }
+      this.manualLoading = true;
+      try {
+        const res = await service.get(
+          `/sms/manualArrearsCandidates?companyId=${encodeURIComponent(companyId)}`
+        );
+        this.candidates = (res.code === 200 && res.data) || [];
+      } catch (e) {
+        this.candidates = [];
+        ElMessage.error("获取候选用户失败：" + (e.message || e));
+      } finally {
+        this.manualLoading = false;
+        this.syncTableSelection();
+      }
+    },
+
+    // 搜索关键字变化：回到第一页
+    handleManualSearch() {
+      this.manualPage = 1;
+      this.syncTableSelection();
+    },
+
+    // 页码变化
+    handleManualPageChange(page) {
+      this.manualPage = page;
+      this.syncTableSelection();
+    },
+
+    // 表格勾选变化：仅按“当前页”做增量同步，保留其他页的已选
+    onSelect(rows) {
+      if (this.syncingSelection) return;
+      const pageIds = this.pagedCandidates.map((r) => r.userMeterBindId);
+      const selectedOnPage = new Set(rows.map((r) => r.userMeterBindId));
+      const kept = this.selectedIds.filter((id) => !pageIds.includes(id));
+      const added = pageIds.filter((id) => selectedOnPage.has(id));
+      this.selectedIds = kept.concat(added);
+    },
+
+    // 根据 selectedIds 还原当前页的勾选状态
+    syncTableSelection() {
+      this.$nextTick(() => {
+        const table = this.$refs.candTable;
+        if (!table) return;
+        this.syncingSelection = true;
+        this.pagedCandidates.forEach((row) => {
+          const checked = this.selectedIds.includes(row.userMeterBindId);
+          table.toggleRowSelection(row, checked);
+        });
+        this.$nextTick(() => {
+          this.syncingSelection = false;
+        });
+      });
+    },
+
+    // 选择本页：把当前页所有用户并入已选
+    selectCurrentPage() {
+      const ids = this.pagedCandidates.map((r) => r.userMeterBindId);
+      const set = new Set(this.selectedIds);
+      ids.forEach((id) => set.add(id));
+      this.selectedIds = Array.from(set);
+      this.syncTableSelection();
+    },
+
+    // 选择全部：选中所有（搜索过滤后的）候选用户
+    selectAll() {
+      this.selectedIds = this.filteredCandidates.map((r) => r.userMeterBindId);
+      this.syncTableSelection();
+    },
+
+    // 取消选择：清空已选（不关闭弹窗）
+    clearManualSelection() {
+      this.selectedIds = [];
+      this.syncTableSelection();
+    },
+
+    async confirmSend() {
+      if (!this.selectedIds.length) return;
+      const companyId = this.getManualCompanyId();
+      if (!companyId) {
+        ElMessage.warning("请先在上方选择所属水厂");
+        return;
+      }
+      try {
+        await ElMessageBox.confirm(
+          `确认向 ${this.selectedIds.length} 位用户发送余额不足短信通知？`,
+          "提示",
+          { confirmButtonText: "确定", cancelButtonText: "取消", type: "warning" }
+        );
+      } catch (e) {
+        return; // 用户取消
+      }
+      this.manualSending = true;
+      try {
+        const res = await service.post("/sms/manualSendArrears", this.selectedIds, {
+          params: { companyId },
+        });
+        if (res.code === 200 && res.data && res.data.started) {
+          ElMessage.success(`已提交，预计发送 ${res.data.total} 条`);
+          this.manualVisible = false;
+        } else {
+          ElMessage.error((res && res.msg) || "提交失败");
+        }
+      } catch (e) {
+        ElMessage.error("发送失败：" + (e.message || e));
+      } finally {
+        this.manualSending = false;
+      }
+    },
+
     getRegionData() {
       let url = "";
       if (this.companyId === 1) {
@@ -1410,7 +1640,8 @@ export default {
 .edit-btn,
 .water_outage-btn,
 .export-in-btn,
-.export-out-btn {
+.export-out-btn,
+.manual-send-btn {
   display: flex;
   align-items: center;
   min-width: 50px; /* 设置按钮的宽度 */
@@ -1423,12 +1654,33 @@ export default {
   background-color: #fff;
   border: 2px solid #f2f2f2;
   padding: 0 8px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  box-sizing: border-box;
 }
 
 .btn-single-only-disabled {
   opacity: 0.5;
   cursor: not-allowed !important;
   pointer-events: none;
+}
+
+/* 短信通知手工补发：搜索栏与分页 */
+.manual-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 12px;
+}
+
+.manual-toolbar .manual-search {
+  width: 100%;
+}
+
+.manual-pager {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 12px;
 }
 
 .reflush {
