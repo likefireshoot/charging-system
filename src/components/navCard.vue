@@ -277,7 +277,8 @@ function buildMenu(userData) {
         { id: 49, name: "用户报表", icon: require("@/assets/menu/icon3.png"), icon2: require("@/assets/menu/icon4.png"), path: "/report/accountsReport" },
         { id: 139, name: "月实收报表", permissionId: 101, icon: require("@/assets/menu/icon15.png"), icon2: require("@/assets/menu/icon16.png"), path: "/meterReading/twoFeeMonthlyReport" },
         { id: 490, name: "收费明细表", icon: require("@/assets/menu/icon5.png"), icon2: require("@/assets/menu/icon6.png"), path: "/report/rechargeDetailReport" },
-        { id: 491, name: "扣费明细表", icon: require("@/assets/menu/icon5.png"), icon2: require("@/assets/menu/icon6.png"), path: "/report/billDetailReport" },
+        // 下线：扣费明细表（不要随便删除，随时可能启用）
+        // { id: 491, name: "扣费明细表", icon: require("@/assets/menu/icon5.png"), icon2: require("@/assets/menu/icon6.png"), path: "/report/billDetailReport" },
         // { id: 492, name: "大额扣费审计", icon: require("@/assets/menu/icon5.png"), icon2: require("@/assets/menu/icon6.png"), path: "/report/abnormalChargeReport" },
       ].filter(child => !child.permissionId || staffPermissionIds.value.includes(child.permissionId)),
     });

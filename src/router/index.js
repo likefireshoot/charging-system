@@ -35,7 +35,8 @@ import commandLog from "../views/commandLog.vue";
 import errorReportRecord from "../views/errorReportRecord.vue";
 import historyDataManage from "@/views/historyDataManage.vue";
 import deviceManage from "@/views/deviceManage.vue";
-import billDetailReport from "@/components/report/billDetailReport.vue";
+// 下线：扣费明细表（不要随便删除，随时可能启用）
+// import billDetailReport from "@/components/report/billDetailReport.vue";
 import abnormalChargeReport from "@/components/report/abnormalChargeReport.vue";
 import twoFeeMonthlyReport from "@/views/twoFeeMonthlyReport.vue";
 import quickMeterReport from "@/views/quickMeterReport.vue";
@@ -206,11 +207,12 @@ const routes = [
             name: "rechargeDetailReport",
             component: rechargeDetailReport,
           },
-          {
-            path: "billDetailReport",
-            name: "billDetailReport",
-            component: billDetailReport,
-          },
+          // 下线：扣费明细表（不要随便删除，随时可能启用）
+          // {
+          //   path: "billDetailReport",
+          //   name: "billDetailReport",
+          //   component: billDetailReport,
+          // },
           {
             path: "abnormalChargeReport",
             name: "abnormalChargeReport",

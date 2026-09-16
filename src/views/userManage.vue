@@ -219,9 +219,10 @@
                 </div>
               </template>
               <template #default="scope">
-                <span @click="handleChaoBiaoTime(scope.row)"
-                  style="color: #46b97e; display: block; width: 100%; text-align: center">{{ scope.row.updateTime
-                  }}</span>
+                <span @click="handleChaoBiaoTime(scope.row)" style="display: block; width: 100%; text-align: center">
+                  <el-tag v-if="!scope.row.updateTime" type="warning" class="new-meter-badge">新表-<br />尚未接入系统</el-tag>
+                  <span v-else style="color: #46b97e">{{ scope.row.updateTime }}</span>
+                </span>
               </template>
             </el-table-column>
             <!-- <el-table-column property="imei" label="IMEI号" width="280" align="center" /> -->
@@ -1340,7 +1341,7 @@ export default {
           if (response.code === 200) {
             this.yonghuData = response.data.userInfoData;
             this.yonghuData.forEach((item) => {
-              item.updateTime = item.updateTime.replace("T", " ");
+              item.updateTime = item.updateTime ? item.updateTime.replace("T", " ") : null;
             });
             this.total = response.data.totalElements;
             // if (this.currentPage !== response.data.currentPages) {
@@ -2564,6 +2565,15 @@ export default {
 </script>
 
 <style scoped>
+:deep(.el-tag.new-meter-badge) {
+  font-size: 14px;
+  height: auto;
+  padding: 2px 8px;
+  line-height: 1.25;
+  border-radius: 6px;
+  white-space: normal;
+}
+
 :deep(.el-table__body tr:nth-child(odd)) {
   background-color: #edf8f2;
 }

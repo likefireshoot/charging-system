@@ -108,7 +108,12 @@
             <el-table-column property="valveStatus" label="阀门状态" min-width="90" align="center" />
             <el-table-column property="battery" label="电量" min-width="70" align="center" />
             <el-table-column property="signalValue" label="信号值" min-width="70" align="center" />
-            <el-table-column property="updateTime" label="抄表时间" min-width="155" align="center"> </el-table-column>
+            <el-table-column label="抄表时间" min-width="155" align="center">
+              <template #default="scope">
+                <el-tag v-if="!scope.row.updateTime" type="warning" class="new-meter-badge">新表-<br />尚未接入系统</el-tag>
+                <span v-else>{{ scope.row.updateTime }}</span>
+              </template>
+            </el-table-column>
             <el-table-column property="imei" label="imei号" min-width="140" align="center" />
             <el-table-column property="productId" label="产品ID" min-width="140" align="center" />
             <el-table-column property="deviceId" label="设备ID" min-width="150" align="center" />
@@ -570,7 +575,7 @@ export default {
             this.deviceData = response.data.list;
             if (this.deviceData.length > 0) {
               this.deviceData.forEach((item) => {
-                item.updateTime = item.updateTime.replace("T", " "); // 替换T为空格
+                item.updateTime = item.updateTime ? item.updateTime.replace("T", " ") : null; // 替换T为空格
               });
             }
             this.total = response.data.total;
@@ -634,7 +639,7 @@ export default {
             this.deviceData = response.data.list;
             if (this.deviceData.length > 0) {
               this.deviceData.forEach((item) => {
-                item.updateTime = item.updateTime.replace("T", " "); // 替换T为空格
+                item.updateTime = item.updateTime ? item.updateTime.replace("T", " ") : null; // 替换T为空格
               });
             }
             this.total = response.data.total;
@@ -812,6 +817,15 @@ export default {
 </script>
 
 <style scoped>
+:deep(.el-tag.new-meter-badge) {
+  font-size: 14px;
+  height: auto;
+  padding: 2px 8px;
+  line-height: 1.25;
+  border-radius: 6px;
+  white-space: normal;
+}
+
 :deep(.el-table__body tr:nth-child(odd)) {
   background-color: #edf8f2;
 }
