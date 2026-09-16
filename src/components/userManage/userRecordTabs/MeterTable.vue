@@ -232,11 +232,11 @@
         </div>
         <div class="recharge-input">
           <span>读数</span>
-          <el-input v-model="addForm.readingCount" placeholder="请输入水表读数" @input="onWaterInput"></el-input>
+          <el-input v-model="addForm.readingCount" placeholder="请输入水表读数"></el-input>
         </div>
         <div class="recharge-input">
           <span>用水量</span>
-          <el-input v-model="addForm.deltaWater" placeholder="请输入用水量" @input="onWaterInput"></el-input>
+          <el-input v-model="addForm.deltaWater" placeholder="请输入用水量"></el-input>
         </div>
         <div class="recharge-input">
           <span>阀门</span>
@@ -247,16 +247,12 @@
           </el-select>
         </div>
         <div class="recharge-input">
-          <span>起码</span>
-          <el-input v-model="addForm.startRead" placeholder="请输入起码"></el-input>
+          <span>扣费</span>
+          <el-input v-model="addForm.feeThisTime" placeholder="请输入扣费金额"></el-input>
         </div>
         <div class="recharge-input">
-          <span>止码</span>
-          <el-input v-model="addForm.endRead" placeholder="请输入止码"></el-input>
-        </div>
-        <div class="recharge-input">
-          <span>结算量</span>
-          <el-input v-model="addForm.waterUse" placeholder="请输入结算量"></el-input>
+          <span>余额</span>
+          <el-input v-model="addForm.balanceThisTime" placeholder="请输入余额"></el-input>
         </div>
         <div class="recharge-input">
           <span>抄表时间</span>
@@ -268,14 +264,14 @@
             style="width:100%"
           ></el-date-picker>
         </div>
-        <div class="recharge-input" v-if="user.meterType === '普通水表'">
-          <span>抄表状态</span>
-          <el-select v-model="addForm.reportStatus" placeholder="请选择" style="width:100%">
-            <el-option label="正常" value="正常"/>
-            <el-option label="无人在家" value="无人在家"/>
-            <el-option label="表埋" value="表埋"/>
-          </el-select>
-        </div>
+<!--        <div class="recharge-input" v-if="user.meterType === '普通水表'">-->
+<!--          <span>抄表状态</span>-->
+<!--          <el-select v-model="addForm.reportStatus" placeholder="请选择" style="width:100%">-->
+<!--            <el-option label="正常" value="正常"/>-->
+<!--            <el-option label="无人在家" value="无人在家"/>-->
+<!--            <el-option label="表埋" value="表埋"/>-->
+<!--          </el-select>-->
+<!--        </div>-->
       </div>
       <div class="btn">
         <div class="confirm-btn" @click="confirmAdd" :class="{loading:adding}">
@@ -331,12 +327,11 @@ export default {
       addForm: {
         readingCount: null,
         deltaWater: null,
-        startRead: null,
-        endRead: null,
-        waterUse: null,
+        feeThisTime: null,
+        balanceThisTime: null,
         createTime: "",
         valveStatus: "",
-        reportStatus: "正常",
+        // reportStatus: "正常",
       }
     };
   },
@@ -734,12 +729,11 @@ export default {
       this.addForm = {
         readingCount: null,
         deltaWater: null,
-        startRead: null,
-        endRead: null,
-        waterUse: null,
+        feeThisTime: null,
+        balanceThisTime: null,
         createTime: "",
         valveStatus: "",
-        reportStatus: "正常",
+        // reportStatus: "正常",
       };
       if(this.$refs.addFormRef){
         this.$refs.addFormRef.clearValidate();
@@ -748,11 +742,10 @@ export default {
     async confirmAdd() {
       if(this.adding) return;
       // 读取数值
-      const readingCount = parseFloat(this.addForm.readingCount);
-      const deltaWater = parseFloat(this.addForm.deltaWater);
-      const startRead = Number(this.addForm.startRead);
-      const endRead = Number(this.addForm.endRead);
-      const waterUse = Number(this.addForm.waterUse);
+      const readingCount = Number(this.addForm.readingCount);
+      const deltaWater = Number(this.addForm.deltaWater);
+      const feeThisTime = Number(this.addForm.feeThisTime);
+      const balanceThisTime = Number(this.addForm.balanceThisTime);
 
       // 校验表单
       if (isNaN(readingCount)) {
@@ -763,17 +756,12 @@ export default {
         ElMessage.warning("请输入正确的用水量");
         return;
       }
-      // 校验起码、止码、结算量必须是整数
-      if (!Number.isInteger(startRead)) {
-        ElMessage.warning("起码必须为整数");
+      if (isNaN(feeThisTime)) {
+        ElMessage.warning("请输入正确的扣费金额");
         return;
       }
-      if (!Number.isInteger(endRead)) {
-        ElMessage.warning("止码必须为整数");
-        return;
-      }
-      if (!Number.isInteger(waterUse)) {
-        ElMessage.warning("结算量必须为整数");
+      if (isNaN(balanceThisTime)) {
+        ElMessage.warning("请输入正确的余额");
         return;
       }
       if (!this.addForm.createTime) {
@@ -784,40 +772,34 @@ export default {
         ElMessage.warning("请选择阀门状态");
         return;
       }
-      if (this.user.meterType==='普通水表' && !this.addForm.reportStatus) {
-        ElMessage.warning("请选择抄表状态");
-        return;
-      }
+      // if (this.user.meterType==='普通水表' && !this.addForm.reportStatus) {
+      //   ElMessage.warning("请选择抄表状态");
+      //   return;
+      // }
       this.adding = true;
       try {
-        // =========接口待对接，这里是请求体示例========
         const reqData = {
           userId: this.user.userId,
           meterCode: this.user.meterCode,
           companyId: this.user.companyId,
           readingCount: readingCount,
           deltaWater: deltaWater,
-          startRead: startRead,
-          endRead: endRead,
-          waterUse: waterUse,
+          feeThisTime: feeThisTime,
+          balanceThisTime: balanceThisTime,
           createTime: this.addForm.createTime,
           valveStatus: this.addForm.valveStatus,
-          reportStatus: this.addForm.reportStatus
+          // reportStatus: this.addForm.reportStatus
         };
         console.log("待提交新增抄表记录参数：", reqData);
 
-        // 后续对接接口后替换这里
-        // const res = await service.post("/userManage/meterRead/addMeterRecord", reqData);
-        // if(res.code === 200){
-        //   ElMessage.success("添加成功");
-        //   this.closeAddDialog();
-        //   this.handleRefresh();
-        // }else{
-        //   ElMessage.error(res.msg || "添加失败");
-        // }
-
-        // 临时模拟成功
-        ElMessage.success("接口测试中，暂未上线");
+        const res = await service.post("/userManage/userCharge/addSingleMeterReportRecord", reqData);
+        if(res.code === 200){
+          ElMessage.success("添加成功");
+          this.closeAddDialog();
+          this.handleRefresh();
+        }else{
+          ElMessage.error(res.msg || "添加失败");
+        }
         this.closeAddDialog();
         this.handleRefresh();
       } catch (err) {
@@ -827,30 +809,30 @@ export default {
         this.adding = false;
       }
     },
-    // 输入读数后自动带出 起码、止码、用水量
-    onWaterInput() {
-      if (this.addForm.readingCount === null || this.addForm.deltaWater === null) {
-        return;
-      }
-      // 任意一个不是有效数字，直接return，不自动计算
-      if (isNaN(this.addForm.readingCount) || isNaN(this.addForm.deltaWater)) {
-        ElMessage.warning('请在读数/用水量输入框输入有效的数字');
-        return;
-      }
-      const readingCount = Number(this.addForm.readingCount);
-      const deltaWater = Number(this.addForm.deltaWater);
-
-      // 止码 = 本次读数的整数部分
-      const endRead = Math.floor(readingCount);
-      this.addForm.endRead = endRead;
-
-      // 起码 = 本次读数 - 用水量 的整数部分
-      const startRead = Math.floor(readingCount - deltaWater);
-      this.addForm.startRead = startRead;
-
-      // 结算量 = 止码 - 起码
-      this.addForm.waterUse = endRead - startRead;
-    }
+    // // 输入读数后自动带出 起码、止码、用水量
+    // onWaterInput() {
+    //   if (this.addForm.readingCount === null || this.addForm.deltaWater === null) {
+    //     return;
+    //   }
+    //   // 任意一个不是有效数字，直接return，不自动计算
+    //   if (isNaN(this.addForm.readingCount) || isNaN(this.addForm.deltaWater)) {
+    //     ElMessage.warning('请在读数/用水量输入框输入有效的数字');
+    //     return;
+    //   }
+    //   const readingCount = Number(this.addForm.readingCount);
+    //   const deltaWater = Number(this.addForm.deltaWater);
+    //
+    //   // 止码 = 本次读数的整数部分
+    //   const endRead = Math.floor(readingCount);
+    //   this.addForm.endRead = endRead;
+    //
+    //   // 起码 = 本次读数 - 用水量 的整数部分
+    //   const startRead = Math.floor(readingCount - deltaWater);
+    //   this.addForm.startRead = startRead;
+    //
+    //   // 结算量 = 止码 - 起码
+    //   this.addForm.waterUse = endRead - startRead;
+    // }
   }
 };
 </script>

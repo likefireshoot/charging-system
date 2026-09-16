@@ -826,6 +826,7 @@ export default {
         userPhone: "", // 联系电话
         userAddr: "", // 新增地址搜索参数
         order: 0,   // ****** 默认按照时间顺序倒叙排列表格 ******
+        priceId: null,
       },
       price_list: [],
       priceDialogVisible: false,
@@ -863,6 +864,8 @@ export default {
       multipleSelection: [], //存储当前勾选的行的数据信息
       commandType: "",
       companyList: [],
+
+      allPriceList: [],
 
       sortField: "time",
       sortOrder: "desc",
@@ -990,6 +993,7 @@ export default {
         { key: "meterType", label: "水表类型", type: "select", optionsKey: "shuibiao_list", defaultVisible: false },
         { key: "battery", label: "电量", type: "select", clearable: true, options: [{ label: "正常", value: "正常" }, { label: "异常", value: "异常" }] },
         { key: "valveStatus", label: "阀门", type: "select", clearable: true, options: [{ label: "开阀", value: "开阀" }, { label: "关阀", value: "关阀" }, { label: "故障", value: "故障" }] },
+        { key: "priceId", label: "价格类型", type: "select", placeholder: "请选择所属水厂", optionsKey: "allPriceList" },
       ],
       batchPauseDialogVisible: false,
       batchCloseDialogVisible: false,
@@ -1040,6 +1044,8 @@ export default {
       this.quyu_selected = null;
       this.$refs.treeRef.setCurrentKey(null);
       this.getRegionData();
+      this.param.priceId = null;
+      this.getAllPriceList();
     },
     // 监听 yonghuData 变化，处理从异常页面跳转后的自动点击抄表时间
     yonghuData: {
@@ -1208,8 +1214,34 @@ export default {
     }
 
     this.getCompanyList();
+    this.getAllPriceList();
   },
   methods: {
+    getAllPriceList() {
+      let targetCompanyId;
+      if (this.companyId === 1) {
+        targetCompanyId = this.param?.company ? this.param.company : this.companyId;
+      } else {
+        targetCompanyId = this.companyId;
+      }
+
+      let params = {
+        pageNo: 1,
+        pageSize: 1000,
+        companyId: targetCompanyId,
+      };
+
+      queryPriceMg(params)
+        .then((res) => {
+          this.allPriceList = res.data.records.map((item) => ({
+            id: item.priceId,
+            label: item.priceName,
+          }));
+        })
+        .catch(() => {
+          ElMessage.error("获取价格类型失败");
+        });
+    },
     // 打开批量停户弹窗
     openBatchPauseDialog() {
       this.batchPauseDialogVisible = true;
@@ -1285,6 +1317,9 @@ export default {
       }
       if (field.optionsKey === "shuibiao_list") {
         return (this.shuibiao_list || []).map((item) => ({ label: item.label, value: item.label }));
+      }
+      if (field.optionsKey === "allPriceList") {
+        return (this.allPriceList || []).map((item) => ({ label: item.label, value: item.id }));
       }
       return [];
     },
@@ -2685,7 +2720,7 @@ export default {
   justify-content: center;
   /* 确保子元素在父容器中垂直居中 */
   flex-direction: column;
-  width: 8%;
+  width: 7%;
   height: 100%;
   margin-right: 10px;
 }

@@ -235,12 +235,12 @@
           <el-input :value="user.meterCode" :disabled="true"></el-input>
         </div>
         <div class="recharge-input">
-          <span>读数</span>
-          <el-input v-model="addForm.readingCount" placeholder="请输入水表读数" @input="onWaterInput"></el-input>
+          <span>起码</span>
+          <el-input v-model="addForm.startRead" placeholder="请输入起码"></el-input>
         </div>
         <div class="recharge-input">
-          <span>用水量</span>
-          <el-input v-model="addForm.deltaWater" placeholder="请输入用水量" @input="onWaterInput"></el-input>
+          <span>止码</span>
+          <el-input v-model="addForm.endRead" placeholder="请输入止码"></el-input>
         </div>
         <div class="recharge-input">
           <span>阀门</span>
@@ -251,19 +251,38 @@
           </el-select>
         </div>
         <div class="recharge-input">
-          <span>起码</span>
-          <el-input v-model="addForm.startRead" placeholder="请输入起码"></el-input>
+          <span>原金额</span>
+          <el-input v-model="addForm.oldBalance" placeholder="请输入原金额" @input="onWaterInput"></el-input>
         </div>
         <div class="recharge-input">
-          <span>止码</span>
-          <el-input v-model="addForm.endRead" placeholder="请输入止码"></el-input>
+          <span>扣费金额</span>
+          <el-input v-model="addForm.chargeAmount" placeholder="请输入扣费金额" @input="onWaterInput"></el-input>
         </div>
         <div class="recharge-input">
-          <span>结算量</span>
-          <el-input v-model="addForm.waterUse" placeholder="请输入结算量"></el-input>
+          <span>余额</span>
+          <el-input v-model="addForm.newBalance" placeholder="请输入余额"></el-input>
+        </div>
+        <div class="recharge-input" v-if="user.companyId !== 95">
+          <span>扣费组成1:水费</span>
+          <el-input v-model="addForm.waterFee" placeholder="请输入水费"></el-input>
+        </div>
+        <div class="recharge-input" v-if="user.companyId !== 95">
+          <span>扣费组成2:污水处理费</span>
+          <el-input v-model="addForm.sewageFee" placeholder="请输入污水处理费"></el-input>
+        </div>
+        <div class="recharge-input" v-if="user.companyId !== 95">
+          <span>扣费组成3:保底消费</span>
+          <el-input v-model="addForm.minFee" placeholder="请输入保底消费"></el-input>
         </div>
         <div class="recharge-input">
-          <span>抄表时间</span>
+          <span>扣费类型</span>
+          <el-select v-model="addForm.typeStr" placeholder="请选择" style="width:100%">
+            <el-option label="抄表扣费" value="抄表扣费"/>
+            <el-option label="保底扣费" value="保底扣费"/>
+          </el-select>
+        </div>
+        <div class="recharge-input">
+          <span>算费日期</span>
           <el-date-picker
             v-model="addForm.createTime"
             type="datetime"
@@ -271,14 +290,6 @@
             value-format="YYYY-MM-DD HH:mm:ss"
             style="width:100%"
           ></el-date-picker>
-        </div>
-        <div class="recharge-input" v-if="user.meterType === '普通水表'">
-          <span>抄表状态</span>
-          <el-select v-model="addForm.reportStatus" placeholder="请选择" style="width:100%">
-            <el-option label="正常" value="正常"/>
-            <el-option label="无人在家" value="无人在家"/>
-            <el-option label="表埋" value="表埋"/>
-          </el-select>
         </div>
       </div>
       <div class="btn">
@@ -358,14 +369,18 @@ export default {
       addDialogVisible: false,
       adding: false,
       addForm: {
-        readingCount: null,
-        deltaWater: null,
         startRead: null,
         endRead: null,
         waterUse: null,
-        createTime: "",
         valveStatus: "",
-        reportStatus: "正常",
+        oldBalance: null,
+        chargeAmount: null,
+        newBalance: null,
+        waterFee: null,
+        sewageFee: null,
+        minFee: null,
+        typeStr: "",
+        createTime: "",
       }
     };
   },
@@ -767,14 +782,18 @@ export default {
       this.addDialogVisible = false;
       // 清空表单
       this.addForm = {
-        readingCount: null,
-        deltaWater: null,
         startRead: null,
         endRead: null,
         waterUse: null,
-        createTime: "",
         valveStatus: "",
-        reportStatus: "正常",
+        oldBalance: null,
+        chargeAmount: null,
+        newBalance: null,
+        waterFee: null,
+        sewageFee: null,
+        minFee: null,
+        typeStr: "",
+        createTime: "",
       };
       if(this.$refs.addFormRef){
         this.$refs.addFormRef.clearValidate();
@@ -783,76 +802,77 @@ export default {
     async confirmAdd() {
       if(this.adding) return;
       // 读取数值
-      const readingCount = parseFloat(this.addForm.readingCount);
-      const deltaWater = parseFloat(this.addForm.deltaWater);
+      const oldBalance = Number(this.addForm.oldBalance);
+      const newBalance = Number(this.addForm.newBalance);
+      const chargeAmount = Number(this.addForm.chargeAmount);
       const startRead = Number(this.addForm.startRead);
       const endRead = Number(this.addForm.endRead);
-      const waterUse = Number(this.addForm.waterUse);
+      let waterFee = 0;
+      let sewageFee = 0;
+      let minFee = 0;
+      if (this.user.companyId !== 95) {
+        waterFee = Number(this.addForm.waterFee);
+        sewageFee = Number(this.addForm.sewageFee);
+        minFee = Number(this.addForm.minFee);
+      }
 
       // 校验表单
-      if (isNaN(readingCount)) {
-        ElMessage.warning("请输入正确的水表读数");
+      if (isNaN(oldBalance)) {
+        ElMessage.warning("请输入正确的原金额");
         return;
       }
-      if (isNaN(deltaWater)) {
-        ElMessage.warning("请输入正确的用水量");
+      if (isNaN(chargeAmount)) {
+        ElMessage.warning("请输入正确的扣费金额");
         return;
       }
-      // 校验起码、止码、结算量必须是整数
-      if (!Number.isInteger(startRead)) {
+      if (isNaN(newBalance)) {
+        ElMessage.warning("请输入正确的余额");
+        return;
+      }
+      if (this.addForm.startRead === '' || isNaN(startRead) || !Number.isInteger(startRead)) {
         ElMessage.warning("起码必须为整数");
         return;
       }
-      if (!Number.isInteger(endRead)) {
+      if (this.addForm.endRead === '' || isNaN(endRead) || !Number.isInteger(endRead)) {
         ElMessage.warning("止码必须为整数");
         return;
       }
-      if (!Number.isInteger(waterUse)) {
-        ElMessage.warning("结算量必须为整数");
-        return;
-      }
       if (!this.addForm.createTime) {
-        ElMessage.warning("请选择抄表时间");
+        ElMessage.warning("请选择算费时间");
         return;
       }
       if (!this.addForm.valveStatus) {
         ElMessage.warning("请选择阀门状态");
         return;
       }
-      if (this.user.meterType==='普通水表' && !this.addForm.reportStatus) {
-        ElMessage.warning("请选择抄表状态");
-        return;
-      }
       this.adding = true;
       try {
-        // =========接口待对接，这里是请求体示例========
         const reqData = {
           userId: this.user.userId,
           meterCode: this.user.meterCode,
           companyId: this.user.companyId,
-          readingCount: readingCount,
-          deltaWater: deltaWater,
+          oldBalance: oldBalance,
+          chargeAmount: chargeAmount,
+          newBalance: newBalance,
           startRead: startRead,
           endRead: endRead,
-          waterUse: waterUse,
+          waterFee: waterFee,
+          sewageFee: sewageFee,
+          minFee: minFee,
           createTime: this.addForm.createTime,
           valveStatus: this.addForm.valveStatus,
-          reportStatus: this.addForm.reportStatus
+          typeStr: this.addForm.typeStr
         };
-        console.log("待提交新增抄表记录参数：", reqData);
 
-        // 后续对接接口后替换这里
-        // const res = await service.post("/userManage/meterRead/addMeterRecord", reqData);
-        // if(res.code === 200){
-        //   ElMessage.success("添加成功");
-        //   this.closeAddDialog();
-        //   this.handleRefresh();
-        // }else{
-        //   ElMessage.error(res.msg || "添加失败");
-        // }
+        const res = await service.post("/import/addSingleChargeRecord", reqData);
+        if(res.code === 200){
+          ElMessage.success("添加成功");
+          this.closeAddDialog();
+          this.handleRefresh();
+        }else{
+          ElMessage.error(res.msg || "添加失败");
+        }
 
-        // 临时模拟成功
-        ElMessage.success("接口测试中，暂未上线");
         this.closeAddDialog();
         this.handleRefresh();
       } catch (err) {
@@ -862,29 +882,19 @@ export default {
         this.adding = false;
       }
     },
-    // 输入读数后自动带出 起码、止码、用水量
     onWaterInput() {
-      if (this.addForm.readingCount === null || this.addForm.deltaWater === null) {
+      if (this.addForm.oldBalance === null || this.addForm.chargeAmount === null) {
         return;
       }
       // 任意一个不是有效数字，直接return，不自动计算
-      if (isNaN(this.addForm.readingCount) || isNaN(this.addForm.deltaWater)) {
-        ElMessage.warning('请在读数/用水量输入框输入有效的数字');
+      if (isNaN(this.addForm.oldBalance) || isNaN(this.addForm.chargeAmount)) {
+        ElMessage.warning('请在原金额/扣费金额输入框输入有效的数字');
         return;
       }
-      const readingCount = Number(this.addForm.readingCount);
-      const deltaWater = Number(this.addForm.deltaWater);
+      const oldBalance = Number(this.addForm.oldBalance);
+      const chargeAmount = Number(this.addForm.chargeAmount);
 
-      // 止码 = 本次读数的整数部分
-      const endRead = Math.floor(readingCount);
-      this.addForm.endRead = endRead;
-
-      // 起码 = 本次读数 - 用水量 的整数部分
-      const startRead = Math.floor(readingCount - deltaWater);
-      this.addForm.startRead = startRead;
-
-      // 结算量 = 止码 - 起码
-      this.addForm.waterUse = endRead - startRead;
+      this.addForm.newBalance = Number(((oldBalance * 100 - chargeAmount * 100) / 100).toFixed(2));
     }
   }
 };
