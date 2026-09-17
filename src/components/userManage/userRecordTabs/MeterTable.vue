@@ -78,10 +78,10 @@
         <img src="@/assets/yonghu/icon1.3.png" alt="" />
         <span>导出</span>
       </div>
-<!--      <div class="tool-btn"  @click="openAddDialog">-->
-<!--        <img src="@/assets/yuangong/icon6.png" alt="" />-->
-<!--        <span>调账-记录添加</span>-->
-<!--      </div>-->
+      <div class="tool-btn"  @click="openAddDialog">
+        <img src="@/assets/yuangong/icon6.png" alt="" />
+        <span>调账-记录添加</span>
+      </div>
       <el-tooltip content="至少选择一条记录" placement="top" :disabled="multipleSelection.length > 0">
         <div class="tool-btn" :class="{ 'disabled-btn-tip': multipleSelection.length === 0 }" @click="multipleSelection.length > 0 && openDeleteDialog()">
           <img src="@/assets/yonghu/icon4.png" alt="" />
@@ -204,6 +204,87 @@
       </div>
     </template>
   </el-dialog>
+
+  <!-- 调账-记录添加弹窗 -->
+  <div class="recharge-dialog" v-if="addDialogVisible">
+    <div class="change-balance-dialog-content">
+      <div class="title">
+        <div style="margin-left: 10px; display: flex; align-items: center">
+          <img src="@/assets/yonghu/icon20.png" alt="" style="margin-right: 8px" />
+          <span style="font-size: 20px">调账-记录添加</span>
+        </div>
+        <div style="margin-right: 10px; cursor: pointer" @click="closeAddDialog">
+          <img src="@/assets/close.png" alt="" />
+        </div>
+      </div>
+      <div class="recharge-content">
+        <div class="recharge-input">
+          <span>用户号</span>
+          <el-input :value="user.userId" :disabled="true"></el-input>
+        </div>
+        <div class="recharge-input">
+          <span>用户名</span>
+          <el-input :value="user.userName" :disabled="true"></el-input>
+        </div>
+        <div class="recharge-input">
+          <span>表号</span>
+          <el-input :value="user.meterCode" :disabled="true"></el-input>
+        </div>
+        <div class="recharge-input">
+          <span>读数</span>
+          <el-input v-model="addForm.readingCount" placeholder="请输入水表读数"></el-input>
+        </div>
+        <div class="recharge-input">
+          <span>用水量</span>
+          <el-input v-model="addForm.deltaWater" placeholder="请输入用水量"></el-input>
+        </div>
+        <div class="recharge-input">
+          <span>阀门</span>
+          <el-select v-model="addForm.valveStatus" placeholder="请选择" style="width:100%">
+            <el-option label="开阀" value="开阀"/>
+            <el-option label="关阀" value="关阀"/>
+            <el-option label="故障" value="故障"/>
+          </el-select>
+        </div>
+        <div class="recharge-input">
+          <span>扣费</span>
+          <el-input v-model="addForm.feeThisTime" placeholder="请输入扣费金额"></el-input>
+        </div>
+        <div class="recharge-input">
+          <span>余额</span>
+          <el-input v-model="addForm.balanceThisTime" placeholder="请输入余额"></el-input>
+        </div>
+        <div class="recharge-input">
+          <span>抄表时间</span>
+          <el-date-picker
+            v-model="addForm.createTime"
+            type="datetime"
+            placeholder="选择抄表时间"
+            value-format="YYYY-MM-DD HH:mm:ss"
+            style="width:100%"
+          ></el-date-picker>
+        </div>
+<!--        <div class="recharge-input" v-if="user.meterType === '普通水表'">-->
+<!--          <span>抄表状态</span>-->
+<!--          <el-select v-model="addForm.reportStatus" placeholder="请选择" style="width:100%">-->
+<!--            <el-option label="正常" value="正常"/>-->
+<!--            <el-option label="无人在家" value="无人在家"/>-->
+<!--            <el-option label="表埋" value="表埋"/>-->
+<!--          </el-select>-->
+<!--        </div>-->
+      </div>
+      <div class="btn">
+        <div class="confirm-btn" @click="confirmAdd" :class="{loading:adding}">
+          <el-icon style="margin-left: 5%"><Check /></el-icon>
+          <span style="font-size: 20px; margin-left: 15%">确认</span>
+        </div>
+        <div class="cancel-btn" @click="closeAddDialog">
+          <el-icon style="margin-left: 5%; color: #45ba7e"><Close /></el-icon>
+          <span style="font-size: 20px; margin-left: 15%; color: #5a5a5a">取消</span>
+        </div>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script>
@@ -239,7 +320,19 @@ export default {
       deleteDialogVisible: false,
       deleteTargets: [],
       acknowledgeDelete: false,
-      deleting: false
+      deleting: false,
+
+      addDialogVisible: false,
+      adding: false,
+      addForm: {
+        readingCount: null,
+        deltaWater: null,
+        feeThisTime: null,
+        balanceThisTime: null,
+        createTime: "",
+        valveStatus: "",
+        // reportStatus: "正常",
+      }
     };
   },
   mounted() {
@@ -264,29 +357,6 @@ export default {
     }
   },
   methods: {
-    // 计算每行结算量、扣费吨值（倒序列表，取上一行结算量做差值）
-    calcSettleTonData(list) {
-      if (!list || list.length === 0) return list;
-      // 遍历生成结算量：读数向下取整
-      const calcList = list.map(item => {
-        const readNum = Number(item.readingCount || 0);
-        return {
-          ...item,
-          settleTon: Math.floor(readNum)
-        };
-      });
-      // 倒序列表，逐行计算扣费吨值 = 当前结算量 - 上一条结算量
-      for (let i = 0; i < calcList.length; i++) {
-        const current = calcList[i];
-        const prev = calcList[i + 1]; // 下一条是更早抄表记录
-        if (!prev) {
-          current.deductTon = 0; // 第一行无更早数据，扣费吨值0
-        } else {
-          current.deductTon = current.settleTon - prev.settleTon;
-        }
-      }
-      return calcList;
-    },
     isCurrentMeter(row) {
       return String(row?.meterCode ?? "") === String(this.user?.meterCode ?? "");
     },
@@ -373,7 +443,7 @@ export default {
             createTime: item.createTime ? item.createTime.replace("T", " ") : ""
           }));
           // 计算结算量、扣费吨值
-          this.list = this.calcSettleTonData(tempList);
+          this.list = tempList;
 
           this.total = response.data.totalElements || 0;
           await this.fetchTotalWater();
@@ -414,7 +484,7 @@ export default {
             ...item,
             createTime: item.createTime ? item.createTime.replace("T", " ") : ""
           }));
-          this.list = this.calcSettleTonData(tempList);
+          this.list = tempList;
 
           this.total = response.data.totalElements || 0;
           await this.fetchTotalWater();
@@ -645,7 +715,124 @@ export default {
       } finally {
         this.deleting = false;
       }
-    }
+    },
+    openAddDialog() {
+      if(!this.user || !this.user.userId){
+        ElMessage.warning("用户信息缺失，无法新增记录");
+        return;
+      }
+      this.addDialogVisible = true;
+    },
+    closeAddDialog() {
+      this.addDialogVisible = false;
+      // 清空表单
+      this.addForm = {
+        readingCount: null,
+        deltaWater: null,
+        feeThisTime: null,
+        balanceThisTime: null,
+        createTime: "",
+        valveStatus: "",
+        // reportStatus: "正常",
+      };
+      if(this.$refs.addFormRef){
+        this.$refs.addFormRef.clearValidate();
+      }
+    },
+    async confirmAdd() {
+      if(this.adding) return;
+      // 读取数值
+      const readingCount = Number(this.addForm.readingCount);
+      const deltaWater = Number(this.addForm.deltaWater);
+      const feeThisTime = Number(this.addForm.feeThisTime);
+      const balanceThisTime = Number(this.addForm.balanceThisTime);
+
+      // 校验表单
+      if (isNaN(readingCount)) {
+        ElMessage.warning("请输入正确的水表读数");
+        return;
+      }
+      if (isNaN(deltaWater)) {
+        ElMessage.warning("请输入正确的用水量");
+        return;
+      }
+      if (isNaN(feeThisTime)) {
+        ElMessage.warning("请输入正确的扣费金额");
+        return;
+      }
+      if (isNaN(balanceThisTime)) {
+        ElMessage.warning("请输入正确的余额");
+        return;
+      }
+      if (!this.addForm.createTime) {
+        ElMessage.warning("请选择抄表时间");
+        return;
+      }
+      if (!this.addForm.valveStatus) {
+        ElMessage.warning("请选择阀门状态");
+        return;
+      }
+      // if (this.user.meterType==='普通水表' && !this.addForm.reportStatus) {
+      //   ElMessage.warning("请选择抄表状态");
+      //   return;
+      // }
+      this.adding = true;
+      try {
+        const reqData = {
+          userId: this.user.userId,
+          meterCode: this.user.meterCode,
+          companyId: this.user.companyId,
+          readingCount: readingCount,
+          deltaWater: deltaWater,
+          feeThisTime: feeThisTime,
+          balanceThisTime: balanceThisTime,
+          createTime: this.addForm.createTime,
+          valveStatus: this.addForm.valveStatus,
+          // reportStatus: this.addForm.reportStatus
+        };
+        console.log("待提交新增抄表记录参数：", reqData);
+
+        const res = await service.post("/userManage/userCharge/addSingleMeterReportRecord", reqData);
+        if(res.code === 200){
+          ElMessage.success("添加成功");
+          this.closeAddDialog();
+          this.handleRefresh();
+        }else{
+          ElMessage.error(res.msg || "添加失败");
+        }
+        this.closeAddDialog();
+        this.handleRefresh();
+      } catch (err) {
+        ElMessage.error("添加失败");
+        console.error(err);
+      } finally {
+        this.adding = false;
+      }
+    },
+    // // 输入读数后自动带出 起码、止码、用水量
+    // onWaterInput() {
+    //   if (this.addForm.readingCount === null || this.addForm.deltaWater === null) {
+    //     return;
+    //   }
+    //   // 任意一个不是有效数字，直接return，不自动计算
+    //   if (isNaN(this.addForm.readingCount) || isNaN(this.addForm.deltaWater)) {
+    //     ElMessage.warning('请在读数/用水量输入框输入有效的数字');
+    //     return;
+    //   }
+    //   const readingCount = Number(this.addForm.readingCount);
+    //   const deltaWater = Number(this.addForm.deltaWater);
+    //
+    //   // 止码 = 本次读数的整数部分
+    //   const endRead = Math.floor(readingCount);
+    //   this.addForm.endRead = endRead;
+    //
+    //   // 起码 = 本次读数 - 用水量 的整数部分
+    //   const startRead = Math.floor(readingCount - deltaWater);
+    //   this.addForm.startRead = startRead;
+    //
+    //   // 结算量 = 止码 - 起码
+    //   this.addForm.waterUse = endRead - startRead;
+    // }
   }
 };
 </script>
@@ -948,4 +1135,107 @@ export default {
   color: #606266;
 }
 
+.recharge-dialog {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 199;
+  background-color: rgb(31 33 38 / 15%);
+}
+
+.change-balance-dialog-content {
+  width: 60%;
+  border: 1px solid #fafafa;
+  background-color: #fafafa;
+  border-radius: 5px;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.recharge-content {
+  width: 94%;
+  background-color: #fff;
+  border-radius: 5px;
+  margin-top: 15px;
+  margin-bottom: 5px;
+  display: flex;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  padding: 10px;
+  overflow-y: auto;
+}
+
+.recharge-input {
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  width: 31%;
+  height: 75px;
+  margin-right: 2.3%;
+}
+
+.recharge-input > span {
+  font-size: 20px;
+  color: #747374;
+  margin-bottom: 5px;
+}
+
+.recharge-input > .el-input {
+  height: 35px;
+  width: 100%;
+}
+
+.title {
+  width: 100%;
+  background-color: #fff;
+  border-radius: 5px 5px 0 0;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+  height: 45px;
+  line-height: 45px;
+  text-align: center;
+  display: flex;
+  justify-content: space-between;
+}
+
+.btn {
+  width: 100%;
+  height: 40px;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  margin-top: 15px;
+  margin-bottom: 15px;
+}
+
+.confirm-btn, .cancel-btn {
+  height: 42px;
+  width: 110px;
+  cursor: pointer;
+  border: 1px solid #f2f2f2;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+}
+
+.confirm-btn {
+  background-color: #45ba7e;
+  margin-right: 15px;
+  color: #fff;
+}
+
+.cancel-btn {
+  background-color: #fff;
+  margin-right: 3%;
+}
+.recharge-input :deep(.el-input__inner.is-disabled) {
+  background-color: #f5f7fa;
+  color: #909399;
+}
 </style>

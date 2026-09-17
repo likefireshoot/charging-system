@@ -316,6 +316,7 @@
       width="960px"
       :close-on-click-modal="false"
       @open="fetchCandidates"
+      :lock-scroll="false"
     >
       <div class="manual-toolbar">
         <el-input
@@ -1681,6 +1682,7 @@ export default {
   display: flex;
   justify-content: flex-end;
   margin-top: 12px;
+  justify-content: center;
 }
 
 .reflush {

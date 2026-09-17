@@ -121,19 +121,9 @@ const routes = [
             component: meterBookReport,
           },
           {
-            path: "monthRecoveryReport",
-            name: "monthRecoveryReport",
-            component: monthRecoveryReport,
-          },
-          {
             path: "twoFeeMonthlyReport",
             name: "twoFeeMonthlyReport",
             component: twoFeeMonthlyReport,
-          },
-          {
-            path: "monthSummaryReport",
-            name: "monthSummaryReport",
-            component: monthSummaryReport,
           },
           {
             path: "monthBaseUserReport",
@@ -201,6 +191,16 @@ const routes = [
             path: "readingCountYearlyReport",
             name: "readingCountYearlyReport",
             component: readingCountYearlyReport,
+          },
+          {
+            path: "monthRecoveryReport",
+            name: "monthRecoveryReport",
+            component: monthRecoveryReport,
+          },
+          {
+            path: "monthSummaryReport",
+            name: "monthSummaryReport",
+            component: monthSummaryReport,
           },
           {
             path: "rechargeDetailReport",

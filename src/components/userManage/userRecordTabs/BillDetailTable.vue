@@ -80,6 +80,10 @@
         <img src="@/assets/yonghu/icon1.3.png" alt="" />
         <span>导出</span>
       </div>
+      <div class="export-btn"  @click="openAddDialog">
+        <img src="@/assets/yuangong/icon6.png" alt="" />
+        <span>调账-记录添加</span>
+      </div>
       <el-tooltip content="至少选择一条记录" placement="top" :disabled="multipleSelection.length > 0">
         <div class="export-btn" :class="{ 'disabled-btn-tip': multipleSelection.length === 0 }" @click="multipleSelection.length > 0 && openDeleteDialog()">
           <img src="@/assets/yonghu/icon4.png" alt="" />
@@ -115,15 +119,15 @@
           <template #default="scope">{{ scope.row.waterUse }}</template>
         </el-table-column>
         <el-table-column property="chargeAmount" label="扣费" min-width="100" align="center"></el-table-column>
-        <el-table-column property="waterFee" min-width="140" align="center" v-if="companyId !== 95">
+        <el-table-column property="waterFee" min-width="140" align="center" v-if="user.companyId !== 95">
           <template #header>扣费组成1:<br>水费</template>
           <template #default="scope">{{ scope.row.waterFee }}</template>
         </el-table-column>
-        <el-table-column property="sewageFee" min-width="140" align="center" v-if="companyId !== 95">
+        <el-table-column property="sewageFee" min-width="140" align="center" v-if="user.companyId !== 95">
           <template #header>扣费组成2:<br>污水处理费</template>
           <template #default="scope">{{ scope.row.sewageFee }}</template>
         </el-table-column>
-        <el-table-column property="minFee" min-width="140" align="center" v-if="companyId !== 95">
+        <el-table-column property="minFee" min-width="140" align="center" v-if="user.companyId !== 95">
           <template #header>扣费组成3:<br>保底消费</template>
           <template #default="scope">{{ scope.row.minFee }}</template>
         </el-table-column>
@@ -146,9 +150,9 @@
         <el-table-column property="endRead" min-width="100" align="center" />
         <el-table-column property="waterUse" min-width="100" align="center" />
         <el-table-column property="totalChargeAmount" min-width="100" align="center"></el-table-column>
-        <el-table-column property="waterFee" min-width="140" align="center" v-if="companyId !== 95"/>
-        <el-table-column property="sewageFee" min-width="140" align="center" v-if="companyId !== 95"/>
-        <el-table-column property="minFee" min-width="140" align="center" v-if="companyId !== 95"/>
+        <el-table-column property="waterFee" min-width="140" align="center" v-if="user.companyId !== 95"/>
+        <el-table-column property="sewageFee" min-width="140" align="center" v-if="user.companyId !== 95"/>
+        <el-table-column property="minFee" min-width="140" align="center" v-if="user.companyId !== 95"/>
         <el-table-column property="createTime" min-width="140" align="center" />
       </el-table>
     </div>
@@ -204,6 +208,102 @@
       </div>
     </template>
   </el-dialog>
+
+  <!-- 调账-记录添加弹窗 -->
+  <div class="recharge-dialog" v-if="addDialogVisible">
+    <div class="change-balance-dialog-content">
+      <div class="title">
+        <div style="margin-left: 10px; display: flex; align-items: center">
+          <img src="@/assets/yonghu/icon20.png" alt="" style="margin-right: 8px" />
+          <span style="font-size: 20px">调账-记录添加</span>
+        </div>
+        <div style="margin-right: 10px; cursor: pointer" @click="closeAddDialog">
+          <img src="@/assets/close.png" alt="" />
+        </div>
+      </div>
+      <div class="recharge-content">
+        <div class="recharge-input">
+          <span>用户号</span>
+          <el-input :value="user.userId" :disabled="true"></el-input>
+        </div>
+        <div class="recharge-input">
+          <span>用户名</span>
+          <el-input :value="user.userName" :disabled="true"></el-input>
+        </div>
+        <div class="recharge-input">
+          <span>表号</span>
+          <el-input :value="user.meterCode" :disabled="true"></el-input>
+        </div>
+        <div class="recharge-input">
+          <span>起码</span>
+          <el-input v-model="addForm.startRead" placeholder="请输入起码"></el-input>
+        </div>
+        <div class="recharge-input">
+          <span>止码</span>
+          <el-input v-model="addForm.endRead" placeholder="请输入止码"></el-input>
+        </div>
+        <div class="recharge-input">
+          <span>阀门</span>
+          <el-select v-model="addForm.valveStatus" placeholder="请选择" style="width:100%">
+            <el-option label="开阀" value="开阀"/>
+            <el-option label="关阀" value="关阀"/>
+            <el-option label="故障" value="故障"/>
+          </el-select>
+        </div>
+        <div class="recharge-input">
+          <span>原金额</span>
+          <el-input v-model="addForm.oldBalance" placeholder="请输入原金额" @input="onWaterInput"></el-input>
+        </div>
+        <div class="recharge-input">
+          <span>扣费金额</span>
+          <el-input v-model="addForm.chargeAmount" placeholder="请输入扣费金额" @input="onWaterInput"></el-input>
+        </div>
+        <div class="recharge-input">
+          <span>余额</span>
+          <el-input v-model="addForm.newBalance" placeholder="请输入余额"></el-input>
+        </div>
+        <div class="recharge-input" v-if="user.companyId !== 95">
+          <span>扣费组成1:水费</span>
+          <el-input v-model="addForm.waterFee" placeholder="请输入水费"></el-input>
+        </div>
+        <div class="recharge-input" v-if="user.companyId !== 95">
+          <span>扣费组成2:污水处理费</span>
+          <el-input v-model="addForm.sewageFee" placeholder="请输入污水处理费"></el-input>
+        </div>
+        <div class="recharge-input" v-if="user.companyId !== 95">
+          <span>扣费组成3:保底消费</span>
+          <el-input v-model="addForm.minFee" placeholder="请输入保底消费"></el-input>
+        </div>
+        <div class="recharge-input">
+          <span>扣费类型</span>
+          <el-select v-model="addForm.typeStr" placeholder="请选择" style="width:100%">
+            <el-option label="抄表扣费" value="抄表扣费"/>
+            <el-option label="保底扣费" value="保底扣费"/>
+          </el-select>
+        </div>
+        <div class="recharge-input">
+          <span>算费日期</span>
+          <el-date-picker
+            v-model="addForm.createTime"
+            type="datetime"
+            placeholder="选择抄表时间"
+            value-format="YYYY-MM-DD HH:mm:ss"
+            style="width:100%"
+          ></el-date-picker>
+        </div>
+      </div>
+      <div class="btn">
+        <div class="confirm-btn" @click="confirmAdd" :class="{loading:adding}">
+          <el-icon style="margin-left: 5%"><Check /></el-icon>
+          <span style="font-size: 20px; margin-left: 15%">确认</span>
+        </div>
+        <div class="cancel-btn" @click="closeAddDialog">
+          <el-icon style="margin-left: 5%; color: #45ba7e"><Close /></el-icon>
+          <span style="font-size: 20px; margin-left: 15%; color: #5a5a5a">取消</span>
+        </div>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script>
@@ -264,7 +364,24 @@ export default {
       deleteDialogVisible: false,
       deleteTargets: [],
       acknowledgeDelete: false,
-      deleting: false
+      deleting: false,
+
+      addDialogVisible: false,
+      adding: false,
+      addForm: {
+        startRead: null,
+        endRead: null,
+        waterUse: null,
+        valveStatus: "",
+        oldBalance: null,
+        chargeAmount: null,
+        newBalance: null,
+        waterFee: null,
+        sewageFee: null,
+        minFee: null,
+        typeStr: "",
+        createTime: "",
+      }
     };
   },
   mounted() {
@@ -653,6 +770,131 @@ export default {
       } finally {
         this.deleting = false;
       }
+    },
+    openAddDialog() {
+      if(!this.user || !this.user.userId){
+        ElMessage.warning("用户信息缺失，无法新增记录");
+        return;
+      }
+      this.addDialogVisible = true;
+    },
+    closeAddDialog() {
+      this.addDialogVisible = false;
+      // 清空表单
+      this.addForm = {
+        startRead: null,
+        endRead: null,
+        waterUse: null,
+        valveStatus: "",
+        oldBalance: null,
+        chargeAmount: null,
+        newBalance: null,
+        waterFee: null,
+        sewageFee: null,
+        minFee: null,
+        typeStr: "",
+        createTime: "",
+      };
+      if(this.$refs.addFormRef){
+        this.$refs.addFormRef.clearValidate();
+      }
+    },
+    async confirmAdd() {
+      if(this.adding) return;
+      // 读取数值
+      const oldBalance = Number(this.addForm.oldBalance);
+      const newBalance = Number(this.addForm.newBalance);
+      const chargeAmount = Number(this.addForm.chargeAmount);
+      const startRead = Number(this.addForm.startRead);
+      const endRead = Number(this.addForm.endRead);
+      let waterFee = 0;
+      let sewageFee = 0;
+      let minFee = 0;
+      if (this.user.companyId !== 95) {
+        waterFee = Number(this.addForm.waterFee);
+        sewageFee = Number(this.addForm.sewageFee);
+        minFee = Number(this.addForm.minFee);
+      }
+
+      // 校验表单
+      if (isNaN(oldBalance)) {
+        ElMessage.warning("请输入正确的原金额");
+        return;
+      }
+      if (isNaN(chargeAmount)) {
+        ElMessage.warning("请输入正确的扣费金额");
+        return;
+      }
+      if (isNaN(newBalance)) {
+        ElMessage.warning("请输入正确的余额");
+        return;
+      }
+      if (this.addForm.startRead === '' || isNaN(startRead) || !Number.isInteger(startRead)) {
+        ElMessage.warning("起码必须为整数");
+        return;
+      }
+      if (this.addForm.endRead === '' || isNaN(endRead) || !Number.isInteger(endRead)) {
+        ElMessage.warning("止码必须为整数");
+        return;
+      }
+      if (!this.addForm.createTime) {
+        ElMessage.warning("请选择算费时间");
+        return;
+      }
+      if (!this.addForm.valveStatus) {
+        ElMessage.warning("请选择阀门状态");
+        return;
+      }
+      this.adding = true;
+      try {
+        const reqData = {
+          userId: this.user.userId,
+          meterCode: this.user.meterCode,
+          companyId: this.user.companyId,
+          oldBalance: oldBalance,
+          chargeAmount: chargeAmount,
+          newBalance: newBalance,
+          startRead: startRead,
+          endRead: endRead,
+          waterFee: waterFee,
+          sewageFee: sewageFee,
+          minFee: minFee,
+          createTime: this.addForm.createTime,
+          valveStatus: this.addForm.valveStatus,
+          typeStr: this.addForm.typeStr
+        };
+
+        const res = await service.post("/import/addSingleChargeRecord", reqData);
+        if(res.code === 200){
+          ElMessage.success("添加成功");
+          this.closeAddDialog();
+          this.handleRefresh();
+        }else{
+          ElMessage.error(res.msg || "添加失败");
+        }
+
+        this.closeAddDialog();
+        this.handleRefresh();
+      } catch (err) {
+        ElMessage.error("添加失败");
+        console.error(err);
+      } finally {
+        this.adding = false;
+      }
+    },
+    onWaterInput() {
+      if (this.addForm.oldBalance === null || this.addForm.chargeAmount === null) {
+        return;
+      }
+      // 任意一个不是有效数字，直接return，不自动计算
+      if (isNaN(this.addForm.oldBalance) || isNaN(this.addForm.chargeAmount)) {
+        ElMessage.warning('请在原金额/扣费金额输入框输入有效的数字');
+        return;
+      }
+      const oldBalance = Number(this.addForm.oldBalance);
+      const chargeAmount = Number(this.addForm.chargeAmount);
+
+      this.addForm.newBalance = Number(((oldBalance * 100 - chargeAmount * 100) / 100).toFixed(2));
     }
   }
 };
@@ -904,5 +1146,109 @@ export default {
 .delete-footer :deep(.el-checkbox__label) {
   font-size: 14px;
   color: #606266;
+}
+
+.recharge-dialog {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 199;
+  background-color: rgb(31 33 38 / 15%);
+}
+
+.change-balance-dialog-content {
+  width: 60%;
+  border: 1px solid #fafafa;
+  background-color: #fafafa;
+  border-radius: 5px;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.recharge-content {
+  width: 94%;
+  background-color: #fff;
+  border-radius: 5px;
+  margin-top: 15px;
+  margin-bottom: 5px;
+  display: flex;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  padding: 10px;
+  overflow-y: auto;
+}
+
+.recharge-input {
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  width: 31%;
+  height: 75px;
+  margin-right: 2.3%;
+}
+
+.recharge-input > span {
+  font-size: 20px;
+  color: #747374;
+  margin-bottom: 5px;
+}
+
+.recharge-input > .el-input {
+  height: 35px;
+  width: 100%;
+}
+
+.title {
+  width: 100%;
+  background-color: #fff;
+  border-radius: 5px 5px 0 0;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+  height: 45px;
+  line-height: 45px;
+  text-align: center;
+  display: flex;
+  justify-content: space-between;
+}
+
+.btn {
+  width: 100%;
+  height: 40px;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  margin-top: 15px;
+  margin-bottom: 15px;
+}
+
+.confirm-btn, .cancel-btn {
+  height: 42px;
+  width: 110px;
+  cursor: pointer;
+  border: 1px solid #f2f2f2;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+}
+
+.confirm-btn {
+  background-color: #45ba7e;
+  margin-right: 15px;
+  color: #fff;
+}
+
+.cancel-btn {
+  background-color: #fff;
+  margin-right: 3%;
+}
+.recharge-input :deep(.el-input__inner.is-disabled) {
+  background-color: #f5f7fa;
+  color: #909399;
 }
 </style>
