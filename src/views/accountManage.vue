@@ -118,6 +118,9 @@
                   </div>
                 </div>
               </template>
+              <template #default="scope">
+                {{ formatCreateTime(scope.row.createTime) }}
+              </template>
             </el-table-column>
           </el-table>
         </div>
@@ -908,6 +911,17 @@ export default {
           console.error("导出失败:", error);
           ElMessage.error("导出失败: " + error.message);
         });
+    },
+    formatCreateTime(timeStr) {
+      if (!timeStr) return "";
+      const limit = "2026-09-20T10:00:00";
+      if (timeStr < limit) {
+        // T前面一截，只拿年月日
+        return timeStr.split("T")[0];
+      } else {
+        // T替换成空格，保留完整时间
+        return timeStr.replace("T", " ");
+      }
     },
   },
 };

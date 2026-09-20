@@ -43,7 +43,7 @@
           </div>
           <div class="edit-input">
             <span>开户时间</span>
-            <el-date-picker v-model="form.createTime" type="date" placeholder="选择日期" style="flex-grow: 1; width: 100%; max-height: 35px" format="YYYY-MM-DD" value-format="YYYY-MM-DD" />
+            <el-date-picker v-model="form.createTime" type="datetime" placeholder="选择日期" style="flex-grow: 1; width: 100%; max-height: 35px" format="YYYY-MM-DD HH:mm:ss" value-format="YYYY-MM-DD HH:mm:ss" />
           </div>
         </div>
 
@@ -219,7 +219,7 @@ export default {
       throw new Error("用户信息不完整，请重新登录！");
     }
 
-    const currentDate = new Date().toISOString().split("T")[0];
+    const currentDate = this.getLocalDateTime();
     return {
       companyId: userData.companyId,
       submitting: false,
@@ -599,6 +599,16 @@ export default {
       } finally {
         this.submitting = false;
       }
+    },
+    getLocalDateTime() {
+      const d = new Date();
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      const h = String(d.getHours()).padStart(2, '0');
+      const mi = String(d.getMinutes()).padStart(2, '0');
+      const s = String(d.getSeconds()).padStart(2, '0');
+      return `${y}-${m}-${day} ${h}:${mi}:${s}`;
     },
   },
 };

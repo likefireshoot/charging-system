@@ -54,7 +54,7 @@
         </div>
         <div class="edit-input" style="margin-right: 1%">
           <span>开户时间</span>
-          <el-date-picker v-model="addData.createTime" type="date" placeholder="选择日期" style="flex-grow: 1; width: 100%; max-height: 35px" format="YYYY-MM-DD" value-format="YYYY-MM-DD" />
+          <el-date-picker v-model="addData.createTime" type="datetime" placeholder="选择日期" style="flex-grow: 1; width: 100%; max-height: 35px" format="YYYY-MM-DD HH:mm:ss" value-format="YYYY-MM-DD HH:mm:ss" />
         </div>
       </div>
       <div class="btn">
@@ -83,8 +83,7 @@ export default {
     },
   },
   data() {
-    // 获取当前日期 YYYY-MM-DD 格式
-    const currentDate = new Date().toISOString().split("T")[0];
+    const currentDate = this.getLocalDateTime();
     return {
       addData: {
         userName: "",
@@ -243,6 +242,11 @@ export default {
               continue;
             }
 
+            // 不是普表用户时，codeBookId跳过校验
+            if (key === 'codeBookId' && !formData.isNormalMeterUser) {
+              continue;
+            }
+
             const value = obj[key];
 
             if (typeof value === "object" && value !== null) {
@@ -292,6 +296,16 @@ export default {
         .catch((err) => {
           ElMessage.error("提交失败：" + err.message);
         }).finally(() => { this.isSubmitting = false; });
+    },
+    getLocalDateTime() {
+      const d = new Date();
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      const h = String(d.getHours()).padStart(2, '0');
+      const mi = String(d.getMinutes()).padStart(2, '0');
+      const s = String(d.getSeconds()).padStart(2, '0');
+      return `${y}-${m}-${day} ${h}:${mi}:${s}`;
     },
   },
 };
