@@ -581,6 +581,7 @@ export default {
         userPhone: userPhone,
         userOtherPhone: this.userInfoData.userOtherPhone || null,
         userRemark: this.userInfoData.userRemark || null,
+        meterCode: this.userInfoData.meterCode,
         imei: this.userInfoData.imei,
         approver_1: this.userInfoData.approver_1,
         approver_2: approver_2,
