@@ -197,7 +197,6 @@ export default {
       if (this.isSubmitting) {
         return;
       }
-      this.isSubmitting = true;
       let missingFields = [];
       let formData = {};
       Object.keys(this.addData).forEach((key) => {
@@ -226,6 +225,7 @@ export default {
         userPhone: "联系电话",
         companyId: "所属水厂",
         createTime: "开户时间",
+        codeBookId: "所属表册",
       };
 
       // 可选字段列表（允许为空）
@@ -243,7 +243,7 @@ export default {
             }
 
             // 不是普表用户时，codeBookId跳过校验
-            if (key === 'codeBookId' && !formData.isNormalMeterUser) {
+            if (fullKey === 'codeBookId' && !formData.isNormalMeterUser) {
               continue;
             }
 
@@ -283,6 +283,7 @@ export default {
       console.log(formData);
 
       // 所有字段都不为空，提交数据到后台
+      this.isSubmitting = true;
         service.post("/userManage/userCharge/addUser", formData)
         .then((res) => {
           if (res.code === 200) {

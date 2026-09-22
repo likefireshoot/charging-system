@@ -125,7 +125,7 @@ export default {
       this.addData.meterType = "NB-IoT表";
       this.addData.companyId = 1;
 
-      if (/^[1379]\d{9}$/.test(code)) {
+      if (/^[13479]\d{9}$/.test(code)) {
         this.addData.meterVendor = "信驰";
         this.addData.masterKey = "5eb4f253756d4b16858afd965f39ad43";
         this.addData.productId = "17245445";
