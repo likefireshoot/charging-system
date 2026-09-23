@@ -231,8 +231,8 @@
           <el-input :value="user.userName" :disabled="true"></el-input>
         </div>
         <div class="recharge-input">
-          <span>表号</span>
-          <el-input :value="user.meterCode" :disabled="true"></el-input>
+          <span>地址</span>
+          <el-input :value="user.userAddr" :disabled="true"></el-input>
         </div>
         <div class="recharge-input">
           <span>起码</span>
@@ -242,14 +242,14 @@
           <span>止码</span>
           <el-input v-model="addForm.endRead" placeholder="请输入止码"></el-input>
         </div>
-        <div class="recharge-input">
-          <span>阀门</span>
-          <el-select v-model="addForm.valveStatus" placeholder="请选择" style="width:100%">
-            <el-option label="开阀" value="开阀"/>
-            <el-option label="关阀" value="关阀"/>
-            <el-option label="故障" value="故障"/>
-          </el-select>
-        </div>
+<!--        <div class="recharge-input">-->
+<!--          <span>阀门</span>-->
+<!--          <el-select v-model="addForm.valveStatus" placeholder="请选择" style="width:100%">-->
+<!--            <el-option label="开阀" value="开阀"/>-->
+<!--            <el-option label="关阀" value="关阀"/>-->
+<!--            <el-option label="故障" value="故障"/>-->
+<!--          </el-select>-->
+<!--        </div>-->
         <div class="recharge-input">
           <span>原金额</span>
           <el-input v-model="addForm.oldBalance" placeholder="请输入原金额" @input="onWaterInput"></el-input>
@@ -258,28 +258,21 @@
           <span>扣费金额</span>
           <el-input v-model="addForm.chargeAmount" placeholder="请输入扣费金额" @input="onWaterInput"></el-input>
         </div>
-        <div class="recharge-input">
-          <span>余额</span>
-          <el-input v-model="addForm.newBalance" placeholder="请输入余额"></el-input>
-        </div>
         <div class="recharge-input" v-if="user.companyId !== 95">
-          <span>扣费组成1:水费</span>
+          <span>水费</span>
           <el-input v-model="addForm.waterFee" placeholder="请输入水费"></el-input>
         </div>
         <div class="recharge-input" v-if="user.companyId !== 95">
-          <span>扣费组成2:污水处理费</span>
+          <span>污水处理费</span>
           <el-input v-model="addForm.sewageFee" placeholder="请输入污水处理费"></el-input>
         </div>
         <div class="recharge-input" v-if="user.companyId !== 95">
-          <span>扣费组成3:保底消费</span>
+          <span>保底消费</span>
           <el-input v-model="addForm.minFee" placeholder="请输入保底消费"></el-input>
         </div>
         <div class="recharge-input">
-          <span>扣费类型</span>
-          <el-select v-model="addForm.typeStr" placeholder="请选择" style="width:100%">
-            <el-option label="抄表扣费" value="抄表扣费"/>
-            <el-option label="保底扣费" value="保底扣费"/>
-          </el-select>
+          <span>余额</span>
+          <el-input v-model="addForm.newBalance" placeholder="请输入余额"></el-input>
         </div>
         <div class="recharge-input">
           <span>算费日期</span>
@@ -290,6 +283,13 @@
             value-format="YYYY-MM-DD HH:mm:ss"
             style="width:100%"
           ></el-date-picker>
+        </div>
+        <div class="recharge-input">
+          <span>扣费类型</span>
+          <el-select v-model="addForm.typeStr" placeholder="请选择" style="width:100%">
+            <el-option label="抄表扣费" value="抄表扣费"/>
+            <el-option label="保底扣费" value="保底扣费"/>
+          </el-select>
         </div>
       </div>
       <div class="btn">
@@ -372,7 +372,7 @@ export default {
         startRead: null,
         endRead: null,
         waterUse: null,
-        valveStatus: "",
+        // valveStatus: "",
         oldBalance: null,
         chargeAmount: null,
         newBalance: null,
@@ -785,7 +785,7 @@ export default {
         startRead: null,
         endRead: null,
         waterUse: null,
-        valveStatus: "",
+        // valveStatus: "",
         oldBalance: null,
         chargeAmount: null,
         newBalance: null,
@@ -841,10 +841,10 @@ export default {
         ElMessage.warning("请选择算费时间");
         return;
       }
-      if (!this.addForm.valveStatus) {
-        ElMessage.warning("请选择阀门状态");
-        return;
-      }
+      // if (!this.addForm.valveStatus) {
+      //   ElMessage.warning("请选择阀门状态");
+      //   return;
+      // }
       this.adding = true;
       try {
         const reqData = {
@@ -860,7 +860,7 @@ export default {
           sewageFee: sewageFee,
           minFee: minFee,
           createTime: this.addForm.createTime,
-          valveStatus: this.addForm.valveStatus,
+          // valveStatus: this.addForm.valveStatus,
           typeStr: this.addForm.typeStr
         };
 
@@ -1159,7 +1159,7 @@ export default {
 }
 
 .change-balance-dialog-content {
-  width: 60%;
+  width: 95%;
   border: 1px solid #fafafa;
   background-color: #fafafa;
   border-radius: 5px;
@@ -1173,7 +1173,7 @@ export default {
 }
 
 .recharge-content {
-  width: 94%;
+  width: 98%;
   background-color: #fff;
   border-radius: 5px;
   margin-top: 15px;
@@ -1189,9 +1189,10 @@ export default {
   display: flex;
   justify-content: center;
   flex-direction: column;
-  width: 31%;
+  flex: 1;
+  min-width: 60px;
   height: 75px;
-  margin-right: 2.3%;
+  margin-right: 3px;
 }
 
 .recharge-input > span {
