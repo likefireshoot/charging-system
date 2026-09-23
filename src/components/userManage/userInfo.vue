@@ -81,7 +81,7 @@
         </div>
         <div class="user-info-input">
           <span>开户时间</span>
-          <el-date-picker v-model="userInfoData.createTime" type="date" placeholder="选择日期" style="width: 100%" format="YYYY-MM-DD" value-format="YYYY-MM-DD" />
+          <el-date-picker v-model="userInfoData.createTime" type="datetime" placeholder="选择日期时间" style="width: 100%" format="YYYY-MM-DD HH:mm:ss" value-format="YYYY-MM-DD HH:mm:ss" />
         </div>
         <div class="user-info-input">
           <span>水表关阀设置（后付费设置）</span>
@@ -807,7 +807,7 @@ export default {
       this.userInfoData.approver_1 = full.approver1;
       this.userInfoData.factoryDate = full.factoryDate || "";
       this.userInfoData.firstInspectDate = full.firstInspectDate || "";
-      this.userInfoData.createTime = full.createTime ? full.createTime.split(" ")[0] : "";
+      this.userInfoData.createTime = full.createTime || "";
       this.userInfoData.enableArrearsValve = full.enableArrearsValve === null ? "default" : full.enableArrearsValve;
       this.userInfoData.keepValveOpenFree = full.keepValveOpenFree ?? 1;
       this.userInfoData.isPause = full.isPause ?? 0;
