@@ -61,12 +61,13 @@
         <el-table-column property="displayUserId" label="用户号" min-width="120" align="center" />
         <el-table-column property="meterCode" label="表号" min-width="150" align="center" />
         <el-table-column property="commandType" label="通讯类别" min-width="130" align="center" />
+        <el-table-column property="baseReading" label="命令参数" width="100" align="center" />
         <el-table-column property="commandStatus" label="通讯状态" min-width="130" align="center" />
-        <el-table-column property="createTime" label="通讯下发时间" min-width="180" align="center" />
-        <el-table-column property="finishTime" label="通讯完成时间" min-width="180" align="center" />
+        <el-table-column property="createTime" label="通讯下发时间" min-width="150" align="center" />
+        <el-table-column property="finishTime" label="通讯完成时间" min-width="150" align="center" />
 <!--        <el-table-column property="meterVendor" label="厂商" min-width="120" align="center" />-->
         <el-table-column property="displayStaffName" label="下发员工" min-width="120" align="center" />
-        <el-table-column property="description" label="描述" min-width="260" align="center" show-overflow-tooltip />
+        <el-table-column property="description" label="描述" min-width="220" align="center" show-overflow-tooltip />
       </el-table>
     </div>
 
