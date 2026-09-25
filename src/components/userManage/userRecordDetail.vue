@@ -24,7 +24,7 @@
             </div>
             <div class="data-item"><span>电话：</span>{{ currentUser.phone || '-' }}</div>
             <div class="data-item" v-if="currentUser.userOtherPhone != null || companyId === 95"><span>电话2：</span>{{ currentUser.userOtherPhone != null ? currentUser.userOtherPhone : '暂无' }}</div>
-            <div class="data-item"><span>开户：</span>{{ currentUser.createTime || '-' }}</div>
+            <div class="data-item"><span>开户：</span>{{ formatDateTime(currentUser.createTime) }}</div>
             <div class="data-item"><span>地址：</span>{{ currentUser.userAddr || '-' }}</div>
             <div class="data-item"><span>区域：</span>{{ currentUser.regionName || '-' }}</div>
             <div class="data-item"><span>价格：</span>{{ currentUser.userType || '-' }}</div>
@@ -286,6 +286,10 @@ export default {
     formatDate(datetime) {
       if (!datetime) return '';
       return datetime.substring(0, 10);
+    },
+    formatDateTime(datetime) {
+      if (!datetime) return '-';
+      return String(datetime).replace('T', ' ');
     },
     handleTotalMoneyUpdate(value) {
       this.totalMoney = value || 0;
