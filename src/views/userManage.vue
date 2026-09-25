@@ -79,9 +79,18 @@
           <img src="@/assets/yonghu/icon20.png" alt="" />
           <span>余额调整</span>
         </div>
+        <div class="recharge-btn" @click="change_balance_record_btn_click"
+             v-if="staffPermissionIds.includes(9)">
+          <img src="@/assets/yonghu/icon20.png" alt="" />
+          <span>余额调整记录</span>
+        </div>
         <div class="recharge-btn" :class="{ 'btn-single-only-disabled': multipleSelection.length !== 1 || hasPauseUserSelected }" @click="(multipleSelection.length === 1 && !hasPauseUserSelected) && change_tonnage_btn_click()">
           <img src="@/assets/jiage/icon3.png" alt="" />
           <span>吨数调整</span>
+        </div>
+        <div class="recharge-btn" @click="change_tonnage_record_btn_click">
+          <img src="@/assets/jiage/icon3.png" alt="" />
+          <span>吨数调整记录</span>
         </div>
         <div class="recharge-btn" :class="{ 'btn-single-only-disabled': multipleSelection.length !== 1 || hasPauseUserSelected }" @click="(multipleSelection.length === 1 && !hasPauseUserSelected) && recharge_btn_click()"
           v-if="staffPermissionIds.includes(10)">
@@ -318,10 +327,20 @@
       :changeBalance_dialogFormVisible="changeBalance_dialogFormVisible" :data="multipleSelection[0]"
       @close="closeChangeBalanceDialog"></changeBalanceVue>
 
+    <!-- 余额调整记录弹出框 -->
+    <changeBalanceRecordVue v-if="changeBalanceRecord_dialogFormVisible"
+                      :changeBalanceRecord_dialogFormVisible="changeBalanceRecord_dialogFormVisible" :data="multipleSelection[0]"
+                      @close="closeChangeBalanceRecordDialog"></changeBalanceRecordVue>
+
     <!-- 吨数调整弹出框 -->
     <changeTonnageVue v-if="changeTonnage_dialogFormVisible"
       :changeTonnage_dialogFormVisible="changeTonnage_dialogFormVisible" :data="multipleSelection[0]"
       @close="closeChangeTonnageDialog"></changeTonnageVue>
+
+    <!-- 吨数调整记录弹出框 -->
+    <changeTonnageRecordVue v-if="changeTonnageRecord_dialogFormVisible"
+                      :changeTonnageRecord_dialogFormVisible="changeTonnageRecord_dialogFormVisible" :data="multipleSelection[0]"
+                      @close="closeChangeTonnageRecordDialog"></changeTonnageRecordVue>
 
     <!-- 充值弹出框 -->
     <rechargeVue v-if="recharge_dialogFormVisible" :recharge_dialogFormVisible="recharge_dialogFormVisible"
@@ -757,7 +776,9 @@ import changeRecord from "@/components/userManage/changeRecord.vue";
 import userInfoVue from "@/components/userManage/userInfo.vue";
 import transactionRecord from "@/components/userManage/transactionRecord.vue";
 import changeBalanceVue from "@/components/userManage/changeBalance.vue";
+import changeBalanceRecordVue from "@/components/userManage/changeBalanceRecord.vue";
 import changeTonnageVue from "@/components/userManage/changeTonnage.vue";
+import changeTonnageRecordVue from "@/components/userManage/changeTonnageRecord.vue";
 import rechargeCancelRecordVue from "@/components/userManage/RechargeCancelRecord.vue";
 import pauseRecord from "@/components/userManage/pauseRecord.vue";
 import closeRecord from "@/components/userManage/closeRecord.vue";
@@ -785,7 +806,9 @@ export default {
     valveVue,
     valueOpenVue,
     changeBalanceVue,
+    changeBalanceRecordVue,
     changeTonnageVue,
+    changeTonnageRecordVue,
     commandTaiYangNengVue,
     commandXinchiVue,
     commandShengXin,
@@ -894,7 +917,9 @@ export default {
       valve_dialogFormVisible: false,
       valveOpen_dialogFormVisible: false,
       changeBalance_dialogFormVisible: false,
+      changeBalanceRecord_dialogFormVisible: false,
       changeTonnage_dialogFormVisible: false,
+      changeTonnageRecord_dialogFormVisible: false,
       // 充值撤销记录
       recharge_cancel_record_dialogFormVisible: false,
       // 新增暂停、销户弹窗标记
@@ -1663,12 +1688,18 @@ export default {
         ElMessage.warning("请选择要调整余额的数据");
       }
     },
+    change_balance_record_btn_click() {
+      this.changeBalanceRecord_dialogFormVisible = true;
+    },
     change_tonnage_btn_click() {
       if (this.multipleSelection.length > 0) {
         this.changeTonnage_dialogFormVisible = true;
       } else {
         ElMessage.warning("请选择要调整吨数的数据");
       }
+    },
+    change_tonnage_record_btn_click() {
+      this.changeTonnageRecord_dialogFormVisible = true;
     },
     recharge_btn_click() {
       if (this.multipleSelection.length > 0) {
@@ -1792,8 +1823,18 @@ export default {
       this.multipleSelection = [];
       this.reflush();
     },
+    closeChangeBalanceRecordDialog() {
+      this.changeBalanceRecord_dialogFormVisible = false;
+      this.multipleSelection = [];
+      this.reflush();
+    },
     closeChangeTonnageDialog() {
       this.changeTonnage_dialogFormVisible = false;
+      this.multipleSelection = [];
+      this.reflush();
+    },
+    closeChangeTonnageRecordDialog() {
+      this.changeTonnageRecord_dialogFormVisible = false;
       this.multipleSelection = [];
       this.reflush();
     },
