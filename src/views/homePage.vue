@@ -51,7 +51,7 @@
         <div class="week-report-title">
             <span style="font-size: 20px; margin-top: 10px; margin-bottom: 5px">
               收费统计（{{ dateRangeText }}）
-              <a href="javascript:;" style="font-size: 20px; margin-left: 0; color: #46b97e" @click="exportChartExcel(monthchart, '收费统计')">(导出)</a>
+              <a href="javascript:;" style="font-size: 20px; margin-left: 0; color: #46b97e" @click="exportChartExcel(monthChargeChart, '收费统计')">(导出)</a>
             </span>
           <div class="flex-container">
             <div style="width: 4px; height: 4px; background-color: #46b87d; margin-right: 5px"></div>
@@ -542,6 +542,10 @@ export default {
               type: "dashed",
               color: "#ccc",
             },
+          },
+          axisLabel: {
+            fontSize: 16,
+            color: "#666"
           },
         },
         tooltip: {
