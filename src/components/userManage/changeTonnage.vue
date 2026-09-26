@@ -25,7 +25,10 @@
           <span>新吨数（读数）</span>
           <el-input v-model="formData.reading" class="input-item" placeholder="请输入新的吨数（读数）" />
         </div>
-
+        <div class="edit-input" style="width: 90%">
+          <span>调整原因（选填，限30字以内）</span>
+          <el-input v-model="formData.reason" class="input-item" placeholder="请输入调整原因（选填，限30字以内）" />
+        </div>
         <!-- 展示区：设备基本情况 + 用户绑定情况 -->
         <div v-if="loading" v-loading="loading" class="info-panel loading-panel"></div>
 
@@ -91,6 +94,7 @@ export default {
       formData: {
         meterCode: "",
         reading: "",
+        reason: "",
       },
       deviceInfo: null,
       bindingInfo: null,
@@ -120,6 +124,7 @@ export default {
     resetForm() {
       this.formData.meterCode = "";
       this.formData.reading = "";
+      this.formData.reason = "";
       this.deviceInfo = null;
       this.bindingInfo = null;
       this.loading = false;
@@ -171,6 +176,7 @@ export default {
     handleCommit() {
       const meterCode = this.formData.meterCode.trim();
       const reading = this.formData.reading.trim();
+      const reason = this.formData.reason.trim();
 
       if (!meterCode) {
         ElMessage.error("表号不能为空");
@@ -186,6 +192,12 @@ export default {
       }
       if (!/^\d+(\.\d{1,2})?$/.test(reading)) {
         ElMessage.error("吨数必须为不小于 0 的数字，且最多两位小数");
+        return;
+      }
+
+      // 新增：调整原因校验，选填最多30字
+      if (reason.length > 30) {
+        ElMessage.error("调整原因不能超过30个字");
         return;
       }
 
@@ -220,16 +232,19 @@ export default {
         lockScroll: false,
       })
         .then(() => {
-          this.doSubmit(meterCode, this.deviceInfo.imei, newReadingNum);
+          this.doSubmit(meterCode, this.deviceInfo.imei, newReadingNum, reason);
         })
         .catch(() => {});
     },
-    doSubmit(meterCode, imei, reading) {
+    doSubmit(meterCode, imei, reading, reason) {
+      console.log("Binding", this.bindingInfo)
+      console.log("设备信息", this.deviceInfo)
       service
         .post("/userManage/meterRead/editMeterReading", {
           meterCode,
           imei,
           reading,
+          reason,
         })
         .then((res) => {
           if (res.code === 200) {

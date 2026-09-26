@@ -32,6 +32,11 @@
           <span>修改后的余额/元</span>
           <el-input v-model="rechargeData.newBalance" />
         </div>
+        <br>
+        <div class="recharge-input" style="margin-right: 1%; width: 100%">
+          <span>调整原因（选填，限30字）</span>
+          <el-input v-model="rechargeData.reason" />
+        </div>
       </div>
       <div class="btn">
         <div class="confirm-btn" @click="handleConfirm">
@@ -71,6 +76,7 @@ export default {
         meterCode: "",
         balance: "",
         newBalance: "",
+        reason: "",
       },
     };
   },
@@ -99,8 +105,10 @@ export default {
         companyId: this.rechargeData.companyId,
         userId: this.rechargeData.userId,
         meterCode: this.rechargeData.meterCode,
+        oldBalance: this.rechargeData.balance,
         newBalance: this.rechargeData.newBalance,
         imei: this.data.imei,
+        reason: this.rechargeData.reason,
       };
       console.log(params);
 
@@ -140,6 +148,13 @@ export default {
         ElMessage.error(message);
         return;
       }
+
+      // =========新增：调整原因选填，最多30个字=========
+      if (this.rechargeData.reason.length > 30) {
+        ElMessage.error("调整原因不能超过30个字");
+        return;
+      }
+
       service
         .put("/userManage/userCharge/changeBalance", params)
         .then((response) => {
@@ -169,7 +184,6 @@ export default {
 
 .change-balance-dialog-content {
   width: 60%;
-  height: 320px;
   border: 1px solid #fafafa;
   background-color: #fafafa;
   border-radius: 5px;

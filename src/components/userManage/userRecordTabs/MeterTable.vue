@@ -239,20 +239,20 @@
           <el-input v-model="addForm.deltaWater" placeholder="请输入用水量"></el-input>
         </div>
         <div class="recharge-input">
-          <span>阀门</span>
-          <el-select v-model="addForm.valveStatus" placeholder="请选择" style="width:100%">
-            <el-option label="开阀" value="开阀"/>
-            <el-option label="关阀" value="关阀"/>
-            <el-option label="故障" value="故障"/>
-          </el-select>
-        </div>
-        <div class="recharge-input">
           <span>扣费</span>
           <el-input v-model="addForm.feeThisTime" placeholder="请输入扣费金额"></el-input>
         </div>
         <div class="recharge-input">
           <span>余额</span>
           <el-input v-model="addForm.balanceThisTime" placeholder="请输入余额"></el-input>
+        </div>
+        <div class="recharge-input">
+          <span>阀门</span>
+          <el-select v-model="addForm.valveStatus" placeholder="请选择" style="width:100%">
+            <el-option label="开阀" value="开阀"/>
+            <el-option label="关阀" value="关阀"/>
+            <el-option label="故障" value="故障"/>
+          </el-select>
         </div>
         <div class="recharge-input">
           <span>抄表时间</span>
@@ -1146,7 +1146,7 @@ export default {
 }
 
 .change-balance-dialog-content {
-  width: 60%;
+  width: 90%;
   border: 1px solid #fafafa;
   background-color: #fafafa;
   border-radius: 5px;
@@ -1160,7 +1160,7 @@ export default {
 }
 
 .recharge-content {
-  width: 94%;
+  width: 96%;
   background-color: #fff;
   border-radius: 5px;
   margin-top: 15px;
@@ -1176,9 +1176,9 @@ export default {
   display: flex;
   justify-content: center;
   flex-direction: column;
-  width: 31%;
+  width: 10%;
   height: 75px;
-  margin-right: 2.3%;
+  margin-right: 1%;
 }
 
 .recharge-input > span {
