@@ -137,6 +137,7 @@ export default {
         this.addData.deviceId = "无";
       } else if (/^6\d{13}$/.test(code)) {
         this.addData.meterVendor = "圣鑫";
+        this.addData.imei = "8" + code;
         this.addData.masterKey = "e44c23dee3804ddea74f4f10b720d368";
         this.addData.productId = "17247122";
         this.addData.deviceId = "默认id";
