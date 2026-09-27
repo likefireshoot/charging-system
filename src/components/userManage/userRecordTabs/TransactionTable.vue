@@ -97,13 +97,15 @@
         <span>导出</span>
       </div>
       <el-tooltip content="至少选择一条记录" placement="top" :disabled="multipleSelection.length > 0">
-        <div class="tool-btn" :class="{ 'disabled-btn-tip': multipleSelection.length === 0 }" @click="openEditDialog()">
+        <div class="tool-btn" :class="{ 'disabled-btn-tip': multipleSelection.length === 0 }" @click="openEditDialog()"
+             v-if="staffPermissionIds.includes(107)">
           <img src="@/assets/yuangong/icon6.png" alt="" />
           <span>调账-记录编辑</span>
         </div>
       </el-tooltip>
       <el-tooltip content="至少选择一条记录" placement="top" :disabled="multipleSelection.length > 0">
-        <div class="tool-btn" :class="{ 'disabled-btn-tip': multipleSelection.length === 0 }" @click="multipleSelection.length > 0 && openDeleteDialog()">
+        <div class="tool-btn" :class="{ 'disabled-btn-tip': multipleSelection.length === 0 }" @click="multipleSelection.length > 0 && openDeleteDialog()"
+             v-if="staffPermissionIds.includes(107)">
           <img src="@/assets/yonghu/icon4.png" alt="" />
           <span>调账-记录删除</span>
         </div>

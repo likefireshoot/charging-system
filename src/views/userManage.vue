@@ -80,15 +80,17 @@
           <span>余额调整</span>
         </div>
         <div class="recharge-btn" @click="change_balance_record_btn_click"
-             v-if="staffPermissionIds.includes(9)">
+             v-if="staffPermissionIds.includes(102)">
           <img src="@/assets/yonghu/icon20.png" alt="" />
           <span>余额调整记录</span>
         </div>
-        <div class="recharge-btn" :class="{ 'btn-single-only-disabled': multipleSelection.length !== 1 || hasPauseUserSelected }" @click="(multipleSelection.length === 1 && !hasPauseUserSelected) && change_tonnage_btn_click()">
+        <div class="recharge-btn" :class="{ 'btn-single-only-disabled': multipleSelection.length !== 1 || hasPauseUserSelected }" @click="(multipleSelection.length === 1 && !hasPauseUserSelected) && change_tonnage_btn_click()"
+             v-if="staffPermissionIds.includes(103)">
           <img src="@/assets/jiage/icon3.png" alt="" />
           <span>吨数调整</span>
         </div>
-        <div class="recharge-btn" @click="change_tonnage_record_btn_click">
+        <div class="recharge-btn" @click="change_tonnage_record_btn_click"
+             v-if="staffPermissionIds.includes(104)">
           <img src="@/assets/jiage/icon3.png" alt="" />
           <span>吨数调整记录</span>
         </div>

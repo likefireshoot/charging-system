@@ -829,10 +829,10 @@ export default {
         ElMessage.error("角色名称不能为空！");
         return;
       }
-      if (this.addData.permissionList.length == 0) {
-        ElMessage.error("权限内容不能为空！");
-        return;
-      }
+      // if (this.addData.permissionList.length == 0) {
+      //   ElMessage.error("权限内容不能为空！");
+      //   return;
+      // }
       Object.keys(this.addData).forEach((key) => {
         if (typeof this.addData[key] === "string") {
           this.addData[key] = this.addData[key].trim();
@@ -877,10 +877,10 @@ export default {
           message: "角色名称不能为空！",
         },
 
-        {
-          condition: this.editData.permissionList.length === 0,
-          message: "权限内容不能为空！",
-        },
+        // {
+        //   condition: this.editData.permissionList.length === 0,
+        //   message: "权限内容不能为空！",
+        // },
       ];
       for (const validation of validations) {
         if (validation.condition) {
