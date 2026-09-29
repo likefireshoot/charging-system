@@ -80,12 +80,14 @@
         <img src="@/assets/yonghu/icon1.3.png" alt="" />
         <span>导出</span>
       </div>
-      <div class="export-btn"  @click="openAddDialog">
+      <div class="export-btn"  @click="openAddDialog"
+           v-if="staffPermissionIds.includes(106)">
         <img src="@/assets/yuangong/icon6.png" alt="" />
         <span>调账-记录添加</span>
       </div>
       <el-tooltip content="至少选择一条记录" placement="top" :disabled="multipleSelection.length > 0">
-        <div class="export-btn" :class="{ 'disabled-btn-tip': multipleSelection.length === 0 }" @click="multipleSelection.length > 0 && openDeleteDialog()">
+        <div class="export-btn" :class="{ 'disabled-btn-tip': multipleSelection.length === 0 }" @click="multipleSelection.length > 0 && openDeleteDialog()"
+             v-if="staffPermissionIds.includes(106)">
           <img src="@/assets/yonghu/icon4.png" alt="" />
           <span>调账-记录删除</span>
         </div>

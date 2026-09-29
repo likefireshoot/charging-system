@@ -211,16 +211,28 @@ const staffPermissionIds = computed(() => {
 });
 
 const baseMenu = [
-  { id: 0, name: "首页", icon: require("@/assets/menu/icon1.png"), icon2: require("@/assets/menu/icon2.png"), path: "/homePage", ports: ["93"]  },
-  { id: 20, name: "水务地图", icon: require("@/assets/icon7.png"), icon2: require("@/assets/icon10.png"), path: "/map", ports: ["92"] },
-  { id: 21, name: "外勤管理", icon: require("@/assets/icon8.png"), icon2: require("@/assets/icon9.png"), path: "/field", ports: ["92"] },
-  { id: 22, name: "设备管理", icon: require("@/assets/menu/icon32.png"), icon2: require("@/assets/menu/icon33.png"), path: "/deviceManage", ports: ["92"] },
+  // { id: 0, name: "首页", icon: require("@/assets/menu/icon1.png"), icon2: require("@/assets/menu/icon2.png"), path: "/homePage", ports: ["93"]  },
+  // { id: 20, name: "水务地图", icon: require("@/assets/icon7.png"), icon2: require("@/assets/icon10.png"), path: "/map", ports: ["92"] },
+  // { id: 21, name: "外勤管理", icon: require("@/assets/icon8.png"), icon2: require("@/assets/icon9.png"), path: "/field", ports: ["92"] },
+  // { id: 22, name: "设备管理", icon: require("@/assets/menu/icon32.png"), icon2: require("@/assets/menu/icon33.png"), path: "/deviceManage", ports: ["92"] },
 ];
 
 const navLists = reactive([]);
 
 function buildMenu(userData) {
   const tempMenus = JSON.parse(JSON.stringify(baseMenu));
+  if (staffPermissionIds.value.includes(108)) {
+    tempMenus.push({ id: 0, name: "首页", icon: require("@/assets/menu/icon1.png"), icon2: require("@/assets/menu/icon2.png"), path: "/homePage", ports: ["93"]  });
+  }
+  if (staffPermissionIds.value.includes(109)) {
+    tempMenus.push({ id: 20, name: "水务地图", icon: require("@/assets/icon7.png"), icon2: require("@/assets/icon10.png"), path: "/map", ports: ["92"] },);
+  }
+  if (staffPermissionIds.value.includes(110)) {
+    tempMenus.push({ id: 21, name: "外勤管理", icon: require("@/assets/icon8.png"), icon2: require("@/assets/icon9.png"), path: "/field", ports: ["92"] });
+  }
+  if (staffPermissionIds.value.includes(111)) {
+    tempMenus.push({ id: 22, name: "设备管理", icon: require("@/assets/menu/icon32.png"), icon2: require("@/assets/menu/icon33.png"), path: "/deviceManage", ports: ["92"] });
+  }
   if (staffPermissionIds.value.includes(1)) {
     tempMenus.push({ id: 1, name: "开户管理", icon: require("@/assets/menu/icon24.png"), icon2: require("@/assets/menu/icon23.png"), path: "/accountManage", ports: ["93"] });
   }

@@ -1,5 +1,15 @@
 <template>
   <div class="shouye">
+    <!-- ========== 无权限美化区域【新增】 ========== -->
+    <div v-if="!staffPermissionIds.includes(108)" class="no-permission-box">
+      <div class="no-permission-inner">
+        <!-- 使用element-plus 锁图标 -->
+        <el-icon class="lock-icon"><Lock /></el-icon>
+        <div class="tip-text">暂无权限查看</div>
+        <div class="sub-text">请联系管理员分配首页查看权限</div>
+      </div>
+    </div>
+    <template v-else>
     <div class="container1">
       <div class="shebei-status">
         <span style="font-size: 22px; margin-top: 10px; margin-bottom: 5px">设备状态</span>
@@ -156,6 +166,7 @@
         </div>
       </div>
     </div>
+    </template>
   </div>
 </template>
 
@@ -190,6 +201,7 @@ export default {
     const month = String(now.getMonth() + 1).padStart(2, "0");
     const day = String(now.getDate()).padStart(2, "0");
     return {
+      staffPermissionIds: JSON.parse(sessionStorage.getItem("userData")).staffPermissionIds,
       params: {
         record_time: `${year}-${month}-${day}`,
         dateRange: getCurrentMonthRange(),
@@ -1200,5 +1212,35 @@ export default {
 .warn-num-text:hover {
   color: #46b97e;
   text-decoration-color: #46b97e;
+}
+
+.no-permission-box {
+  width: 100%;
+  height: 100%;
+  background: #ffffff;
+  border:1px solid #e9e9e9;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.no-permission-inner {
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+}
+.lock-icon {
+  font-size:95px;
+  color:#46b97e;
+  margin-bottom:20px;
+}
+.tip-text {
+  font-size:28px;
+  color:#606266;
+  margin-bottom:10px;
+}
+.sub-text {
+  font-size:20px;
+  color:#909399;
 }
 </style>
