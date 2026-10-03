@@ -622,7 +622,7 @@ export default {
                   let childList = Array.isArray(parentNode.children) ? [...parentNode.children] : [];
                   if (currentCompanyId !== 1) {
                     childList = childList.filter(child => {
-                      return child.permissionId !== 30 && child.permissionId !== 40;
+                      return child.permissionId !== 30;
                     });
                   }
                   return {
