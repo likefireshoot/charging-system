@@ -36,6 +36,7 @@
             type="month"
             placeholder="选择月份"
             value-format="YYYY-MM"
+            :disabled-date="disabledDate"
             style="width:100%"
           ></el-date-picker>
         </div>
@@ -214,6 +215,11 @@ export default {
       const y = now.getFullYear();
       const m = String(now.getMonth()+1).padStart(2,'0');
       return `${y}-${m}`;
+    },
+    // 定制需求（监利新沟）：companyId 为 93 时，只显示 2026-09 及以后的统计数据
+    disabledDate(time) {
+      if (this.companyId !== 93) return false;
+      return time.getFullYear() < 2026 || (time.getFullYear() === 2026 && time.getMonth() < 8);
     },
     async getCompanyList() {
       await service
