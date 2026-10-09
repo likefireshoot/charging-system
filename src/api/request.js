@@ -96,7 +96,10 @@ service.interceptors.request.use(
     let { data, method, url } = config;
     if (!data) data = {};
     if (method === "get") {
-      config.params = data;
+      // GET 用 config.data 作 params，但必须保留调用方已显式传入的 config.params。
+      // 原实现直接 config.params = data 会把 { params } 全部覆盖成 {}，
+      // 典型表现：表端回执分页/筛选失效，点任何一页都只显示第一页。
+      config.params = { ...data, ...(config.params || {}) };
     }
 
     // 每次请求前都从sessionStorage中获取最新的token

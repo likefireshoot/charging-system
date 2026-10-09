@@ -400,6 +400,35 @@ watch(
       }
     }
 
+    // 蓝牙卡表（35D2）菜单：父菜单仅在其子菜单至少有一个命中用户权限时才显示
+    const btMeterMenu = {
+      id: 23,
+      name: "蓝牙卡表",
+      icon: require("@/assets/menu/icon5.png"),
+      icon2: require("@/assets/menu/icon6.png"),
+      path: "/btMeter",
+      ports: ["92"],
+      arrowIcon1,
+      arrowIcon2,
+      children: [
+        { id: 231, name: "档案管理", permissionId: 40, icon: require("@/assets/menu/icon11.png"), icon2: require("@/assets/menu/icon12.png"), path: "/btMeter/manage" },
+        { id: 232, name: "写表任务", permissionId: 41, icon: require("@/assets/menu/icon13.png"), icon2: require("@/assets/menu/icon14.png"), path: "/btMeter/task" },
+        { id: 233, name: "表端回执", permissionId: 42, icon: require("@/assets/menu/icon17.png"), icon2: require("@/assets/menu/icon18.png"), path: "/btMeter/receipt" },
+        { id: 234, name: "抄表任务", permissionId: 45, icon: require("@/assets/menu/icon13.png"), icon2: require("@/assets/menu/icon14.png"), path: "/btMeter/readTask" },
+      ],
+    };
+    const btMenus = filterByPort([btMeterMenu]);
+    if (btMenus.length > 0) {
+      const menu = btMenus[0];
+      const visibleChildren = (menu.children || []).filter((child) =>
+        staffPermissionIds.value.includes(child.permissionId)
+      );
+      if (visibleChildren.length > 0) {
+        menu.children = visibleChildren;
+        navLists.push(menu);
+      }
+    }
+
   },
   { immediate: true }
 );
