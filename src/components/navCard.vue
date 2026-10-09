@@ -211,16 +211,28 @@ const staffPermissionIds = computed(() => {
 });
 
 const baseMenu = [
-  { id: 0, name: "首页", icon: require("@/assets/menu/icon1.png"), icon2: require("@/assets/menu/icon2.png"), path: "/homePage", ports: ["93"]  },
-  { id: 20, name: "水务地图", icon: require("@/assets/icon7.png"), icon2: require("@/assets/icon10.png"), path: "/map", ports: ["92"] },
-  { id: 21, name: "外勤管理", icon: require("@/assets/icon8.png"), icon2: require("@/assets/icon9.png"), path: "/field", ports: ["92"] },
-  { id: 22, name: "设备管理", icon: require("@/assets/menu/icon32.png"), icon2: require("@/assets/menu/icon33.png"), path: "/deviceManage", ports: ["92"] },
+  // { id: 0, name: "首页", icon: require("@/assets/menu/icon1.png"), icon2: require("@/assets/menu/icon2.png"), path: "/homePage", ports: ["93"]  },
+  // { id: 20, name: "水务地图", icon: require("@/assets/icon7.png"), icon2: require("@/assets/icon10.png"), path: "/map", ports: ["92"] },
+  // { id: 21, name: "外勤管理", icon: require("@/assets/icon8.png"), icon2: require("@/assets/icon9.png"), path: "/field", ports: ["92"] },
+  // { id: 22, name: "设备管理", icon: require("@/assets/menu/icon32.png"), icon2: require("@/assets/menu/icon33.png"), path: "/deviceManage", ports: ["92"] },
 ];
 
 const navLists = reactive([]);
 
 function buildMenu(userData) {
   const tempMenus = JSON.parse(JSON.stringify(baseMenu));
+  if (staffPermissionIds.value.includes(108)) {
+    tempMenus.push({ id: 0, name: "首页", icon: require("@/assets/menu/icon1.png"), icon2: require("@/assets/menu/icon2.png"), path: "/homePage", ports: ["93"]  });
+  }
+  if (staffPermissionIds.value.includes(109)) {
+    tempMenus.push({ id: 20, name: "水务地图", icon: require("@/assets/icon7.png"), icon2: require("@/assets/icon10.png"), path: "/map", ports: ["92"] },);
+  }
+  if (staffPermissionIds.value.includes(110)) {
+    tempMenus.push({ id: 21, name: "外勤管理", icon: require("@/assets/icon8.png"), icon2: require("@/assets/icon9.png"), path: "/field", ports: ["92"] });
+  }
+  if (staffPermissionIds.value.includes(111)) {
+    tempMenus.push({ id: 22, name: "设备管理", icon: require("@/assets/menu/icon32.png"), icon2: require("@/assets/menu/icon33.png"), path: "/deviceManage", ports: ["92"] });
+  }
   if (staffPermissionIds.value.includes(1)) {
     tempMenus.push({ id: 1, name: "开户管理", icon: require("@/assets/menu/icon24.png"), icon2: require("@/assets/menu/icon23.png"), path: "/accountManage", ports: ["93"] });
   }
@@ -275,10 +287,14 @@ function buildMenu(userData) {
         { id: 47, name: "用水月报表", icon: require("@/assets/menu/icon15.png"), icon2: require("@/assets/menu/icon16.png"), path: "/report/readingCountMonthlyReport" },
         { id: 48, name: "用水年报表", icon: require("@/assets/menu/icon17.png"), icon2: require("@/assets/menu/icon18.png"), path: "/report/readingCountYearlyReport" },
         { id: 49, name: "用户报表", icon: require("@/assets/menu/icon3.png"), icon2: require("@/assets/menu/icon4.png"), path: "/report/accountsReport" },
+        { id: 136, name: "月回收报表", permissionId:98, icon: require("@/assets/menu/icon15.png"), icon2: require("@/assets/menu/icon16.png"), path: "/report/monthRecoveryReport" },
+        { id: 139, name: "月实收报表", permissionId: 101, icon: require("@/assets/menu/icon15.png"), icon2: require("@/assets/menu/icon16.png"), path: "/meterReading/twoFeeMonthlyReport" },
+        { id: 137, name: "月汇总报表", permissionId:99, icon: require("@/assets/menu/icon11.png"), icon2: require("@/assets/menu/icon12.png"), path: "/report/monthSummaryReport"},
         { id: 490, name: "收费明细表", icon: require("@/assets/menu/icon5.png"), icon2: require("@/assets/menu/icon6.png"), path: "/report/rechargeDetailReport" },
-        { id: 491, name: "扣费明细表", icon: require("@/assets/menu/icon5.png"), icon2: require("@/assets/menu/icon6.png"), path: "/report/billDetailReport" },
+        // 下线：扣费明细表（不要随便删除，随时可能启用）
+        // { id: 491, name: "扣费明细表", icon: require("@/assets/menu/icon5.png"), icon2: require("@/assets/menu/icon6.png"), path: "/report/billDetailReport" },
         // { id: 492, name: "大额扣费审计", icon: require("@/assets/menu/icon5.png"), icon2: require("@/assets/menu/icon6.png"), path: "/report/abnormalChargeReport" },
-      ],
+      ].filter(child => !child.permissionId || staffPermissionIds.value.includes(child.permissionId)),
     });
   }
   if (staffPermissionIds.value.includes(84)) {
@@ -355,6 +371,9 @@ watch(
           { id: 133, name: "区域报表", permissionId: 83, icon: require("@/assets/menu/icon15.png"), icon2: require("@/assets/menu/icon16.png"), path: "/meterReading/regionMeterReport" },
           { id: 134, name: "抄表统计表", permissionId: 96, icon: require("@/assets/add/icon-10.png"), icon2: require("@/assets/add/icon-11.png"), path: "/meterReading/meterReadingReport" },
           { id: 135, name: "抄表册报表", permissionId: 97, icon: require("@/assets/menu/icon17.png"), icon2: require("@/assets/menu/icon18.png"), path: "/meterReading/meterBookReport" },
+          // { id: 136, name: "月回收报表", permissionId: 98, icon: require("@/assets/menu/icon15.png"), icon2: require("@/assets/menu/icon16.png"), path: "/meterReading/monthRecoveryReport" },
+          // { id: 137, name: "月汇总报表", permissionId: 99, icon: require("@/assets/menu/icon11.png"), icon2: require("@/assets/menu/icon12.png"), path: "/meterReading/monthSummaryReport"},
+          { id: 138, name: "底数户报表", permissionId: 100, icon: require("@/assets/menu/icon3.png"), icon2: require("@/assets/menu/icon4.png"), path: "/meterReading/monthBaseUserReport"},
         ]
       };
 
@@ -362,9 +381,12 @@ watch(
       const meterMenus = filterByPort([meterReadingMenu]);
       if (meterMenus.length > 0) {
         const menu = meterMenus[0];
-        // 父菜单按子菜单可见性显示：仅保留有权限的子菜单
+        // 父菜单按子菜单可见性显示：仅保留有权限的子菜单；公司专属子菜单按 companyOnly 判断，不受按钮权限控制
         const visibleChildren = (menu.children || []).filter(
-          (child) => staffPermissionIds.value.includes(child.permissionId)
+          (child) =>
+            child.companyOnly !== undefined
+              ? newUserData && newUserData.companyId === child.companyOnly
+              : staffPermissionIds.value.includes(child.permissionId)
         );
         if (visibleChildren.length > 0) {
           menu.children = visibleChildren;

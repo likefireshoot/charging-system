@@ -54,7 +54,7 @@
               <el-option label="现金" value="现金"></el-option>
               <el-option label="微信支付" value="微信支付"></el-option>
               <el-option label="免费赠送" value="免费赠送"></el-option>
-              <el-option label="微信生活缴费" value="微信生活缴费"></el-option>
+              <el-option label="生活缴费" value="生活缴费"></el-option>
             </el-select>
           </div>
           <div class="search-input" style="width: 38%; margin-right: 10px">
@@ -182,7 +182,7 @@
               <span class="summary-value">{{ rechargeSummary.cashTotalAmount }}</span>
             </div>
             <div class="summary-item">
-              <span class="summary-label">微信生活缴费总金额</span>
+              <span class="summary-label">生活缴费总金额</span>
               <span class="summary-value">{{ rechargeSummary.wxLifeFengKouTotalAmount }}</span>
             </div>
             <div class="summary-item">

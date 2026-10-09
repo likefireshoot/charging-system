@@ -79,9 +79,20 @@
           <img src="@/assets/yonghu/icon20.png" alt="" />
           <span>余额调整</span>
         </div>
-        <div class="recharge-btn" :class="{ 'btn-single-only-disabled': multipleSelection.length !== 1 || hasPauseUserSelected }" @click="(multipleSelection.length === 1 && !hasPauseUserSelected) && change_tonnage_btn_click()">
+        <div class="recharge-btn" @click="change_balance_record_btn_click"
+             v-if="staffPermissionIds.includes(102)">
+          <img src="@/assets/yonghu/icon20.png" alt="" />
+          <span>余额调整记录</span>
+        </div>
+        <div class="recharge-btn" :class="{ 'btn-single-only-disabled': multipleSelection.length !== 1 || hasPauseUserSelected }" @click="(multipleSelection.length === 1 && !hasPauseUserSelected) && change_tonnage_btn_click()"
+             v-if="staffPermissionIds.includes(103)">
           <img src="@/assets/jiage/icon3.png" alt="" />
           <span>吨数调整</span>
+        </div>
+        <div class="recharge-btn" @click="change_tonnage_record_btn_click"
+             v-if="staffPermissionIds.includes(104)">
+          <img src="@/assets/jiage/icon3.png" alt="" />
+          <span>吨数调整记录</span>
         </div>
         <div class="recharge-btn" :class="{ 'btn-single-only-disabled': multipleSelection.length !== 1 || hasPauseUserSelected }" @click="(multipleSelection.length === 1 && !hasPauseUserSelected) && recharge_btn_click()"
           v-if="staffPermissionIds.includes(10)">
@@ -219,9 +230,10 @@
                 </div>
               </template>
               <template #default="scope">
-                <span @click="handleChaoBiaoTime(scope.row)"
-                  style="color: #46b97e; display: block; width: 100%; text-align: center">{{ scope.row.updateTime
-                  }}</span>
+                <span @click="handleChaoBiaoTime(scope.row)" style="display: block; width: 100%; text-align: center">
+                  <el-tag v-if="!scope.row.updateTime" type="warning" class="new-meter-badge">新表-<br />尚未接入系统</el-tag>
+                  <span v-else style="color: #46b97e">{{ scope.row.updateTime }}</span>
+                </span>
               </template>
             </el-table-column>
             <!-- <el-table-column property="imei" label="IMEI号" width="280" align="center" /> -->
@@ -317,10 +329,20 @@
       :changeBalance_dialogFormVisible="changeBalance_dialogFormVisible" :data="multipleSelection[0]"
       @close="closeChangeBalanceDialog"></changeBalanceVue>
 
+    <!-- 余额调整记录弹出框 -->
+    <changeBalanceRecordVue v-if="changeBalanceRecord_dialogFormVisible"
+                      :changeBalanceRecord_dialogFormVisible="changeBalanceRecord_dialogFormVisible" :data="multipleSelection[0]"
+                      @close="closeChangeBalanceRecordDialog"></changeBalanceRecordVue>
+
     <!-- 吨数调整弹出框 -->
     <changeTonnageVue v-if="changeTonnage_dialogFormVisible"
       :changeTonnage_dialogFormVisible="changeTonnage_dialogFormVisible" :data="multipleSelection[0]"
       @close="closeChangeTonnageDialog"></changeTonnageVue>
+
+    <!-- 吨数调整记录弹出框 -->
+    <changeTonnageRecordVue v-if="changeTonnageRecord_dialogFormVisible"
+                      :changeTonnageRecord_dialogFormVisible="changeTonnageRecord_dialogFormVisible" :data="multipleSelection[0]"
+                      @close="closeChangeTonnageRecordDialog"></changeTonnageRecordVue>
 
     <!-- 充值弹出框 -->
     <rechargeVue v-if="recharge_dialogFormVisible" :recharge_dialogFormVisible="recharge_dialogFormVisible"
@@ -756,7 +778,9 @@ import changeRecord from "@/components/userManage/changeRecord.vue";
 import userInfoVue from "@/components/userManage/userInfo.vue";
 import transactionRecord from "@/components/userManage/transactionRecord.vue";
 import changeBalanceVue from "@/components/userManage/changeBalance.vue";
+import changeBalanceRecordVue from "@/components/userManage/changeBalanceRecord.vue";
 import changeTonnageVue from "@/components/userManage/changeTonnage.vue";
+import changeTonnageRecordVue from "@/components/userManage/changeTonnageRecord.vue";
 import rechargeCancelRecordVue from "@/components/userManage/RechargeCancelRecord.vue";
 import pauseRecord from "@/components/userManage/pauseRecord.vue";
 import closeRecord from "@/components/userManage/closeRecord.vue";
@@ -784,7 +808,9 @@ export default {
     valveVue,
     valueOpenVue,
     changeBalanceVue,
+    changeBalanceRecordVue,
     changeTonnageVue,
+    changeTonnageRecordVue,
     commandTaiYangNengVue,
     commandXinchiVue,
     commandShengXin,
@@ -826,6 +852,7 @@ export default {
         userPhone: "", // 联系电话
         userAddr: "", // 新增地址搜索参数
         order: 0,   // ****** 默认按照时间顺序倒叙排列表格 ******
+        priceId: null,
       },
       price_list: [],
       priceDialogVisible: false,
@@ -868,6 +895,8 @@ export default {
       commandType: "",
       companyList: [],
 
+      allPriceList: [],
+
       sortField: "time",
       sortOrder: "desc",
 
@@ -894,7 +923,9 @@ export default {
       valve_dialogFormVisible: false,
       valveOpen_dialogFormVisible: false,
       changeBalance_dialogFormVisible: false,
+      changeBalanceRecord_dialogFormVisible: false,
       changeTonnage_dialogFormVisible: false,
+      changeTonnageRecord_dialogFormVisible: false,
       // 充值撤销记录
       recharge_cancel_record_dialogFormVisible: false,
       // 新增暂停、销户弹窗标记
@@ -994,6 +1025,7 @@ export default {
         { key: "meterType", label: "水表类型", type: "select", optionsKey: "shuibiao_list", defaultVisible: false },
         { key: "battery", label: "电量", type: "select", clearable: true, options: [{ label: "正常", value: "正常" }, { label: "异常", value: "异常" }] },
         { key: "valveStatus", label: "阀门", type: "select", clearable: true, options: [{ label: "开阀", value: "开阀" }, { label: "关阀", value: "关阀" }, { label: "故障", value: "故障" }] },
+        { key: "priceId", label: "价格类型", type: "select", placeholder: "请选择所属水厂", optionsKey: "allPriceList" },
       ],
       batchPauseDialogVisible: false,
       batchCloseDialogVisible: false,
@@ -1044,6 +1076,8 @@ export default {
       this.quyu_selected = null;
       this.$refs.treeRef.setCurrentKey(null);
       this.getRegionData();
+      this.param.priceId = null;
+      this.getAllPriceList();
     },
     // 监听 yonghuData 变化，处理从异常页面跳转后的自动点击抄表时间
     yonghuData: {
@@ -1212,8 +1246,34 @@ export default {
     }
 
     this.getCompanyList();
+    this.getAllPriceList();
   },
   methods: {
+    getAllPriceList() {
+      let targetCompanyId;
+      if (this.companyId === 1) {
+        targetCompanyId = this.param?.company ? this.param.company : this.companyId;
+      } else {
+        targetCompanyId = this.companyId;
+      }
+
+      let params = {
+        pageNo: 1,
+        pageSize: 1000,
+        companyId: targetCompanyId,
+      };
+
+      queryPriceMg(params)
+        .then((res) => {
+          this.allPriceList = res.data.records.map((item) => ({
+            id: item.priceId,
+            label: item.priceName,
+          }));
+        })
+        .catch(() => {
+          ElMessage.error("获取价格类型失败");
+        });
+    },
     // 打开批量停户弹窗
     openBatchPauseDialog() {
       this.batchPauseDialogVisible = true;
@@ -1290,6 +1350,9 @@ export default {
       if (field.optionsKey === "shuibiao_list") {
         return (this.shuibiao_list || []).map((item) => ({ label: item.label, value: item.label }));
       }
+      if (field.optionsKey === "allPriceList") {
+        return (this.allPriceList || []).map((item) => ({ label: item.label, value: item.id }));
+      }
       return [];
     },
     // ****** 手动处理分页变化，避免 watch 循环 ******
@@ -1344,7 +1407,7 @@ export default {
           if (response.code === 200) {
             this.yonghuData = response.data.userInfoData;
             this.yonghuData.forEach((item) => {
-              item.updateTime = item.updateTime.replace("T", " ");
+              item.updateTime = item.updateTime ? item.updateTime.replace("T", " ") : null;
             });
             this.total = response.data.totalElements;
             // if (this.currentPage !== response.data.currentPages) {
@@ -1631,12 +1694,18 @@ export default {
         ElMessage.warning("请选择要调整余额的数据");
       }
     },
+    change_balance_record_btn_click() {
+      this.changeBalanceRecord_dialogFormVisible = true;
+    },
     change_tonnage_btn_click() {
       if (this.multipleSelection.length > 0) {
         this.changeTonnage_dialogFormVisible = true;
       } else {
         ElMessage.warning("请选择要调整吨数的数据");
       }
+    },
+    change_tonnage_record_btn_click() {
+      this.changeTonnageRecord_dialogFormVisible = true;
     },
     recharge_btn_click() {
       if (this.multipleSelection.length > 0) {
@@ -1760,8 +1829,18 @@ export default {
       this.multipleSelection = [];
       this.reflush();
     },
+    closeChangeBalanceRecordDialog() {
+      this.changeBalanceRecord_dialogFormVisible = false;
+      this.multipleSelection = [];
+      this.reflush();
+    },
     closeChangeTonnageDialog() {
       this.changeTonnage_dialogFormVisible = false;
+      this.multipleSelection = [];
+      this.reflush();
+    },
+    closeChangeTonnageRecordDialog() {
+      this.changeTonnageRecord_dialogFormVisible = false;
       this.multipleSelection = [];
       this.reflush();
     },
@@ -2568,6 +2647,15 @@ export default {
 </script>
 
 <style scoped>
+:deep(.el-tag.new-meter-badge) {
+  font-size: 14px;
+  height: auto;
+  padding: 2px 8px;
+  line-height: 1.25;
+  border-radius: 6px;
+  white-space: normal;
+}
+
 :deep(.el-table__body tr:nth-child(odd)) {
   background-color: #edf8f2;
 }
@@ -2689,7 +2777,7 @@ export default {
   justify-content: center;
   /* 确保子元素在父容器中垂直居中 */
   flex-direction: column;
-  width: 8%;
+  width: 7%;
   height: 100%;
   margin-right: 10px;
 }

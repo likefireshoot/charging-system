@@ -4,8 +4,23 @@
       <div class="search-content">
         <div class="search-input" v-if="companyId === 1">
           <span>所属水厂</span>
-          <el-select v-model="params.companyId" placeholder="请选择所属水厂">
+          <el-select v-model="params.companyId" placeholder="请选择所属水厂" @change="handleCompanyChange">
             <el-option v-for="item in companyList" :key="item.id" :label="item.name" :value="item.id"></el-option>
+          </el-select>
+        </div>
+        <div class="search-input">
+          <span>区域</span>
+          <el-select
+            v-model="params.region"
+            placeholder="选择区域"
+            clearable
+            @change="search"
+            :disabled="!params.companyId"
+            filterable
+            :filter-method="filterRegion"
+            style="width:100%"
+          >
+            <el-option v-for="item in regionList" :key="item.regionId" :label="item.regionName" :value="item.regionId"/>
           </el-select>
         </div>
         <div class="search-input">
@@ -49,37 +64,19 @@
           :row-style="{ height: '50px' }"
           v-loading="isLoading"
         >
-          <el-table-column label="序号" min-width="80" align="center" fixed="left" #default="scope">
+          <el-table-column label="序号" min-width="60" align="center" fixed="left" #default="scope">
             {{ scope.$index + 1 }}
           </el-table-column>
           <el-table-column prop="regionName" label="区域" align="center" min-width="130"/>
-          <el-table-column prop="totalMeterCount" label="总户数" align="center" min-width="100"/>
-
-          <el-table-column label="已审核" align="center">
-          <el-table-column label="成功抄表" align="center">
-            <el-table-column prop="normalCount" label="正常" align="center" min-width="90"/>
-            <el-table-column prop="noChangeCount" label="表数未动" align="center" min-width="100"/>
-            <el-table-column prop="endNotReachCount" label="止码未到" align="center" min-width="100"/>
-            <el-table-column prop="readTotalCount" label="合计" align="center" min-width="100"/>
-          </el-table-column>
-
-          <el-table-column label="异常抄表" align="center">
-            <el-table-column prop="meterUnclearCount" label="表不清" align="center" min-width="90"/>
-            <el-table-column prop="meterBrokenCount" label="表破" align="center" min-width="90"/>
-            <el-table-column prop="meterBuriedCount" label="表埋" align="center" min-width="90"/>
-            <el-table-column prop="tempRemoveCount" label="暂拆" align="center" min-width="90"/>
-            <el-table-column prop="otherCount" label="其它" align="center" min-width="90"/>
-            <el-table-column prop="noOneHomeCount" label="无人在家" align="center" min-width="100"/>
-            <el-table-column prop="unreadTotalCount" label="合计" align="center" min-width="100"/>
-          </el-table-column>
-          </el-table-column>
-          <el-table-column prop="cacheReadCount" label="已抄表未审核" align="center" min-width="100">
-            <template #header>已抄表<br>未审核</template>
-          </el-table-column>
-          <el-table-column prop="noReadCount" label="未抄表" align="center" min-width="100"/>
+          <el-table-column prop="counterAmount" label="现金" align="center" min-width="100"/>
+          <el-table-column prop="miniProgramAmount" label="微信小程序" align="center" min-width="100"/>
+          <el-table-column prop="lifePayAmount" label="生活缴费" align="center" min-width="100"/>
+<!--          <el-table-column prop="freeGiftAmount" label="免费赠送" align="center" min-width="100"/>-->
+          <el-table-column prop="tradeCount" label="交易笔数" align="center" min-width="100"/>
+          <el-table-column prop="totalReceiveAmount" label="实收合计" align="center" min-width="100"/>
+          <el-table-column prop="periodChargeAmount" label="当月扣款" align="center" min-width="100"/>
         </el-table>
       </div>
-      <!-- 底部固定汇总行，无表头，紧贴表格下方 -->
       <el-table
         :data="[totalSummaryRow]"
         border
@@ -87,32 +84,17 @@
         :show-header="false"
         row-class-name="summary-row"
       >
-        <el-table-column label="序号" min-width="210" align="center" fixed="left">
+        <el-table-column label="序号" min-width="190" align="center" fixed="left">
           <template #default>合计</template>
         </el-table-column>
-        <el-table-column label="总户数" min-width="100" align="center" prop="totalMeterSum" />
-        <el-table-column label="正常" min-width="90" align="center" prop="normalSum" />
-        <el-table-column label="表数未动" min-width="100" align="center" prop="noChangeSum" />
-        <el-table-column label="止码未到" min-width="100" align="center" prop="endNotReachSum" />
-        <el-table-column label="已抄合计" min-width="100" align="center" prop="readTotalSum" />
-        <el-table-column label="表不清" min-width="90" align="center" prop="meterUnclearSum" />
-        <el-table-column label="表破" min-width="90" align="center" prop="meterBrokenSum" />
-        <el-table-column label="表埋" min-width="90" align="center" prop="meterBuriedSum" />
-        <el-table-column label="暂拆" min-width="90" align="center" prop="tempRemoveSum" />
-        <el-table-column label="其它" min-width="90" align="center" prop="otherSum" />
-        <el-table-column label="无人在家" min-width="100" align="center" prop="noOneHomeSum" />
-        <el-table-column label="未抄合计" min-width="100" align="center" prop="unreadTotalSum" />
-        <el-table-column prop="cacheReadSum" label="已抄表未审核" align="center" min-width="100"/>
-        <el-table-column prop="noReadSum" label="未抄表" align="center" min-width="100"/>
+        <el-table-column prop="counterAmount" label="现金" align="center" min-width="100"/>
+        <el-table-column prop="miniProgramAmount" label="微信小程序" align="center" min-width="100"/>
+        <el-table-column prop="lifePayAmount" label="生活缴费" align="center" min-width="100"/>
+<!--        <el-table-column prop="freeGiftAmount" label="免费赠送" align="center" min-width="100"/>-->
+        <el-table-column prop="tradeCount" label="交易笔数" align="center" min-width="100"/>
+        <el-table-column prop="totalReceiveAmount" label="实收合计" align="center" min-width="100"/>
+        <el-table-column prop="periodChargeAmount" label="当月扣款" align="center" min-width="100"/>
       </el-table>
-<!--      <div class="page-box">-->
-<!--        <div class="page-left">制表人：{{ reportMakerName }}</div>-->
-<!--        <div class="demo-pagination-block">-->
-<!--          <el-pagination v-model:current-page="params.pageNo" v-model:page-size="params.pageSize" :page-sizes="[5, 10, 15]" layout="total,  prev, pager, next, jumper" :total="total"-->
-<!--                         @current-change="handlePageChange"/>-->
-<!--        </div>-->
-<!--        <div class="page-right">制表时间：{{ reportMakeDate }}</div>-->
-<!--      </div>-->
     </div>
   </div>
 </template>
@@ -125,42 +107,38 @@ export default {
   data() {
     return {
       timeRange: this.getCurMonthStr(),
-      pageTitle: "城区抄表情况报表",
+      pageTitle: "月回收报表",
       params: {
         companyId: null,
         startTime: null,
         endTime: null,
+        region: null,
       },
       reportMakerName: JSON.parse(sessionStorage.getItem("userData")).staffName,
       reportMakeDate: this.getTodayStr(),
       companyId: JSON.parse(sessionStorage.getItem("userData")).companyId,
       companyList: [],
+      regionList:[],
       tableData: [],
-      total: 0,
       isLoading: false,
       totalSummaryRow: {
-          totalMeterSum: 0,
-          normalSum: 0,
-          noChangeSum: 0,
-          endNotReachSum: 0,
-          readTotalSum: 0,
-          meterUnclearSum: 0,
-          meterBrokenSum: 0,
-          meterBuriedSum: 0,
-          tempRemoveSum: 0,
-          otherSum: 0,
-          noOneHomeSum: 0,
-          unreadTotalSum: 0,
-          readNoReviewTotal: 0,
-          unReadTotal: 0,
-          cacheReadSum: 0,
-          noReadSum: 0
-       },
+        counterAmount: 0,
+        miniProgramAmount: 0,
+        lifePayAmount: 0,
+        freeGiftAmount: 0,
+        tradeCount: 0,
+        totalReceiveAmount: 0,
+        periodChargeAmount: 0
+      },
     };
   },
   mounted() {
     this.getCompanyList();
-    this.search();
+    if(this.companyId !== 1){
+      this.params.companyId = this.companyId
+      this.handleCompanyChange(this.companyId)
+      this.search()
+    }
   },
   methods: {
     getTodayStr(){
@@ -176,8 +154,8 @@ export default {
       const m = String(now.getMonth()+1).padStart(2,'0');
       return `${y}-${m}`;
     },
-    getCompanyList() {
-      service
+    async getCompanyList() {
+      await service
         .get("/getAllCompany")
         .then((response) => {
           if (response.code === 200) {
@@ -201,9 +179,9 @@ export default {
       const y = this.timeRange.split("-")[0];
       const m = this.timeRange.split("-")[1];
       this.params.startTime = `${this.timeRange}-01`;
-      const lastDay = new Date(y, m, 0).getDate();
-      this.params.endTime = `${y}-${m}-${lastDay}`;
-      this.pageTitle = `${y}年${m}月城区抄表情况报表`;
+      const lastDay = new Date(Number(y), Number(m), 0).getDate();
+      this.params.endTime = `${y}-${m}-${String(lastDay)}`;
+      this.pageTitle = `${y}${m}月回收报表`;
       if (this.companyId === 1) {
         this.params.companyId = this.params.companyId || 1;
       } else {
@@ -215,10 +193,21 @@ export default {
       this.params.companyId = null;
       this.params.startTime = null;
       this.params.endTime = null;
+      this.params.region = null;
       this.timeRange = this.getCurMonthStr();
       this.tableData = [];
-      this.total = 0;
-      this.search();
+      this.totalSummaryRow = {
+        counterAmount: 0,
+        miniProgramAmount: 0,
+        lifePayAmount: 0,
+        freeGiftAmount: 0,
+        tradeCount: 0,
+        totalReceiveAmount: 0,
+        periodChargeAmount: 0
+      };
+      if (this.companyId !== 1){
+        this.search()
+      }
     },
     async handleExport() {
       if (this.params.companyId === null){
@@ -235,8 +224,14 @@ export default {
           token = JSON.parse(userData).token;
         } catch (e) {}
       }
+      const reqData = {
+        companyId: this.params.companyId,
+        startDate: this.params.startTime,
+        endDate: this.params.endTime,
+        regionId: this.params.region,
+      };
       try {
-        const res = await service.get(`/manual/charge/regionMeterReport/export?companyId=${this.params.companyId}&startTime=${this.params.startTime}&endTime=${this.params.endTime}`, {
+        const res = await service.post(`/exportTimeRangeRecycleReport`, reqData,{
           responseType: "blob",
           headers: { Authorization: token, token: token }
         });
@@ -244,7 +239,6 @@ export default {
         const downloadUrl = window.URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = downloadUrl;
-        // 文件名：2026‑08月城区抄表情况报表.xlsx
         a.download = `${this.pageTitle}.xlsx`;
         document.body.appendChild(a);
         a.click();
@@ -268,27 +262,71 @@ export default {
       if (this.params.companyId === null){
         this.params.companyId = this.companyId;
       }
-
+      const reqData = {
+        companyId: this.params.companyId,
+        startDate: this.params.startTime,
+        endDate: this.params.endTime,
+        regionId: this.params.region,
+      };
       try {
-        const res = await service.get(`/manual/charge/regionMeterReport?companyId=${this.params.companyId}&startTime=${this.params.startTime}&endTime=${this.params.endTime}`, {
+        const res = await service.post(`/timeRangeRecycleReport`, reqData,{
           headers: { Authorization: token, token: token },
         });
         if(res.code===200){
-          const {summary, detailList} = res.data;
-          this.tableData = detailList || [];
-          if(summary){
-            this.totalSummaryRow = summary;
+          const list = res.data || [];
+
+          // ① 列表：剔除合计行
+          this.tableData = list.filter(item => item.regionName !== '合计');
+
+          // ② 单独合计行：把后端返回的合计行字段映射给 totalSummaryRow
+          const summaryRow = list.find(item => item.regionName === '合计');
+          if(summaryRow){
+            this.totalSummaryRow = {
+              counterAmount: summaryRow.counterAmount,
+              miniProgramAmount: summaryRow.miniProgramAmount,
+              lifePayAmount: summaryRow.lifePayAmount,
+              freeGiftAmount: summaryRow.freeGiftAmount,
+              tradeCount: summaryRow.tradeCount,
+              totalReceiveAmount: summaryRow.totalReceiveAmount,
+              periodChargeAmount: summaryRow.periodChargeAmount
+            };
           }
         }
       } catch (err) {
         ElMessage.error("获取报表失败");
         console.error(err);
-        this.tableData = [];
-        this.totalSummaryRow = {};
       } finally {
         this.isLoading = false;
       }
     },
+    async handleCompanyChange(companyId){
+      if(!companyId){
+        this.regionList = [];
+        this.params.region = null;
+        return;
+      }
+      try{
+        const res = await service.get(`/getRegion?companyId=${companyId}`);
+        if(res.code===200){
+          const allRegions = res.data||[];
+          if(companyId ===95){
+            this.regionList = allRegions.filter(r=> r.regionType ===1)
+          }else{
+            this.regionList = allRegions;
+          }
+          if(this.regionList.length ===0){
+            ElMessage.warning(companyId ===95 ? '该水厂下暂无一般区域' : '该水厂下暂无区域')
+          }
+        }else{
+          this.regionList = [];
+        }
+      }catch(e){
+        console.error(e);
+        this.regionList = [];
+      }
+      this.params.region = null;
+    },
+    filterRegion(){},
   },
 };
 </script>

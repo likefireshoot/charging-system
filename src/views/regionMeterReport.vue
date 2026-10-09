@@ -59,26 +59,26 @@
         </div>
 
         <!-- 本月用水量相关 -->
-        <div class="search-input">
+        <div class="search-input search-input--compare">
           <span>本月用水量</span>
-          <div style="display:flex;gap:4px;align-items:center;">
+          <div class="water-compare">
             <el-select
               v-model="waterCompareOpt"
               placeholder="条件"
-              style="width:40%"
+              class="wc-select"
               clearable
             >
               <el-option label="大于" value="gt" />
               <el-option label="小于" value="lt" />
             </el-select>
-            <span style="font-size: 16px">上月</span>
+            <span class="wc-label">上月</span>
             <el-input
               v-model.number="waterCompareVal"
               placeholder="吨"
-              style="width:30%"
+              class="wc-input"
               min="0"
             />
-            <span style="font-size: 16px">吨</span>
+            <span class="wc-label">吨以上</span>
           </div>
         </div>
         </div>
@@ -851,21 +851,24 @@ onBeforeUnmount(() => {
   margin-top: 5px;
   margin-bottom: 10px;
   width: 99.3%;
-  height: 98px;
+  min-height: 98px;
   padding: 0px 10px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
+  row-gap: 8px;
+  flex-shrink: 0;
   border: 1px solid #e9e9e9;
   border-radius: 5px;
   background-color: #fff;
 }
 
-/* 筛选表单：横向单行排列，撑满剩余空间 */
+/* 筛选表单：横向排列，撑满剩余空间；窄屏时整体换行而不是挤压文字 */
 .search-form {
   display: flex;
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
+  row-gap: 8px;
   align-items: center;
   flex: 1;
   min-width: 0;
@@ -874,7 +877,8 @@ onBeforeUnmount(() => {
 /* 主体卡片 */
 .info-card {
   width: 99.3%;
-  height: calc(100% - 120px);
+  flex: 1 1 auto;
+  min-height: 0;
   margin-bottom: 0;
   display: flex;
   flex-direction: column;
@@ -940,7 +944,8 @@ onBeforeUnmount(() => {
   display: flex;
   justify-content: center; /* 确保子元素在父容器中垂直居中 */
   flex-direction: column;
-  width: 18%;
+  flex: 1 1 0;
+  min-width: 110px;
   height: 100%;
   margin-right: 10px;
 }
@@ -948,6 +953,38 @@ onBeforeUnmount(() => {
 .search-input > span {
   font-size: 18px;
   margin-bottom: 5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 本月用水量：条件 + 数值，同行展示，宽度不足时收缩控件而不是折断文字 */
+.search-input--compare {
+  flex: 1.8 1 0;
+  min-width: 190px;
+}
+
+.water-compare {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+}
+
+.water-compare .wc-label {
+  font-size: 16px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.water-compare .wc-select {
+  flex: 1 1 0;
+  min-width: 56px;
+}
+
+.water-compare .wc-input {
+  flex: 1 1 0;
+  min-width: 44px;
 }
 
 .buttons {

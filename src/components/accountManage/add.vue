@@ -54,7 +54,7 @@
         </div>
         <div class="edit-input" style="margin-right: 1%">
           <span>开户时间</span>
-          <el-date-picker v-model="addData.createTime" type="date" placeholder="选择日期" style="flex-grow: 1; width: 100%; max-height: 35px" format="YYYY-MM-DD" value-format="YYYY-MM-DD" />
+          <el-date-picker v-model="addData.createTime" type="datetime" placeholder="选择日期" style="flex-grow: 1; width: 100%; max-height: 35px" format="YYYY-MM-DD HH:mm:ss" value-format="YYYY-MM-DD HH:mm:ss" />
         </div>
       </div>
       <div class="btn">
@@ -83,8 +83,7 @@ export default {
     },
   },
   data() {
-    // 获取当前日期 YYYY-MM-DD 格式
-    const currentDate = new Date().toISOString().split("T")[0];
+    const currentDate = this.getLocalDateTime();
     return {
       addData: {
         userName: "",
@@ -198,7 +197,6 @@ export default {
       if (this.isSubmitting) {
         return;
       }
-      this.isSubmitting = true;
       let missingFields = [];
       let formData = {};
       Object.keys(this.addData).forEach((key) => {
@@ -227,6 +225,7 @@ export default {
         userPhone: "联系电话",
         companyId: "所属水厂",
         createTime: "开户时间",
+        codeBookId: "所属表册",
       };
 
       // 可选字段列表（允许为空）
@@ -240,6 +239,11 @@ export default {
 
             // 如果是可选字段，则跳过必填校验
             if (!parentKey && optionalFields.includes(key)) {
+              continue;
+            }
+
+            // 不是普表用户时，codeBookId跳过校验
+            if (fullKey === 'codeBookId' && !formData.isNormalMeterUser) {
               continue;
             }
 
@@ -279,6 +283,7 @@ export default {
       console.log(formData);
 
       // 所有字段都不为空，提交数据到后台
+      this.isSubmitting = true;
         service.post("/userManage/userCharge/addUser", formData)
         .then((res) => {
           if (res.code === 200) {
@@ -292,6 +297,16 @@ export default {
         .catch((err) => {
           ElMessage.error("提交失败：" + err.message);
         }).finally(() => { this.isSubmitting = false; });
+    },
+    getLocalDateTime() {
+      const d = new Date();
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      const h = String(d.getHours()).padStart(2, '0');
+      const mi = String(d.getMinutes()).padStart(2, '0');
+      const s = String(d.getSeconds()).padStart(2, '0');
+      return `${y}-${m}-${day} ${h}:${mi}:${s}`;
     },
   },
 };

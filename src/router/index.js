@@ -35,8 +35,10 @@ import commandLog from "../views/commandLog.vue";
 import errorReportRecord from "../views/errorReportRecord.vue";
 import historyDataManage from "@/views/historyDataManage.vue";
 import deviceManage from "@/views/deviceManage.vue";
-import billDetailReport from "@/components/report/billDetailReport.vue";
+// 下线：扣费明细表（不要随便删除，随时可能启用）
+// import billDetailReport from "@/components/report/billDetailReport.vue";
 import abnormalChargeReport from "@/components/report/abnormalChargeReport.vue";
+import twoFeeMonthlyReport from "@/views/twoFeeMonthlyReport.vue";
 import quickMeterReport from "@/views/quickMeterReport.vue";
 import rechargeDetailReport from "@/components/report/rechargeDetailReport.vue";
 import reviewMeterReport from "@/views/reviewMeterReport.vue";
@@ -46,6 +48,9 @@ import operateLog from "@/components/logManage/operateLog.vue";
 import loginLog from "@/components/logManage/loginLog.vue";
 import meterReadingReport from "@/views/meterReadingReport.vue";
 import meterBookReport from "@/views/meterBookReport.vue";
+import monthRecoveryReport from "@/views/monthRecoveryReport.vue";
+import monthSummaryReport from "@/views/monthSummaryReport.vue";
+import monthBaseUserReport from "@/views/monthBaseUserReport.vue";
 
 // 蓝牙卡表（35D2）模块页面
 import btMeterManage from "@/views/btMeterManage.vue";
@@ -120,6 +125,16 @@ const routes = [
             path: "meterBookReport",
             name: "meterBookReport",
             component: meterBookReport,
+          },
+          {
+            path: "twoFeeMonthlyReport",
+            name: "twoFeeMonthlyReport",
+            component: twoFeeMonthlyReport,
+          },
+          {
+            path: "monthBaseUserReport",
+            name: "monthBaseUserReport",
+            component: monthBaseUserReport,
           }
         ]
       },
@@ -216,15 +231,26 @@ const routes = [
             component: readingCountYearlyReport,
           },
           {
+            path: "monthRecoveryReport",
+            name: "monthRecoveryReport",
+            component: monthRecoveryReport,
+          },
+          {
+            path: "monthSummaryReport",
+            name: "monthSummaryReport",
+            component: monthSummaryReport,
+          },
+          {
             path: "rechargeDetailReport",
             name: "rechargeDetailReport",
             component: rechargeDetailReport,
           },
-          {
-            path: "billDetailReport",
-            name: "billDetailReport",
-            component: billDetailReport,
-          },
+          // 下线：扣费明细表（不要随便删除，随时可能启用）
+          // {
+          //   path: "billDetailReport",
+          //   name: "billDetailReport",
+          //   component: billDetailReport,
+          // },
           {
             path: "abnormalChargeReport",
             name: "abnormalChargeReport",

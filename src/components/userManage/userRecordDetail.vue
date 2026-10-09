@@ -24,7 +24,7 @@
             </div>
             <div class="data-item"><span>电话：</span>{{ currentUser.phone || '-' }}</div>
             <div class="data-item" v-if="currentUser.userOtherPhone != null || companyId === 95"><span>电话2：</span>{{ currentUser.userOtherPhone != null ? currentUser.userOtherPhone : '暂无' }}</div>
-            <div class="data-item"><span>开户：</span>{{ currentUser.createTime || '-' }}</div>
+            <div class="data-item"><span>开户：</span>{{ formatDateTime(currentUser.createTime) }}</div>
             <div class="data-item"><span>地址：</span>{{ currentUser.userAddr || '-' }}</div>
             <div class="data-item"><span>区域：</span>{{ currentUser.regionName || '-' }}</div>
             <div class="data-item"><span>价格：</span>{{ currentUser.userType || '-' }}</div>
@@ -63,6 +63,8 @@
 
           <div class="data-list">
             <div class="data-item"><span>表号：</span>{{ selectedMeter.meterCode || currentUser.meterCode || '-' }}</div>
+            <div class="data-item"><span>IMEI：</span>{{ selectedMeter.imei || currentUser.imei || '-' }}</div>
+            <div class="data-item"><span>类型：</span>{{ selectedMeter.meterType || currentUser.meterType || 'NB-IoT表' }}</div>
             <div class="data-item"><span>类型：</span>{{ selectedMeter.meterType || (source === 'btMeter' ? '蓝牙卡表' : (currentUser.meterType || 'NB-IoT表')) }}</div>
             <div class="data-item"><span>品牌：</span>{{ selectedMeter.meterVendor || currentUser.meterVendor || '-' }}</div>
             <div class="data-item"><span>结算：</span>{{ formatDate(selectedMeter.updateTime) || '-' }}</div>
@@ -219,6 +221,7 @@ export default {
         this.currentUser = {
           userId: r.userId || "",
           meterCode: this.$route.query.meterCode || r.meterCode || "",
+          imei: r.imei || "",
           companyId: r.companyId || this.$route.query.companyId || "",
           userName: r.userName || "",
           userAddr: r.userAddr || "",
@@ -284,6 +287,10 @@ export default {
     formatDate(datetime) {
       if (!datetime) return '';
       return datetime.substring(0, 10);
+    },
+    formatDateTime(datetime) {
+      if (!datetime) return '-';
+      return String(datetime).replace('T', ' ');
     },
     handleTotalMoneyUpdate(value) {
       this.totalMoney = value || 0;

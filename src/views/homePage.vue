@@ -1,5 +1,15 @@
 <template>
   <div class="shouye">
+    <!-- ========== 无权限美化区域【新增】 ========== -->
+    <div v-if="!staffPermissionIds.includes(108)" class="no-permission-box">
+      <div class="no-permission-inner">
+        <!-- 使用element-plus 锁图标 -->
+        <el-icon class="lock-icon"><Lock /></el-icon>
+        <div class="tip-text">暂无权限查看</div>
+        <div class="sub-text">请联系管理员分配首页查看权限</div>
+      </div>
+    </div>
+    <template v-else>
     <div class="container1">
       <div class="shebei-status">
         <span style="font-size: 22px; margin-top: 10px; margin-bottom: 5px">设备状态</span>
@@ -31,20 +41,35 @@
           </div>
         </div>
       </div>
+<!--      <div class="week-report">-->
+<!--        <div class="week-report-title">-->
+<!--          <span style="font-size: 20px; margin-top: 10px; margin-bottom: 5px"-->
+<!--            >近7天缴费总额-->
+
+<!--            <a href="javascript:;" style="font-size: 20px; margin-left: 0px; color: #46b97e" @click="exportChartExcel(weekchart, '近7天缴费总额')">(导出)</a>-->
+<!--          </span>-->
+<!--          <div class="flex-container">-->
+<!--            <div style="width: 4px; height: 4px; background-color: #46b87d; margin-right: 5px"></div>-->
+<!--            <div style="width: 4px; height: 4px; background-color: #90d5b2; margin-right: 5px"></div>-->
+<!--            <div style="width: 4px; height: 4px; background-color: #c7ead7; margin-right: 5px"></div>-->
+<!--            <div style="width: 100%; height: 1px; background-color: #e9e9e9"></div>-->
+<!--          </div>-->
+<!--          <div class="week-report-chart" id="week"></div>-->
+<!--        </div>-->
+<!--      </div>-->
       <div class="week-report">
         <div class="week-report-title">
-          <span style="font-size: 20px; margin-top: 10px; margin-bottom: 5px"
-            >近7天缴费总额
-
-            <a href="javascript:;" style="font-size: 20px; margin-left: 0px; color: #46b97e" @click="exportChartExcel(weekchart, '近7天缴费总额')">(导出)</a>
-          </span>
+            <span style="font-size: 20px; margin-top: 10px; margin-bottom: 5px">
+              收费统计（{{ dateRangeText }}）
+              <a href="javascript:;" style="font-size: 20px; margin-left: 0; color: #46b97e" @click="exportChartExcel(monthChargeChart, '收费统计')">(导出)</a>
+            </span>
           <div class="flex-container">
             <div style="width: 4px; height: 4px; background-color: #46b87d; margin-right: 5px"></div>
             <div style="width: 4px; height: 4px; background-color: #90d5b2; margin-right: 5px"></div>
             <div style="width: 4px; height: 4px; background-color: #c7ead7; margin-right: 5px"></div>
             <div style="width: 100%; height: 1px; background-color: #e9e9e9"></div>
           </div>
-          <div class="week-report-chart" id="week"></div>
+          <div class="month-report-chart" id="monthCharge"></div>
         </div>
       </div>
     </div>
@@ -141,6 +166,7 @@
         </div>
       </div>
     </div>
+    </template>
   </div>
 </template>
 
@@ -151,6 +177,23 @@ import service from "@/api/request";
 import { ElMessage } from "element-plus";
 import { useWarningStore } from "@/store/warningStore.js";
 import { exportChartExcel } from "@/api/otherapi/other.js";
+
+const pad = (value) => String(value).padStart(2, "0");
+const createDate = (year, month, day) => new Date(year, month - 1, day);
+const parseDate = (value) => {
+  if (!value) return null;
+  const [year, month, day] = value.split("-").map(Number);
+  return createDate(year, month, day);
+};
+const formatDate = (date) => `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+const getCurrentMonthRange = () => {
+  const now = new Date();
+  return [formatDate(createDate(now.getFullYear(), now.getMonth() + 1, 1)), formatDate(now)];
+};
+const normalizeList = (list) => (Array.isArray(list) ? list : []);
+const toAmountList = (list) => list.map((item) => Number(item.totalMoney || 0));
+const toDayAxis = (list) => list.map((item) => (item.reportTimeStart || "").slice(5, 10));
+
 export default {
   data() {
     const now = new Date();
@@ -158,8 +201,10 @@ export default {
     const month = String(now.getMonth() + 1).padStart(2, "0");
     const day = String(now.getDate()).padStart(2, "0");
     return {
+      staffPermissionIds: JSON.parse(sessionStorage.getItem("userData")).staffPermissionIds,
       params: {
         record_time: `${year}-${month}-${day}`,
+        dateRange: getCurrentMonthRange(),
       },
       companyId: JSON.parse(sessionStorage.getItem("userData")).companyId,
       token: JSON.parse(sessionStorage.getItem("userData")).token,
@@ -343,7 +388,7 @@ export default {
           },
           // [底部留白百分比, 顶部留白百分比]
           boundaryGap: false,
-          data: ["总额", "现金", "微信小程序", "微信生活缴费", "支付宝"],
+          data: ["总额", "现金", "微信小程序", "生活缴费", "支付宝"],
         },
         yAxis: {
           type: "value",
@@ -488,11 +533,82 @@ export default {
         abnormalWaterCount: 0
         
       },
+      monthChargeChart: null,
+      monthChargeChart_option: {
+        grid: {
+          left: "6%",
+          right: "5%",
+          top: "9%",
+          bottom: "13%",
+        },
+        xAxis: {
+          type: "category",
+          boundaryGap: false,
+          data: [],
+        },
+        yAxis: {
+          type: "value",
+          splitLine: {
+            show: true,
+            lineStyle: {
+              type: "dashed",
+              color: "#ccc",
+            },
+          },
+          axisLabel: {
+            fontSize: 16,
+            color: "#666"
+          },
+        },
+        tooltip: {
+          trigger: "item",
+          formatter(params) {
+            return `${params.name}: ${params.value}`;
+          },
+        },
+        series: [
+          {
+            data: [],
+            type: "line",
+            smooth: true,
+            areaStyle: {
+              color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                { offset: 0, color: "rgba(75,187,129, 0.8)" },
+                { offset: 1, color: "rgba(75,187,129, 0.1)" },
+              ]),
+            },
+            symbol: "circle",
+            symbolSize: 8,
+            itemStyle: {
+              color: "#fff",
+              borderColor: "#4BBB81",
+              borderWidth: 3,
+            },
+            lineStyle: {
+              color: "rgba(75,187,129, 1)",
+            },
+          },
+        ],
+        label: {
+          show: true,
+          position: "top",
+          color: "#333",
+          fontSize: 12,
+        },
+      },
+      monthChargeResizeObserver: null,
     };
+  },
+  computed: {
+    dateRangeText() {
+      const [startTime, endTime] = this.params.dateRange || [];
+      return startTime && endTime ? `${startTime} ~ ${endTime}` : "";
+    },
   },
   async mounted() {
     await this.getTotal();
     this.bingtuChart();
+    this.getTradeData();
 
     this.getWeekData();
     this.getMonthData();
@@ -601,6 +717,12 @@ export default {
     },
 
     beforeUnmount() {
+      if (this.monthChargeResizeObserver) {
+        this.monthChargeResizeObserver.disconnect();
+      }
+      if (this.monthChargeChart) {
+        this.monthChargeChart.dispose();
+      }
       if (this.bingtuResizeObserver) {
         this.bingtuResizeObserver.disconnect();
       }
@@ -831,6 +953,53 @@ export default {
           }
         });
     },
+    monthChargeChartInit() {
+      const chartDom = document.getElementById("monthCharge");
+      if (!chartDom) return;
+      this.monthChargeChart = markRaw(echarts.init(chartDom));
+      this.monthChargeChart.setOption(this.monthChargeChart_option);
+      this.monthChargeResizeObserver = new ResizeObserver(
+        this.debounce(() => {
+          if (this.monthChargeChart) {
+            this.monthChargeChart.resize();
+          }
+        }, 200)
+      );
+      this.monthChargeResizeObserver.observe(chartDom);
+    },
+// 获取收费统计接口
+    getTradeData() {
+      const [startTime, endTime] = this.params.dateRange || [];
+      if (!startTime || !endTime) {
+        ElMessage.warning("请选择时间范围");
+        return;
+      }
+      let companyId = this.companyId === 1 ? "" : this.companyId;
+      const query = new URLSearchParams({
+        region: "",
+        startTime,
+        endTime,
+        companyId,
+        rechargeUser: "",
+      }).toString();
+      service
+        .get(`/monthReportV2?${query}`, {
+          headers: { Authorization: this.token },
+        })
+        .then((response) => {
+          if (response.code !== 200) {
+            ElMessage.error(response.msg);
+            return;
+          }
+          const currentList = normalizeList(response.data.currentSingularReport);
+          this.monthChargeChart_option.xAxis.data = toDayAxis(currentList);
+          this.monthChargeChart_option.series[0].data = toAmountList(currentList);
+          this.monthChargeChartInit();
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+    },
   },
 };
 </script>
@@ -1043,5 +1212,35 @@ export default {
 .warn-num-text:hover {
   color: #46b97e;
   text-decoration-color: #46b97e;
+}
+
+.no-permission-box {
+  width: 100%;
+  height: 100%;
+  background: #ffffff;
+  border:1px solid #e9e9e9;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.no-permission-inner {
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+}
+.lock-icon {
+  font-size:95px;
+  color:#46b97e;
+  margin-bottom:20px;
+}
+.tip-text {
+  font-size:28px;
+  color:#606266;
+  margin-bottom:10px;
+}
+.sub-text {
+  font-size:20px;
+  color:#909399;
 }
 </style>

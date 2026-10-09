@@ -81,7 +81,7 @@
         </div>
         <div class="user-info-input">
           <span>开户时间</span>
-          <el-date-picker v-model="userInfoData.createTime" type="date" placeholder="选择日期" style="width: 100%" format="YYYY-MM-DD" value-format="YYYY-MM-DD" />
+          <el-date-picker v-model="userInfoData.createTime" type="datetime" placeholder="选择日期时间" style="width: 100%" format="YYYY-MM-DD HH:mm:ss" value-format="YYYY-MM-DD HH:mm:ss" />
         </div>
         <div class="user-info-input">
           <span>水表关阀设置（后付费设置）</span>
@@ -332,6 +332,10 @@ export default {
     }
   },
   methods: {
+    // 后端返回带 T（2026-09-25T10:00:00），选择器展示与提交给后端的格式都要求空格分隔
+    toPickerDateTime(val) {
+      return val ? String(val).replace("T", " ") : "";
+    },
     handleUserInfoClose() {
       this.$emit("close");
     },
@@ -357,7 +361,7 @@ export default {
       // this.userInfoData.approver_3 = this.data.approver3;
       this.userInfoData.company = this.data.companyName;
       this.userInfoData.companyId = this.data.companyId; // 关键：确保companyId先被赋值
-      this.userInfoData.createTime = this.data.createTime;
+      this.userInfoData.createTime = this.toPickerDateTime(this.data.createTime);
       this.userInfoData.enableArrearsValve = this.data.enableArrearsValve === null ? "default" : this.data.enableArrearsValve;
       this.userInfoData.keepValveOpenFree = this.data.keepValveOpenFree === null ? 1 : this.data.keepValveOpenFree;
       this.userInfoData.isPause = this.data.isPause ?? 0;
@@ -585,6 +589,7 @@ export default {
         userPhone: userPhone,
         userOtherPhone: this.userInfoData.userOtherPhone || null,
         userRemark: this.userInfoData.userRemark || null,
+        meterCode: this.userInfoData.meterCode,
         imei: this.userInfoData.imei,
         approver_1: this.userInfoData.approver_1,
         approver_2: approver_2,
@@ -810,7 +815,7 @@ export default {
       this.userInfoData.approver_1 = full.approver1;
       this.userInfoData.factoryDate = full.factoryDate || "";
       this.userInfoData.firstInspectDate = full.firstInspectDate || "";
-      this.userInfoData.createTime = full.createTime ? full.createTime.split(" ")[0] : "";
+      this.userInfoData.createTime = this.toPickerDateTime(full.createTime);
       this.userInfoData.enableArrearsValve = full.enableArrearsValve === null ? "default" : full.enableArrearsValve;
       this.userInfoData.keepValveOpenFree = full.keepValveOpenFree ?? 1;
       this.userInfoData.isPause = full.isPause ?? 0;

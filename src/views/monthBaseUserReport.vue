@@ -4,8 +4,29 @@
       <div class="search-content">
         <div class="search-input" v-if="companyId === 1">
           <span>所属水厂</span>
-          <el-select v-model="params.companyId" placeholder="请选择所属水厂">
+          <el-select v-model="params.companyId" placeholder="请选择所属水厂" @change="handleCompanyChange">
             <el-option v-for="item in companyList" :key="item.id" :label="item.name" :value="item.id"></el-option>
+          </el-select>
+        </div>
+        <div class="search-input">
+          <span>区域</span>
+          <el-select
+            v-model="params.regionId"
+            placeholder="选择区域"
+            clearable
+            @change="search"
+            :disabled="!params.companyId"
+            filterable
+            :filter-method="filterRegion"
+            style="width:100%"
+          >
+            <el-option v-for="item in regionList" :key="item.regionId" :label="item.regionName" :value="item.regionId"/>
+          </el-select>
+        </div>
+        <div class="search-input">
+          <span>价格类型</span>
+          <el-select v-model="params.priceId" clearable placeholder="请选择价格类型" :disabled="!params.companyId">
+            <el-option v-for="item in priceOptionList" :key="item.priceId" :value="item.priceId" :label="item.priceName"></el-option>
           </el-select>
         </div>
         <div class="search-input">
@@ -47,39 +68,19 @@
           border
           :header-cell-style="{ height:'45px', background: '#46B97E', color: '#FFFFFF' }"
           :row-style="{ height: '50px' }"
+          :row-class-name="rowClassName"
           v-loading="isLoading"
         >
-          <el-table-column label="序号" min-width="80" align="center" fixed="left" #default="scope">
-            {{ scope.$index + 1 }}
-          </el-table-column>
-          <el-table-column prop="regionName" label="区域" align="center" min-width="130"/>
-          <el-table-column prop="totalMeterCount" label="总户数" align="center" min-width="100"/>
-
-          <el-table-column label="已审核" align="center">
-          <el-table-column label="成功抄表" align="center">
-            <el-table-column prop="normalCount" label="正常" align="center" min-width="90"/>
-            <el-table-column prop="noChangeCount" label="表数未动" align="center" min-width="100"/>
-            <el-table-column prop="endNotReachCount" label="止码未到" align="center" min-width="100"/>
-            <el-table-column prop="readTotalCount" label="合计" align="center" min-width="100"/>
-          </el-table-column>
-
-          <el-table-column label="异常抄表" align="center">
-            <el-table-column prop="meterUnclearCount" label="表不清" align="center" min-width="90"/>
-            <el-table-column prop="meterBrokenCount" label="表破" align="center" min-width="90"/>
-            <el-table-column prop="meterBuriedCount" label="表埋" align="center" min-width="90"/>
-            <el-table-column prop="tempRemoveCount" label="暂拆" align="center" min-width="90"/>
-            <el-table-column prop="otherCount" label="其它" align="center" min-width="90"/>
-            <el-table-column prop="noOneHomeCount" label="无人在家" align="center" min-width="100"/>
-            <el-table-column prop="unreadTotalCount" label="合计" align="center" min-width="100"/>
-          </el-table-column>
-          </el-table-column>
-          <el-table-column prop="cacheReadCount" label="已抄表未审核" align="center" min-width="100">
-            <template #header>已抄表<br>未审核</template>
-          </el-table-column>
-          <el-table-column prop="noReadCount" label="未抄表" align="center" min-width="100"/>
+          <el-table-column prop="regionName" label="区域" align="center" min-width="80"/>
+          <el-table-column prop="priceName" label="价格类型" align="center" min-width="150"/>
+          <el-table-column prop="ton0Count" label="0吨" align="center" min-width="80"/>
+          <el-table-column prop="ton1Count" label="1吨" align="center" min-width="80"/>
+          <el-table-column prop="ton2Count" label="2吨" align="center" min-width="80" />
+          <el-table-column prop="ton3Count" label="3吨" align="center" min-width="80"/>
+          <el-table-column prop="ton4Count" label="4吨" align="center" min-width="80"/>
+          <el-table-column prop="fourTonSubtotal" label="小计" align="center" min-width="100"/>
         </el-table>
       </div>
-      <!-- 底部固定汇总行，无表头，紧贴表格下方 -->
       <el-table
         :data="[totalSummaryRow]"
         border
@@ -87,32 +88,17 @@
         :show-header="false"
         row-class-name="summary-row"
       >
-        <el-table-column label="序号" min-width="210" align="center" fixed="left">
-          <template #default>合计</template>
+        <el-table-column label="区域" align="center" min-width="80" fixed="left">
+          <template #default>总计</template>
         </el-table-column>
-        <el-table-column label="总户数" min-width="100" align="center" prop="totalMeterSum" />
-        <el-table-column label="正常" min-width="90" align="center" prop="normalSum" />
-        <el-table-column label="表数未动" min-width="100" align="center" prop="noChangeSum" />
-        <el-table-column label="止码未到" min-width="100" align="center" prop="endNotReachSum" />
-        <el-table-column label="已抄合计" min-width="100" align="center" prop="readTotalSum" />
-        <el-table-column label="表不清" min-width="90" align="center" prop="meterUnclearSum" />
-        <el-table-column label="表破" min-width="90" align="center" prop="meterBrokenSum" />
-        <el-table-column label="表埋" min-width="90" align="center" prop="meterBuriedSum" />
-        <el-table-column label="暂拆" min-width="90" align="center" prop="tempRemoveSum" />
-        <el-table-column label="其它" min-width="90" align="center" prop="otherSum" />
-        <el-table-column label="无人在家" min-width="100" align="center" prop="noOneHomeSum" />
-        <el-table-column label="未抄合计" min-width="100" align="center" prop="unreadTotalSum" />
-        <el-table-column prop="cacheReadSum" label="已抄表未审核" align="center" min-width="100"/>
-        <el-table-column prop="noReadSum" label="未抄表" align="center" min-width="100"/>
+        <el-table-column prop="priceName" label="价格类型" align="center" min-width="150"/>
+        <el-table-column prop="ton0Count" label="0吨" align="center" min-width="80"/>
+        <el-table-column prop="ton1Count" label="1吨" align="center" min-width="80"/>
+        <el-table-column prop="ton2Count" label="2吨" align="center" min-width="80" />
+        <el-table-column prop="ton3Count" label="3吨" align="center" min-width="80"/>
+        <el-table-column prop="ton4Count" label="4吨" align="center" min-width="80"/>
+        <el-table-column prop="fourTonSubtotal" label="小计" align="center" min-width="100"/>
       </el-table>
-<!--      <div class="page-box">-->
-<!--        <div class="page-left">制表人：{{ reportMakerName }}</div>-->
-<!--        <div class="demo-pagination-block">-->
-<!--          <el-pagination v-model:current-page="params.pageNo" v-model:page-size="params.pageSize" :page-sizes="[5, 10, 15]" layout="total,  prev, pager, next, jumper" :total="total"-->
-<!--                         @current-change="handlePageChange"/>-->
-<!--        </div>-->
-<!--        <div class="page-right">制表时间：{{ reportMakeDate }}</div>-->
-<!--      </div>-->
     </div>
   </div>
 </template>
@@ -120,47 +106,45 @@
 <script>
 import service from "@/api/request";
 import { ElMessage } from "element-plus";
+import yearlyReport from "@/components/report/yearlyReport.vue";
 
 export default {
   data() {
     return {
       timeRange: this.getCurMonthStr(),
-      pageTitle: "城区抄表情况报表",
+      pageTitle: "自来水公司月底数户汇总",
       params: {
         companyId: null,
-        startTime: null,
-        endTime: null,
+        reportYear: null,
+        reportMonth: null,
+        regionId: null,
+        priceId: null,
       },
       reportMakerName: JSON.parse(sessionStorage.getItem("userData")).staffName,
       reportMakeDate: this.getTodayStr(),
       companyId: JSON.parse(sessionStorage.getItem("userData")).companyId,
       companyList: [],
+      regionList:[],
       tableData: [],
-      total: 0,
       isLoading: false,
       totalSummaryRow: {
-          totalMeterSum: 0,
-          normalSum: 0,
-          noChangeSum: 0,
-          endNotReachSum: 0,
-          readTotalSum: 0,
-          meterUnclearSum: 0,
-          meterBrokenSum: 0,
-          meterBuriedSum: 0,
-          tempRemoveSum: 0,
-          otherSum: 0,
-          noOneHomeSum: 0,
-          unreadTotalSum: 0,
-          readNoReviewTotal: 0,
-          unReadTotal: 0,
-          cacheReadSum: 0,
-          noReadSum: 0
-       },
+        ton0Count: 0,
+        ton1Count: 0,
+        ton2Count: 0,
+        ton3Count: 0,
+        ton4Count: 0,
+        fourTonSubtotal: 0
+      },
+      priceOptionList: [],
     };
   },
   mounted() {
     this.getCompanyList();
-    this.search();
+    if(this.companyId !== 1){
+      this.params.companyId = this.companyId
+      this.handleCompanyChange(this.companyId)
+      this.search()
+    }
   },
   methods: {
     getTodayStr(){
@@ -176,8 +160,8 @@ export default {
       const m = String(now.getMonth()+1).padStart(2,'0');
       return `${y}-${m}`;
     },
-    getCompanyList() {
-      service
+    async getCompanyList() {
+      await service
         .get("/getAllCompany")
         .then((response) => {
           if (response.code === 200) {
@@ -193,17 +177,46 @@ export default {
           console.error(error);
         });
     },
+    // 获取价格下拉列表
+    async getPriceOptionList() {
+      this.priceOptionList = [];
+      this.params.priceId = null
+      try {
+        const reqParams = {
+          pageNo: 1,
+          pageSize: 9999999,
+        };
+        if (this.companyId === 1 && this.params.companyId) {
+          reqParams.companyId = this.params.companyId;
+        } else if (this.companyId !== 1) {
+          reqParams.companyId = this.companyId;
+        }else{
+          ElMessage.error("获取价格类型失败");
+          return ;
+        }
+        const res = await service.post("/price/queryPriceMg", reqParams);
+        if (res.code === 200) {
+          this.priceOptionList = res.data.records.map(item => ({
+            priceId: item.priceId,
+            priceName: item.priceName
+          }));
+        } else {
+          ElMessage.error(res.msg || "加载价格列表失败");
+        }
+      } catch (err) {
+        console.error("获取价格下拉失败", err);
+        ElMessage.error("获取价格类型失败");
+      }
+    },
     search() {
       if (!this.timeRange) {
         ElMessage.warning("请选择月份");
         return;
       }
-      const y = this.timeRange.split("-")[0];
-      const m = this.timeRange.split("-")[1];
-      this.params.startTime = `${this.timeRange}-01`;
-      const lastDay = new Date(y, m, 0).getDate();
-      this.params.endTime = `${y}-${m}-${lastDay}`;
-      this.pageTitle = `${y}年${m}月城区抄表情况报表`;
+      const [year, month] = this.timeRange.split("-");
+      this.params.reportYear = year;
+      this.params.reportMonth = Number(month);
+      this.pageTitle = `自来水公司${year}-${month}月底数户汇总`;
       if (this.companyId === 1) {
         this.params.companyId = this.params.companyId || 1;
       } else {
@@ -213,18 +226,32 @@ export default {
     },
     clear() {
       this.params.companyId = null;
-      this.params.startTime = null;
-      this.params.endTime = null;
+      this.params.reportYear = null;
+      this.params.reportMonth = null;
+      this.params.regionId = null;
+      this.params.priceId = null;
       this.timeRange = this.getCurMonthStr();
       this.tableData = [];
-      this.total = 0;
-      this.search();
+      this.totalSummaryRow = {
+        shouldReadUser:0,
+        realReadUser:0,
+        readRate:0,
+        currentWater:0,
+        lastYearWater:0,
+        waterDiff:0,
+        currentTotalFee:0,
+        lastYearTotalFee:0,
+        feeDiff:0
+      };
+      if (this.companyId !== 1){
+        this.search()
+      }
     },
     async handleExport() {
       if (this.params.companyId === null){
         this.params.companyId = this.companyId;
       }
-      if ( !this.params.startTime || !this.params.endTime) {
+      if ( !this.params.reportYear || !this.params.reportMonth) {
         ElMessage.warning("请先选择时间，再执行导出");
         return;
       }
@@ -236,7 +263,7 @@ export default {
         } catch (e) {}
       }
       try {
-        const res = await service.get(`/manual/charge/regionMeterReport/export?companyId=${this.params.companyId}&startTime=${this.params.startTime}&endTime=${this.params.endTime}`, {
+        const res = await service.post(`lowWaterFourTonReport/export`, this.params,{
           responseType: "blob",
           headers: { Authorization: token, token: token }
         });
@@ -244,7 +271,6 @@ export default {
         const downloadUrl = window.URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = downloadUrl;
-        // 文件名：2026‑08月城区抄表情况报表.xlsx
         a.download = `${this.pageTitle}.xlsx`;
         document.body.appendChild(a);
         a.click();
@@ -268,26 +294,93 @@ export default {
       if (this.params.companyId === null){
         this.params.companyId = this.companyId;
       }
-
       try {
-        const res = await service.get(`/manual/charge/regionMeterReport?companyId=${this.params.companyId}&startTime=${this.params.startTime}&endTime=${this.params.endTime}`, {
+        const res = await service.post(`lowWaterFourTonReport/query`, this.params,{
           headers: { Authorization: token, token: token },
         });
         if(res.code===200){
-          const {summary, detailList} = res.data;
-          this.tableData = detailList || [];
-          if(summary){
-            this.totalSummaryRow = summary;
-          }
+          // 按区域分组 + 插入小计行
+          this.tableData = this.buildDisplayData(
+            res.data.itemList || [],
+            res.data.regionSummaryList || []
+          );
+          this.totalSummaryRow = res.data.totalSummary || {};
         }
       } catch (err) {
         ElMessage.error("获取报表失败");
         console.error(err);
-        this.tableData = [];
-        this.totalSummaryRow = {};
       } finally {
         this.isLoading = false;
       }
+    },
+    async handleCompanyChange(companyId){
+      if(!companyId){
+        this.regionList = [];
+        this.params.regionId = null;
+        this.priceOptionList = [];
+        this.params.priceId = null;
+        return;
+      }
+      try{
+        const res = await service.get(`/getRegion?companyId=${companyId}`);
+        if(res.code===200){
+          const allRegions = res.data||[];
+          if(companyId ===95){
+            this.regionList = allRegions;
+          }else{
+            this.regionList = allRegions.filter(r=>
+              (r.regionName && r.regionName.includes('普表')) || r.regionType ===3
+            )
+          }
+          if(this.regionList.length ===0){
+            ElMessage.warning('该水厂下暂无普表区域')
+          }
+          await this.getPriceOptionList();
+        }else{
+          this.regionList = [];
+        }
+      }catch(e){
+        console.error(e);
+        this.regionList = [];
+      }
+      this.params.regionId = null;
+    },
+    filterRegion(){},
+    // 把明细按区域聚到一起，每个区域末尾插入小计行
+    buildDisplayData(itemList, regionSummaryList) {
+      const display = [];
+      const itemMap = {};
+      itemList.forEach(item => {
+        const key = String(item.regionId);
+        if (!itemMap[key]) itemMap[key] = [];
+        itemMap[key].push({ ...item });
+      });
+      const handled = new Set();
+      regionSummaryList.forEach(sum => {
+        const rid = String(sum.regionId);
+        handled.add(rid);
+        const items = itemMap[rid] || [];
+        items.forEach(d => {
+          display.push(d);
+        });
+        display.push({
+          ...sum,
+          regionName: sum.regionName,
+          priceName: '小计',
+          isSummary: true,
+        });
+      });
+      Object.keys(itemMap).forEach(rid => {
+        if (!handled.has(rid)) {
+          itemMap[rid].forEach(d => {
+            display.push(d);
+          });
+        }
+      });
+      return display;
+    },
+    rowClassName({ row }) {
+      return row.isSummary ? 'summary-subtotal' : '';
     },
   },
 };
@@ -527,5 +620,14 @@ export default {
 
 :deep(.el-select__wrapper .el-select__selected-item) {
   font-size: 16px !important;
+}
+</style>
+
+<style scoped>
+:deep(.summary-subtotal) {
+  font-weight: bold !important;
+}
+:deep(.summary-subtotal td) {
+  border-bottom: 2px solid #d7d8d8 !important;
 }
 </style>

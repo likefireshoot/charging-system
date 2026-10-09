@@ -96,6 +96,7 @@
           <el-table-column property="meterCode" label="表号" :width="biaohaoWidth" align="center" />
           <el-table-column property="companyName" label="水厂" :width="companyNameWidth" align="center" />
           <el-table-column property="commandType" label="通讯类别" :width="tongxunleibieWidth" align="center" />
+          <el-table-column property="baseReading" label="命令参数" :width="commandParamWidth" align="center" />
           <el-table-column property="commandStatus" label="通讯状态" :width="tongxunzhaungtaiWidth" align="center" />
           <el-table-column label="下发时间" :width="timeWidth" align="center">
             <template #default="scope">
@@ -202,6 +203,7 @@ export default {
       userIdWidth: 0,
       staffNameWidth: 0,
       tongxunleibieWidth: 0,
+      commandParamWidth: 0,
       tongxunzhaungtaiWidth: 0,
       timeWidth: 0,
       changshangWidth: 0,
@@ -231,7 +233,7 @@ export default {
     },
   },
   computed: {
-    // 每列的百分比宽度
+    // 每列的百分比宽度（总和必须为 100）
     columnPercentages() {
       return {
         selection: 3,
@@ -240,12 +242,14 @@ export default {
         company_name: 6,
         userId: 5,
         staffName: 6,
-        tongxunleibie: 7,
+        tongxunleibie: 6,
+        command_param: 6,
         tongxunzhaungtai: 6,
-        time: 10,
-        changshang: 7,
+        // 下发时间与完成时间共用该宽度，合计 18%
+        time: 9,
+        changshang: 6,
         userName: 7,
-        description: 22,
+        description: 20,
       };
     },
   },
@@ -299,6 +303,7 @@ export default {
         this.userIdWidth = (this.columnPercentages.userId / 100) * parentWidth;
         this.staffNameWidth = (this.columnPercentages.staffName / 100) * parentWidth;
         this.tongxunleibieWidth = (this.columnPercentages.tongxunleibie / 100) * parentWidth;
+        this.commandParamWidth = (this.columnPercentages.command_param / 100) * parentWidth;
         this.tongxunzhaungtaiWidth = (this.columnPercentages.tongxunzhaungtai / 100) * parentWidth;
         this.timeWidth = (this.columnPercentages.time / 100) * parentWidth;
         this.changshangWidth = (this.columnPercentages.changshang / 100) * parentWidth;
