@@ -52,6 +52,12 @@ import monthRecoveryReport from "@/views/monthRecoveryReport.vue";
 import monthSummaryReport from "@/views/monthSummaryReport.vue";
 import monthBaseUserReport from "@/views/monthBaseUserReport.vue";
 
+// 蓝牙卡表（35D2）模块页面
+import btMeterManage from "@/views/btMeterManage.vue";
+import btWriteTaskManage from "@/views/btWriteTaskManage.vue";
+import btReceiptManage from "@/views/btReceiptManage.vue";
+import btReadTaskManage from "@/views/btReadTaskManage.vue";
+
 const routes = [
   {
     path: "/",
@@ -131,6 +137,38 @@ const routes = [
             component: monthBaseUserReport,
           }
         ]
+      },
+      {
+        path: "/btMeter",
+        name: "btMeter",
+        redirect: "/btMeter/manage",
+        meta: { title: "蓝牙卡表" },
+        children: [
+          {
+            path: "manage",
+            name: "btMeterManage",
+            component: btMeterManage,
+            meta: { title: "档案管理" },
+          },
+          {
+            path: "task",
+            name: "btWriteTaskManage",
+            component: btWriteTaskManage,
+            meta: { title: "写表任务" },
+          },
+          {
+            path: "receipt",
+            name: "btReceiptManage",
+            component: btReceiptManage,
+            meta: { title: "表端回执" },
+          },
+          {
+            path: "readTask",
+            name: "btReadTaskManage",
+            component: btReadTaskManage,
+            meta: { title: "抄表任务" },
+          },
+        ],
       },
       {
         path: "/priceManage",
