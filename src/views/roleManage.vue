@@ -635,12 +635,12 @@ export default {
                   };
                 });
 
-                // 将【小程序】分组挪到数组末尾
-                const miniIndex = result.findIndex(item => item.id === 85);
-                if (miniIndex > -1) {
-                  const miniItem = result.splice(miniIndex, 1)[0];
-                  result.push(miniItem);
-                }
+                // 直接用权重排序，微信小程序会自动排到末尾，删掉手动splice那段
+                result.sort((a, b) => {
+                  const w1 = this.getPermissionSortWeight(a.label.trim());
+                  const w2 = this.getPermissionSortWeight(b.label.trim());
+                  return w1 - w2;
+                });
                 return result;
               };
               this.permissionList = transformTree(tree);
@@ -666,6 +666,30 @@ export default {
         }
       })
       return ids;
+    },
+    // 权限菜单固定排序
+    getPermissionSortWeight(name) {
+      const sortList = [
+        "首页",
+        "开户管理",
+        "用户管理",
+        "价格管理",
+        "报表统计",
+        "短信通知",
+        "普表抄表",
+        "警告管理",
+        "异常数据",
+        "命令状态",
+        "员工中心",
+        "角色管理",
+        "操作日志",
+        "登录安全"
+      ];
+      // 小程序固定放最后
+      if(name === '微信小程序') return 999;
+      const idx = sortList.indexOf(name);
+      // 在列表里的返回下标，不在里面返回 100，排在固定列表之后、小程序之前
+      return idx >= 0 ? idx : 100;
     },
     // 点击父级复选框
     onParentCheckChange(parentItem, mode) {
@@ -717,13 +741,15 @@ export default {
                 const transformTableTree = (tree) => {
                   if(!Array.isArray(tree)) return tree;
                   const arr = [...tree];
-                  const miniIdx = arr.findIndex(x=>x.permissionId === 85);
-                  if(miniIdx > -1){
-                    const miniItem = arr.splice(miniIdx,1)[0];
-                    arr.push(miniItem);
-                  }
+                  // 按名称权重排序
+                  arr.sort((a,b)=>{
+                    const w1 = this.getPermissionSortWeight(a.permissionName);
+                    const w2 = this.getPermissionSortWeight(b.permissionName);
+                    return w1 - w2;
+                  })
                   return arr;
                 }
+
 
                 const permissionIds = this.getAllPermissionId(role.permissionTree);
 
@@ -793,14 +819,16 @@ export default {
             const list = Array.isArray(res.data?.list) ? res.data.list : [];
             this.roleData = list.map((role, idx) => {
               try {
+                // 表格展示用树，把小程序父节点挪到末尾
                 const transformTableTree = (tree) => {
                   if(!Array.isArray(tree)) return tree;
                   const arr = [...tree];
-                  const miniIdx = arr.findIndex(x=>x.permissionId === 85);
-                  if(miniIdx > -1){
-                    const miniItem = arr.splice(miniIdx,1)[0];
-                    arr.push(miniItem);
-                  }
+                  // 按名称权重排序
+                  arr.sort((a,b)=>{
+                    const w1 = this.getPermissionSortWeight(a.permissionName);
+                    const w2 = this.getPermissionSortWeight(b.permissionName);
+                    return w1 - w2;
+                  })
                   return arr;
                 }
 
@@ -1451,14 +1479,15 @@ export default {
 }
 
 .add-confirm-dialog-content {
-  width: 70%;
-  min-height: 320px;
+  width: 80%;
+  height: 98%;
   border: 1px solid #fafafa;
   background-color: #fafafa;
   border-radius: 5px;
   display: flex;
   flex-direction: column;
   align-items: center;
+  overflow: hidden;
 }
 
 .confirm-content {
@@ -1470,6 +1499,8 @@ export default {
   display: flex;
   flex-direction: column;
   gap: 20px;
+  flex: 1;
+  overflow-y: auto;
 }
 
 .confirm-row {
