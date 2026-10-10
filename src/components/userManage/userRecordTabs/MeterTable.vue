@@ -241,6 +241,18 @@
           <el-input v-model="addForm.deltaWater" placeholder="请输入用水量"></el-input>
         </div>
         <div class="recharge-input">
+          <span>起码</span>
+          <el-input value="自动计算" disabled></el-input>
+        </div>
+        <div class="recharge-input">
+          <span>止码</span>
+          <el-input value="自动计算" disabled></el-input>
+        </div>
+        <div class="recharge-input">
+          <span>结算量</span>
+          <el-input value="自动计算" disabled></el-input>
+        </div>
+        <div class="recharge-input">
           <span>扣费</span>
           <el-input v-model="addForm.feeThisTime" placeholder="请输入扣费金额"></el-input>
         </div>
@@ -1162,7 +1174,7 @@ export default {
 }
 
 .recharge-content {
-  width: 96%;
+  width: 98%;
   background-color: #fff;
   border-radius: 5px;
   margin-top: 15px;
@@ -1178,9 +1190,9 @@ export default {
   display: flex;
   justify-content: center;
   flex-direction: column;
-  width: 10%;
+  width: 7.8%;
   height: 75px;
-  margin-right: 1%;
+  margin-right: 0.5%;
 }
 
 .recharge-input > span {
