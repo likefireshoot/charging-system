@@ -76,7 +76,14 @@
           <el-table-column prop="cacheReadCount" label="已抄表未审核" align="center" min-width="100">
             <template #header>已抄表<br>未审核</template>
           </el-table-column>
-          <el-table-column prop="noReadCount" label="未抄表" align="center" min-width="100"/>
+          <el-table-column prop="noReadCount" label="未抄表" align="center" min-width="100">
+            <template #default="scope">
+                <span class="link-num" @click="scope.row.noReadCount > 0 && goRegionReport(scope.row)">
+                  {{ scope.row.noReadCount }}
+                </span>
+            </template>
+          </el-table-column>
+
         </el-table>
       </div>
       <!-- 底部固定汇总行，无表头，紧贴表格下方 -->
@@ -163,6 +170,16 @@ export default {
     this.search();
   },
   methods: {
+    goRegionReport(row) {
+      this.$router.push({
+        name: "regionMeterReport",
+        query: {
+          regionId: row.regionId,
+          reportStatus: "未抄表"
+        }
+      })
+    },
+
     getTodayStr(){
       const now = new Date();
       const y = now.getFullYear();
@@ -527,5 +544,9 @@ export default {
 
 :deep(.el-select__wrapper .el-select__selected-item) {
   font-size: 16px !important;
+}
+:deep(.link-num) {
+  color: #46b97e;
+  cursor: pointer;
 }
 </style>
