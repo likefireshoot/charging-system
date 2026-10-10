@@ -37,7 +37,7 @@
       <div class="buttons" >
         <div class="sercah-btn" @click="search">
           <img src="@/assets/yonghu/icon16.png" alt="" style="margin-left: 10px" />
-          <span style="margin-left: 10%">搜索</span>
+          <span style="margin-left: 10%">查询</span>
         </div>
         <div class="clear-btn" @click="clear">
           <img src="@/assets/yuangong/icon4.png" alt="" style="margin-left: 10px" />
@@ -137,7 +137,7 @@ export default {
     if(this.companyId !== 1){
       this.params.companyId = this.companyId
       this.handleCompanyChange(this.companyId)
-      this.search()
+      // this.search()
     }
   },
   methods: {
