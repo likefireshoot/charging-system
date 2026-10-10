@@ -65,15 +65,15 @@
     </div>
 
     <div class="tool-bar">
-      <div class="tool-btn" @click="downloadTemplate" v-if="staffPermissionIds.includes(16)">
-        <img src="@/assets/yonghu/icon1.png" alt="" />
-        <span>抄表记录导⼊模版</span>
-      </div>
-      <div class="tool-btn" @click="triggerFileInput" v-if="staffPermissionIds.includes(16)">
-        <img src="@/assets/yonghu/icon2.png" alt="" />
-        <span>抄表记录导⼊</span>
-        <input ref="fileInput" type="file" accept=".xls,.xlsx" style="display: none" @change="handleImport" />
-      </div>
+<!--      <div class="tool-btn" @click="downloadTemplate" v-if="staffPermissionIds.includes(16)">-->
+<!--        <img src="@/assets/yonghu/icon1.png" alt="" />-->
+<!--        <span>抄表记录导⼊模版</span>-->
+<!--      </div>-->
+<!--      <div class="tool-btn" @click="triggerFileInput" v-if="staffPermissionIds.includes(16)">-->
+<!--        <img src="@/assets/yonghu/icon2.png" alt="" />-->
+<!--        <span>抄表记录导⼊</span>-->
+<!--        <input ref="fileInput" type="file" accept=".xls,.xlsx" style="display: none" @change="handleImport" />-->
+<!--      </div>-->
       <div class="tool-btn" @click="exportExcel">
         <img src="@/assets/yonghu/icon1.3.png" alt="" />
         <span>导出</span>

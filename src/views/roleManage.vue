@@ -625,6 +625,9 @@ export default {
                       return child.permissionId !== 30 && child.permissionId !== 112;
                     });
                   }
+                  childList = childList.filter(child => {
+                    return child.permissionId !== 16 && child.permissionId !== 53 && child.permissionId !== 54
+                  })
                   return {
                     id: parentNode.permissionId,
                     label: parentNode.permissionName,
@@ -741,6 +744,14 @@ export default {
                 const transformTableTree = (tree) => {
                   if(!Array.isArray(tree)) return tree;
                   const arr = [...tree];
+                  // 所有水厂统一过滤子权限 16、53、54
+                  arr.forEach(node => {
+                    if (Array.isArray(node.children) && node.children.length) {
+                      node.children = node.children.filter(child => {
+                        return child.permissionId !== 16 && child.permissionId !== 53 && child.permissionId !== 54
+                      })
+                    }
+                  })
                   // 按名称权重排序
                   arr.sort((a,b)=>{
                     const w1 = this.getPermissionSortWeight(a.permissionName);
@@ -823,6 +834,14 @@ export default {
                 const transformTableTree = (tree) => {
                   if(!Array.isArray(tree)) return tree;
                   const arr = [...tree];
+                  // 所有水厂统一过滤子权限 16、53、54
+                  arr.forEach(node => {
+                    if (Array.isArray(node.children) && node.children.length) {
+                      node.children = node.children.filter(child => {
+                        return child.permissionId !== 16 && child.permissionId !== 53 && child.permissionId !== 54
+                      })
+                    }
+                  })
                   // 按名称权重排序
                   arr.sort((a,b)=>{
                     const w1 = this.getPermissionSortWeight(a.permissionName);
