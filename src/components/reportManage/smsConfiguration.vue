@@ -62,7 +62,7 @@
           <img src="@/assets/yonghu/icon1.3.png" alt="" />
           <span style="margin-left: 6px; color: #5a5a5a">导出</span>
         </div>
-        <div class="manual-send-btn" style="width: 190px" @click="openManualDialog">
+        <div class="manual-send-btn" style="width: 190px" @click="openManualDialog" v-if="staffPermissionIds.includes(113)">
           <img src="@/assets/yonghu/icon1.3.png" alt="" />
           <span style="margin-left: 6px; color: #5a5a5a; white-space: nowrap">短信通知手工补发</span>
         </div>

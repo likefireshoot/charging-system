@@ -55,7 +55,7 @@
           <span style="margin-left: 6px; color: #5a5a5a">新增员工</span>
         </div>
         <div class="add-btn" @click="edit_company_block = true"
-             v-if="staffPermissionIds.includes(40) && companyId == 1">
+             v-if="staffPermissionIds.includes(112) && companyId == 1">
           <img src="@/assets/yuangong/icon6.png" alt="" />
           <span style="margin-left: 6px; color: #5a5a5a">水厂管理</span>
         </div>
