@@ -1,0 +1,6 @@
+{
+  "version": 1,
+  "evidence": "2026-10-10 用户确认：设备 2099 和管线 475、476 均在旧高德地图点击添加。登记只适用于这些已核实 ID，不作为全库默认来源。",
+  "devices": { "2099": "confirmed-mainland-AMap-GCJ02" },
+  "pipes": { "475": "confirmed-mainland-AMap-GCJ02", "476": "confirmed-mainland-AMap-GCJ02" }
+}

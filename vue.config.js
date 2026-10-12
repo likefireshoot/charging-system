@@ -21,13 +21,17 @@ module.exports = defineConfig({
 
   devServer: {
     host: "0.0.0.0",
-    port: 8080,
+    port: 8081,
     client: {
       overlay: false,
     },
     https: true,
     historyApiFallback: true,
     proxy: {
+      "/map-assets": {
+        target: "http://127.0.0.1:8094",
+        changeOrigin: true,
+      },
       "/api": {
         // target: 'http://81.69.29.7:9882/',
         // target: 'http://124.221.3.13:9882/',
