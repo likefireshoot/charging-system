@@ -25,7 +25,8 @@ export function constrainNationalViewport(map) {
     const northeast = new maplibregl.MercatorCoordinate(projected.x + dx, projected.y - dy).toLngLat();
     map.setMaxBounds(null); map.setMinZoom(camera.zoom); map.setMaxBounds([southwest, northeast]);
     minimum = camera.zoom;
-    map.jumpTo(overview ? camera : { center, zoom: Math.max(zoom, minimum) });
+    map.jumpTo(overview ? { ...camera, padding: 0,
+      pitch: reset ? 0 : map.getPitch(), bearing: reset ? 0 : map.getBearing() } : { center, zoom: Math.max(zoom, minimum) });
   }
   return { update, national: () => update(true), dispose: () => map.off("move", clamp) };
 }

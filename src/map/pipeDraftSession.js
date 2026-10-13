@@ -5,7 +5,7 @@ import { ScaledDrawAdapter } from "./scaledDrawAdapter";
 // the editable geometry, separate from formal business layers and IDs.
 export function createPipeDraftSession(map) {
   const draw = new TerraDraw({ adapter: new ScaledDrawAdapter({ map, coordinatePrecision: 9 }), modes: [
-    new TerraDrawLineStringMode({ styles: { lineStringColor: "#ef8d25", lineStringWidth: 6 } }),
+    new TerraDrawLineStringMode({ styles: { lineStringColor: "#ef8d25", lineStringWidth: 8 } }),
   ] });
   let id = null, coordinates = [], signature = "", disposed = false;
   draw.start(); draw.setMode("static");

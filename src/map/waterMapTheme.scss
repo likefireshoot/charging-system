@@ -1,0 +1,126 @@
+// The additional page class scopes decoration to the existing water map and
+// keeps the established shared layout, scale compensation and interactions.
+.readonly-map-page.device-map-page.map-ui.map-ui[data-testid] {
+  --map-ink: #284c49;
+  --map-muted: #6b817b;
+  --map-accent: #208f6c;
+  --map-border: #dce7e1;
+  --map-shadow: 0 5px 20px #244a3c12, 0 1px 3px #244a3c08;
+  color: var(--map-ink);
+  button, a, input, select { font-family: inherit; }
+  button { transition: background-color .16s, border-color .16s, box-shadow .16s; }
+  button:disabled { cursor: default; opacity: .5; box-shadow: none; }
+  .readonly-toolbar {
+    gap: 10px;
+    > strong, > label, > form, > button { border: 1px solid var(--map-border); border-radius: 10px; box-shadow: var(--map-shadow); }
+    > strong {
+      display: flex; align-items: center; gap: 10px; padding: 12px 18px;
+      color: white; background: #208f6c; border-color: #208f6c; font-weight: 600;
+      &::before { content: ''; width: 12px; height: 16px; border: 2px solid #ffffffdf; border-radius: 70% 70% 70% 8%; transform: rotate(-35deg); }
+    }
+    > label { padding: 3px 12px; color: var(--map-muted); background: #fffffff5; }
+    > form { gap: 0; padding: 3px; background: #fffffff5; }
+    input, select { color: var(--map-ink); background: transparent; }
+    input { padding: 10px 12px; }
+    input::placeholder { color: #8b9d95; }
+    form button { background: #edf6f0; color: #23785f; border-radius: 7px; padding: 10px 14px; box-shadow: none; }
+    > button { color: #3a6357; background: #fffffff5; }
+    button:not(:disabled):hover { background: #e7f2ec; border-color: #b2d6c5; }
+  }
+  .readonly-types, .device-tools {
+    gap: 9px;
+    button { min-height: 46px; border: 1px solid var(--map-border); border-radius: 10px; box-shadow: var(--map-shadow); }
+    button:not(.active) { color: #51675e; background: #fffffff5; }
+    button:not(.active):not(:disabled):hover { background: #edf6f0; border-color: #aacfbf; }
+    button.active { background: #29986f; border-color: #29986f; color: white; box-shadow: 0 4px 12px #29986f20; }
+  }
+  .readonly-types button { padding: 11px 12px; }
+  .device-tools button {
+    display: flex; align-items: center; justify-content: center; gap: 8px; padding: 14px 6px;
+    &:nth-child(4) { margin-top: 9px; }
+  }
+  .map-tool-symbol { width: 22px; height: 22px; flex-shrink: 0; pointer-events: none; }
+  .readonly-properties {
+    background: #ffffff; border: 1px solid var(--map-border); border-radius: 16px;
+    box-shadow: 0 12px 34px #244a3c1c, 0 2px 6px #244a3c0a; padding: 20px;
+    header { align-items: flex-start; margin-bottom: 14px; padding-bottom: 16px; border-bottom: 1px solid #e9eeea; }
+    header h2 { font-size: 23px; font-weight: 600; color: var(--map-ink); }
+    .map-panel-heading p { margin-top: 6px; font-size: 16px; color: var(--map-muted); line-height: 1.4; }
+    header button { border: 1px solid #e4ece6; border-radius: 8px; padding: 7px 13px; background: #f4f7f4; color: #577269; font-size: 17px; }
+    header button:hover { background: #e8f2eb; }
+  }
+  .device-property-tabs {
+    gap: 7px; margin: 0 0 16px;
+    button { border: 1px solid #e1e9e3; border-radius: 8px; padding: 8px 11px; font-size: 18px; background: #f8faf7; color: #647970; }
+    button.active { background: #e3f2e9; color: #167654; border-color: #a5d2bb; font-weight: 600; }
+    button:not(:disabled):hover { border-color: #a5d2bb; }
+  }
+  .readonly-record-list { padding-right: 6px; }
+  .device-property-row {
+    gap: 8px; padding: 5px; margin-bottom: 10px; border: 1px solid #e4ebe5; border-radius: 11px; background: #f8faf7;
+    &:hover { border-color: #b9d6c5; }
+    > button:first-child {
+      margin: 0; padding: 11px; color: #3e5e51; background: transparent; border: 1px solid transparent; border-radius: 7px; line-height: 1.65;
+      > span:first-child { color: var(--map-ink); font-size: 20px; font-weight: 500; }
+      > span:not(:first-child) { font-size: 17px; color: #536d61; }
+      small { font-size: 16px; color: #7c9086; }
+      em { display: inline-block; margin: 5px 0 0; padding: 0 7px; border-radius: 4px; background: #fff0eb; color: #b6503d; font-size: 15px; font-style: normal; }
+      &.active { background: #e6f3eb; border-color: #a2cdb5; }
+    }
+    .device-delete { margin: 0; padding: 7px 9px; border: 1px solid #eedbd4; border-radius: 7px; background: #fff8f4; color: #b2513e; font-size: 17px; }
+    .device-delete:not(:disabled):hover { color: #9f3c2c; background: #fce9e2; border-color: #debaad; }
+  }
+  .device-pagination {
+    margin-top: 12px; padding: 12px 0 0; border-top: 1px solid #e8eee8; font-size: 17px; color: #74887b;
+    button { padding: 8px 13px; background: #edf5ee; color: #2a805d; border: 1px solid #cde0d2; border-radius: 7px; }
+    button:not(:disabled):hover { background: #dff0e4; }
+  }
+  .readonly-detail {
+    box-sizing: border-box; max-height: 38%;
+    border-top: 1px solid #e6ede6; margin-top: 16px; padding-top: 16px;
+    h3 { display: flex; align-items: center; gap: 8px; font-size: 19px; color: var(--map-ink); font-weight: 600;
+      &::before { content: ''; width: 4px; height: 18px; background: #29986f; border-radius: 3px; }
+    }
+    dl { gap: 9px 12px; font-size: 17px; line-height: 1.5; }
+    dt { color: #7a9081; } dd { color: #385d48; font-variant-numeric: tabular-nums; }
+    button { background: #29986f; border-radius: 8px; padding: 11px; font-size: 18px; }
+    button:not(:disabled):hover { background: #20835e; }
+  }
+  .readonly-pending { padding: 12px; background: #fbf7e9; border: 1px solid #ece3c5; border-radius: 8px; }
+  .readonly-empty { color: #8b9d90; padding: 30px 15px; }
+  .readonly-status p { color: #486653; border: 1px solid #dbe9dc; border-left: 3px solid #29986f; border-radius: 9px; box-shadow: var(--map-shadow); background: #fffffff7; }
+  .readonly-status p.error { color: #a64b3e; border-color: #eed4cb; border-left-color: #c9644d; background: #fff8f4; }
+  .device-form .popCard {
+    background: #ffffff; border: 1px solid var(--map-border); border-radius: 16px; box-shadow: 0 12px 34px #244a3c1c;
+    .inHead { background: #fff; border-bottom: 1px solid #e4ece4; border-radius: 15px 15px 0 0; }
+    .inHead .bottom { opacity: .55; }
+    .hint { color: #819283; line-height: 1.6; }
+    .infoCard { background: #f1f7f0; border: 1px solid #dce9dc; border-radius: 10px; }
+    .selectCard, .inputCard { border-radius: 9px; }
+    .saveCard { background: #fff; border-top: 1px solid #e4ece4; border-radius: 0 0 15px 15px; }
+    .saveCard .btn { background: #29986f; border-radius: 9px; }
+    .saveCard .btn.disabled { background: #e9eee8; color: #879789; cursor: not-allowed; box-shadow: none;
+      p { color: #879789; } img { opacity: .45; }
+    }
+  }
+  .map-pipe-legend { padding: 11px 13px; background: #f4f8f3; border: 1px solid #e3ece1; border-radius: 9px; }
+  .readonly-device {
+    box-shadow: 0 3px 10px #26443340;
+    .device-name { padding: 4px 8px; border: 1px solid #d7e4d5; border-radius: 6px; background: #fffffff5; color: #365c45; box-shadow: 0 2px 7px #244a3c12; }
+    &.is-selected { box-shadow: 0 0 0 3px #ffdc6e45, 0 4px 12px #26443345; }
+  }
+  .maplibregl-popup-content { padding: 14px 16px; border-radius: 11px; box-shadow: 0 8px 24px #244a3c26; }
+  .readonly-popup { font-size: 16px; line-height: 1.85; color: #46624f; strong { color: #7a8e7b; } }
+  .maplibregl-ctrl-group { border: 1px solid #dce7db; border-radius: 8px; box-shadow: var(--map-shadow); overflow: hidden; }
+  .maplibregl-ctrl-scale { border-color: #708670; color: #4d674d; background: #ffffffe0; }
+  .map-pan-control button { border-color: #dce7db; border-radius: 6px; color: #45684f; box-shadow: 0 2px 5px #244a3c12; }
+  .readonly-record-list, .readonly-detail, .readonly-pending, .device-tools, .readonly-types, .device-form .inBody {
+    scrollbar-width: thin; scrollbar-color: #bbcebd transparent;
+  }
+  @container (max-width: 1150px) {
+    .device-tools button { gap: 5px; padding: 12px 4px; font-size: 18px; }
+    .map-tool-symbol { width: 19px; height: 19px; }
+    .readonly-properties { padding: 16px; }
+  }
+  @media (prefers-reduced-motion: reduce) { button { transition: none; } }
+}

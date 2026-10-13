@@ -17,6 +17,7 @@
       <button data-testid="search-clear" :disabled="locked" @click="clearSearch">清除查询</button>
       <button data-testid="refresh" :disabled="locked || state.busy" @click="refresh">刷新</button>
       <button data-testid="national-view" :disabled="!ready" @click="session.national()">全国视野</button>
+      <MapViewControl :map="session?.map" :view="session?.view" :ready="ready" :disabled="locked" />
     </div>
     <div class="readonly-status" aria-live="polite" data-testid="map-status">
       <p v-if="!ready && !mapError">正在加载中国底图…</p>
@@ -42,12 +43,12 @@
       </button>
     </div>
     <nav class="device-tools" aria-label="地图操作">
-      <button data-testid="tool-add" :disabled="locked || !ready || state.busy || !state.regionId" :class="{ active: tool === 'add' }" @click="setTool('add')">设备添加</button>
-      <button data-testid="tool-revise" :disabled="locked || !ready || state.busy" :class="{ active: tool === 'revise' }" @click="setTool('revise')">设备校正</button>
-      <button data-testid="tool-devices" :disabled="locked" :class="{ active: tool === 'device' }" @click="setTool('device')">设备属性</button>
-      <button data-testid="tool-pipe-add" :disabled="locked || !ready || state.busy || !state.regionId" :class="{ active: tool === 'pipe-add' }" @click="setTool('pipe-add')">管线添加</button>
-      <button data-testid="tool-pipe-revise" :disabled="locked || !ready || state.busy" :class="{ active: tool === 'pipe-revise' }" @click="setTool('pipe-revise')">管线校正</button>
-      <button data-testid="tool-pipes" :disabled="locked" :class="{ active: tool === 'pipe' }" @click="setTool('pipe')">管线属性</button>
+      <button data-testid="tool-add" :disabled="locked || !ready || state.busy || !state.regionId" :class="{ active: tool === 'add' }" :aria-pressed="tool === 'add'" @click="setTool('add')"><MapToolIcon name="device-add" />设备添加</button>
+      <button data-testid="tool-revise" :disabled="locked || !ready || state.busy" :class="{ active: tool === 'revise' }" :aria-pressed="tool === 'revise'" @click="setTool('revise')"><MapToolIcon name="device-revise" />设备校正</button>
+      <button data-testid="tool-devices" :disabled="locked" :class="{ active: tool === 'device' }" :aria-pressed="tool === 'device'" @click="setTool('device')"><MapToolIcon name="device-info" />设备属性</button>
+      <button data-testid="tool-pipe-add" :disabled="locked || !ready || state.busy || !state.regionId" :class="{ active: tool === 'pipe-add' }" :aria-pressed="tool === 'pipe-add'" @click="setTool('pipe-add')"><MapToolIcon name="pipe-add" />管线添加</button>
+      <button data-testid="tool-pipe-revise" :disabled="locked || !ready || state.busy" :class="{ active: tool === 'pipe-revise' }" :aria-pressed="tool === 'pipe-revise'" @click="setTool('pipe-revise')"><MapToolIcon name="pipe-revise" />管线校正</button>
+      <button data-testid="tool-pipes" :disabled="locked" :class="{ active: tool === 'pipe' }" :aria-pressed="tool === 'pipe'" @click="setTool('pipe')"><MapToolIcon name="pipe-info" />管线属性</button>
     </nav>
     <div v-if="edit.mode === 'add'" class="device-form" data-testid="add-panel">
       <DeviceAdd :show="true" :all-town-select="state.regionId" :click-position="edit.draft?.position" :submit-device="submitDevice" :busy="locked"
@@ -64,7 +65,7 @@
       <PolylineCorrect :show="true" :check-line="checkPipe" :selected-point="selectedNode" :edit-actions="pipeActions" :busy="locked" :pipe-draft="pipeEdit.draft" :preview-length="pipeLength" @update:show="closeTool" />
     </div>
     <aside v-if="tool === 'device' || tool === 'pipe'" class="readonly-properties" data-testid="property-panel">
-      <header><h2>{{ tool === 'device' ? '设备属性' : '管线属性' }}</h2><button data-testid="close-properties" :disabled="locked" @click="tool = null">关闭</button></header>
+      <header><div class="map-panel-heading"><h2>{{ tool === 'device' ? '设备属性' : '管线属性' }}</h2><p>{{ tool === 'device' ? typeName(propertyType) : '区域管线' }} · {{ allList.length }} 条记录</p></div><button data-testid="close-properties" :disabled="locked" @click="tool = null">关闭</button></header>
       <div v-if="tool === 'device'" class="device-property-tabs">
         <button v-for="type in deviceTypes" :key="type.id" :disabled="locked" :data-testid="'property-type-' + type.id" :class="{ active: propertyType === type.id }" @click="propertyType = type.id; page = 1">{{ type.name }}</button>
       </div>
@@ -104,8 +105,11 @@ import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 import { onBeforeRouteLeave } from "vue-router";
 import { useMapUiLayout } from "@/map/mapUiLayout";
 import "@/map/mapUi.scss";
+import "@/map/waterMapTheme.scss";
+import MapToolIcon from "@/map/MapToolIcon.vue";
 import MapPipeLegend from "@/map/MapPipeLegend.vue";
 import MapPanControl from "@/map/MapPanControl.vue";
+import MapViewControl from "@/map/MapViewControl.vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 import eventBus from "@/api/eventBus";
 import DeviceAdd from "@/components/map/deviceAdd.vue";
@@ -131,6 +135,9 @@ const edit = ref(editor.snapshot());
 const pipeEditor = createPipeEditor({ api: pipeApi, onChange: updatePipeEdit, onSaved: onPipeSaved });
 const pipeEdit = ref(pipeEditor.snapshot());
 const locked = computed(() => edit.value.busy || !!edit.value.pending || pipeEdit.value.busy || !!pipeEdit.value.pending);
+const flowPaused = computed(() => locked.value || !!edit.value.mode || !!pipeEdit.value.mode || ["add", "revise", "pipe-add", "pipe-revise"].includes(tool.value));
+function syncFlow() { session?.setFlowPaused(flowPaused.value); }
+watch(flowPaused, syncFlow, { flush: "post" });
 const pipeLength = computed(() => { pipeEdit.value; return pipeEditor.previewLength(); });
 const checkPipe = computed(() => pipeEdit.value.draft?.model ? { ...pipeEdit.value.draft.model, coords: pipeEdit.value.draft.coordinates } : null);
 const selectedNode = computed(() => pipeEdit.value.selectedNode === null ? null : { index: pipeEdit.value.selectedNode, coord: pipeEdit.value.draft.coordinates[pipeEdit.value.selectedNode] });
@@ -289,7 +296,7 @@ onMounted(async () => {
   window.__mapDevices = { get map() { return session.map; }, snapshot: controller.snapshot, editor: editor.snapshot, pipeEditor: pipeEditor.snapshot, pipeDraft: () => pipeDraftSession?.diagnostics(), diagnostics: session.diagnostics, uiLayout: uiLayout.diagnostics };
   const user = JSON.parse(sessionStorage.getItem("userData") || "null"), dataReady = controller.load(user?.companyId);
   ready.value = await session.ready; await dataReady;
-  if (unmounted) return; if (ready.value) pipeDraftSession = createPipeDraftSession(session.map); render(); if (ready.value) session.fitAll();
+  if (unmounted) return; if (ready.value) pipeDraftSession = createPipeDraftSession(session.map); syncFlow(); render(); if (ready.value) session.fitAll();
 });
 onUnmounted(() => { unmounted = true; editor.dispose(); pipeEditor.dispose(); pipeDraftSession?.dispose(); controller.dispose(); session?.dispose(); delete window.__mapDevices; });
 </script>

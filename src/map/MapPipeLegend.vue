@@ -1,7 +1,7 @@
 <template>
   <div class="map-pipe-legend" aria-label="管径颜色图例">
     <span v-for="item in items" :key="item.label"><i :style="{ background: getPipeColor(item.diameter) }"></i>{{ item.label }}</span>
-    <p>箭头表示已确认流向，黄色描边表示选中管线。</p>
+    <p>箭头和白色脉冲表示已设置的流向，动画速度仅用于示意。黄色描边表示选中管线。</p>
   </div>
 </template>
 <script setup>

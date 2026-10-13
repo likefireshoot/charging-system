@@ -1,5 +1,6 @@
 import maplibregl from "maplibre-gl";
 import { Protocol } from "pmtiles";
+import { applyWaterMapTheme, waterMapColors } from "./waterMapTheme";
 
 let sharedProtocol = null;
 let protocolUsers = 0;
@@ -37,6 +38,7 @@ export async function loadNationalResources(signal) {
   const maskResponse = await fetch(maskUrl, { signal });
   if (!maskResponse.ok) throw new Error(`China display mask: HTTP ${maskResponse.status}`);
   const [style, regions, displayMask] = await Promise.all([json("style-light.json"), json("regions.json"), maskResponse.json()]);
+  applyWaterMapTheme(style);
   style.glyphs = absolute("fonts/{fontstack}/{range}.pbf").replaceAll("%7B", "{").replaceAll("%7D", "}");
   style.sprite = absolute("sprites/light");
   style.sources.protomaps.url = `pmtiles://${absolute("地图数据/china-20261010-z15.pmtiles")}`;
@@ -50,7 +52,6 @@ export async function loadNationalResources(signal) {
   const overviewMask = displayMask.features.find(feature => feature.properties.display === "overview");
   const seaFont = style.layers.find(layer => layer.id === "water_label_ocean")?.layout?.["text-font"] || ["Noto Sans Regular"];
   for (const layer of style.layers) {
-    if (layer.type === "fill" && layer["source-layer"] === "water") layer.paint["fill-color"] = "#dcecf2";
     if (layer.id.startsWith("water_label_ocean")) layer.minzoom = Math.max(layer.minzoom || 0, 6);
     // Hide the whole exterior label, rather than cutting off its glyphs where
     // a long neighboring place name overlaps the display mask's edge.
@@ -67,14 +68,14 @@ export async function loadNationalResources(signal) {
   }
   style.layers.push({ id: "prototype-china-display-mask", type: "fill", source: "prototype-china-display-mask", minzoom: 6,
     filter: ["==", ["get", "display"], "detail"],
-    paint: { "fill-color": "#dcecf2", "fill-opacity": 1, "fill-antialias": false } });
+    paint: { "fill-color": waterMapColors.water, "fill-opacity": 1, "fill-antialias": false } });
   style.layers.push({ id: "prototype-china-display-mask-overview", type: "fill", source: "prototype-china-display-mask", maxzoom: 6,
     filter: ["==", ["get", "display"], "overview"],
-    paint: { "fill-color": "#dcecf2", "fill-opacity": 1, "fill-antialias": false } });
+    paint: { "fill-color": waterMapColors.water, "fill-opacity": 1, "fill-antialias": false } });
   style.sources["prototype-south-sea-label"] = { type: "geojson", data: {
     type: "Feature", properties: {}, geometry: { type: "Point", coordinates: [113, 11] } } };
   style.layers.push({ id: "prototype-south-sea-label", type: "symbol", source: "prototype-south-sea-label", maxzoom: 6,
     layout: { "text-field": "南海诸岛", "text-font": seaFont, "text-size": 14 },
-    paint: { "text-color": "#65899a", "text-halo-color": "#dcecf2", "text-halo-width": 1 } });
+    paint: { "text-color": "#65899a", "text-halo-color": waterMapColors.water, "text-halo-width": 1 } });
   return { style, regions };
 }

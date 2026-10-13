@@ -5,13 +5,15 @@ import { constrainNationalViewport } from "./nationalViewport";
 import { bearingDegrees } from "./geometry";
 import { deviceColor, deviceDetails, pipeDetails } from "./legacyAdapters";
 import { getPipeColor } from "@/api/map/map";
+import { createPipeFlow } from "./pipeFlow";
+import { createMapView } from "./mapView";
 
 const totals = { maps: 0, observers: 0, listeners: 0, markers: 0 };
 const collection = features => ({ type: "FeatureCollection", features });
 const empty = () => collection([]);
 const fireIcon = require("@/assets/device/icon19.svg");
 export function createReadonlySession({ container, onSelect, onError, onMapClick, suppressPopup, fitPadding }) {
-  let map, observer, viewport, release, disposed = false, loaded = false, popup, resolveReady;
+  let map, observer, viewport, release, disposed = false, loaded = false, popup, resolveReady, pipeFlow, view;
   let devices = [], pipes = [], dataSignature = "", selected = null;
   const markers = new Map(), disposers = [], abort = new AbortController();
   function listen(target, event, handler) {
@@ -56,6 +58,12 @@ export function createReadonlySession({ container, onSelect, onError, onMapClick
   function updateMarkerSizes() {
     for (const marker of markers.values()) marker.getElement().classList.toggle("is-overview", map.getZoom() < 12);
   }
+  function updateMarkerAngles() {
+    for (const device of devices) {
+      const icon = markers.get(String(device.id))?.getElement().querySelector(".device-symbol");
+      if (icon) icon.style.transform = `rotate(${device.angle - map.getBearing()}deg)`;
+    }
+  }
   function setData(nextDevices, nextPipes) {
     devices = nextDevices; pipes = nextPipes;
     if (!loaded || disposed) return;
@@ -91,7 +99,7 @@ export function createReadonlySession({ container, onSelect, onError, onMapClick
       const marker = new maplibregl.Marker({ element: button, anchor: "center" }).setLngLat(device.position).addTo(map);
       markers.set(String(device.id), marker); totals.markers++;
     }
-    updateMarkerSizes();
+    updateMarkerSizes(); updateMarkerAngles();
     map.getSource("readonly-pipes").setData(collection(pipes.map(pipe => ({ type: "Feature", properties: {
       businessId: String(pipe.id), color: getPipeColor(pipe.diameter) }, geometry: { type: "LineString", coordinates: pipe.coordinates } }))));
     const arrows = pipes.flatMap(pipe => pipe.directions.map((flag, index) => {
@@ -101,7 +109,7 @@ export function createReadonlySession({ container, onSelect, onError, onMapClick
         bearing: (bearingDegrees(a, b) + (flag === 1 ? 180 : 0)) % 360 },
       geometry: { type: "Point", coordinates: [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2] } };
     }).filter(Boolean));
-    map.getSource("readonly-directions").setData(collection(arrows)); select(selected);
+    map.getSource("readonly-directions").setData(collection(arrows)); pipeFlow?.setPipes(pipes); select(selected);
   }
   function select(value) {
     const changed = JSON.stringify(value) !== JSON.stringify(selected);
@@ -119,7 +127,8 @@ export function createReadonlySession({ container, onSelect, onError, onMapClick
     if (!points.length) { viewport.national(); return; }
     const bounds = points.reduce((result, point) => result.extend(point), new maplibregl.LngLatBounds(points[0], points[0]));
     const padding = typeof fitPadding === "function" ? fitPadding() : fitPadding;
-    map.fitBounds(bounds, { padding: padding || { top: 130, bottom: 65, left: 180, right: 440 }, maxZoom: 19, duration: 0 });
+    map.fitBounds(bounds, { padding: padding || { top: 130, bottom: 65, left: 180, right: 440 },
+      bearing: map.getBearing(), pitch: map.getPitch(), maxZoom: 19, duration: 0 });
   }
   function locate(kind, id) {
     const item = (kind === "device" ? devices : pipes).find(record => String(record.id) === String(id));
@@ -129,6 +138,7 @@ export function createReadonlySession({ container, onSelect, onError, onMapClick
   function dispose() {
     if (disposed) return;
     disposed = true; abort.abort(); observer?.disconnect(); if (observer) totals.observers--;
+    pipeFlow?.dispose(); view?.dispose();
     popup?.remove(); clearMarkers(); viewport?.dispose();
     while (disposers.length) disposers.pop()();
     resolveReady?.(false);
@@ -141,13 +151,14 @@ export function createReadonlySession({ container, onSelect, onError, onMapClick
       if (disposed) return false;
       release = acquireArchiveProtocol();
       map = new maplibregl.Map({ container, style: resources.style, center: [104, 35], zoom: 3.6, minZoom: 0,
-        maxZoom: 22, renderWorldCopies: false, pitch: 0, bearing: 0, dragRotate: false, pitchWithRotate: false, touchPitch: false,
+        maxZoom: 22, maxPitch: 50, renderWorldCopies: false, pitch: 0, bearing: 0, dragRotate: false, pitchWithRotate: false, touchPitch: false,
         localIdeographFontFamily: "Microsoft YaHei, PingFang SC, Noto Sans CJK SC, sans-serif", attributionControl: { compact: true } });
       totals.maps++; map.touchZoomRotate.disableRotation();
       map.addControl(new maplibregl.NavigationControl({ showCompass: false }), "bottom-left");
       map.addControl(new maplibregl.ScaleControl({ unit: "metric" }), "bottom-right");
       listen(map, "error", event => { if (!disposed) onError(event.error?.message || "地图资源加载失败"); });
       listen(map, "zoom", updateMarkerSizes);
+      listen(map, "rotate", updateMarkerAngles);
       listen(map, "click", event => {
         // Existing pages scale #app to 0.7. Derive physical pointer pixels from
         // the canvas rectangle, as in the already verified Terra Draw adapter.
@@ -178,10 +189,14 @@ export function createReadonlySession({ container, onSelect, onError, onMapClick
         listen(map, "load", () => {
           if (disposed) { resolve(false); return; }
           try {
+            view = createMapView(map);
             map.addSource("readonly-pipes", { type: "geojson", data: empty() });
+            map.addLayer({ id: "readonly-pipe-casing", type: "line", source: "readonly-pipes",
+              paint: { "line-color": "#ffffff", "line-width": 11, "line-opacity": 0.85 },
+              layout: { "line-cap": "round", "line-join": "round" } });
             map.addLayer({ id: "readonly-pipe-selection", type: "line", source: "readonly-pipes", filter: ["==", ["get", "businessId"], ""],
-              paint: { "line-color": "#ffc942", "line-width": 13, "line-opacity": 0.75 }, layout: { "line-cap": "round", "line-join": "round" } });
-            map.addLayer({ id: "readonly-pipes", type: "line", source: "readonly-pipes", paint: { "line-color": ["get", "color"], "line-width": 6 },
+              paint: { "line-color": "#ffc942", "line-width": 15, "line-opacity": 0.75 }, layout: { "line-cap": "round", "line-join": "round" } });
+            map.addLayer({ id: "readonly-pipes", type: "line", source: "readonly-pipes", paint: { "line-color": ["get", "color"], "line-width": 8 },
               layout: { "line-cap": "round", "line-join": "round" } });
             const canvas = document.createElement("canvas"); canvas.width = 32; canvas.height = 32;
             const pen = canvas.getContext("2d"); pen.fillStyle = "white"; pen.strokeStyle = "#183851"; pen.lineWidth = 2;
@@ -193,6 +208,7 @@ export function createReadonlySession({ container, onSelect, onError, onMapClick
             map.addSource("readonly-nodes", { type: "geojson", data: empty() });
             map.addLayer({ id: "readonly-nodes", type: "circle", source: "readonly-nodes",
               paint: { "circle-radius": 5, "circle-color": "white", "circle-stroke-width": 2, "circle-stroke-color": "#46b97e" } });
+            pipeFlow = createPipeFlow(map, { colorForDiameter: getPipeColor });
             viewport = constrainNationalViewport(map); loaded = true; viewport.national(); setData(devices, pipes);
             observer = new ResizeObserver(() => { if (!disposed) { map.resize(); viewport.update(); } });
             observer.observe(container); totals.observers++; resolve(true);
@@ -203,5 +219,7 @@ export function createReadonlySession({ container, onSelect, onError, onMapClick
     } catch (error) { if (!disposed && error.name !== "AbortError") onError(error.message); dispose(); return false; }
   })();
   return { ready, dispose, setData, select, locate, fitAll: () => fit([...devices.map(device => device.position), ...pipes.flatMap(pipe => pipe.coordinates)]),
-    national: () => viewport?.national(), get map() { return map; }, diagnostics: () => ({ ...totals, protocolUsers: getProtocolUsers(), disposed }) };
+    setFlowPaused: value => { pipeFlow?.setPaused(value); view?.setEditing(value); },
+    national: () => viewport?.national(), get map() { return map; }, get view() { return view; },
+    diagnostics: () => ({ ...totals, flow: pipeFlow?.diagnostics(), view: view?.diagnostics(), protocolUsers: getProtocolUsers(), disposed }) };
 }
