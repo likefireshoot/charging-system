@@ -66,9 +66,7 @@ const routes = [
       },
       {
         path: "/map-readonly",
-        name: "mapReadonly",
-        component: () => import("../views/mapReadonly.vue"),
-        meta: { mapReadonly: true },
+        redirect: "/map",
       },
       {
         path: "/homePage",

@@ -27,12 +27,14 @@
   }
   .readonly-properties {
     top: var(--map-panel-top); bottom: 80px; width: var(--map-property-width);
-    min-height: 0; overscroll-behavior: contain; z-index: 10;
+    min-height: 0; overflow: hidden; overscroll-behavior: contain; z-index: 10;
     header { gap: 12px; flex-shrink: 0; h2 { line-height: 1.4; } }
     header button { padding: 6px 12px; background: #eef5f0; border-radius: 4px; color: #315544; }
-    .readonly-record-list { max-height: min(290px, 32cqh); }
+    .device-property-tabs, .readonly-tabs { flex-shrink: 0; }
+    .readonly-record-list { flex: 1 1 0; min-height: 0; max-height: none; overflow-y: auto; }
     .device-pagination { flex-shrink: 0; gap: 12px; }
-    .readonly-detail { flex-shrink: 0; }
+    .readonly-detail { flex: 0 1 auto; min-height: 0; max-height: 45%; overflow-y: auto; }
+    .readonly-pending { flex: 0 1 auto; min-height: 0; max-height: 25%; overflow-y: auto; }
   }
   &.device-map-page .readonly-properties { right: var(--map-dock-right); }
   .device-form .popCard {

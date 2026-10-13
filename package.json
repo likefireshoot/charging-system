@@ -4,7 +4,6 @@
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
-    "map:serve": "node scripts/map-assets.cjs",
     "build": "vue-cli-service build"
   },
   "dependencies": {

@@ -17,7 +17,6 @@
       <button data-testid="search-clear" :disabled="locked" @click="clearSearch">清除查询</button>
       <button data-testid="refresh" :disabled="locked || state.busy" @click="refresh">刷新</button>
       <button data-testid="national-view" :disabled="!ready" @click="session.national()">全国视野</button>
-      <router-link to="/map-readonly">只读地图</router-link>
     </div>
     <div class="readonly-status" aria-live="polite" data-testid="map-status">
       <p v-if="!ready && !mapError">正在加载中国底图…</p>
@@ -122,7 +121,7 @@ import { createReadonlyController } from "@/map/readonlyController";
 import { createReadonlySession } from "@/map/readonlySession";
 import { deviceTypes, deviceDetails, pipeDetails, typeName } from "@/map/legacyAdapters";
 
-const canvas = ref(null), name = ref(""), ready = ref(false), mapError = ref(""), tool = ref("device"), propertyType = ref(1), page = ref(1), pageSize = 20;
+const canvas = ref(null), name = ref(""), ready = ref(false), mapError = ref(""), tool = ref(null), propertyType = ref(1), page = ref(1), pageSize = 20;
 const uiRoot = ref(null), uiLayout = useMapUiLayout(uiRoot);
 let session, pipeDraftSession, unmounted = false;
 const controller = createReadonlyController({ api: deviceApi, onChange: update });
@@ -170,8 +169,13 @@ async function discard() {
   if (locked.value) { ElMessage.warning("请等待保存完成，或先核对保存结果"); return false; }
   const draft = edit.value.draft;
   const pipeDraft = pipeEdit.value.draft;
-  const pipeDirty = pipeEdit.value.mode === "add" || (pipeDraft && (JSON.stringify(pipeDraft.coordinates) !== JSON.stringify(pipeDraft.model.coordinates) || JSON.stringify(pipeDraft.directions) !== JSON.stringify(pipeDraft.model.directions) || JSON.stringify(pipeDraft.properties) !== JSON.stringify(pipeDraft.model.properties)));
-  const dirty = pipeDirty || edit.value.mode === "add" || (draft && (draft.angle !== draft.model.angle || JSON.stringify(draft.position) !== JSON.stringify(draft.model.position)));
+  const pipeDirty = pipeEdit.value.mode === "add"
+    ? !!pipeDraft?.coordinates.length
+    : !!pipeDraft?.model && (JSON.stringify(pipeDraft.coordinates) !== JSON.stringify(pipeDraft.model.coordinates) || JSON.stringify(pipeDraft.directions) !== JSON.stringify(pipeDraft.model.directions) || JSON.stringify(pipeDraft.properties) !== JSON.stringify(pipeDraft.model.properties));
+  const deviceDirty = edit.value.mode === "add"
+    ? !!draft?.position
+    : !!draft?.model && (draft.angle !== draft.model.angle || JSON.stringify(draft.position) !== JSON.stringify(draft.model.position));
+  const dirty = pipeDirty || deviceDirty;
   if (dirty) {
     try { await ElMessageBox.confirm(pipeDirty ? "放弃本次尚未保存的管线操作？" : "放弃本次尚未保存的设备操作？", pipeDirty ? "退出管线编辑" : "退出设备编辑", { confirmButtonText: "放弃", cancelButtonText: "继续编辑", type: "warning" }); }
     catch (_) { return false; }
@@ -209,7 +213,7 @@ async function locate(kind, id) { if (await select(kind, id) && ready.value && !
 async function changeRegion(event) {
   const id = event.target.value;
   if (!(await discard())) { event.target.value = String(state.value.regionId ?? ""); return; }
-  name.value = ""; tool.value = "device"; page.value = 1; await controller.selectRegion(id); if (!unmounted && ready.value) session.fitAll();
+  name.value = ""; tool.value = null; page.value = 1; await controller.selectRegion(id); if (!unmounted && ready.value) session.fitAll();
 }
 async function refresh() {
   if (!(await discard())) return;
@@ -313,7 +317,7 @@ button { cursor: pointer; font-family: inherit; } button:disabled { opacity: .5;
 }
 .readonly-tabs { display: flex; gap: 8px; margin-bottom: 15px;
   button { flex: 1; background: #eef5f0; padding: 10px; font-size: 18px; border-radius: 6px; } .active { background: #46b97e; color: #fff; } }
-.readonly-record-list { max-height: 290px; overflow: auto; flex-shrink: 0;
+.readonly-record-list { flex: 1 1 0; min-height: 0; overflow: auto;
   button { width: 100%; text-align: left; background: #f3f6f4; border: 1px solid transparent; padding: 12px; margin-bottom: 8px; border-radius: 6px;
     span { display: block; font-size: 20px; overflow-wrap: anywhere; } small { font-size: 16px; color: #6f8177; } em { color: #c23737; margin-left: 8px; } &.active { border-color: #46b97e; background: #e5f5ec; } } }
 .readonly-detail { margin-top: 15px; h3 { font-size: 20px; margin-bottom: 12px; } dl { display: grid; grid-template-columns: 100px 1fr; gap: 10px; font-size: 17px;

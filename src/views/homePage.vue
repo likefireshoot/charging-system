@@ -598,7 +598,6 @@ export default {
     this.bingtuChart();
     this.getTradeData();
 
-    this.getWeekData();
     this.getMonthData();
     this.getYearData();
     this.getWaringNum();
@@ -620,6 +619,13 @@ export default {
   },
   methods: {
     exportChartExcel,
+    handleDataError(error) {
+      console.error("首页数据加载失败", error);
+      // 请求错误已由统一拦截器提示；本页只提示数据处理或图表错误。
+      if (!error?.isAxiosError) {
+        ElMessage.error(error?.message || "首页数据加载失败，请刷新重试");
+      }
+    },
     toWarnPath(val) {
       this.$router.push({ path: "/warningManage", query: { warningType: val } });
     },
@@ -786,7 +792,7 @@ export default {
           }
         })
         .catch((error) => {
-          ElMessage.error(error);
+          this.handleDataError(error);
         });
     },
     getMonthData() {
@@ -805,15 +811,15 @@ export default {
         })
         .then((response) => {
           if (response.code === 200) {
-            let trade_data = response.data.currentDurationReport;
-            this.monthchart_option.series[0].data = [trade_data.totalMoney, trade_data.cashMoney, trade_data.weChatMoney, trade_data.weChatLifeMoney, trade_data.alipayMoney];
+            const trade_data = response.data?.currentDurationReport || {};
+            this.monthchart_option.series[0].data = [trade_data.totalMoney ?? 0, trade_data.cashMoney ?? 0, trade_data.weChatMoney ?? 0, trade_data.weChatLifeMoney ?? 0, trade_data.alipayMoney ?? 0];
             this.monthChart();
           } else {
             ElMessage.error(response.msg);
           }
         })
         .catch((error) => {
-          ElMessage.error(error);
+          this.handleDataError(error);
         });
     },
     getYearData() {
@@ -842,7 +848,7 @@ export default {
           }
         })
         .catch((error) => {
-          ElMessage.error(error);
+          this.handleDataError(error);
         });
     },
     goToDetail(type) {
@@ -873,7 +879,7 @@ export default {
           }
         })
         .catch((error) => {
-          ElMessage.error(error);
+          this.handleDataError(error);
         });
     },
     getWaringData(type, callback) {
@@ -913,7 +919,7 @@ export default {
           }
         })
         .catch((error) => {
-          ElMessage.error(error);
+          this.handleDataError(error);
         });
     },
     //获取表统计数据
