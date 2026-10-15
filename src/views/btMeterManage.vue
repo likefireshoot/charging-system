@@ -214,12 +214,12 @@
               <div class="pv-item"><span>三阶单价</span><b>{{ initForm.unitPrice3 }} 元/吨</b></div>
               <div class="pv-item"><span>一阶上限量</span><b>{{ initForm.limitValue1 }} 吨</b></div>
               <div class="pv-item"><span>二阶上限量</span><b>{{ initForm.limitValue2 }} 吨</b></div>
-              <div class="pv-item"><span>保底金额</span><b>{{ initForm.minValue }} 元</b></div>
+              <div class="pv-item"><span>{{ initMinName }}</span><b>{{ initForm.minValue }} {{ initMinUnit || "—" }}</b></div>
             </div>
             <div class="pv-tip">
               {{ initMinLocked
-                ? "该价格方案已启用保底费，表端保底金额以下发值为准"
-                : "该价格方案保底费为 0，表端保底金额可手动填写" }}
+                ? "该价格方案的「元保底费」已按一阶单价换算为吨并锁定（水量保底下发）"
+                : "该价格方案保底费为 0，表端保底值可手动填写（保底类型需与表端口径一致）" }}
             </div>
           </div>
           <el-form-item label="区域号">
@@ -256,19 +256,37 @@
           <el-form-item label="阶梯3单价(元)">
             <el-input-number v-model="initForm.unitPrice3" :min="0" :max="99.99" :precision="2" :step="0.5" :disabled="!!initForm.priceId" />
           </el-form-item>
-          <el-form-item label="保底金额(元)">
-            <el-input-number v-model="initForm.minValue" :min="0" :max="9999" :precision="2" :disabled="initMinLocked" />
+          <el-form-item label="保底类型">
+            <el-select v-model="initForm.minimumConfig" :disabled="initMinLocked" placeholder="请选择保底类型" style="width: 100%">
+              <el-option label="水量保底 · 一位小数(0.1吨)" :value="128" />
+              <el-option label="水量保底 · 整数吨" :value="192" />
+              <el-option label="不启用保底" :value="0" />
+            </el-select>
             <div class="form-tip">
-              {{ initMinLocked
-                ? "由价格方案的保底费自动带出并锁定，不可手填"
-                : "表端账户余额警戒值，可手动填写（价格方案保底费为 0 时不参与系统扣费）" }}
+              保底配置字 MinimumConfig（协议 1.4）：0x80=水量扣减(一位小数)、0xC0=水量扣减(整数吨)、0=关闭。
+              当前所用 JetsonHardNX.dll 仅暴露 MinValue/MinimumConfig，未暴露厂商文档中的 MinimumAmount 字段，
+              故「金额保底(0xA0)」模式下 DLL 不会写入保底值（表端固定得 100=1.00 元），金额保底暂不可用，仅提供水量保底(吨)。
+              下方保底值的单位为「吨」，需与表端口径一致。保底值随「开户/充值」指令下发到表端
+              （设置指令按厂商 Demo 下发费率/限购/报警，不下发保底配置字）
             </div>
+          </el-form-item>
+          <el-form-item :label="initMinLabel">
+            <el-input-number
+              v-model="initForm.minValue"
+              :min="0"
+              :max="initMinMax"
+              :precision="initMinPrecision"
+              :step="initMinPrecision === 0 ? 1 : 0.1"
+              :disabled="initMinLocked || initForm.minimumConfig === 0"
+            />
+            <div class="form-tip">{{ initMinTip }}</div>
           </el-form-item>
           <el-form-item label="报警金额(元)">
             <el-input-number v-model="initForm.shutoffAmount" :min="0" :max="9999" />
           </el-form-item>
           <el-form-item label="限购金额(元)">
             <el-input-number v-model="initForm.limitAmount" :min="0" :max="9999" />
+            <div class="form-tip">单次充值上限。0 会被表端当成「限购 0 元」直接拒绝购水（错误类型 0x0A 购买超出限购），因此 0/未填写按下发默认 100 元处理</div>
           </el-form-item>
         </template>
       </el-form>
@@ -590,6 +608,11 @@ const initForm = reactive({
   unitPrice2: 4,
   unitPrice3: 5,
   minValue: 0,
+  // 保底配置字 MinimumConfig（协议 1.4）：128(0x80)=水量保底(一位小数) 192(0xC0)=水量保底(整数吨) 0=不启用。
+  // 说明：当前 DLL 不支持金额保底(0xA0)，默认走水量保底(吨)。
+  // 注意：以下默认值仅是 reactive 初始态，openInit 打开设置弹窗时会用档案值整体覆盖，
+  // 不会把默认值提交给表端（曾因未覆盖导致表端被写入 100/200 吨上限，见 initArchive 注释）。
+  minimumConfig: 128,
   shutoffAmount: 100,
   limitAmount: 100,
 });
@@ -599,23 +622,116 @@ const initForm = reactive({
 const initMinFromPrice = ref(0);
 const initMinLocked = computed(() => !!initForm.priceId && Number(initMinFromPrice.value) > 0);
 
+// 保底类型 → 单位/口径联动（与表端 MinimumConfig 对齐，仅水量保底可用）：
+// 128(0x80)=水量保底(一位小数,吨)；192(0xC0)=水量保底(整数吨)；0=不启用
+const initMinName = computed(() =>
+  initForm.minimumConfig === 0 ? "保底(未启用)" : "保底水量"
+);
+const initMinUnit = computed(() =>
+  initForm.minimumConfig === 0 ? "" : "吨"
+);
+const initMinLabel = computed(() =>
+  initForm.minimumConfig === 0 ? "保底值(未启用)" : "保底水量(吨)"
+);
+// 协议量程：水量保底 0-4295.3 吨(bit6=0 一位小数) / 0-42953 吨(bit6=1 整数)
+const initMinMax = computed(() =>
+  initForm.minimumConfig === 192 ? 42953 : 4295.3
+);
+const initMinPrecision = computed(() =>
+  initForm.minimumConfig === 192 ? 0 : 1
+);
+const initMinTip = computed(() => {
+  if (initForm.minimumConfig === 0) return "未启用保底：表端不做保底补扣，无需填写";
+  if (initMinLocked.value) return "由价格方案的「元保底费」按一阶单价换算为吨并锁定（水量保底下发）";
+  return initForm.minimumConfig === 192
+    ? "水量保底（整数吨）：周期用量不足保底水量时，差额水量按阶梯单价补扣（单位：吨，整数）"
+    : "水量保底（一位小数）：周期用量不足保底水量时，差额水量按阶梯单价补扣（单位：吨）";
+});
+
+// 金额保底（bit5=1，历史档案常见 160 + 元值）当前 DLL 不支持下发：回填与保存时统一按一阶单价换算为水量保底
+// （吨，向上取整到 0.1 吨，保证换算后的水费≥元保底费），与后端 BtMeterServiceImpl.normalizeMinForDownlink 同口径。
+// 一阶单价缺失/为 0 时无法换算，按「不启用保底」显示，避免把「元」当「吨」展示与保存。
+function normalizeMinForWater(minConfig, minValue, unitPrice1) {
+  const cfg = minConfig == null || minConfig === "" ? 0 : Number(minConfig);
+  const val = minValue == null || minValue === "" ? 0 : Number(minValue);
+  if ((cfg & 0x20) === 0) return { minimumConfig: cfg, minValue: val };
+  const price = unitPrice1 == null || unitPrice1 === "" ? 0 : Number(unitPrice1);
+  if (val > 0 && price > 0) return { minimumConfig: 128, minValue: Math.ceil((val / price) * 10) / 10 };
+  return { minimumConfig: 0, minValue: 0 };
+}
+
+// 档案参数快照：打开设置弹窗时从列表行(row)回填；取消价格方案时也恢复到这里。
+// 绝不能用硬编码默认值顶替表端参数——2026-10-14 事故：弹窗显示默认 100/200吨+3/4/5元+160，
+// 用户只改了保底值就提交，表端阶梯上限被写成 100/200 吨（预期 1/2 吨的 100 倍）、单价/保底类型也被覆盖。
+const initArchive = {
+  areaCode: 205, rateVersion: 0, cycle: 0, rateIdent: 1, rateAssist: 0,
+  limitValue1: 0, limitValue2: 0, unitPrice1: 0, unitPrice2: 0, unitPrice3: 0,
+  minValue: 0, minimumConfig: 0, shutoffAmount: 0, limitAmount: 0,
+};
+
 function openInit(type, row) {
   initType.value = type;
   initForm.meterCode = row.meterCode;
   initForm.operateStaff = "";
+  if (type === "SETTING") {
+    // 设置弹窗必须回填档案（=表端当前参数），不能显示硬编码默认值
+    const n = (v, d) => (v != null && v !== "" ? Number(v) : d);
+    initArchive.areaCode = n(row.areaCode, 205);
+    initArchive.rateVersion = n(row.rateVersion, 0);
+    initArchive.cycle = n(row.rateCycle, 0);
+    initArchive.rateIdent = n(row.rateIdent, 1);
+    initArchive.rateAssist = n(row.rateAssist, 0);
+    initArchive.limitValue1 = n(row.limitValue1, 0);
+    initArchive.limitValue2 = n(row.limitValue2, 0);
+    initArchive.unitPrice1 = n(row.unitPrice1, 0);
+    initArchive.unitPrice2 = n(row.unitPrice2, 0);
+    initArchive.unitPrice3 = n(row.unitPrice3, 0);
+    initArchive.minValue = n(row.minValue, 0);
+    initArchive.minimumConfig = n(row.minConfig, 0);
+    initArchive.shutoffAmount = n(row.alarmAmount, 0);
+    // 限购金额：0/空按「未设置」处理，回填为默认 100 元（与后端 effectiveLimitAmount 同口径）。
+    // 表端限购 0 元会导致开户/充值被拒（错误类型 0x0A 购买超出限购），界面必须显示实际会下发的值。
+    const rowLimit = n(row.limitAmount, 0);
+    initArchive.limitAmount = rowLimit > 0 ? rowLimit : 100;
+    // 档案里残留的金额保底（如 160 + 1.0 元）按一阶单价换算为水量保底后再回填，避免把「元」当「吨」显示/下发
+    const minFixed = normalizeMinForWater(initArchive.minimumConfig, initArchive.minValue, initArchive.unitPrice1);
+    initArchive.minimumConfig = minFixed.minimumConfig;
+    initArchive.minValue = minFixed.minValue;
+    Object.assign(initForm, {
+      areaCode: initArchive.areaCode,
+      rateVersion: initArchive.rateVersion,
+      cycle: initArchive.cycle,
+      rateIdent: initArchive.rateIdent,
+      rateAssist: initArchive.rateAssist,
+      limitValue1: initArchive.limitValue1,
+      limitValue2: initArchive.limitValue2,
+      unitPrice1: initArchive.unitPrice1,
+      unitPrice2: initArchive.unitPrice2,
+      unitPrice3: initArchive.unitPrice3,
+      minValue: initArchive.minValue,
+      minimumConfig: initArchive.minimumConfig,
+      shutoffAmount: initArchive.shutoffAmount,
+      limitAmount: initArchive.limitAmount,
+    });
+    // 不回填 priceId：字段保持可编辑，展示档案实际值（可能与方案值不同）
+    initForm.priceId = null;
+    initMinFromPrice.value = 0;
+  }
   initVisible.value = true;
   loadPriceOptions();
 }
 
-// 设置指令选了价格类型后，按后端回填规则在前端预览单价/上限/保底（价格表单价/保底直接存「元」）；取消选择则恢复默认
+// 设置指令选了价格类型后，按后端回填规则在前端预览单价/上限/保底（价格表单价/保底直接存「元」）；
+// 取消选择则恢复档案参数快照（不是硬编码默认值）
 async function onInitPriceChange(val) {
   if (!val) {
-    initForm.unitPrice1 = 3;
-    initForm.unitPrice2 = 4;
-    initForm.unitPrice3 = 5;
-    initForm.limitValue1 = 100;
-    initForm.limitValue2 = 200;
-    initForm.minValue = 0;
+    initForm.unitPrice1 = initArchive.unitPrice1;
+    initForm.unitPrice2 = initArchive.unitPrice2;
+    initForm.unitPrice3 = initArchive.unitPrice3;
+    initForm.limitValue1 = initArchive.limitValue1;
+    initForm.limitValue2 = initArchive.limitValue2;
+    initForm.minValue = initArchive.minValue;
+    initForm.minimumConfig = initArchive.minimumConfig;
     initMinFromPrice.value = 0;
     return;
   }
@@ -627,10 +743,17 @@ async function onInitPriceChange(val) {
     initForm.unitPrice3 = p.priceThird != null ? Number(p.priceThird) : 0;
     initForm.limitValue1 = p.amountFirstEnd != null ? Number(p.amountFirstEnd) : 0;
     initForm.limitValue2 = p.amountSecondEnd != null ? Number(p.amountSecondEnd) : 0;
-    // 保底费 >0 才自动带出（并锁定）；=0/为空表示系统不启用保底，表端保底金额交由人工填写
+    // 保底费 >0 才自动带出（并锁定）；=0/为空表示系统不启用保底，表端保底交由人工填写。
+    // 价格方案的保底费单位为「元」，但当前表端 DLL 仅支持水量保底(吨)，故按一阶单价换算为吨
+    // （向上取整到 0.1 吨，保证折算水量对应的水费 ≥ 保底费）。
     const fee = p.guaranteedWaterFee != null ? Number(p.guaranteedWaterFee) : 0;
     initMinFromPrice.value = fee;
-    initForm.minValue = fee > 0 ? fee : 0;
+    if (fee > 0 && initForm.unitPrice1 > 0) {
+      initForm.minimumConfig = 128;
+      initForm.minValue = Math.ceil((fee / initForm.unitPrice1) * 10) / 10;
+    } else {
+      initForm.minValue = 0;
+    }
   }
 }
 
@@ -695,6 +818,10 @@ function openEdit(row) {
     // 水厂ID 统一取登录信息，不沿用行内值（数据隔离）
     const { companyId, ...rest } = row;
     Object.assign(editForm, rest);
+    // 档案里残留的金额保底（bit5=1）同口径换算为水量保底，避免把元值当吨值又保存回库
+    const minFixed = normalizeMinForWater(editForm.minConfig, editForm.minValue, editForm.unitPrice1);
+    editForm.minConfig = minFixed.minimumConfig;
+    editForm.minValue = minFixed.minValue;
   }
   editVisible.value = true;
   loadPriceOptions();
