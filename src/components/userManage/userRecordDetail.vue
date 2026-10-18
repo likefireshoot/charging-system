@@ -65,6 +65,7 @@
             <div class="data-item"><span>表号：</span>{{ selectedMeter.meterCode || currentUser.meterCode || '-' }}</div>
             <div class="data-item"><span>IMEI：</span>{{ selectedMeter.imei || currentUser.imei || '-' }}</div>
             <div class="data-item"><span>类型：</span>{{ selectedMeter.meterType || currentUser.meterType || 'NB-IoT表' }}</div>
+            <div class="data-item"><span>类型：</span>{{ selectedMeter.meterType || (source === 'btMeter' ? '蓝牙卡表' : (currentUser.meterType || 'NB-IoT表')) }}</div>
             <div class="data-item"><span>品牌：</span>{{ selectedMeter.meterVendor || currentUser.meterVendor || '-' }}</div>
             <div class="data-item"><span>结算：</span>{{ formatDate(selectedMeter.updateTime) || '-' }}</div>
             <div class="data-item"><span>阀门：</span>{{ selectedMeter.valveStatus || currentUser.valveStatus || '-' }}</div>
@@ -88,7 +89,7 @@
           <div class="back-button-wrapper">
             <button class="back-btn" @click="goBack">
               <img src="@/assets/yonghu/icon27.png" alt="back" />
-              <span>{{ { warningManage: '返回警告管理', errorReportRecord: '返回异常上报', commandLog: '返回命令下发记录' }[source] || '返回用户列表' }}</span>
+              <span>{{ { warningManage: '返回警告管理', errorReportRecord: '返回异常上报', commandLog: '返回命令下发记录', btMeter: '返回蓝牙表管理' }[source] || '返回用户列表' }}</span>
             </button>
           </div>
         </div>

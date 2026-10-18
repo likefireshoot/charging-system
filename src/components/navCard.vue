@@ -211,16 +211,28 @@ const staffPermissionIds = computed(() => {
 });
 
 const baseMenu = [
-  { id: 0, name: "首页", icon: require("@/assets/menu/icon1.png"), icon2: require("@/assets/menu/icon2.png"), path: "/homePage", ports: ["93"]  },
-  { id: 20, name: "水务地图", icon: require("@/assets/icon7.png"), icon2: require("@/assets/icon10.png"), path: "/map", ports: ["92"] },
-  { id: 21, name: "外勤管理", icon: require("@/assets/icon8.png"), icon2: require("@/assets/icon9.png"), path: "/field", ports: ["92"] },
-  { id: 22, name: "设备管理", icon: require("@/assets/menu/icon32.png"), icon2: require("@/assets/menu/icon33.png"), path: "/deviceManage", ports: ["92"] },
+  // { id: 0, name: "首页", icon: require("@/assets/menu/icon1.png"), icon2: require("@/assets/menu/icon2.png"), path: "/homePage", ports: ["93"]  },
+  // { id: 20, name: "水务地图", icon: require("@/assets/icon7.png"), icon2: require("@/assets/icon10.png"), path: "/map", ports: ["92"] },
+  // { id: 21, name: "外勤管理", icon: require("@/assets/icon8.png"), icon2: require("@/assets/icon9.png"), path: "/field", ports: ["92"] },
+  // { id: 22, name: "设备管理", icon: require("@/assets/menu/icon32.png"), icon2: require("@/assets/menu/icon33.png"), path: "/deviceManage", ports: ["92"] },
 ];
 
 const navLists = reactive([]);
 
 function buildMenu(userData) {
   const tempMenus = JSON.parse(JSON.stringify(baseMenu));
+  if (staffPermissionIds.value.includes(108)) {
+    tempMenus.push({ id: 0, name: "首页", icon: require("@/assets/menu/icon1.png"), icon2: require("@/assets/menu/icon2.png"), path: "/homePage", ports: ["93"]  });
+  }
+  if (staffPermissionIds.value.includes(109)) {
+    tempMenus.push({ id: 20, name: "水务地图", icon: require("@/assets/icon7.png"), icon2: require("@/assets/icon10.png"), path: "/map", ports: ["92"] },);
+  }
+  if (staffPermissionIds.value.includes(110)) {
+    tempMenus.push({ id: 21, name: "外勤管理", icon: require("@/assets/icon8.png"), icon2: require("@/assets/icon9.png"), path: "/field", ports: ["92"] });
+  }
+  if (staffPermissionIds.value.includes(111)) {
+    tempMenus.push({ id: 22, name: "设备管理", icon: require("@/assets/menu/icon32.png"), icon2: require("@/assets/menu/icon33.png"), path: "/deviceManage", ports: ["92"] });
+  }
   if (staffPermissionIds.value.includes(1)) {
     tempMenus.push({ id: 1, name: "开户管理", icon: require("@/assets/menu/icon24.png"), icon2: require("@/assets/menu/icon23.png"), path: "/accountManage", ports: ["93"] });
   }
@@ -385,6 +397,35 @@ watch(
             navLists.push(menu);
           }
         }
+      }
+    }
+
+    // 蓝牙卡表（35D2）菜单：父菜单仅在其子菜单至少有一个命中用户权限时才显示
+    const btMeterMenu = {
+      id: 23,
+      name: "蓝牙卡表",
+      icon: require("@/assets/menu/icon5.png"),
+      icon2: require("@/assets/menu/icon6.png"),
+      path: "/btMeter",
+      ports: ["92"],
+      arrowIcon1,
+      arrowIcon2,
+      children: [
+        { id: 231, name: "档案管理", permissionId: 40, icon: require("@/assets/menu/icon11.png"), icon2: require("@/assets/menu/icon12.png"), path: "/btMeter/manage" },
+        { id: 232, name: "写表任务", permissionId: 41, icon: require("@/assets/menu/icon13.png"), icon2: require("@/assets/menu/icon14.png"), path: "/btMeter/task" },
+        { id: 233, name: "表端回执", permissionId: 42, icon: require("@/assets/menu/icon17.png"), icon2: require("@/assets/menu/icon18.png"), path: "/btMeter/receipt" },
+        { id: 234, name: "抄表任务", permissionId: 45, icon: require("@/assets/menu/icon13.png"), icon2: require("@/assets/menu/icon14.png"), path: "/btMeter/readTask" },
+      ],
+    };
+    const btMenus = filterByPort([btMeterMenu]);
+    if (btMenus.length > 0) {
+      const menu = btMenus[0];
+      const visibleChildren = (menu.children || []).filter((child) =>
+        staffPermissionIds.value.includes(child.permissionId)
+      );
+      if (visibleChildren.length > 0) {
+        menu.children = visibleChildren;
+        navLists.push(menu);
       }
     }
 

@@ -210,6 +210,10 @@ export default {
           id: 2,
           label: "普通水表",
         },
+        {
+          id: 3,
+          label: "蓝牙卡表",
+        },
       ],
 
       filterText: "",

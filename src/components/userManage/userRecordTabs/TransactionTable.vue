@@ -9,6 +9,7 @@
           <el-option label="微信支付" value="微信支付" />
           <el-option label="免费赠送" value="免费赠送" />
           <el-option label="生活缴费" value="生活缴费" />
+          <el-option label="蓝牙卡表" value="蓝牙卡表" />
         </el-select>
       </div>
       <div class="search-input-item">
@@ -97,13 +98,15 @@
         <span>导出</span>
       </div>
       <el-tooltip content="至少选择一条记录" placement="top" :disabled="multipleSelection.length > 0">
-        <div class="tool-btn" :class="{ 'disabled-btn-tip': multipleSelection.length === 0 }" @click="openEditDialog()">
+        <div class="tool-btn" :class="{ 'disabled-btn-tip': multipleSelection.length === 0 }" @click="openEditDialog()"
+             v-if="staffPermissionIds.includes(107)">
           <img src="@/assets/yuangong/icon6.png" alt="" />
           <span>调账-记录编辑</span>
         </div>
       </el-tooltip>
       <el-tooltip content="至少选择一条记录" placement="top" :disabled="multipleSelection.length > 0">
-        <div class="tool-btn" :class="{ 'disabled-btn-tip': multipleSelection.length === 0 }" @click="multipleSelection.length > 0 && openDeleteDialog()">
+        <div class="tool-btn" :class="{ 'disabled-btn-tip': multipleSelection.length === 0 }" @click="multipleSelection.length > 0 && openDeleteDialog()"
+             v-if="staffPermissionIds.includes(107)">
           <img src="@/assets/yonghu/icon4.png" alt="" />
           <span>调账-记录删除</span>
         </div>
