@@ -1,7 +1,6 @@
 import { createRouter, createWebHistory } from "vue-router";
 import home from "../views/home.vue";
 import homePage from "../views/homePage.vue";
-import map from "../views/map.vue";
 import field from "../views/field.vue";
 import userManage from "../views/userManage.vue";
 import priceManage from "../views/priceManage.vue";
@@ -59,12 +58,22 @@ import btReceiptManage from "@/views/btReceiptManage.vue";
 import btReadTaskManage from "@/views/btReadTaskManage.vue";
 
 const routes = [
+  { path: "/map-prototype", redirect: "/map" },
   {
     path: "/",
     name: "home",
     component: home,
     redirect: "/homePage",
     children: [
+      {
+        path: "/map-devices",
+        name: "mapDevices",
+        redirect: "/map",
+      },
+      {
+        path: "/map-readonly",
+        redirect: "/map",
+      },
       {
         path: "/homePage",
         name: "homePage",
@@ -73,7 +82,8 @@ const routes = [
       {
         path: "/map",
         name: "map",
-        component: map,
+        component: () => import("../views/mapDevices.vue"),
+        meta: { mapDevices: true },
       },
       {
         path: "/field",

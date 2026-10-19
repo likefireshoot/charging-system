@@ -1,6 +1,6 @@
 
 <template>
-  <div class="popCard" :class="show?'on':''">
+  <div class="popCard" :class="show?'on':''" :inert="saving || busy ? true : undefined">
 
     <div class="inHead">
       <p>修改标记点</p>
@@ -131,23 +131,18 @@ import { ElMessage } from 'element-plus'
 import { reactive, defineProps, ref, onMounted, onBeforeUnmount,defineEmits,getCurrentInstance } from "vue";
 const { proxy } = getCurrentInstance();
 const emit = defineEmits(['updateMarket','updateUpRotation']);
-const props = defineProps(['show', 'checkMarket']);
+const props = defineProps(['show', 'checkMarket', 'editActions', 'busy']);
+const saving = ref(false);
 
 const selectSlide = ref(false);
 const selectSlide2 = ref(false);
 
-onMounted(() => {
-  document.body.addEventListener('click', e => {
-    selectSlide.value = false;
-    selectSlide2.value = false;
-  });
-});
-onBeforeUnmount(() => {
-  document.body.removeEventListener('click', e => {
-    selectSlide.value = false;
-    selectSlide2.value = false;
-  });
-});
+const closeDropdowns = () => {
+  selectSlide.value = false;
+  selectSlide2.value = false;
+};
+onMounted(() => document.body.addEventListener('click', closeDropdowns));
+onBeforeUnmount(() => document.body.removeEventListener('click', closeDropdowns));
 
 
 const latAndLng=ref({lng:0.00001141,lat:0.00000899});
@@ -168,6 +163,8 @@ function setRotate(data) {
 }
 
 function goDistance(index){
+  if (saving.value || props.busy) return;
+  if (props.editActions) { props.editActions.move(index, param.Distance); return; }
   console.log(index);
   let {checkMarket}=props;
 
@@ -197,6 +194,8 @@ function goDistance(index){
 }
 
 function goRotate(index){
+  if (saving.value || props.busy) return;
+  if (props.editActions) { props.editActions.rotate(index, param.Rotate); return; }
   let {checkMarket}=props;
   if(!checkMarket){
     ElMessage.warning('请选择要修改的设备');
@@ -220,6 +219,14 @@ function goRotate(index){
 }
 
 async function save(){
+  if (saving.value || props.busy) return;
+  if (props.editActions) {
+    saving.value = true;
+    try { await props.editActions.save(); ElMessage.success('保存成功！'); }
+    catch (error) { ElMessage.error(error.message || '保存失败，请重试'); }
+    finally { saving.value = false; }
+    return;
+  }
 
   let {checkMarket}=props;
   if(!checkMarket){

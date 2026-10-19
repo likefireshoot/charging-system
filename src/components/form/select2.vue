@@ -47,16 +47,13 @@ function slideToggle(Boolean) {
 
 
 
+const closeOnBodyClick = () => slideToggle(false);
 onMounted(()=>{
-  document.body.addEventListener('click',e=>{
-    slideToggle(false);
-  });
+  document.body.addEventListener('click', closeOnBodyClick);
   getStyle();
 });
 onBeforeUnmount(()=>{
-  document.body.removeEventListener('click',e=>{
-    slideToggle(false);
-  });
+  document.body.removeEventListener('click', closeOnBodyClick);
 });
 
 

@@ -24,3 +24,6 @@ pnpm-debug.log*
 *.sw?
 *.sh
 /.claude/
+
+# Large local map archives are transferred separately from Git history.
+/map-assets/地图数据/*.pmtiles

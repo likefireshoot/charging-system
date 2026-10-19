@@ -16,6 +16,10 @@ if (process.env.NODE_ENV == "development") {
   // axios.defaults.baseURL = "http://127.0.0.1:8080";
   // axios.defaults.baseURL = "/api";
 }
+// 独立部署可指定同源 API；未指定时保留原开发和生产地址。
+if (process.env.VUE_APP_API_BASE) {
+  axios.defaults.baseURL = process.env.VUE_APP_API_BASE;
+}
 console.log(axios.defaults.baseURL);
 axios.defaults.headers.post["Content-Type"] = "application/json;charset=utf-8";
 axios.defaults.headers.put["Content-Type"] = "application/json;charset=utf-8";

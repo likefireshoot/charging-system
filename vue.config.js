@@ -1,4 +1,5 @@
 const { defineConfig } = require("@vue/cli-service");
+const { createMapAssetsMiddleware } = require("./scripts/map-assets.cjs");
 
 module.exports = defineConfig({
   transpileDependencies: true,
@@ -21,12 +22,17 @@ module.exports = defineConfig({
 
   devServer: {
     host: "0.0.0.0",
-    port: 8080,
+    port: 8081,
     client: {
       overlay: false,
     },
     https: true,
     historyApiFallback: true,
+    setupMiddlewares(middlewares) {
+      // Handle map files before the SPA fallback and serve them in byte ranges.
+      middlewares.unshift({ name: "local-map-assets", middleware: createMapAssetsMiddleware() });
+      return middlewares;
+    },
     proxy: {
       "/api": {
         // target: 'http://81.69.29.7:9882/',

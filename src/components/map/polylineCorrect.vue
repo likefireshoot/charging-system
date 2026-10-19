@@ -1,5 +1,5 @@
 <template>
-  <div class="popCard" :class="show ? 'on' : ''">
+  <div class="popCard" :class="show ? 'on' : ''" :inert="props.busy || saving">
     <div class="inHead">
       <p>管线校正</p>
       <a class="btn" @click.stop="$emit('update:show', false)">
@@ -29,6 +29,16 @@
         </div>
       </div>
 
+      <section v-if="props.pipeDraft" class="pipe-fields" data-testid="pipe-fields">
+        <label>名称 <input data-testid="pipe-name" :value="props.pipeDraft.properties.name" maxlength="10" title="最多10个字符" @input="props.editActions.properties({ name: $event.target.value })" /></label>
+        <label>管径 (mm) <input data-testid="pipe-diameter" type="number" min="1" :value="props.pipeDraft.properties.pipe_diameter" @input="props.editActions.properties({ pipe_diameter: Number($event.target.value) })" /></label>
+        <p>长度预览：{{ props.previewLength }} 米（后台回读为准）</p>
+        <p v-if="selectedPoint">已选节点 {{ selectedPoint.index + 1 }}：{{ selectedPoint.coord.map(n => n.toFixed(6)).join(', ') }}</p>
+        <div v-for="(flag, index) in props.pipeDraft.directions" :key="index" class="pipe-direction">
+          <span>第 {{ index + 1 }} 段：{{ flag === 0 ? '正向' : '逆向' }}</span>
+          <button :data-testid="'pipe-direction-' + index" @click.stop="props.editActions.direction(index)">反转流向</button>
+        </div>
+      </section>
       <template v-if="selectedPoint && selectedPoint.coord">
         <div class="pointsCard">
           <h2 class="name">当前选中节点</h2>
@@ -104,11 +114,12 @@
 import { ElMessage } from "element-plus";
 import { reactive, defineProps, ref, watch, defineEmits, getCurrentInstance, computed, onMounted, onBeforeUnmount } from "vue";
 const { proxy } = getCurrentInstance();
-const emit = defineEmits(["updatePoint", "save"]);
+const emit = defineEmits(["updatePoint", "save", "update:show"]);
 
-const props = defineProps(["show", "checkLine", "selectedPoint"]);
+const props = defineProps(["show", "checkLine", "selectedPoint", "editActions", "busy", "pipeDraft", "previewLength"]);
 
 const selectSlide = ref(false);
+const saving = ref(false);
 const pointDistance = ref(1); // 移动距离
 
 const latAndLng = ref({ lng: 0.00001141, lat: 0.00000899 });
@@ -117,17 +128,9 @@ const param = reactive({
   Distance: 1,
 });
 
-onMounted(() => {
-  document.body.addEventListener("click", (e) => {
-    selectSlide.value = false;
-  });
-});
-
-onBeforeUnmount(() => {
-  document.body.removeEventListener("click", (e) => {
-    selectSlide.value = false;
-  });
-});
+const closeDistanceSelect = () => { selectSlide.value = false; };
+onMounted(() => { document.body.addEventListener("click", closeDistanceSelect); });
+onBeforeUnmount(() => { document.body.removeEventListener("click", closeDistanceSelect); });
 
 // 当前选中点的坐标（用于编辑）
 const currentCoord = ref([0, 0]);
@@ -166,6 +169,8 @@ function updateCoord(coordIndex, value) {
 }
 
 function goPointDistance(direction) {
+  if (props.busy || saving.value) return;
+  if (props.editActions) { props.editActions.move(direction, pointDistance.value); return; }
   if (!props.selectedPoint || !currentCoord.value) {
     return;
   }
@@ -197,6 +202,14 @@ function goPointDistance(direction) {
 }
 
 async function save() {
+  if (props.busy || saving.value) return;
+  if (props.editActions) {
+    saving.value = true;
+    try { await props.editActions.save(); ElMessage.success("管线保存并回读确认成功"); }
+    catch (error) { ElMessage.error(error.message); }
+    finally { saving.value = false; }
+    return;
+  }
   if (!props.checkLine) {
     ElMessage.warning("请选择要修改的管线");
     return;
@@ -216,6 +229,8 @@ async function save() {
 </script>
 
 <style lang="scss" scoped>
+.pipe-fields { padding: 0 30px 18px; font-size: 18px; line-height: 1.8; label { display: flex; gap: 12px; margin-bottom: 10px; } input { width: 220px; border: 1px solid #ddd; border-radius: 4px; padding: 5px; } button { cursor: pointer; background: #46b97e; color: white; border-radius: 4px; padding: 4px 10px; } }
+.pipe-direction { display: flex; justify-content: space-between; margin: 7px 0; }
 .popCard {
   position: absolute;
   right: 180px;

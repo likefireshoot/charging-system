@@ -1,5 +1,5 @@
 <template>
-  <div class="popCard" :class="show ? 'on' : ''">
+  <div class="popCard" :class="show ? 'on' : ''" :inert="props.busy || saving">
     <div class="inHead">
       <p>管线添加</p>
       <a class="btn" @click.stop="$emit('update:show', false)">
@@ -55,6 +55,7 @@
 
       <div v-if="newPolyline.coords.length > 0" class="pointsCard">
         <h2 class="name">已选择的点</h2>
+        <p v-if="props.submitPipe">长度预览：{{ props.previewLength }} 米（保存后以后台回读为准）</p>
         <div class="pointList">
           <div v-for="(coord, index) in newPolyline.coords" :key="index" class="pointItem">
             <span class="pointIndex">点 {{ index + 1 }}</span>
@@ -80,9 +81,10 @@ import { reactive, defineProps, ref, watch, defineEmits, getCurrentInstance, com
 const { proxy } = getCurrentInstance();
 const emit = defineEmits(["update:show", "polylineAdded", "addPoint", "updatePoints"]);
 
-const props = defineProps(["show", "allTownSelect", "clickPosition"]);
+const props = defineProps(["show", "allTownSelect", "clickPosition", "submitPipe", "draftCoordinates", "busy", "previewLength"]);
 
 const selectSlide = ref(false);
+const saving = ref(false);
 
 const handleBodyClick = () => {
   selectSlide.value = false;
@@ -101,10 +103,13 @@ const newPolyline = reactive({
   coords: [], // [[lng, lat], ...]
 });
 
+watch(() => props.draftCoordinates, value => { if (props.submitPipe && value) newPolyline.coords = value.map(p => [...p]); }, { immediate: true, deep: true });
+
 // 监听点击位置变化，添加点到管线
 watch(
   () => [props.clickPosition, props.show],
   ([newPos, isShow]) => {
+    if (props.submitPipe) return;
     // 只有当弹窗打开且有新位置时才添加点
     if (!isShow || !newPos) {
       return;
@@ -181,6 +186,7 @@ function removePoint(index) {
 }
 
 async function save() {
+  if (props.busy || saving.value) return;
   if (!canSave.value) {
     if (newPolyline.coords.length < 2) {
       ElMessage.warning("至少需要选择2个点才能创建管线");
@@ -198,6 +204,7 @@ async function save() {
     return;
   }
 
+  saving.value = true;
   try {
     // 构建 GeoJSON Feature 格式的数据（包含 commitType 和 features 数组）
     const geoJsonData = {
@@ -223,7 +230,7 @@ async function save() {
     };
 
     // 调用添加管线API
-    const { code, msg } = await proxy.ajax.post("/DBAllDataPostWeb", geoJsonData, true);
+    const { code, msg } = await (props.submitPipe ? props.submitPipe(geoJsonData) : proxy.ajax.post("/DBAllDataPostWeb", geoJsonData, true));
 
     if (code === 200) {
       ElMessage.success("管线添加成功！");
@@ -236,8 +243,8 @@ async function save() {
     }
   } catch (error) {
     console.error("添加管线失败:", error);
-    ElMessage.error("添加失败，请重试");
-  }
+    ElMessage.error(props.submitPipe ? error.message : "添加失败，请重试");
+  } finally { saving.value = false; }
 }
 </script>
 
