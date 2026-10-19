@@ -84,15 +84,15 @@
         <img src="@/assets/yonghu/icon1.3.png" alt="" />
         <span style="margin-left: 6px; color: #5a5a5a">微信退款</span>
       </div>
-      <div class="tool-btn" @click="downloadTemplate" v-if="staffPermissionIds.includes(53)">
-        <img src="@/assets/yonghu/icon1.png" alt="" />
-        <span>充值记录导⼊模版</span>
-      </div>
-      <div class="tool-btn" @click="triggerFileInput" v-if="staffPermissionIds.includes(53)">
-        <img src="@/assets/yonghu/icon2.png" alt="" />
-        <span>充值记录导⼊</span>
-        <input ref="fileInput" type="file" accept=".xls,.xlsx" style="display: none" @change="handleImport" />
-      </div>
+<!--      <div class="tool-btn" @click="downloadTemplate" v-if="staffPermissionIds.includes(53)">-->
+<!--        <img src="@/assets/yonghu/icon1.png" alt="" />-->
+<!--        <span>充值记录导⼊模版</span>-->
+<!--      </div>-->
+<!--      <div class="tool-btn" @click="triggerFileInput" v-if="staffPermissionIds.includes(53)">-->
+<!--        <img src="@/assets/yonghu/icon2.png" alt="" />-->
+<!--        <span>充值记录导⼊</span>-->
+<!--        <input ref="fileInput" type="file" accept=".xls,.xlsx" style="display: none" @change="handleImport" />-->
+<!--      </div>-->
       <div class="tool-btn" @click="exportExcel">
         <img src="@/assets/yonghu/icon1.3.png" alt="" />
         <span>导出</span>

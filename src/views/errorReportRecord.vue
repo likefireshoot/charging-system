@@ -85,6 +85,7 @@
         <div class="reflush" @click="reflush">
           <img src="@/assets/yonghu/icon15.png" alt="" />
         </div>
+        <span style="margin-left: 10px; color: #e04545">说明：当本次上报吨数小于上次上报吨数，也即出现了用水读数倒转时，该上报读数异常，将被拦截并列入该异常数据列表</span>
       </div>
       <div class="yuangong-table">
         <el-table

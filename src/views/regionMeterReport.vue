@@ -28,6 +28,28 @@
         </div>
 
         <div class="search-input">
+          <span>抄表状态</span>
+          <el-select
+            v-model="reportStatus"
+            placeholder="选择抄表状态"
+            clearable
+            @change="handleSearch"
+          >
+            <el-option label="正常" value="正常" />
+            <el-option label="表数未动" value="表数未动" />
+            <el-option label="止码未到" value="止码未到" />
+            <el-option label="表不清" value="表不清" />
+            <el-option label="表破" value="表破" />
+            <el-option label="表埋" value="表埋" />
+            <el-option label="暂拆" value="暂拆" />
+            <el-option label="其他" value="其他" />
+            <el-option label="无人在家" value="无人在家" />
+            <el-option label="未抄表" value="未抄表" />
+          </el-select>
+        </div>
+
+
+        <div class="search-input">
           <span>表册</span>
           <el-select
             v-model="searchParams.codeBook"
@@ -124,6 +146,12 @@
           class="report-table"
           style="width: 100%; height: 100%; table-layout: fixed; overflow-x: auto; overflow-y: auto"
         >
+          <!-- 新增序号列 -->
+          <el-table-column label="序号" :width="indexWidth" align="center">
+            <template #default="{ $index }">
+              {{ (currentPage - 1) * pageSize + $index + 1 }}
+            </template>
+          </el-table-column>
           <el-table-column prop="userId" label="用户号" :width="userIdWidth" align="center">
             <template #default="{ row }">
               <span>{{ row.userId % 10000000 }}</span>
@@ -211,9 +239,10 @@
           row-class-name="summary-row"
           style="width: 100%; flex-shrink: 0; table-layout: fixed; margin-top: -1px;"
         >
-          <el-table-column :width="userIdWidth" align="center">
+          <el-table-column :width="indexWidth" align="center">
             <template #default><span>汇总</span></template>
           </el-table-column>
+          <el-table-column :width="userIdWidth" align="center"></el-table-column>
           <el-table-column :width="userNameWidth" align="center"></el-table-column>
           <el-table-column :width="addressWidth" align="center"></el-table-column>
           <el-table-column :width="reportStatusWidth" align="center"></el-table-column>
@@ -256,6 +285,11 @@ import { ref, reactive, computed, onMounted, onBeforeUnmount, nextTick } from 'v
 import { ElMessage } from 'element-plus';
 import service from '@/api/request';
 
+import { useRoute } from 'vue-router'
+const route = useRoute()
+
+
+
 // 简易防抖：用于用户搜索输入
 let searchTimer = null;
 const debounceSearch = (fn, wait = 400) => {
@@ -297,6 +331,9 @@ const summaryRow = ref([{ totalDeltaWater: 0, totalFeeThisTime: 0 }]);
 
 // 搜索关键词
 const searchKeyword = ref('');
+
+// 抄表状态筛选
+const reportStatus = ref('')
 
 // 本月用水量相关
 // 用水量对比筛选
@@ -348,6 +385,7 @@ const formatDate = (dateStr) => {
 
 // ============== 表格列宽（参考登录安全页做法，按容器百分比分配） ==============
 const columnPercentages = {
+  index: 4,
   userId: 7,
   userName: 8,
   address: 10,  // 本月用水量相关
@@ -355,15 +393,16 @@ const columnPercentages = {
   reportStatus: 8,
   startReading: 8,
   endReading: 8,
-  deltaWater: 8,
-  lastMonthDeltaWater: 8,
-  lastDeltaWater: 9,  // 本月用水量相关
+  deltaWater: 7,
+  lastMonthDeltaWater: 6,
+  lastDeltaWater: 7,  // 本月用水量相关
   feeThisTime: 8,
   createTime: 10
 };
 
 const tableContainer = ref(null);
 
+const indexWidth = ref(0);
 const userIdWidth = ref(0);
 const userNameWidth = ref(0);
 const addressWidth = ref(0);
@@ -380,6 +419,7 @@ const createTimeWidth = ref(0);
 const calculateColumnWidths = () => {
   if (!tableContainer.value) return;
   const w = tableContainer.value.offsetWidth;
+  indexWidth.value = (columnPercentages.index / 100) * w;
   userIdWidth.value = (columnPercentages.userId / 100) * w;
   userNameWidth.value = (columnPercentages.userName / 100) * w;
   addressWidth.value = (columnPercentages.address / 100) * w;
@@ -424,6 +464,11 @@ const loadRegionReport = async (regionId, codeBookId, keyword = '') => {
       url += `&waterCompareOpt=${encodeURIComponent(waterCompareOpt.value)}`;
       url += `&waterCompareVal=${encodeURIComponent(waterCompareVal.value ?? 40)}`;
     }
+    // 抄表状态，有值才拼接
+    if (reportStatus.value) {
+      url += `&reportStatus=${encodeURIComponent(reportStatus.value)}`
+    }
+
     const res = await service.get(url);
 
     if (res.code === 200) {
@@ -505,7 +550,7 @@ const fetchCompanyList = async () => {
       if (currentUserCompany) {
         currentCompanyName.value = currentUserCompany.companyName;
         searchParams.companyId = currentCompanyId.value;
-        handleCompanyChange(currentCompanyId.value);
+        await handleCompanyChange(currentCompanyId.value);
       } else {
         currentCompanyName.value = '-';
       }
@@ -672,6 +717,7 @@ const exportReport = async (type) => {
   const query = new URLSearchParams({
     regionId: searchParams.region,
     keyword: searchKeyword.value || '',
+    reportStatus: reportStatus.value || '',
     waterCompareOpt: waterCompareOpt.value || '',
     waterCompareVal: waterCompareVal.value ?? 40,
     regionName: regionName.value,
@@ -726,7 +772,7 @@ const exportReport = async (type) => {
   }
 };
 
-onMounted(() => {
+onMounted(async () => {
   // 表格列宽自适应
   nextTick(() => {
     tableContainer.value = document.querySelector('.table-zone') || document.querySelector('.info-card');
@@ -740,7 +786,27 @@ onMounted(() => {
       window.addEventListener('resize', calculateColumnWidths);
     }
   });
-  fetchCompanyList();
+  await fetchCompanyList();
+  // ==========读取路由参数==========
+  const query = route.query;
+  if (query.reportStatus) {
+    reportStatus.value = query.reportStatus
+  }
+
+  if (query.regionId) {
+    // 现在regionList已经加载完毕！
+    const targetRegionId = Number(query.regionId);
+    // 判断regionList里是否存在这个regionId，防止url传入无效ID
+    const existRegion = regionList.value.find(r => r.regionId == targetRegionId);
+    if (existRegion) {
+      // 赋值regionId给searchParams.region
+      searchParams.region = targetRegionId;
+      await handleRegionChange(targetRegionId);
+    } else {
+      ElMessage.warning('传入的区域ID不存在');
+    }
+  }
+
 });
 
 onBeforeUnmount(() => {

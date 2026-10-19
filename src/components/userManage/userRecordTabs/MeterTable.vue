@@ -65,15 +65,15 @@
     </div>
 
     <div class="tool-bar">
-      <div class="tool-btn" @click="downloadTemplate" v-if="staffPermissionIds.includes(16)">
-        <img src="@/assets/yonghu/icon1.png" alt="" />
-        <span>抄表记录导⼊模版</span>
-      </div>
-      <div class="tool-btn" @click="triggerFileInput" v-if="staffPermissionIds.includes(16)">
-        <img src="@/assets/yonghu/icon2.png" alt="" />
-        <span>抄表记录导⼊</span>
-        <input ref="fileInput" type="file" accept=".xls,.xlsx" style="display: none" @change="handleImport" />
-      </div>
+<!--      <div class="tool-btn" @click="downloadTemplate" v-if="staffPermissionIds.includes(16)">-->
+<!--        <img src="@/assets/yonghu/icon1.png" alt="" />-->
+<!--        <span>抄表记录导⼊模版</span>-->
+<!--      </div>-->
+<!--      <div class="tool-btn" @click="triggerFileInput" v-if="staffPermissionIds.includes(16)">-->
+<!--        <img src="@/assets/yonghu/icon2.png" alt="" />-->
+<!--        <span>抄表记录导⼊</span>-->
+<!--        <input ref="fileInput" type="file" accept=".xls,.xlsx" style="display: none" @change="handleImport" />-->
+<!--      </div>-->
       <div class="tool-btn" @click="exportExcel">
         <img src="@/assets/yonghu/icon1.3.png" alt="" />
         <span>导出</span>
@@ -239,6 +239,18 @@
         <div class="recharge-input">
           <span>用水量</span>
           <el-input v-model="addForm.deltaWater" placeholder="请输入用水量"></el-input>
+        </div>
+        <div class="recharge-input">
+          <span>起码</span>
+          <el-input value="自动计算" disabled></el-input>
+        </div>
+        <div class="recharge-input">
+          <span>止码</span>
+          <el-input value="自动计算" disabled></el-input>
+        </div>
+        <div class="recharge-input">
+          <span>结算量</span>
+          <el-input value="自动计算" disabled></el-input>
         </div>
         <div class="recharge-input">
           <span>扣费</span>
@@ -1162,7 +1174,7 @@ export default {
 }
 
 .recharge-content {
-  width: 96%;
+  width: 98%;
   background-color: #fff;
   border-radius: 5px;
   margin-top: 15px;
@@ -1178,9 +1190,9 @@ export default {
   display: flex;
   justify-content: center;
   flex-direction: column;
-  width: 10%;
+  width: 7.8%;
   height: 75px;
-  margin-right: 1%;
+  margin-right: 0.5%;
 }
 
 .recharge-input > span {

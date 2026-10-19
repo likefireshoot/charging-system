@@ -610,6 +610,7 @@ export default {
     this.bingtuChart();
     this.getTradeData();
 
+    // this.getWeekData();
     this.getMonthData();
     this.getYearData();
     this.getWaringNum();
