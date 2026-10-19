@@ -397,7 +397,7 @@ export default {
             const imei = this.meterData.imei;
             const count = this.params_set_tai.count;
             service
-              .get(`/command/${p}/${p}SetReadCount?imei=${imei}&count=${count}`)
+              .get(`/command/${p}/${p}SetReadCount?imei=${imei}&readCount=${count}`)
               .then((res) => {
                 if (res.code === 200) { ElMessage.success("表读数设置成功"); }
                 else { ElMessage.error(res.msg); }

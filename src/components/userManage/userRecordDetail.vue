@@ -64,7 +64,6 @@
           <div class="data-list">
             <div class="data-item"><span>表号：</span>{{ selectedMeter.meterCode || currentUser.meterCode || '-' }}</div>
             <div class="data-item"><span>IMEI：</span>{{ selectedMeter.imei || currentUser.imei || '-' }}</div>
-            <div class="data-item"><span>类型：</span>{{ selectedMeter.meterType || currentUser.meterType || 'NB-IoT表' }}</div>
             <div class="data-item"><span>类型：</span>{{ selectedMeter.meterType || (source === 'btMeter' ? '蓝牙卡表' : (currentUser.meterType || 'NB-IoT表')) }}</div>
             <div class="data-item"><span>品牌：</span>{{ selectedMeter.meterVendor || currentUser.meterVendor || '-' }}</div>
             <div class="data-item"><span>结算：</span>{{ formatDate(selectedMeter.updateTime) || '-' }}</div>
