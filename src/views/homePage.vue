@@ -201,6 +201,7 @@ export default {
     const month = String(now.getMonth() + 1).padStart(2, "0");
     const day = String(now.getDate()).padStart(2, "0");
     return {
+      isDestroyed: false, // 新增：组件销毁标记 2026/10/19 CJY
       staffPermissionIds: JSON.parse(sessionStorage.getItem("userData")).staffPermissionIds,
       params: {
         record_time: `${year}-${month}-${day}`,
@@ -531,7 +532,7 @@ export default {
         shebeiyichang: 0,
         currentMonthNewUserCount:0,
         abnormalWaterCount: 0
-        
+
       },
       monthChargeChart: null,
       monthChargeChart_option: {
@@ -665,7 +666,11 @@ export default {
     },
     // 使用防抖函数来包装 resize 操作
     bingtuChart() {
-      this.bingtuchart = markRaw(echarts.init(document.getElementById("bingtu")));
+      if (this.isDestroyed) return; //新增：组件销毁直接退出
+      const dom = document.getElementById("bingtu"); //提取dom变量
+      if (!dom) return; //新增：DOM节点不存在直接return，防止echarts初始化空dom报错
+      this.bingtuchart = markRaw(echarts.init(dom));
+      // this.bingtuchart = markRaw(echarts.init(document.getElementById("bingtu")));
       this.bingtuchart_option.series[0].data[0].value = this.shebeiStatus.normal;
       this.bingtuchart_option.series[0].data[1].value = this.shebeiStatus.abnormal;
       this.bingtuchart.setOption(this.bingtuchart_option);
@@ -673,6 +678,7 @@ export default {
       // 创建 ResizeObserver 实例来监听 weekshouyi div 大小变化
       this.bingtuResizeObserver = new ResizeObserver(
         this.debounce(() => {
+          if(this.isDestroyed || !this.bingtuchart) return; //新增判断
           this.bingtuchart.resize(); // 当大小变化时，调用 resize 来调整图表的尺寸
         }, 200)
       ); // 200 毫秒的防抖延时
@@ -681,12 +687,17 @@ export default {
       this.bingtuResizeObserver.observe(document.getElementById("bingtu"));
     },
     weekChart() {
-      this.weekchart = markRaw(echarts.init(document.getElementById("week")));
+      if (this.isDestroyed) return;
+      const dom = document.getElementById("week");
+      if (!dom) return;
+      this.weekchart = markRaw(echarts.init(dom));
+      // this.weekchart = markRaw(echarts.init(document.getElementById("week")));
       this.weekchart.setOption(this.weekchart_option);
 
       // 创建 ResizeObserver 实例来监听 weekshouyi div 大小变化
       this.weekchartResizeObserver = new ResizeObserver(
         this.debounce(() => {
+          if(this.isDestroyed || !this.weekchart) return;
           this.weekchart.resize(); // 当大小变化时，调用 resize 来调整图表的尺寸
         }, 200)
       ); // 200 毫秒的防抖延时
@@ -695,12 +706,17 @@ export default {
       this.weekchartResizeObserver.observe(document.getElementById("week"));
     },
     monthChart() {
-      this.monthchart = markRaw(echarts.init(document.getElementById("month")));
+      if (this.isDestroyed) return;
+      const dom = document.getElementById("month");
+      if (!dom) return;
+      this.monthchart = markRaw(echarts.init(dom));
+      // this.monthchart = markRaw(echarts.init(document.getElementById("month")));
       this.monthchart.setOption(this.monthchart_option);
 
       // 创建 ResizeObserver 实例来监听 weekshouyi div 大小变化
       this.monthchartResizeObserver = new ResizeObserver(
         this.debounce(() => {
+          if(this.isDestroyed || !this.monthchart) return;
           this.monthchart.resize(); // 当大小变化时，调用 resize 来调整图表的尺寸
         }, 200)
       ); // 200 毫秒的防抖延时
@@ -709,12 +725,17 @@ export default {
       this.monthchartResizeObserver.observe(document.getElementById("month"));
     },
     yearChart() {
-      this.yearchart = markRaw(echarts.init(document.getElementById("year")));
+      if (this.isDestroyed) return;
+      const dom = document.getElementById("year");
+      if (!dom) return;
+      this.yearchart = markRaw(echarts.init(dom));
+      // this.yearchart = markRaw(echarts.init(document.getElementById("year")));
       this.yearchart.setOption(this.yearchart_option);
 
       // 创建 ResizeObserver 实例来监听 weekshouyi div 大小变化
       this.yearchartResizeObserver = new ResizeObserver(
         this.debounce(() => {
+          if(this.isDestroyed || !this.yearchart) return;
           this.yearchart.resize(); // 当大小变化时，调用 resize 来调整图表的尺寸
         }, 200)
       ); // 200 毫秒的防抖延时
@@ -724,6 +745,7 @@ export default {
     },
 
     beforeUnmount() {
+      this.isDestroyed = true; //【新增】标记组件已经销毁 2026/10/19 CJY
       if (this.monthChargeResizeObserver) {
         this.monthChargeResizeObserver.disconnect();
       }
@@ -784,6 +806,7 @@ export default {
           },
         })
         .then((response) => {
+          if(this.isDestroyed) return; //新增
           if (response.code === 200) {
             // 提取 reportTimeStart 数据
             const reportTimeStarts = response.data.currentSingularReport.map((item) => {
@@ -805,6 +828,7 @@ export default {
           }
         })
         .catch((error) => {
+          if(this.isDestroyed) return;
           this.handleDataError(error);
         });
     },
@@ -823,6 +847,7 @@ export default {
           },
         })
         .then((response) => {
+          if(this.isDestroyed) return;
           if (response.code === 200) {
             const trade_data = response.data?.currentDurationReport || {};
             this.monthchart_option.series[0].data = [trade_data.totalMoney ?? 0, trade_data.cashMoney ?? 0, trade_data.weChatMoney ?? 0, trade_data.weChatLifeMoney ?? 0, trade_data.alipayMoney ?? 0];
@@ -832,6 +857,7 @@ export default {
           }
         })
         .catch((error) => {
+          if(this.isDestroyed) return;
           this.handleDataError(error);
         });
     },
@@ -850,6 +876,7 @@ export default {
           },
         })
         .then((response) => {
+          if(this.isDestroyed) return;
           if (response.code === 200) {
             const totalMoneys = response.data.currentSingularReport.map((item) => {
               return item.totalMoney;
@@ -861,6 +888,7 @@ export default {
           }
         })
         .catch((error) => {
+          if(this.isDestroyed) return;
           this.handleDataError(error);
         });
     },
@@ -879,6 +907,7 @@ export default {
       service
         .get(`/warning/getIndexWarningInfo?companyId=${params.companyId}`)
         .then((response) => {
+          if(this.isDestroyed) return;
           if (response.code === 200) {
             this.shebeiWarning.qianfeiUser = response.data.arrearsUserCount;
             this.shebeiWarning.zerouserL = response.data.zeroUsageCount;
@@ -892,6 +921,7 @@ export default {
           }
         })
         .catch((error) => {
+          if(this.isDestroyed) return;
           this.handleDataError(error);
         });
     },
@@ -950,6 +980,7 @@ export default {
           },
         })
         .then((res) => {
+          if(this.isDestroyed) return; //新增
           if (res.code === 200) {
             this.shebeiStatus.normal = res.data.normalDeviceNum;
             this.shebeiStatus.abnormal = res.data.exceptionDeviceNum;
@@ -961,6 +992,7 @@ export default {
         });
     },
     monthChargeChartInit() {
+      if (this.isDestroyed) return; //新增
       const chartDom = document.getElementById("monthCharge");
       if (!chartDom) return;
       this.monthChargeChart = markRaw(echarts.init(chartDom));
@@ -968,6 +1000,7 @@ export default {
       this.monthChargeResizeObserver = new ResizeObserver(
         this.debounce(() => {
           if (this.monthChargeChart) {
+            if(this.isDestroyed || !this.monthChargeChart) return; //新增isDestroyed判断
             this.monthChargeChart.resize();
           }
         }, 200)
@@ -994,6 +1027,7 @@ export default {
           headers: { Authorization: this.token },
         })
         .then((response) => {
+          if(this.isDestroyed) return;
           if (response.code !== 200) {
             ElMessage.error(response.msg);
             return;
@@ -1004,6 +1038,7 @@ export default {
           this.monthChargeChartInit();
         })
         .catch((error) => {
+          if(this.isDestroyed) return;
           console.error(error);
         });
     },

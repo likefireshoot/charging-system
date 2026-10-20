@@ -3943,7 +3943,7 @@ faye-websocket@^0.11.3:
 
 fflate@^0.8.2:
   version "0.8.3"
-  resolved "https://registry.npmjs.org/fflate/-/fflate-0.8.3.tgz"
+  resolved "https://registry.npmmirror.com/fflate/-/fflate-0.8.3.tgz"
   integrity sha512-tbZNuJrLwGUp3zshBtdy4W+ORxZuIh8a5ilyIEQDC5rY1f3U20JMry0Ll3WBzU58EZKsEuJFXhb5gwv8CsPvgA==
 
 figures@^2.0.0:
@@ -5514,7 +5514,7 @@ map-visit@^1.0.0:
 
 maplibre-gl@^5.24.0, maplibre-gl@>=4:
   version "5.24.0"
-  resolved "https://registry.npmjs.org/maplibre-gl/-/maplibre-gl-5.24.0.tgz"
+  resolved "https://registry.npmmirror.com/maplibre-gl/-/maplibre-gl-5.24.0.tgz"
   integrity sha512-ALyFxgtd5R+65UqZ/++lOqwWcC0SNho9c27fYSyLmG7AfnAul2o46F05aDJGPbFU57wos9dgcIySHs0Xe6ia3A==
   dependencies:
     "@mapbox/jsonlint-lines-primitives" "^2.0.2"
@@ -6301,7 +6301,7 @@ pkg-dir@^4.1.0:
 
 pmtiles@^4.5.0:
   version "4.5.0"
-  resolved "https://registry.npmjs.org/pmtiles/-/pmtiles-4.5.0.tgz"
+  resolved "https://registry.npmmirror.com/pmtiles/-/pmtiles-4.5.0.tgz"
   integrity sha512-CBeD4SoUluFziGdy/8k7FOjQxQy486n+929W/tWophauvMICpkZ26vGBWhDt/6b1FZQWNaf4jFdT/5+q0Wii5w==
   dependencies:
     fflate "^0.8.2"
@@ -7799,13 +7799,13 @@ tapable@^2.0.0, tapable@^2.1.1, tapable@^2.2.0, tapable@^2.2.1:
 
 terra-draw-maplibre-gl-adapter@^1.5.0:
   version "1.5.0"
-  resolved "https://registry.npmjs.org/terra-draw-maplibre-gl-adapter/-/terra-draw-maplibre-gl-adapter-1.5.0.tgz"
+  resolved "https://registry.npmmirror.com/terra-draw-maplibre-gl-adapter/-/terra-draw-maplibre-gl-adapter-1.5.0.tgz"
   integrity sha512-wUv7WDIKln+cWkJOJZ68cOLwFhcBXlSN3GF56Dx8GLnmTTnQEZbIyzWRHjsxhn+TOXvxBOlCDl5JmCghIW3L4g==
 
-terra-draw@^1.0.0, terra-draw@^1.37.0:
-  version "1.37.0"
-  resolved "https://registry.npmjs.org/terra-draw/-/terra-draw-1.37.0.tgz"
-  integrity sha512-t8aGT6tZM+ZTygPg3nRG0/B/OtjiQfrjJauMB1MLyJTFvt4gDNSgk7InFIYzGc/zOwHICJEEDn8Hq+pKzC8mag==
+terra-draw@^1.0.0, terra-draw@^1.38.0:
+  version "1.38.0"
+  resolved "https://registry.npmmirror.com/terra-draw/-/terra-draw-1.38.0.tgz"
+  integrity sha512-h7bD5/mIN/t1qNKmPLqwZvsHnwtZpvFWo49PGA3n7CzM28lyc/xcMl85xWNOMBgF0Tq20UT06+KlBJ7g7B24rg==
 
 terser-webpack-plugin@^5.1.1, terser-webpack-plugin@^5.3.10:
   version "5.3.11"
@@ -8486,9 +8486,9 @@ ws@^8.13.0:
   resolved "https://registry.npmmirror.com/ws/-/ws-8.18.0.tgz"
   integrity sha512-8VbfWfHLbbwu3+N6OKsOMpBdT4kXPDDB9cJk2bJ6mh9ucxdlnNvH1e+roYkKmN9Nxw2yjz7VzeO9oOz2zJ04Pw==
 
-xlsx@0.18.5:
+xlsx@^0.18.5:
   version "0.18.5"
-  resolved "https://registry.npmjs.org/xlsx/-/xlsx-0.18.5.tgz"
+  resolved "https://registry.npmmirror.com/xlsx/-/xlsx-0.18.5.tgz"
   integrity sha512-dmg3LCjBPHZnQp5/F/+nnTa+miPJxUXB6vtk42YjBBKayDNagxGEeIdWApkYPOf3Z3pm3k62Knjzp7lMeTEtFQ==
   dependencies:
     adler-32 "~1.3.0"
