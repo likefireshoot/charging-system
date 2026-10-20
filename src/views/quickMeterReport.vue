@@ -236,18 +236,28 @@
                   <span class="label" style="width: 100px">本月用水量</span>
                   <span class="value amount">{{ formatMoney(waterUsage) }} 吨</span>
                 </div>
-              </div>
 
-              <!-- 提交按钮 - 移到抄表信息区域底部 -->
-              <div class="action-buttons-inline" style="display: flex; justify-content: center">
-                <el-button
-                  class="submit-btn"
-                  @click="submitSingleUser"
-                  :disabled="!canSubmitSingle"
-                >
-                  <el-icon><Upload /></el-icon>
-                  <span>提交该用户</span>
-                </el-button>
+                <!--
+                  用户余额：取 user_meter_bind.balance（后端 getUserListByRegion/getUserListByCodeBook 已回传 balance）
+                  排版：抄表数据区改为三列网格（见 style 中 .reading-grid），本行第 1 列，
+                  因此与上一行第 1 列的“上月读数”严格同宽同高，正好落在它下方
+                -->
+                <div class="reading-item highlight">
+                  <span class="label">用户余额</span>
+                  <span class="value">{{ formatMoney(selectedUserDetail.balance) }} 元</span>
+                </div>
+
+                <!-- 提交按钮：与“用户余额”同一排，水平居中（第 2 列正中，即整排中点） -->
+                <div class="submit-cell">
+                  <el-button
+                    class="submit-btn"
+                    @click="submitSingleUser"
+                    :disabled="!canSubmitSingle"
+                  >
+                    <el-icon><Upload /></el-icon>
+                    <span>提交该用户</span>
+                  </el-button>
+                </div>
               </div>
             </div>
 
@@ -1366,8 +1376,11 @@ fetchCompanyList();
           }
 
           .reading-grid {
-            display: flex;
-            flex-wrap: wrap;
+            // 改为三列网格：上一行放“上月读数/本月读数/本月用水量”，
+            // 下一行第 1 列放“用户余额”（与上一行第 1 列严格同宽，即与“上月读数”同样大小），
+            // 同一行第 2 列放“提交该用户”按钮并水平居中（第 2 列中点即整排中点）
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
             gap: 12px;
 
             .reading-item {
@@ -1376,12 +1389,12 @@ fetchCompanyList();
               padding: 8px 12px;
               background-color: #f9f9f9;
               border-radius: 6px;
-              flex: 1;
-              min-width: 200px;
+              // 网格布局下由网格列宽决定尺寸，min-width 置 0 避免窄屏时把网格撑破
+              min-width: 0;
               gap: 15px;
 
               &.full-width {
-                flex-basis: 100%;
+                grid-column: 1 / -1;
               }
 
               .label {
@@ -1470,12 +1483,27 @@ fetchCompanyList();
               // 异常状态提示样式
               &.abnormal-tip {
                 background-color: #fef0f0;
-                
+                // 异常状态下没有“本月读数/本月用水量”，让说明占满后两列，保持原来的宽条观感
+                grid-column: 2 / -1;
+
                 .tip-text {
                   font-size: 20px;
                   color: #f56c6c;
                   line-height: 1.5;
                 }
+              }
+            }
+
+            // 提交按钮所在格：与“用户余额”同一排，占中间第 2 列并水平居中。
+            // 第 2 列的中点正好是整排宽度的 50%，因此按钮看起来是本排居中，而不是贴在余额框右侧
+            .submit-cell {
+              grid-column: 2 / 3;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+
+              .submit-btn {
+                margin-top: 0;
               }
             }
           }
@@ -1647,6 +1675,19 @@ fetchCompanyList();
           .info-section {
             .info-grid {
               grid-template-columns: 1fr;
+            }
+          }
+
+          // 小屏（面板变窄）时抄表数据区退化为单列，避免三列被挤到换行/溢出
+          .reading-section {
+            .reading-grid {
+              grid-template-columns: 1fr;
+
+              .reading-item.full-width,
+              .reading-item.abnormal-tip,
+              .submit-cell {
+                grid-column: auto;
+              }
             }
           }
         }
