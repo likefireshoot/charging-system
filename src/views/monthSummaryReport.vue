@@ -74,8 +74,8 @@
         >
           <el-table-column prop="regionName" label="区域" align="center" min-width="70"/>
           <el-table-column prop="priceName" label="价格类型" align="center" min-width="100"/>
-          <el-table-column prop="shouldReadUser" label="应抄" align="center" min-width="70"/>
-          <el-table-column prop="realReadUser" label="实抄" align="center" min-width="70"/>
+          <el-table-column prop="shouldReadUser" label="应抄" align="center" min-width="65"/>
+          <el-table-column prop="realReadUser" label="实抄" align="center" min-width="65"/>
           <el-table-column prop="readRate" label="抄表率" align="center" min-width="90">
             <template #default="scope">
               {{ scope.row.readRate != null ? (scope.row.readRate * 100).toFixed(2) + '%' : '-' }}
@@ -107,12 +107,12 @@
               </template>
             </el-table-column>
           </el-table-column>
-          <el-table-column v-if="this.params.companyId === 95" prop="ton0Count" label="0吨" align="center" min-width="55"/>
+          <el-table-column v-if="this.params.companyId === 95" prop="ton0Count" label="0吨" align="center" min-width="60"/>
           <el-table-column v-if="this.params.companyId === 95" prop="ton1Count" label="1吨" align="center" min-width="55"/>
           <el-table-column v-if="this.params.companyId === 95" prop="ton2Count" label="2吨" align="center" min-width="55" />
           <el-table-column v-if="this.params.companyId === 95" prop="ton3Count" label="3吨" align="center" min-width="55"/>
           <el-table-column v-if="this.params.companyId === 95" prop="ton4Count" label="4吨" align="center" min-width="55"/>
-          <el-table-column v-if="this.params.companyId === 95" prop="fourTonSubtotal" label="小计" align="center" min-width="60"/>
+          <el-table-column v-if="this.params.companyId === 95" prop="fourTonSubtotal" label="小计" align="center" min-width="65"/>
         </el-table>
       </div>
       <el-table
@@ -126,8 +126,8 @@
           <template #default>总计</template>
         </el-table-column>
         <el-table-column label="价格类型" align="center" min-width="100"/>
-        <el-table-column prop="shouldReadUser" label="应抄" align="center" min-width="70"/>
-        <el-table-column prop="realReadUser" label="实抄" align="center" min-width="70"/>
+        <el-table-column prop="shouldReadUser" label="应抄" align="center" min-width="65"/>
+        <el-table-column prop="realReadUser" label="实抄" align="center" min-width="65"/>
         <el-table-column prop="readRate" label="抄表率" align="center" min-width="90">
           <template #default="scope">
             {{ scope.row.readRate != null ? (scope.row.readRate * 100).toFixed(2) + '%' : '-' }}
@@ -157,12 +157,12 @@
             </template>
           </el-table-column>
         </el-table-column>
-        <el-table-column v-if="this.params.companyId === 95" prop="ton0Count" label="0吨" align="center" min-width="55"/>
+        <el-table-column v-if="this.params.companyId === 95" prop="ton0Count" label="0吨" align="center" min-width="60"/>
         <el-table-column v-if="this.params.companyId === 95" prop="ton1Count" label="1吨" align="center" min-width="55"/>
         <el-table-column v-if="this.params.companyId === 95" prop="ton2Count" label="2吨" align="center" min-width="55" />
         <el-table-column v-if="this.params.companyId === 95" prop="ton3Count" label="3吨" align="center" min-width="55"/>
         <el-table-column v-if="this.params.companyId === 95" prop="ton4Count" label="4吨" align="center" min-width="55"/>
-        <el-table-column v-if="this.params.companyId === 95" prop="fourTonSubtotal" label="小计" align="center" min-width="60"/>
+        <el-table-column v-if="this.params.companyId === 95" prop="fourTonSubtotal" label="小计" align="center" min-width="65"/>
       </el-table>
     </div>
   </div>
