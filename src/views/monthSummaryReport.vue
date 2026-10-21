@@ -72,20 +72,20 @@
           :row-class-name="rowClassName"
           v-loading="isLoading"
         >
-          <el-table-column prop="regionName" label="区域" align="center" min-width="80"/>
-          <el-table-column prop="priceName" label="价格类型" align="center" min-width="150"/>
-          <el-table-column prop="shouldReadUser" label="应抄" align="center" min-width="80"/>
-          <el-table-column prop="realReadUser" label="实抄" align="center" min-width="80"/>
+          <el-table-column prop="regionName" label="区域" align="center" min-width="70"/>
+          <el-table-column prop="priceName" label="价格类型" align="center" min-width="100"/>
+          <el-table-column prop="shouldReadUser" label="应抄" align="center" min-width="70"/>
+          <el-table-column prop="realReadUser" label="实抄" align="center" min-width="70"/>
           <el-table-column prop="readRate" label="抄表率" align="center" min-width="90">
             <template #default="scope">
               {{ scope.row.readRate != null ? (scope.row.readRate * 100).toFixed(2) + '%' : '-' }}
             </template>
           </el-table-column>
-          <el-table-column prop="currentWater" label="本月水量" align="center" min-width="100" />
-          <el-table-column prop="lastYearWater" label="同期水量" align="center" min-width="100"/>
+          <el-table-column prop="currentWater" label="本月水量" align="center" min-width="90" />
+          <el-table-column prop="lastYearWater" label="同期水量" align="center" min-width="90"/>
           <el-table-column label="水量对比" align="center">
-            <el-table-column prop="waterDiff" align="center" min-width="100"/>
-            <el-table-column align="center" min-width="40">
+            <el-table-column prop="waterDiff" align="center" min-width="80"/>
+            <el-table-column align="center" min-width="30" class-name="arrow-col">
               <template #default="scope">
                 <span v-if="Number(scope.row.waterDiff) > 0" style="color:#67c23a;font-size:20px;">↑</span>
                 <span v-else-if="Number(scope.row.waterDiff) < 0" style="color:#f56c6c;font-size:20px;">↓</span>
@@ -99,14 +99,20 @@
           <el-table-column prop="lastYearTotalFee" label="同期金额" align="center" min-width="100"/>
           <el-table-column label="金额对比" align="center">
             <el-table-column prop="feeDiff" align="center" min-width="100"/>
-            <el-table-column align="center" min-width="40">
+            <el-table-column align="center" min-width="30" class-name="arrow-col">
               <template #default="scope">
-                <span v-if="Number(scope.row.feeDiff) > 0" style="color:#67c23a;font-size:20px;">↑</span>
-                <span v-else-if="Number(scope.row.feeDiff) < 0" style="color:#f56c6c;font-size:20px;">↓</span>
+                <span v-if="Number(scope.row.feeDiff) > 0" style="color:#67c23a;font-size:18px;">↑</span>
+                <span v-else-if="Number(scope.row.feeDiff) < 0" style="color:#f56c6c;font-size:18px;">↓</span>
                 <span v-else>−</span>
               </template>
             </el-table-column>
           </el-table-column>
+          <el-table-column v-if="this.params.companyId === 95" prop="ton0Count" label="0吨" align="center" min-width="55"/>
+          <el-table-column v-if="this.params.companyId === 95" prop="ton1Count" label="1吨" align="center" min-width="55"/>
+          <el-table-column v-if="this.params.companyId === 95" prop="ton2Count" label="2吨" align="center" min-width="55" />
+          <el-table-column v-if="this.params.companyId === 95" prop="ton3Count" label="3吨" align="center" min-width="55"/>
+          <el-table-column v-if="this.params.companyId === 95" prop="ton4Count" label="4吨" align="center" min-width="55"/>
+          <el-table-column v-if="this.params.companyId === 95" prop="fourTonSubtotal" label="小计" align="center" min-width="60"/>
         </el-table>
       </div>
       <el-table
@@ -116,22 +122,22 @@
         :show-header="false"
         row-class-name="summary-row"
       >
-        <el-table-column label="区域" align="center" min-width="80" fixed="left">
+        <el-table-column label="区域" align="center" min-width="70">
           <template #default>总计</template>
         </el-table-column>
-        <el-table-column label="价格类型" align="center" min-width="150"/>
-        <el-table-column prop="shouldReadUser" label="应抄" align="center" min-width="80"/>
-        <el-table-column prop="realReadUser" label="实抄" align="center" min-width="80"/>
+        <el-table-column label="价格类型" align="center" min-width="100"/>
+        <el-table-column prop="shouldReadUser" label="应抄" align="center" min-width="70"/>
+        <el-table-column prop="realReadUser" label="实抄" align="center" min-width="70"/>
         <el-table-column prop="readRate" label="抄表率" align="center" min-width="90">
           <template #default="scope">
             {{ scope.row.readRate != null ? (scope.row.readRate * 100).toFixed(2) + '%' : '-' }}
           </template>
         </el-table-column>
-        <el-table-column prop="currentWater" label="本月水量" align="center" min-width="100" />
-        <el-table-column prop="lastYearWater" label="同期水量" align="center" min-width="100"/>
+        <el-table-column prop="currentWater" label="本月水量" align="center" min-width="90" />
+        <el-table-column prop="lastYearWater" label="同期水量" align="center" min-width="90"/>
         <el-table-column label="水量对比" align="center">
-          <el-table-column prop="waterDiff" align="center" min-width="100"/>
-          <el-table-column align="center" min-width="40">
+          <el-table-column prop="waterDiff" align="center" min-width="80"/>
+          <el-table-column align="center" min-width="30" class-name="arrow-col">
             <template #default="scope">
               <span v-if="Number(scope.row.waterDiff) > 0" style="color:#67c23a;font-size:20px;">↑</span>
               <span v-else-if="Number(scope.row.waterDiff) < 0" style="color:#f56c6c;font-size:20px;">↓</span>
@@ -144,13 +150,19 @@
         <el-table-column prop="lastYearTotalFee" label="同期金额" align="center" min-width="100"/>
         <el-table-column label="金额对比" align="center">
           <el-table-column prop="feeDiff" align="center" min-width="100"/>
-          <el-table-column align="center" min-width="40">
+          <el-table-column align="center" min-width="30" class-name="arrow-col">
             <template #default="scope">
               <span v-if="Number(scope.row.feeDiff) > 0" style="color:#67c23a;font-size:20px;">↑</span>
               <span v-else-if="Number(scope.row.feeDiff) < 0" style="color:#f56c6c;font-size:20px;">↓</span>
             </template>
           </el-table-column>
         </el-table-column>
+        <el-table-column v-if="this.params.companyId === 95" prop="ton0Count" label="0吨" align="center" min-width="55"/>
+        <el-table-column v-if="this.params.companyId === 95" prop="ton1Count" label="1吨" align="center" min-width="55"/>
+        <el-table-column v-if="this.params.companyId === 95" prop="ton2Count" label="2吨" align="center" min-width="55" />
+        <el-table-column v-if="this.params.companyId === 95" prop="ton3Count" label="3吨" align="center" min-width="55"/>
+        <el-table-column v-if="this.params.companyId === 95" prop="ton4Count" label="4吨" align="center" min-width="55"/>
+        <el-table-column v-if="this.params.companyId === 95" prop="fourTonSubtotal" label="小计" align="center" min-width="60"/>
       </el-table>
     </div>
   </div>
@@ -324,7 +336,8 @@ export default {
         } catch (e) {}
       }
       try {
-        const res = await service.post(`/meterSummaryReport/export`, this.params,{
+        const exportUrl = this.params.companyId === 95 ? '/meterUnionReport/export' : '/meterSummaryReport/export';
+        const res = await service.post(exportUrl, this.params,{
           responseType: "blob",
           headers: { Authorization: token, token: token }
         });
@@ -356,7 +369,8 @@ export default {
         this.params.companyId = this.companyId;
       }
       try {
-        const res = await service.post(`/meterSummaryReport/query`, this.params,{
+        const queryUrl = this.params.companyId === 95 ? '/meterUnionReport/query' : '/meterSummaryReport/query';
+        const res = await service.post(queryUrl, this.params,{
           headers: { Authorization: token, token: token },
         });
         if(res.code===200){
@@ -456,6 +470,14 @@ export default {
 
 :deep(.el-table__body tr:hover > td) {
   background-color: #fbf2cb !important;
+}
+
+:deep(.el-table__header th) {
+  font-size: 18px;
+}
+
+:deep(.el-table__body td) {
+  font-size: 18px;
 }
 
 :deep(.el-checkbox__input.is-checked .el-checkbox__inner) {
@@ -663,8 +685,11 @@ export default {
 :deep(.summary-row td) {
   font-weight: bold;
   color: #ffffff;
-  font-size: 20px;
+  font-size: 18px;
   text-align: center;
+}
+:deep(.arrow-col .cell) {
+  padding: 0;
 }
 </style>
 
