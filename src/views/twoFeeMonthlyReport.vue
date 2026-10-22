@@ -21,6 +21,7 @@
               type="month"
               placeholder="选择月份"
               value-format="YYYY-MM"
+              :disabled-date="disabledDate"
               style="width:100%"
             ></el-date-picker>
           </div>
@@ -93,7 +94,22 @@
     </template>
 
     <!-- 温馨提示弹窗 -->
-</div>
+    <div v-if="showTipDialog" class="tip-mask">
+      <div class="tip-card">
+        <div class="tip-card-head">
+          <span class="tip-icon"><el-icon :size="45"><WarningFilled /></el-icon></span>
+          <span class="tip-title">温馨提示</span>
+        </div>
+        <div class="tip-card-body">
+          <p class="tip-desc">为保障数据准确，本报表仅支持查询 <b class="tip-highlight">{{ minSupportYear }}年{{ minSupportMonth }}月及以后</b> 的费用数据。</p>
+          <p class="tip-desc">{{ minSupportYear }}年{{ minSupportMonth - 1 }}月及以前处于新旧系统切换期间，其数据格式与现行系统不一致，暂不支持在线查询 / 导出，敬请谅解。</p>
+        </div>
+        <div class="tip-card-foot">
+          <div class="tip-confirm" @click="showTipDialog = false">我知道了</div>
+        </div>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script>
@@ -102,6 +118,12 @@ import { ElMessage } from "element-plus";
 
 // 月实收报表查看权限 id
 const TWO_FEE_REPORT_PERMISSION_ID = 101;
+// 95号水厂公司id
+const COMPANY_95_ID = 95;
+// 新系统上线时间：95号水厂2026年8月起数据接入，其余水厂2026年9月起，早于对应时间的数据不支持在线查询
+const MIN_SUPPORT_YEAR = 2026;
+const OTHER_PLANT_MIN_SUPPORT_MONTH = 9;
+const COMPANY95_MIN_SUPPORT_MONTH = 8;
 
 export default {
   name: "TwoFeeMonthlyReport",
@@ -112,6 +134,7 @@ export default {
       staffPermissionIds: JSON.parse(sessionStorage.getItem("userData")).staffPermissionIds,
       loading: false,
       exporting: false,
+      showTipDialog: false,
       reportSeq: 0,
       reportData: null,
       pageTitle: this.buildTitle(),
@@ -120,6 +143,13 @@ export default {
   computed: {
     isAllowed() {
       return (this.staffPermissionIds || []).includes(TWO_FEE_REPORT_PERMISSION_ID) && !!this.companyId;
+    },
+    // 当前水厂支持查询的最早月份
+    minSupportYear() {
+      return MIN_SUPPORT_YEAR;
+    },
+    minSupportMonth() {
+      return this.companyId === COMPANY_95_ID ? COMPANY95_MIN_SUPPORT_MONTH : OTHER_PLANT_MIN_SUPPORT_MONTH;
     },
     // 3 行 × 3 列 矩阵（不含底部合计）
     tableData() {
@@ -154,14 +184,29 @@ export default {
       const base = "月实收报表";
       return year && month ? `${base}（${year}年${month}月）` : base;
     },
-    // 月份校验：仅校验是否已选择月份
+    // 月份前置校验：早于当前水厂支持的最早月份拒绝查询/导出，友好提示
     validateMonth() {
       if (!this.timeRange) {
         ElMessage.warning("请先选择统计月份");
         return "";
       }
       const [year, month] = this.timeRange.split("-");
-      return { reportYear: Number(year), reportMonth: Number(month) };
+      const reportYear = Number(year);
+      const reportMonth = Number(month);
+      if (
+        reportYear < this.minSupportYear ||
+        (reportYear === this.minSupportYear && reportMonth < this.minSupportMonth)
+      ) {
+        this.showTipDialog = true;
+        return "";
+      }
+      return { reportYear, reportMonth };
+    },
+    // 日期选择器：早于当前水厂支持的最早月份的选项置灰不可选
+    disabledDate(date) {
+      const y = date.getFullYear();
+      const m = date.getMonth() + 1;
+      return y < this.minSupportYear || (y === this.minSupportYear && m < this.minSupportMonth);
     },
     search() {
       if (!this.isAllowed) {
@@ -455,6 +500,100 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+/* 温馨提示弹窗：固定定位遮罩，不改动 body，避免页面横向收缩 */
+.tip-mask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 3000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.35);
+}
+
+.tip-card {
+  width: 735px;
+  max-width: 94vw;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.24);
+  padding: 33px 36px 30px;
+  box-sizing: border-box;
+}
+
+.tip-card-head {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.tip-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 63px;
+  height: 63px;
+  border-radius: 50%;
+  background: #fdf6ec;
+  margin-right: 16px;
+  color: #e6a23c;
+}
+
+.tip-title {
+  font-size: 36px;
+  font-weight: 600;
+  color: #333;
+}
+
+.tip-card-body {
+  padding-left: 80px;
+}
+
+.tip-desc {
+  margin: 0 0 16px;
+  font-size: 24px;
+  line-height: 1.7;
+  color: #555;
+  text-align: left;
+}
+
+.tip-desc:last-child {
+  margin-bottom: 0;
+}
+
+.tip-highlight {
+  color: #e6a23c;
+  font-weight: 600;
+}
+
+.tip-card-foot {
+  margin-top: 30px;
+  padding-left: 80px;
+  text-align: right;
+}
+
+.tip-confirm {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 195px;
+  height: 60px;
+  padding: 0 36px;
+  border-radius: 10px;
+  font-size: 24px;
+  color: #fff;
+  background-color: #46b97e;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.tip-confirm:hover {
+  background-color: #3aa86e;
 }
 
 /* 导出加载提示文字：放大为默认(14px)的1.5倍，其余样式保持默认 */
