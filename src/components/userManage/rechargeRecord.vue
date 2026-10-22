@@ -20,7 +20,12 @@
           </div>
           <div class="search-input" style="width: 10%; margin-right: 10px">
             <span>区域</span>
-            <el-select v-model="rechargeRecordeData.region" clearable filterable placeholder="区域">
+            <!-- 95水厂：多选 -->
+            <el-select v-if="getEffectiveCompanyId() === 95" v-model="rechargeRecordeData.region" multiple collapse-tags clearable filterable placeholder="区域">
+              <el-option v-for="item in quyu_data" :key="item.id" :label="item.label" :value="item.label"></el-option>
+            </el-select>
+            <!-- 非95水厂：单选 -->
+            <el-select v-else v-model="rechargeRecordeData.region" clearable filterable placeholder="区域">
               <el-option v-for="item in quyu_data" :key="item.id" :label="item.label" :value="item.label"> </el-option>
             </el-select>
           </div>
@@ -426,7 +431,13 @@ export default {
   },
   watch: {
     "rechargeRecordeData.companyId"() {
-      this.rechargeRecordeData.region = "";
+      // this.rechargeRecordeData.region = "";
+      const cid = this.getEffectiveCompanyId()
+      if (cid === 95) {
+        this.rechargeRecordeData.region = []
+      } else {
+        this.rechargeRecordeData.region = ""
+      }
       this.rechargeRecordeData.codeBookId = null;
       this.codeBookList = [];
       this.getRegionData();
@@ -434,7 +445,7 @@ export default {
     "rechargeRecordeData.region"(newVal) {
       if (this.companyId === 95) {
         this.rechargeRecordeData.codeBookId = null;
-        if (newVal) {
+        if (Array.isArray(newVal) && newVal.length > 0) {
           this.getCodeBookList();
         } else {
           this.codeBookList = [];
@@ -520,7 +531,7 @@ export default {
                 label: item.regionName,
               };
             });
-            if (this.companyId === 95 && this.rechargeRecordeData.region) {
+            if (this.companyId === 95 && Array.isArray(this.rechargeRecordeData.region) && this.rechargeRecordeData.region.length > 0) {
               this.getCodeBookList();
             }
           }
@@ -531,6 +542,30 @@ export default {
     },
     getCodeBookList() {
       const regionName = this.rechargeRecordeData.region;
+      this.codeBookList = [];
+      const cid = this.getEffectiveCompanyId()
+      const companyId = this.rechargeRecordeData.companyId || this.companyId;
+
+      if (cid === 95) {
+        if (!Array.isArray(regionName) || regionName.length === 0) return
+        const regionIdList = regionName
+            .map(name => this.quyu_data.find((item) => item.label === name)?.id)
+            .filter(Boolean);
+        if (!regionIdList.length) return
+        const query = regionIdList.map(id => `regionIdList=${id}`).join('&')
+        service.get(`/getCodeBookByRegionList?companyId=${companyId}&${query}`).then((res) => {
+          if (res.code === 200) {
+            const map = new Map()
+            res.data.forEach(item => map.set(item.codeBookId, { id: item.codeBookId, label: item.codeBookName }))
+            this.codeBookList = Array.from(map.values())
+          }
+        }).catch(() => {
+          this.codeBookList = [];
+        })
+        return
+      }
+
+      // ========== 下面是非95水厂不可多选区域获取表册的代码，没有改动 ==========
       if (!regionName) {
         this.codeBookList = [];
         return;
@@ -541,7 +576,7 @@ export default {
         this.codeBookList = [];
         return;
       }
-      const companyId = this.rechargeRecordeData.companyId || this.companyId;
+      // const companyId = this.rechargeRecordeData.companyId || this.companyId;
       service
         .get(`/getCodeBookByRegion?companyId=${companyId}&regionId=${regionId}`)
         .then((res) => {
@@ -585,18 +620,35 @@ export default {
       };
     },
     buildQueryString(params) {
-      let queryString = "";
+      // let queryString = "";
+      // for (const key in params) {
+      //   if (Object.prototype.hasOwnProperty.call(params, key)) {
+      //     const value = params[key];
+      //     if (queryString) {
+      //       queryString += `&${key}=${encodeURIComponent(value)}`;
+      //     } else {
+      //       queryString += `?${key}=${encodeURIComponent(value)}`;
+      //     }
+      //   }
+      // }
+      // return queryString;
+      const queryParts = [];
       for (const key in params) {
         if (Object.prototype.hasOwnProperty.call(params, key)) {
           const value = params[key];
-          if (queryString) {
-            queryString += `&${key}=${encodeURIComponent(value)}`;
-          } else {
-            queryString += `?${key}=${encodeURIComponent(value)}`;
+          // ===== 新增判断：数组循环拼接多个相同key =====
+          if (Array.isArray(value)) {
+            value.forEach((item) => {
+              if (item !== "" && item !== null && item !== undefined) {
+                queryParts.push(`${key}=${encodeURIComponent(item)}`);
+              }
+            });
+          } else if (value !== "" && value !== null && value !== undefined) {
+            queryParts.push(`${key}=${encodeURIComponent(value)}`);
           }
         }
       }
-      return queryString;
+      return queryParts.length ? "?" + queryParts.join("&") : "";
     },
     handleRechargeRecordResponse(response) {
       const records = response.data.userRechargeRecordData || [];
@@ -621,7 +673,12 @@ export default {
     fetchRechargeRecordData(page = this.currentPage) {
       if (this.isLoading) return
       this.isLoading = true
-      const params = this.filterNonEmptyParams(this.buildRechargeRecordParams());
+      const rawParams = this.filterNonEmptyParams(this.buildRechargeRecordParams());
+      let params = { ...rawParams };
+      if (rawParams.region !== undefined) {
+        params.regionList = rawParams.region;
+        delete params.region;
+      }
       const queryString = this.buildQueryString(params);
       service
         .get(`/userManage/userCharge/showRechargeMeterRecordsV2/${page}${queryString}`)
@@ -650,7 +707,12 @@ export default {
       this.fetchRechargeRecordData(1);
     },
     clear(isSearch) {
-      this.rechargeRecordeData.region = "";
+      const cid = this.getEffectiveCompanyId()
+      if (cid === 95) {
+        this.rechargeRecordeData.region = []
+      } else {
+        this.rechargeRecordeData.region = ""
+      }
       this.rechargeRecordeData.startDate = "";
       this.rechargeRecordeData.endDate = "";
       this.rechargeRecordeData.dateRange = [];
@@ -1020,12 +1082,13 @@ export default {
     },
     exportExcel() {
       const exportParams = this.buildRechargeRecordParams();
-      const params = this.filterNonEmptyParams(exportParams);
+      const rawParams = this.filterNonEmptyParams(exportParams);
+      const params = { ...rawParams };
+      const queryString = this.buildQueryString(params);
       axios({
-        url: "/userManage/userCharge/exportRechargeRecord",
+        url: `/userManage/userCharge/exportRechargeRecord${queryString}`,
         method: "GET",
         responseType: "blob",
-        params,
       })
         .then((response) => {
           if (response.status !== 200) {
