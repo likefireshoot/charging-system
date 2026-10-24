@@ -47,6 +47,7 @@ import operateLog from "@/components/logManage/operateLog.vue";
 import loginLog from "@/components/logManage/loginLog.vue";
 import meterReadingReport from "@/views/meterReadingReport.vue";
 import meterBookReport from "@/views/meterBookReport.vue";
+import codeBookSort from "@/views/codeBookSort/index.vue";
 import monthRecoveryReport from "@/views/monthRecoveryReport.vue";
 import monthSummaryReport from "@/views/monthSummaryReport.vue";
 import monthBaseUserReport from "@/views/monthBaseUserReport.vue";
@@ -135,6 +136,11 @@ const routes = [
             path: "meterBookReport",
             name: "meterBookReport",
             component: meterBookReport,
+          },
+          {
+            path: "codeBookSort",
+            name: "codeBookSort",
+            component: codeBookSort,
           },
           {
             path: "twoFeeMonthlyReport",
