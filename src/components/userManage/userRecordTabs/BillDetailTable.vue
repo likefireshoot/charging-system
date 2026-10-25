@@ -260,6 +260,10 @@
           <span>扣费金额</span>
           <el-input v-model="addForm.chargeAmount" placeholder="请输入扣费金额" @input="onWaterInput"></el-input>
         </div>
+        <div class="recharge-input" v-if="user.companyId === 95">
+          <span>卫生费</span>
+          <el-input v-model="addForm.additionFee" placeholder="请输入卫生费"></el-input>
+        </div>
         <div class="recharge-input" v-if="user.companyId !== 95">
           <span>水费</span>
           <el-input v-model="addForm.waterFee" placeholder="请输入水费"></el-input>
@@ -383,6 +387,7 @@ export default {
         minFee: null,
         typeStr: "",
         createTime: "",
+        additionFee: null,
       }
     };
   },
@@ -796,6 +801,7 @@ export default {
         minFee: null,
         typeStr: "",
         createTime: "",
+        additionFee: null,
       };
       if(this.$refs.addFormRef){
         this.$refs.addFormRef.clearValidate();
@@ -816,6 +822,10 @@ export default {
         waterFee = Number(this.addForm.waterFee);
         sewageFee = Number(this.addForm.sewageFee);
         minFee = Number(this.addForm.minFee);
+      }
+      let additionFee = 0;
+      if (this.user.companyId ===95) {
+        additionFee = Number(this.addForm.additionFee);
       }
 
       // 校验表单
@@ -861,6 +871,7 @@ export default {
           waterFee: waterFee,
           sewageFee: sewageFee,
           minFee: minFee,
+          additionFee: additionFee,
           createTime: this.addForm.createTime,
           // valveStatus: this.addForm.valveStatus,
           typeStr: this.addForm.typeStr
