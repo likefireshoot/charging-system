@@ -371,6 +371,7 @@ watch(
           { id: 133, name: "区域报表", permissionId: 83, icon: require("@/assets/menu/icon15.png"), icon2: require("@/assets/menu/icon16.png"), path: "/meterReading/regionMeterReport" },
           { id: 134, name: "抄表统计表", permissionId: 96, icon: require("@/assets/add/icon-10.png"), icon2: require("@/assets/add/icon-11.png"), path: "/meterReading/meterReadingReport" },
           { id: 135, name: "抄表册报表", permissionId: 97, icon: require("@/assets/menu/icon17.png"), icon2: require("@/assets/menu/icon18.png"), path: "/meterReading/meterBookReport" },
+          { id: 140, name: "表册排序", permissionId: 114, companyOnly: 95, icon: require("@/assets/menu/icon3.png"), icon2: require("@/assets/menu/icon4.png"), path: "/meterReading/codeBookSort" },
           // { id: 136, name: "月回收报表", permissionId: 98, icon: require("@/assets/menu/icon15.png"), icon2: require("@/assets/menu/icon16.png"), path: "/meterReading/monthRecoveryReport" },
           // { id: 137, name: "月汇总报表", permissionId: 99, icon: require("@/assets/menu/icon11.png"), icon2: require("@/assets/menu/icon12.png"), path: "/meterReading/monthSummaryReport"},
           { id: 138, name: "底数户报表", permissionId: 100, icon: require("@/assets/menu/icon3.png"), icon2: require("@/assets/menu/icon4.png"), path: "/meterReading/monthBaseUserReport"},
@@ -381,13 +382,13 @@ watch(
       const meterMenus = filterByPort([meterReadingMenu]);
       if (meterMenus.length > 0) {
         const menu = meterMenus[0];
-        // 父菜单按子菜单可见性显示：仅保留有权限的子菜单；公司专属子菜单按 companyOnly 判断，不受按钮权限控制
-        const visibleChildren = (menu.children || []).filter(
-          (child) =>
-            child.companyOnly !== undefined
-              ? newUserData && newUserData.companyId === child.companyOnly
-              : staffPermissionIds.value.includes(child.permissionId)
-        );
+        // 父菜单按子菜单可见性显示：companyOnly 限制水厂；配置了 permissionId 时再校验按钮权限
+        const visibleChildren = (menu.children || []).filter((child) => {
+          if (child.companyOnly !== undefined && newUserData?.companyId !== child.companyOnly) {
+            return false;
+          }
+          return child.permissionId === undefined || staffPermissionIds.value.includes(child.permissionId);
+        });
         if (visibleChildren.length > 0) {
           menu.children = visibleChildren;
           const reportManageIndex = navLists.findIndex(item => item.id === 5);
