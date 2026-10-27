@@ -93,6 +93,21 @@
       <div class="refresh-btn" @click="handleRefresh">
         <img src="@/assets/yonghu/icon15.png" alt="" />
       </div>
+      <div
+        class="recent-usage-summary"
+        role="status"
+        aria-live="polite"
+        title="当前用户和所选水表最近30次有效抄表的单次用水量最大值，不受分页和日期筛选影响"
+      >
+        <span class="recent-usage-label">最近30次最大用水量：</span>
+        <span class="recent-usage-value" :class="{ 'is-error': recentUsageState === 'error' }">
+          {{ recentUsageText }}
+        </span>
+        <span
+          v-if="recentUsageState === 'ready' && recentSampleCount > 0 && recentSampleCount < 30"
+          class="recent-usage-count"
+        >（已有{{ recentSampleCount }}次）</span>
+      </div>
     </div>
 
     <div class="table-wrapper">
@@ -324,6 +339,11 @@ export default {
       currentPage: 1,
       pageSize: 30,
       totalWater: 0,
+      recentMaxWater: null,
+      recentSampleCount: 0,
+      recentUsageState: "loading",
+      meterRequestId: 0,
+      loadingMeterScope: "",
       staffPermissionIds: JSON.parse(sessionStorage.getItem("userData") || "{}").staffPermissionIds || [],
       token: JSON.parse(sessionStorage.getItem("userData") || "{}").token || "",
       meterData: {
@@ -349,6 +369,17 @@ export default {
       }
     };
   },
+  computed: {
+    meterScopeKey() {
+      return JSON.stringify([this.user.companyId, this.user.userId, this.user.meterCode]);
+    },
+    recentUsageText() {
+      if (this.recentUsageState === "loading") return "加载中…";
+      if (this.recentUsageState === "error") return "获取失败";
+      if (this.recentSampleCount === 0) return "暂无历史记录";
+      return `${this.recentMaxWater.toFixed(2)} 吨`;
+    }
+  },
   mounted() {
     this.fetchMeterRecords();
   },
@@ -365,12 +396,53 @@ export default {
         this.fetchMeterRecords();
       }
     },
+    "user.companyId"(newVal, oldVal) {
+      if (newVal && newVal !== oldVal) {
+        this.currentPage = 1;
+        this.fetchMeterRecords();
+      }
+    },
     "meterData.timeType"() {
       this.meterData.accurateTime = "";
       this.meterData.dateRange = null;
     }
   },
   methods: {
+    startMeterRecordsRequest() {
+      if (!this.user.userId || !this.user.meterCode || !this.user.companyId) return null;
+      if (this.isLoading && this.loadingMeterScope === this.meterScopeKey) return null;
+
+      // 切换用户或水表时允许发起新请求；旧请求的结果不能覆盖新水表的数据。
+      if (this.loadingMeterScope !== this.meterScopeKey) {
+        this.list = [];
+        this.total = 0;
+        this.totalWater = 0;
+      }
+      const request = { id: ++this.meterRequestId, scope: this.meterScopeKey };
+      this.loadingMeterScope = request.scope;
+      this.isLoading = true;
+      this.loading = true;
+      this.recentMaxWater = null;
+      this.recentSampleCount = 0;
+      this.recentUsageState = "loading";
+      return request;
+    },
+    isCurrentMeterRequest(request) {
+      return request.id === this.meterRequestId && request.scope === this.meterScopeKey;
+    },
+    updateRecentUsageStats(data) {
+      const sampleCount = Number(data.recentSampleCount);
+      const maxWater = data.recentMaxWater == null ? null : Number(data.recentMaxWater);
+      if (data.recentSampleCount == null || !Number.isInteger(sampleCount)
+          || sampleCount < 0 || sampleCount > 30
+          || (sampleCount > 0 && (maxWater == null || !Number.isFinite(maxWater) || maxWater < 0))) {
+        this.recentUsageState = "error";
+        return;
+      }
+      this.recentMaxWater = maxWater;
+      this.recentSampleCount = sampleCount;
+      this.recentUsageState = "ready";
+    },
     isCurrentMeter(row) {
       return String(row?.meterCode ?? "") === String(this.user?.meterCode ?? "");
     },
@@ -431,18 +503,18 @@ export default {
       return queryString;
     },
     async fetchMeterRecords() {
-      if (!this.user.userId || !this.user.meterCode || this.isLoading) return;
-
-      this.isLoading = true;
-      this.loading = true;
+      const request = this.startMeterRecordsRequest();
+      if (!request) return;
 
       try {
         const params = this.buildBaseParams();
         const queryString = this.buildQueryString(params);
         const url = `/userManage/meterRead/showReadMeterRecords/${this.currentPage}${queryString}`;
         const response = await service.get(url);
+        if (!this.isCurrentMeterRequest(request)) return;
 
         if (response.code === 200) {
+          this.updateRecentUsageStats(response.data);
           const records = response.data.userInfoData || [];
           records.forEach((item, index) => {
             item.theId = this.pageSize * (response.data.currentPages - 1) + index + 1;
@@ -460,31 +532,36 @@ export default {
           this.list = tempList;
 
           this.total = response.data.totalElements || 0;
-          await this.fetchTotalWater();
+          await this.fetchTotalWater(request);
         } else {
+          this.recentUsageState = "error";
           ElMessage.error(response.msg);
         }
       } catch (error) {
+        if (!this.isCurrentMeterRequest(request)) return;
+        this.recentUsageState = "error";
         console.error("获取抄表记录失败", error);
         ElMessage.error("获取抄表记录失败");
       } finally {
-        this.loading = false;
-        this.isLoading = false;
+        if (this.isCurrentMeterRequest(request)) {
+          this.loading = false;
+          this.isLoading = false;
+        }
       }
     },
     async fetchWithSearch() {
-      if (this.isLoading) return;
-
-      this.isLoading = true;
-      this.loading = true;
+      const request = this.startMeterRecordsRequest();
+      if (!request) return;
 
       try {
         const params = this.buildSearchParams();
         const queryString = this.buildQueryString(params);
         const url = `/userManage/meterRead/showReadMeterRecords/${this.currentPage}${queryString}`;
         const response = await service.get(url);
+        if (!this.isCurrentMeterRequest(request)) return;
 
         if (response.code === 200) {
+          this.updateRecentUsageStats(response.data);
           const records = response.data.userInfoData || [];
           records.forEach((item, index) => {
             item.theId = this.pageSize * (response.data.currentPages - 1) + index + 1;
@@ -501,16 +578,21 @@ export default {
           this.list = tempList;
 
           this.total = response.data.totalElements || 0;
-          await this.fetchTotalWater();
+          await this.fetchTotalWater(request);
         } else {
+          this.recentUsageState = "error";
           ElMessage.error(response.msg);
         }
       } catch (error) {
+        if (!this.isCurrentMeterRequest(request)) return;
+        this.recentUsageState = "error";
         console.error("搜索抄表记录失败", error);
         ElMessage.error("搜索抄表记录失败");
       } finally {
-        this.loading = false;
-        this.isLoading = false;
+        if (this.isCurrentMeterRequest(request)) {
+          this.loading = false;
+          this.isLoading = false;
+        }
       }
     },
     handleSearch() {
@@ -553,12 +635,12 @@ export default {
     handleSelectionChange(val) {
       this.multipleSelection = val;
     },
-    async fetchTotalWater() {
+    async fetchTotalWater(request) {
       try {
         const params = this.buildSearchParams();
         const queryString = this.buildQueryString(params);
         const response = await service.get(`/userManage/meterRead/getTotalWater${queryString}`);
-        if (response.code === 200) {
+        if (response.code === 200 && this.isCurrentMeterRequest(request)) {
           this.totalWater = response.data || 0;
         }
       } catch (error) {
@@ -981,9 +1063,38 @@ export default {
 
 .tool-bar {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 10px;
   margin-bottom: 8px;
+}
+
+.recent-usage-summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  margin-left: auto;
+  padding: 4px 10px;
+  border: 1px solid #d9efe2;
+  border-radius: 4px;
+  background: #f7fbf8;
+  font-size: 15px;
+  line-height: 22px;
+}
+
+.recent-usage-label,
+.recent-usage-count {
+  color: #606266;
+}
+
+.recent-usage-value {
+  color: #319764;
+  font-weight: 600;
+}
+
+.recent-usage-value.is-error {
+  color: #b47500;
 }
 
 .tool-btn, .refresh-btn {
