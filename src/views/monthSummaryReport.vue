@@ -64,6 +64,7 @@
       </div>
       <div class="yuangong-table">
         <el-table
+            ref="reportTable"
           :data="tableData"
           style="width: 100%; height: 100%; table-layout: fixed; overflow-x: auto; overflow-y: auto"
           border
@@ -83,9 +84,9 @@
           </el-table-column>
           <el-table-column prop="currentWater" label="本月水量" align="center" min-width="90" />
           <el-table-column prop="lastYearWater" label="同期水量" align="center" min-width="90"/>
-          <el-table-column label="水量对比" align="center">
-            <el-table-column prop="waterDiff" align="center" min-width="80"/>
-            <el-table-column align="center" min-width="30" class-name="arrow-col">
+          <el-table-column label="水量对比" align="center" label-class-name="water-compare-parent">
+            <el-table-column prop="waterDiff" align="center" min-width="80" label-class-name="water-compare-child"/>
+            <el-table-column align="center" min-width="30" class-name="arrow-col" label-class-name="water-compare-child">
               <template #default="scope">
                 <span v-if="Number(scope.row.waterDiff) > 0" style="color:#67c23a;font-size:20px;">↑</span>
                 <span v-else-if="Number(scope.row.waterDiff) < 0" style="color:#f56c6c;font-size:20px;">↓</span>
@@ -97,9 +98,9 @@
           <el-table-column prop="additionFee" label="卫生费" align="center" min-width="100"/>
           <el-table-column prop="sewageFee" label="污水费" align="center" min-width="100"/>
           <el-table-column prop="lastYearTotalFee" label="同期金额" align="center" min-width="100"/>
-          <el-table-column label="金额对比" align="center">
-            <el-table-column prop="feeDiff" align="center" min-width="100"/>
-            <el-table-column align="center" min-width="30" class-name="arrow-col">
+          <el-table-column label="金额对比" align="center" label-class-name="fee-compare-parent">
+            <el-table-column prop="feeDiff" align="center" min-width="100" label-class-name="fee-compare-child"/>
+            <el-table-column align="center" min-width="30" class-name="arrow-col" label-class-name="fee-compare-child">
               <template #default="scope">
                 <span v-if="Number(scope.row.feeDiff) > 0" style="color:#67c23a;font-size:18px;">↑</span>
                 <span v-else-if="Number(scope.row.feeDiff) < 0" style="color:#f56c6c;font-size:18px;">↓</span>
@@ -107,11 +108,13 @@
               </template>
             </el-table-column>
           </el-table-column>
+          <el-table-column label="底数户" align="center" v-if="this.params.companyId === 95">
           <el-table-column v-if="this.params.companyId === 95" prop="ton0Count" label="0吨" align="center" min-width="60"/>
           <el-table-column v-if="this.params.companyId === 95" prop="ton1Count" label="1吨" align="center" min-width="55"/>
           <el-table-column v-if="this.params.companyId === 95" prop="ton2Count" label="2吨" align="center" min-width="55" />
           <el-table-column v-if="this.params.companyId === 95" prop="ton3Count" label="3吨" align="center" min-width="55"/>
           <el-table-column v-if="this.params.companyId === 95" prop="ton4Count" label="4吨" align="center" min-width="55"/>
+          </el-table-column>
           <el-table-column v-if="this.params.companyId === 95" prop="fourTonSubtotal" label="小计" align="center" min-width="60"/>
         </el-table>
       </div>
@@ -213,8 +216,80 @@ export default {
       this.handleCompanyChange(this.companyId)
       // this.search()
     }
+    // 页面首次挂载后，主动合并表头
+    this.$nextTick(() => {
+      this.mergeCompareHeaders();
+    });
+  },
+  updated() {
+    this.$nextTick(() => {
+      this.mergeCompareHeaders();
+    });
   },
   methods: {
+    mergeCompareHeaders() {
+      this.$nextTick(() => {
+        const root = this.$refs.reportTable?.$el;
+        if (!root) return;
+
+        const thead = root.querySelector(
+            '.el-table__header-wrapper thead'
+        );
+        if (!thead) return;
+
+        const mergeGroup = (parentClass, childClass) => {
+          const parent = thead.querySelector(
+              `th.${parentClass}`
+          );
+
+          if (!parent) {
+            console.warn(`未找到父表头：${parentClass}`);
+            return;
+          }
+
+          // 找到当前父表头所在行
+          const parentRow = parent.parentElement;
+          if (!parentRow) return;
+
+          // 找到父表头的下一行
+          const childRow = parentRow.nextElementSibling;
+          if (!childRow) {
+            console.warn(`未找到子表头行：${childClass}`);
+            return;
+          }
+
+          // 只从第二行寻找该组的两个子表头
+          const children = Array.from(
+              childRow.querySelectorAll(`th.${childClass}`)
+          );
+
+          if (children.length !== 2) {
+            console.warn(
+                `${childClass} 应有两个子表头，实际找到 ${children.length} 个`,
+                children
+            );
+            return;
+          }
+
+          // 父表头横跨两列、纵跨两行
+          parent.setAttribute('colspan', '2');
+          parent.setAttribute('rowspan', '2');
+
+          // 删除第二行的两个子表头
+          children.forEach((child) => child.remove());
+        };
+
+        mergeGroup(
+            'water-compare-parent',
+            'water-compare-child'
+        );
+
+        mergeGroup(
+            'fee-compare-parent',
+            'fee-compare-child'
+        );
+      });
+    },
     getTodayStr(){
       const now = new Date();
       const y = now.getFullYear();
@@ -708,13 +783,10 @@ export default {
 </style>
 
 <style scoped>
-:deep(.el-table__header tr:nth-child(2)) {
-  display: none !important;
-}
-/* 让第一行的父单元格自动撑开合并2列宽度 */
-:deep(.el-table__header tr:first-child th[colspan="2"]) {
-  colspan:2;
-  text-align: center;
+:deep(.el-table__header th.hide-sub-header .cell) {
+  visibility: hidden !important;
+  font-size: 0 !important;
+  padding: 0 !important;
 }
 :deep(.summary-subtotal) {
   font-weight: bold !important;
