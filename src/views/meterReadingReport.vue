@@ -78,7 +78,7 @@
           </el-table-column>
           <el-table-column prop="noReadCount" label="未抄表" align="center" min-width="100">
             <template #default="scope">
-                <span class="link-num" @click="scope.row.noReadCount > 0 && goRegionReport(scope.row)">
+                <span class="link-num" @click="scope.row.noReadCount > 0 && openNoReadDialog(scope.row)">
                   {{ scope.row.noReadCount }}
                 </span>
             </template>
@@ -122,6 +122,169 @@
 <!--      </div>-->
     </div>
   </div>
+
+  <!-- 未抄表明细弹窗 -->
+  <div class="noread-record-dialog" v-if="noread_dialogVisible">
+    <div class="noread-record-dialog-content">
+      <div class="title">
+        <div style="margin-left: 10px; display: flex; align-items: center">
+          <img src="@/assets/yonghu/icon7.png" alt="" style="margin-right: 8px" />
+          <span style="font-size: 20px">未抄表明细</span>
+        </div>
+        <div style="margin-right: 10px; cursor: pointer" @click="handleNoReadDialogClose">
+          <img src="@/assets/close.png" alt="" />
+        </div>
+      </div>
+      <div class="noread-record-content">
+        <div class="serach-box">
+          <div class="noread-input" >
+            <span>区域</span>
+            <el-select v-model="noreadParams.regionId" clearable placeholder="选择区域" @change="handleRegionChange">
+              <el-option v-for="item in noreadRegionList" :key="item.regionId" :label="item.regionName" :value="item.regionId"></el-option>
+            </el-select>
+          </div>
+          <div class="noread-input" >
+            <span>表册</span>
+            <el-select v-model="noreadParams.codeBookId" clearable filterable placeholder="选择表册" @change="noreadSearch" :disabled="!noreadParams.regionId">
+              <el-option v-for="item in codeBookList" :key="item.codeBookId" :label="item.codeBookName" :value="item.codeBookId"></el-option>
+            </el-select>
+          </div>
+          <div class="noread-input" >
+            <span>抄表状态</span>
+            <el-select v-model="noreadParams.reportStatus" clearable placeholder="选择抄表状态" @change="noreadSearch">
+              <el-option label="正常" value="正常"></el-option>
+              <el-option label="表数未动" value="表数未动" />
+              <el-option label="止码未到" value="止码未到" />
+              <el-option label="表不清" value="表不清" />
+              <el-option label="表破" value="表破" />
+              <el-option label="表埋" value="表埋" />
+              <el-option label="暂拆" value="暂拆" />
+              <el-option label="其他" value="其他" />
+              <el-option label="无人在家" value="无人在家" />
+              <el-option label="未抄表" value="未抄表" />
+            </el-select>
+          </div>
+          <div class="noread-input" >
+            <span>用户号</span>
+            <el-input v-model="noreadParams.userId" placeholder="请输入用户号" />
+          </div>
+          <div class="noread-input" >
+            <span>用户名</span>
+            <el-input v-model="noreadParams.userName" placeholder="请输入用户名" />
+          </div>
+          <div class="noread-input" >
+            <span>地址</span>
+            <el-input v-model="noreadParams.userAddr" placeholder="请输入地址" />
+          </div>
+          <div class="noread-buttons">
+            <div class="noread-sercah-btn" @click="noreadSearch">
+              <img src="@/assets/yonghu/icon16.png" alt="" style="margin-left: 8px" />
+              <span style="font-size: 20px; margin-left: 8%">搜索</span>
+            </div>
+<!--            <div class="noread-clear-btn" @click="noreadClear">-->
+<!--              <img src="@/assets/yonghu/icon4.png" alt="" style="margin-left: 8px" />-->
+<!--              <span style="font-size: 20px; margin-left: 8%; color: #5a5a5a">清空</span>-->
+<!--            </div>-->
+          </div>
+        </div>
+        <div class="noread-record-list">
+          <div class="command-buttons">
+            <div class="export-out-btn" @click="exportExcel">
+              <img src="@/assets/yonghu/icon1.3.png" alt="" />
+              <span style="margin-left: 6px; color: #5a5a5a">导出</span>
+            </div>
+            <div class="reflush" @click="noreadReflush">
+              <img src="@/assets/yonghu/icon15.png" alt="" />
+            </div>
+          </div>
+          <div class="noread-record-table">
+            <el-table
+                :data="noreadList"
+                row-key="id"
+                style="width: auto; height: 100%; table-layout: fixed; overflow-x: auto; overflow-y: auto"
+                border
+                :header-cell-style="{ background: '#46B97E', color: '#FFFFFF' }"
+                v-loading="noreadLoading"
+                id="noread-record-table"
+            >
+              <el-table-column label="序号" width="90" align="center" fixed="left" #default="scope">
+                {{ scope.$index + 1 + (noreadCurrentPage - 1) * noreadPageSize }}
+              </el-table-column>
+              <el-table-column prop="userId" label="用户号" min-width="90" align="center" fixed="left"/>
+              <el-table-column prop="userName" label="用户名" min-width="100" align="center"/>
+              <el-table-column prop="userAddr" label="地址" min-width="180" align="center"/>
+              <el-table-column prop="reportStatus" label="抄表状态" min-width="90" align="center">
+                <template #default="{ row }">
+                <span
+                    class="status-badge"
+                    :class="{
+                    'badge-success': row.reportStatus === '正常',
+                    'badge-warning': row.reportStatus && row.reportStatus !== '正常',
+                    'badge-info': !row.reportStatus
+                  }"
+                >
+                  {{ row.reportStatus || '-' }}
+                </span>
+                </template>
+              </el-table-column>
+              <el-table-column prop="processStatus" label="处理状态" min-width="90" align="center">
+                <template #default="{ row }">
+                  <span
+                      class="status-badge"
+                      :class="{
+                      'badge-warning': row.processStatus === '待审核',
+                      'badge-success': row.processStatus === '审核通过',
+                      'badge-info': row.processStatus === '无数据' || !row.processStatus
+                    }"
+                  >
+                    {{ row.processStatus || '-' }}
+                  </span>
+                </template>
+              </el-table-column>
+              <el-table-column prop="startReading" label="起码" min-width="80" align="center">
+                <template #default="{ row }">
+                  <span>{{ row.startReading ? row.startReading : '-' }}</span>
+                </template>
+              </el-table-column>
+              <el-table-column prop="endReading" label="止码" min-width="80" align="center">
+                <template #default="{ row }">
+                  <span>{{ row.endReading ? row.endReading : '-' }}</span>
+                </template>
+              </el-table-column>
+              <el-table-column prop="deltaWater" label="用水量" min-width="80" align="center">
+                <template #default="{ row }">
+                  <span>{{ row.deltaWater ? row.deltaWater : '-' }}</span>
+                </template>
+              </el-table-column>
+              <el-table-column prop="feeThisTime" label="扣费" min-width="80" align="center">
+                <template #default="{ row }">
+                  <span>{{ row.feeThisTime ? row.feeThisTime : '-' }}</span>
+                </template>
+              </el-table-column>
+              <el-table-column prop="createTime" label="抄表时间" min-width="120" align="center">
+                <template #default="scope">
+                  {{ scope.row.createTime ? scope.row.createTime.replace('T', ' ') : '-' }}
+                </template>
+              </el-table-column>
+            </el-table>
+          </div>
+        </div>
+        <div class="noread-page-box">
+          <div class="demo-pagination-block">
+            <el-pagination
+                v-model:current-page="noreadCurrentPage"
+                v-model:page-size="noreadPageSize"
+                :page-sizes="[10, 20, 30]"
+                layout="total, prev, pager, next, jumper"
+                :total="noreadTotal"
+                @current-change="handleNoReadPageChange"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
 </template>
 
 <script>
@@ -163,6 +326,26 @@ export default {
           cacheReadSum: 0,
           noReadSum: 0
        },
+
+      // 未抄表用户信息弹窗参数
+      noread_dialogVisible: false,
+      noreadLoading: false,
+      noreadList: [],
+      noreadTotal: 0,
+      noreadCurrentPage: 1,
+      noreadPageSize: 30,
+      noreadRegionList: [],
+      codeBookList: [],
+      noreadParams: {
+        companyId: null,
+        regionId: null,
+        codeBookId: null,
+        reportStatus: null,
+        userId: "",
+        userName: "",
+        userAddr: "",
+        reportMonth: ""
+      },
     };
   },
   mounted() {
@@ -170,16 +353,6 @@ export default {
     this.search();
   },
   methods: {
-    goRegionReport(row) {
-      this.$router.push({
-        name: "regionMeterReport",
-        query: {
-          regionId: row.regionId,
-          reportStatus: "未抄表"
-        }
-      })
-    },
-
     getTodayStr(){
       const now = new Date();
       const y = now.getFullYear();
@@ -304,6 +477,220 @@ export default {
         this.totalSummaryRow = {};
       } finally {
         this.isLoading = false;
+      }
+    },
+    // 打开未抄表明细弹窗，带入点击行的区域id + 当前报表月份
+    openNoReadDialog(row) {
+      this.noreadParams.regionId = row.regionId;
+      this.noreadParams.reportStatus = '未抄表';
+      this.noreadParams.reportMonth = this.timeRange;
+      if(this.companyId !== 1){
+        this.noreadParams.companyId = this.companyId
+      }else{
+        this.noreadParams.companyId = this.params.companyId
+      }
+      this.noread_dialogVisible = true;
+      this.getNoreadRegionList();
+      this.getBookList();
+      this.noreadSearch();
+    },
+    // 关闭弹窗
+    handleNoReadDialogClose() {
+      this.noread_dialogVisible = false;
+      this.noreadList = [];
+      this.codeBookList = [];
+      this.noreadParams = {
+        companyId: this.noreadParams.companyId,
+        regionId: null,
+        codeBookId: null,
+        reportStatus: null,
+        userId: "",
+        userName: "",
+        userAddr: "",
+        reportMonth: this.timeRange
+      }
+      this.noreadCurrentPage = 1;
+      this.noreadTotal = 0;
+    },
+    // 获取弹窗区域下拉
+    async getNoreadRegionList() {
+      if (!this.noreadParams.companyId) {
+        this.noreadRegionList = [];
+        this.codeBookList = []
+        return;
+      }
+      try {
+        const res = await service.get(`/getRegion?companyId=${this.noreadParams.companyId}`);
+        if (res.code === 200) {
+          const allRegions = res.data || [];
+          // 洪湖峰口（companyId=95）：放行全部区域，不做普表筛选
+          // 原因：洪湖峰口业务场景特殊，所有区域类型均需在区域抄表报表中可选
+          if (this.noreadParams.companyId === 95) {
+            this.noreadRegionList = allRegions;
+          } else {
+            // 其他水厂：仅筛选普表区域（名称含"普表"历史兼容，或 regionType === 3）
+            this.noreadRegionList = allRegions.filter(region =>
+                (region.regionName && region.regionName.includes('普表')) || region.regionType === 3
+            );
+          }
+          if (this.noreadRegionList.length === 0) {
+            ElMessage.warning('该水厂下暂无普表区域');
+          }
+        } else {
+          ElMessage.error(res.msg || '获取区域列表失败');
+          this.noreadRegionList = [];
+        }
+      } catch (error) {
+        console.error('获取区域列表错误:', error);
+        ElMessage.error('网络请求失败');
+        this.noreadRegionList = [];
+      }
+    },
+    // 获取表册下拉
+    async getBookList () {
+      this.codeBookList = [];
+      if (!this.noreadParams.regionId) return;
+      try {
+        const res = await service.get(`/getCodeBookByRegion?companyId=${this.noreadParams.companyId}&regionId=${this.noreadParams.regionId}`);
+        if (res.code === 200) {
+          this.codeBookList = res.data || [];
+        } else {
+          ElMessage.error(res.msg || '获取表册列表失败');
+            this.codeBookList = [];
+        }
+      } catch (error) {
+        console.error('获取表册列表错误:', error);
+        ElMessage.error('网络请求失败');
+        this.codeBookList = [];
+      }
+    },
+    async handleRegionChange() {
+      this.noreadParams.codeBookId = null;
+      await this.getBookList();
+      this.noreadSearch();
+    },
+    // 弹窗搜索
+    noreadSearch() {
+      this.noreadCurrentPage = 1;
+      this.fetchNoreadList();
+    },
+// 弹窗清空条件
+    noreadClear() {
+      this.noreadParams = {
+        companyId: this.noreadParams.companyId,
+        regionId: null,
+        codeBookId: null,
+        reportStatus: null,
+        userId: "",
+        userName: "",
+        userAddr: "",
+        reportMonth: this.timeRange
+      }
+      this.noreadCurrentPage = 1;
+      this.noreadTotal = 0;
+      this.noreadList = [];
+      // this.fetchNoreadList();
+    },
+    noreadReflush() {
+      this.noreadSearch();
+    },
+    handleNoReadPageChange(page) {
+      this.noreadCurrentPage = page;
+      this.fetchNoreadList();
+    },
+    // 请求未抄表明细接口（重点：url改成你后端真实接口）
+    async fetchNoreadList() {
+      if (!this.noreadParams.regionId){
+        ElMessage.warning('请选择区域');
+        return ;
+      }
+      this.noreadLoading = true;
+      try {
+        const [y, m] = this.noreadParams.reportMonth.split('-')
+        const start = `${this.noreadParams.reportMonth}-01T00:00:00`
+        const lastDay = new Date(y, m, 0).getDate()
+        const end = `${this.noreadParams.reportMonth}-${lastDay}T23:59:59`
+
+        const p = {
+          companyId: this.noreadParams.companyId,
+          regionId: this.noreadParams.regionId,
+          codeBookId: this.noreadParams.codeBookId,
+          startTime: start,
+          endTime: end,
+          userId: this.noreadParams.userId,
+          userName: this.noreadParams.userName,
+          userAddr: this.noreadParams.userAddr,
+          reportStatus: this.noreadParams.reportStatus,
+          page: this.noreadCurrentPage,
+          pageSize: this.noreadPageSize
+        }
+        // 这里替换成后端未抄表明细接口地址
+        const res = await service.get("/manual/charge/regionMeterDetailReport", {params:p})
+        if(res.code === 200) {
+          this.noreadList = res.data.list || []
+          this.noreadTotal = res.data.total || 0
+        }else{
+          ElMessage.error(res.msg || "查询明细失败")
+        }
+      } catch (e) {
+        console.error(e)
+        ElMessage.error("查询异常")
+      } finally {
+        this.noreadLoading = false
+      }
+    },
+    async exportExcel() {
+      // 参数校验
+      if (!this.noreadParams.companyId) {
+        ElMessage.warning('缺少水厂信息，无法导出');
+        return;
+      }
+      if (!this.noreadParams.reportMonth) {
+        ElMessage.warning('缺少月份信息，无法导出');
+        return;
+      }
+      let token = '';
+      const userData = sessionStorage.getItem("userData");
+      if (userData) {
+        try {
+          token = JSON.parse(userData).token;
+        } catch (e) {}
+      }
+      try {
+        const [y, m] = this.noreadParams.reportMonth.split('-')
+        const start = `${this.noreadParams.reportMonth}-01T00:00:00`
+        const lastDay = new Date(y, m, 0).getDate()
+        const end = `${this.noreadParams.reportMonth}-${lastDay}T23:59:59`
+
+        const res = await service.get(`/manual/charge/exportRegionMeterDetailReport`, {
+          params: {
+            companyId: this.noreadParams.companyId,
+            regionId: this.noreadParams.regionId,
+            codeBookId: this.noreadParams.codeBookId,
+            startTime: start,
+            endTime: end,
+            userId: this.noreadParams.userId,
+            userName: this.noreadParams.userName,
+            userAddr: this.noreadParams.userAddr,
+            reportStatus: this.noreadParams.reportStatus,
+          },
+          responseType: "blob",
+          headers: { Authorization: token, token: token }
+        });
+        const blob = new Blob([res.data]);
+        const downloadUrl = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = downloadUrl;
+        // 文件名，可自行修改
+        a.download = `${this.noreadParams.reportMonth}未抄表明细.xlsx`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(downloadUrl);
+        ElMessage.success("导出成功");
+      } catch (err) {
+        ElMessage.error("导出失败");
+        console.error(err);
       }
     },
   },
@@ -530,6 +917,162 @@ export default {
   color: #ffffff;
   font-size: 20px;
   text-align: center;
+}
+.noread-record-dialog {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 199;
+  background-color: rgb(31 33 38 / 15%);
+}
+.noread-record-dialog-content {
+  width: 94%;
+  max-width: 2100px;
+  height: 98%;
+  border: 1px solid #fafafa;
+  background-color: #fafafa;
+  border-radius: 5px;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.noread-record-content {
+  width: 100%;
+  height: 100%;
+  border-radius: 5px;
+  margin-top: 0px;
+  margin-bottom: 5px;
+  display: flex;
+  background: none;
+  flex-direction: column;
+  align-items: center;
+  flex-wrap: nowrap;
+  padding: 1%;
+  overflow-y: auto;
+}
+.noread-record-content > .serach-box {
+  background-color: #fff;
+  border-radius: 5px;
+  width: 96%;
+  height: 100px;
+  margin-top: 5px;
+  margin-bottom: 5px;
+  padding: 0 10px;
+  display: flex;
+  align-items: center;
+}
+.noread-input {
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  width: 10%;
+  margin-right: 20px;
+}
+.noread-input > span {
+  font-size: 18px;
+  margin-bottom: 5px;
+}
+.noread-buttons {
+  display: flex;
+  width: 120px;
+  height: 100%;
+  margin-left: auto;
+  align-items: center;
+}
+.noread-buttons > * {
+  width: 120px;
+  margin-right: 30px;
+}
+.noread-sercah-btn,
+.noread-clear-btn {
+  display: flex;
+  align-items: center;
+  height: 32px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.3s;
+  color: #fff;
+}
+.noread-sercah-btn {
+  background-color: #45ba7e;
+}
+.noread-clear-btn {
+  background-color: #fff;
+  border: 2px solid #f2f2f2;
+}
+.noread-record-content > .noread-record-list {
+  width: 96%;
+  background-color: #fff;
+  border-radius: 5px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 10px;
+  padding: 0 10px;
+  margin-bottom: 10px;
+}
+.noread-record-table {
+  width: 100%;
+  height: 100vh;
+  margin-top: 5px;
+  overflow-y: auto;
+}
+.title {
+  width: 100%;
+  background-color: #fff;
+  border-radius: 5px 5px 0 0;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+  height: 45px;
+  line-height: 45px;
+  text-align: center;
+  display: flex;
+  justify-content: space-between;
+}
+.noread-page-box {
+  width: 100%;
+  height: 65px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: static;
+  margin-top: 5px;
+}
+.status-badge {
+  display: inline-block;
+  font-size: 20px;
+  line-height: 1;
+  padding: 5px 12px;
+  border-radius: 4px;
+  border: 1px solid transparent;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+
+.status-badge.badge-success {
+  color: #67c23a;
+  background-color: #f0f9eb;
+  border-color: #e1f3d8;
+}
+
+.status-badge.badge-warning {
+  color: #e6a23c;
+  background-color: #fdf6ec;
+  border-color: #faecd8;
+}
+
+.status-badge.badge-info {
+  color: #909399;
+  background-color: #f4f4f5;
+  border-color: #e9e9e9;
+}
+.command-buttons > * {
+  margin-right: 10px;
 }
 </style>
 
