@@ -319,7 +319,25 @@ const routes = [
       {
         path: "/errorReportRecord",
         name: "errorReportRecord",
-        component: errorReportRecord,
+        // 保留旧地址及用户详情返回时携带的筛选条件。
+        redirect: (to) => ({
+          name: to.query.recordType === "usage" ? "errorReportUsage" : "errorReportReading",
+          query: to.query,
+        }),
+        children: [
+          {
+            path: "reading",
+            name: "errorReportReading",
+            component: errorReportRecord,
+            meta: { recordType: "report" },
+          },
+          {
+            path: "usage",
+            name: "errorReportUsage",
+            component: errorReportRecord,
+            meta: { recordType: "usage" },
+          },
+        ],
       },
       {
         path: "/warningManage",

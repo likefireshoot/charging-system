@@ -1,19 +1,13 @@
 <template>
   <div class="yuangong-container">
     <receive-exception-record
-        v-if="recordType !== 'report'"
+        v-if="recordType !== 'report' && recordType !== 'usage'"
         :exception-type="recordType"
         @change-exception-type="recordType = $event"
     />
     <template v-else>
     <div class="search-box">
       <div class="search-content">
-        <div class="search-input">
-          <span>异常类型</span>
-          <el-select v-model="recordType" placeholder="请选择异常类型">
-            <el-option label="读数异常" value="report" />
-          </el-select>
-        </div>
         <div class="search-input" v-if="companyId === 1">
           <span>所属水厂</span>
           <el-select v-model="params.company" placeholder="请选择所属水厂">
@@ -85,13 +79,13 @@
         <div class="reflush" @click="reflush">
           <img src="@/assets/yonghu/icon15.png" alt="" />
         </div>
-        <span style="margin-left: 10px; color: #e04545">说明：当本次上报吨数小于上次上报吨数，也即出现了用水读数倒转时，该上报读数异常，将被拦截并列入该异常数据列表</span>
+        <span style="margin-left: 10px; color: #e04545">{{ exceptionDescription }}</span>
       </div>
       <div class="yuangong-table">
         <el-table
             ref="multipleTableRef"
             :data="ErrorRecordData"
-            row-key="staffId"
+            row-key="id"
             style="width: 100%; height: 100%; table-layout: fixed; overflow-y: auto;"
             border
             :header-cell-style="{ background: '#46B97E', color: '#FFFFFF' }"
@@ -110,6 +104,9 @@
                         {{ scope.$index + 1 + (params.pageNo - 1) * params.pageSize }}
                     </el-table-column> -->
           <el-table-column property="userId" label="用户号" :width="workerNameWidth" align="center" />
+          <el-table-column label="异常类型" width="110" align="center">
+            <template #default="scope">{{ scope.row.errorType === 2 ? '吨数过大' : '读数异常' }}</template>
+          </el-table-column>
           <el-table-column label="用户名" :width="workerNameWidth" align="center">
             <template #default="scope">
               <span @click="handleUserInfo(scope.row)"
@@ -169,7 +166,13 @@
             </template>
 
           </el-table-column>
-          <el-table-column label="操作" :width="operationWidth" align="center" #default="scope">
+          <el-table-column v-if="recordType === 'usage'" label="本次用水量(吨)" width="140" align="center">
+            <template #default="scope">{{ formatUsage(scope.row.deltaWater) }}</template>
+          </el-table-column>
+          <el-table-column v-if="recordType === 'usage'" label="最大日均用水量(吨/日)" width="190" align="center">
+            <template #default="scope">{{ scope.row.maxWaterUsage == null ? '暂无基准' : formatUsage(scope.row.maxWaterUsage) }}</template>
+          </el-table-column>
+          <el-table-column label="操作" :width="operationWidth" align="center" fixed="right" #default="scope">
             <div v-if="scope.row._expired">
               <el-tag type="warning" size="large">已失效</el-tag>
             </div>
@@ -181,6 +184,7 @@
             <div v-else>
               <el-tag type="info" size="large" v-if="scope.row.status === 1">忽略</el-tag>
               <el-tag type="success" size="large" v-else-if="scope.row.status === 2">有效</el-tag>
+              <el-tag type="warning" size="large" v-else-if="scope.row.status === 3">已失效</el-tag>
             </div>
           </el-table-column>
         </el-table>
@@ -202,7 +206,7 @@
         </div>
         <div class="dialog-body">
           <p class="dialog-text">是否确认忽略此条异常上报？</p>
-          <p class="dialog-subtext">该读数将被视为错误数据，不作计费依据。</p>
+          <p class="dialog-subtext">该读数将被视为错误数据，不作计费依据。有效读数保持不变，后续上报仍与上次有效读数比较；忽略不代表免除用水费用。</p>
           <div class="dialog-info-row">
             <span>用户号：{{ confirmDialog.row.userId }}</span>
             <span>表号：{{ confirmDialog.row.meterCode }}</span>
@@ -213,7 +217,7 @@
         </div>
         <div class="dialog-footer">
           <div class="dialog-btn-cancel" @click="closeConfirmDialog">取消</div>
-          <div class="dialog-btn-confirm-danger" @click="handleConfirm">确认忽略</div>
+          <div class="dialog-btn-confirm-danger" @click="handleConfirm">{{ isSubmitting ? '处理中…' : '确认忽略' }}</div>
         </div>
       </div>
     </div>
@@ -227,7 +231,8 @@
         </div>
         <div class="dialog-body">
           <p class="dialog-text">确认此条上报为有效抄表记录？</p>
-          <p class="dialog-subtext">本次上报所产生的水表倒转 / 读数回退为有效抄表记录，出于某些原因水表的确发生了倒转。</p>
+          <p class="dialog-subtext" v-if="isUsageConfirmation">本次用水量按间隔天数向上取整折算的日均值，超过该水表最大日均用水量的10倍。请核实后确认；正常计费仍按实际用水量，基准按原上报时刻的日均值维护。</p>
+          <p class="dialog-subtext" v-else>本次上报所产生的水表倒转 / 读数回退为有效抄表记录，出于某些原因水表的确发生了倒转。</p>
           <div class="dialog-info-row">
             <span>用户号：{{ confirmDialog.row.userId }}</span>
             <span>表号：{{ confirmDialog.row.meterCode }}</span>
@@ -236,16 +241,18 @@
             <span>上次读数：{{ confirmDialog.row.prevReadingCount != null ? confirmDialog.row.prevReadingCount : '-' }} 吨</span>
             <span>本次读数：{{ confirmDialog.row.readingCount }} 吨</span>
           </div>
-          <p class="dialog-highlight">确认后将从 <strong>{{ confirmDialog.row.readingCount }}</strong> 吨开始重新计费。</p>
+          <p class="dialog-highlight" v-if="isUsageConfirmation">确认后将按本次实际用水量 <strong>{{ formatUsage(confirmDialog.row.deltaWater) }}</strong> 吨执行正常计费并扣款。</p>
+          <p class="dialog-highlight" v-else>确认后将从 <strong>{{ confirmDialog.row.readingCount }}</strong> 吨开始重新计费。</p>
           <div class="dialog-checkbox-row">
             <el-checkbox v-model="confirmDialog.checked" class="confirm-checkbox">
-              <span class="checkbox-text">我已明确该水表将从 <strong>{{ confirmDialog.row.readingCount }}</strong> 吨开始重新计费</span>
+              <span class="checkbox-text" v-if="isUsageConfirmation">我已核实本次用水真实有效，同意按现有计费规则扣款</span>
+              <span class="checkbox-text" v-else>我已明确该水表将从 <strong>{{ confirmDialog.row.readingCount }}</strong> 吨开始重新计费</span>
             </el-checkbox>
           </div>
         </div>
         <div class="dialog-footer">
           <div class="dialog-btn-cancel" @click="closeConfirmDialog">取消</div>
-          <div class="dialog-btn-confirm" :class="{ disabled: !confirmDialog.checked }" @click="handleConfirm">确认有效</div>
+          <div class="dialog-btn-confirm" :class="{ disabled: !confirmDialog.checked || isSubmitting }" @click="handleConfirm">{{ isSubmitting ? '处理中…' : '确认有效' }}</div>
         </div>
       </div>
     </div>
@@ -294,7 +301,7 @@ export default {
         battery: null,
         valveStatus: null
       },
-      recordType: "report",
+      recordType: this.$route.meta.recordType === 'usage' ? 'usage' : 'report',
       companyId: JSON.parse(sessionStorage.getItem("userData")).companyId, // 所属水厂ID
       staffPermissionIds: JSON.parse(sessionStorage.getItem("userData")).staffPermissionIds,
       companyList: [],
@@ -359,10 +366,22 @@ export default {
       ErrorRecordData: [],
 
       // ****** 锁
-      isLoading: false
+      isLoading: false,
+      isSubmitting: false,
+      requestId: 0,
+      token: JSON.parse(sessionStorage.getItem("userData")).token,
     };
   },
   watch: {
+    '$route.meta.recordType'(recordType) {
+      this.recordType = recordType === 'usage' ? 'usage' : 'report';
+    },
+    recordType() {
+      this.params.pageNo = 1;
+      this.ErrorRecordData = [];
+      this.total = 0;
+      this.getErrorReportRecordData();
+    },
     // "params.pageNo": {
     //   handler() {
     //     this.getErrorReportRecordData();
@@ -370,6 +389,14 @@ export default {
     // }
   },
   computed: {
+    isUsageConfirmation() {
+      return this.confirmDialog.row && this.confirmDialog.row.errorType === 2;
+    },
+    exceptionDescription() {
+      return this.recordType === 'usage'
+        ? '说明：间隔≤24小时按1天、≤48小时按2天，以此类推；本次用水量÷折算天数严格大于最大日均用水量的10倍时，暂停本次计费并等待确认。'
+        : '说明：当本次上报吨数小于上次上报吨数，也即出现了用水读数倒转时，该上报读数异常，将被拦截并列入该异常数据列表';
+    },
     // 每列的百分比宽度（仅计算实际使用列，总计 100%）
     columnPercentages() {
       return {
@@ -411,9 +438,6 @@ export default {
           console.error('恢复搜索参数失败', e);
         }
       }
-      if (this.$route.query.recordType) {
-        this.recordType = this.$route.query.recordType;
-      }
     }
 
     this.getCompanyList();
@@ -428,6 +452,9 @@ export default {
     }
   },
   methods: {
+    formatUsage(value) {
+      return value == null || !Number.isFinite(Number(value)) ? '-' : Number(value).toFixed(2);
+    },
     // ****** 手动处理分页变化，避免 watch 循环 ******
     handlePageChange(page) {
       if (this.isLoading) return;
@@ -481,9 +508,11 @@ export default {
       };
     },
     closeConfirmDialog() {
+      if (this.isSubmitting) return;
       this.confirmDialog.visible = false;
     },
     handleConfirm() {
+      if (this.isSubmitting) return;
       if (this.confirmDialog.type === 'valid' && !this.confirmDialog.checked) {
         ElMessage.warning('请勾选确认后再提交');
         return;
@@ -493,14 +522,18 @@ export default {
       this.edit(id, status);
     },
     edit(id, status) {
+      if (this.isSubmitting) return;
+      this.isSubmitting = true;
       service
           .post(`/meterReportErrorRecord/editErrorRecord?id=${id}&status=${status}`, {
+          }, {
             headers: {
               Authorization: this.token,
               token: this.token,
             },
           })
           .then((response) => {
+            this.isSubmitting = false;
             if (response.code === 200) {
               if (response.data && response.data.expired) {
                 // 该异常数据已过期，本地标记已失效
@@ -520,8 +553,9 @@ export default {
             }
           })
           .catch((error) => {
+            this.isSubmitting = false;
             ElMessage.error(error);
-          });
+          }).finally(() => { this.isSubmitting = false; });
     },
     handleUserInfo(row) {
       if (this.staffPermissionIds.includes(17)) {
@@ -629,7 +663,8 @@ export default {
           });
     },
     getErrorReportRecordData() {
-      if(this.isLoading) return
+      if (this.recordType !== 'report' && this.recordType !== 'usage') return;
+      const requestId = ++this.requestId;
       this.isLoading = true
       //this.params.companyId = this.params.company ? this.params.company : this.companyId;
       if (this.companyId === 1) {
@@ -650,13 +685,17 @@ export default {
         }
       }
       service
-          .post("/meterReportErrorRecord/queryErrorRecord", this.params, {
+          .post("/meterReportErrorRecord/queryErrorRecord", {
+            ...this.params,
+            errorType: this.recordType === 'usage' ? 2 : 1,
+          }, {
             headers: {
               Authorization: token,
               token: token,
             },
           })
           .then((response) => {
+            if (requestId !== this.requestId) return;
             if (response.code === 200) {
               this.total = response.data.total;
               this.ErrorRecordData = response.data.records;
@@ -665,9 +704,10 @@ export default {
             }
           })
           .catch((error) => {
+            if (requestId !== this.requestId) return;
             ElMessage.error(error);
           }).finally(()=>{
-        this.isLoading = false
+        if (requestId === this.requestId) this.isLoading = false
       });
     },
     search() {
@@ -691,6 +731,7 @@ export default {
     },
     exportExcel() {
       const exportParams = { ...this.params };
+      exportParams.errorType = this.recordType === 'usage' ? 2 : 1;
       exportParams.pageNo = 1;
       exportParams.pageSize = 10000000;
 

@@ -94,19 +94,15 @@
         <img src="@/assets/yonghu/icon15.png" alt="" />
       </div>
       <div
-        class="recent-usage-summary"
+        class="max-daily-usage-summary"
         role="status"
         aria-live="polite"
-        title="当前用户和所选水表最近30次有效抄表的单次用水量最大值，不受分页和日期筛选影响"
+        title="当前用户和所选水表绑定保存的最大日均用水量，不受日期筛选和分页影响"
       >
-        <span class="recent-usage-label">最近30次最大用水量：</span>
-        <span class="recent-usage-value" :class="{ 'is-error': recentUsageState === 'error' }">
-          {{ recentUsageText }}
+        <span class="max-daily-usage-label">最大日均用水量：</span>
+        <span class="max-daily-usage-value" :class="{ 'is-error': maxDailyUsageState === 'error' }">
+          {{ maxDailyUsageText }}
         </span>
-        <span
-          v-if="recentUsageState === 'ready' && recentSampleCount > 0 && recentSampleCount < 30"
-          class="recent-usage-count"
-        >（已有{{ recentSampleCount }}次）</span>
       </div>
     </div>
 
@@ -339,9 +335,8 @@ export default {
       currentPage: 1,
       pageSize: 30,
       totalWater: 0,
-      recentMaxWater: null,
-      recentSampleCount: 0,
-      recentUsageState: "loading",
+      maxWaterUsage: null,
+      maxDailyUsageState: "loading",
       meterRequestId: 0,
       loadingMeterScope: "",
       staffPermissionIds: JSON.parse(sessionStorage.getItem("userData") || "{}").staffPermissionIds || [],
@@ -373,11 +368,11 @@ export default {
     meterScopeKey() {
       return JSON.stringify([this.user.companyId, this.user.userId, this.user.meterCode]);
     },
-    recentUsageText() {
-      if (this.recentUsageState === "loading") return "加载中…";
-      if (this.recentUsageState === "error") return "获取失败";
-      if (this.recentSampleCount === 0) return "暂无历史记录";
-      return `${this.recentMaxWater.toFixed(2)} 吨`;
+    maxDailyUsageText() {
+      if (this.maxDailyUsageState === "loading") return "加载中…";
+      if (this.maxDailyUsageState === "error") return "获取失败";
+      if (this.maxWaterUsage == null) return "暂无基准";
+      return `${this.maxWaterUsage.toFixed(2)} 吨/日`;
     }
   },
   mounted() {
@@ -422,26 +417,23 @@ export default {
       this.loadingMeterScope = request.scope;
       this.isLoading = true;
       this.loading = true;
-      this.recentMaxWater = null;
-      this.recentSampleCount = 0;
-      this.recentUsageState = "loading";
+      this.maxWaterUsage = null;
+      this.maxDailyUsageState = "loading";
       return request;
     },
     isCurrentMeterRequest(request) {
       return request.id === this.meterRequestId && request.scope === this.meterScopeKey;
     },
-    updateRecentUsageStats(data) {
-      const sampleCount = Number(data.recentSampleCount);
-      const maxWater = data.recentMaxWater == null ? null : Number(data.recentMaxWater);
-      if (data.recentSampleCount == null || !Number.isInteger(sampleCount)
-          || sampleCount < 0 || sampleCount > 30
-          || (sampleCount > 0 && (maxWater == null || !Number.isFinite(maxWater) || maxWater < 0))) {
-        this.recentUsageState = "error";
+    updateMaxDailyUsage(data) {
+      // 直接显示后端从user_meter_bind.max_water_usage读取的值，不从抄表列表计算历史最大值。
+      const maxWater = data.maxWaterUsage == null ? null : Number(data.maxWaterUsage);
+      if (!Object.prototype.hasOwnProperty.call(data, 'maxWaterUsage')
+          || (maxWater != null && (!Number.isFinite(maxWater) || maxWater <= 0))) {
+        this.maxDailyUsageState = "error";
         return;
       }
-      this.recentMaxWater = maxWater;
-      this.recentSampleCount = sampleCount;
-      this.recentUsageState = "ready";
+      this.maxWaterUsage = maxWater;
+      this.maxDailyUsageState = "ready";
     },
     isCurrentMeter(row) {
       return String(row?.meterCode ?? "") === String(this.user?.meterCode ?? "");
@@ -514,7 +506,7 @@ export default {
         if (!this.isCurrentMeterRequest(request)) return;
 
         if (response.code === 200) {
-          this.updateRecentUsageStats(response.data);
+          this.updateMaxDailyUsage(response.data);
           const records = response.data.userInfoData || [];
           records.forEach((item, index) => {
             item.theId = this.pageSize * (response.data.currentPages - 1) + index + 1;
@@ -534,12 +526,12 @@ export default {
           this.total = response.data.totalElements || 0;
           await this.fetchTotalWater(request);
         } else {
-          this.recentUsageState = "error";
+          this.maxDailyUsageState = "error";
           ElMessage.error(response.msg);
         }
       } catch (error) {
         if (!this.isCurrentMeterRequest(request)) return;
-        this.recentUsageState = "error";
+        this.maxDailyUsageState = "error";
         console.error("获取抄表记录失败", error);
         ElMessage.error("获取抄表记录失败");
       } finally {
@@ -561,7 +553,7 @@ export default {
         if (!this.isCurrentMeterRequest(request)) return;
 
         if (response.code === 200) {
-          this.updateRecentUsageStats(response.data);
+          this.updateMaxDailyUsage(response.data);
           const records = response.data.userInfoData || [];
           records.forEach((item, index) => {
             item.theId = this.pageSize * (response.data.currentPages - 1) + index + 1;
@@ -580,12 +572,12 @@ export default {
           this.total = response.data.totalElements || 0;
           await this.fetchTotalWater(request);
         } else {
-          this.recentUsageState = "error";
+          this.maxDailyUsageState = "error";
           ElMessage.error(response.msg);
         }
       } catch (error) {
         if (!this.isCurrentMeterRequest(request)) return;
-        this.recentUsageState = "error";
+        this.maxDailyUsageState = "error";
         console.error("搜索抄表记录失败", error);
         ElMessage.error("搜索抄表记录失败");
       } finally {
@@ -1069,7 +1061,7 @@ export default {
   margin-bottom: 8px;
 }
 
-.recent-usage-summary {
+.max-daily-usage-summary {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -1083,17 +1075,16 @@ export default {
   line-height: 22px;
 }
 
-.recent-usage-label,
-.recent-usage-count {
+.max-daily-usage-label {
   color: #606266;
 }
 
-.recent-usage-value {
+.max-daily-usage-value {
   color: #319764;
   font-weight: 600;
 }
 
-.recent-usage-value.is-error {
+.max-daily-usage-value.is-error {
   color: #b47500;
 }
 
