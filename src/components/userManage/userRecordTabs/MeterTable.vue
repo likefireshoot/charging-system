@@ -65,15 +65,15 @@
     </div>
 
     <div class="tool-bar">
-<!--      <div class="tool-btn" @click="downloadTemplate" v-if="staffPermissionIds.includes(16)">-->
-<!--        <img src="@/assets/yonghu/icon1.png" alt="" />-->
-<!--        <span>抄表记录导⼊模版</span>-->
-<!--      </div>-->
-<!--      <div class="tool-btn" @click="triggerFileInput" v-if="staffPermissionIds.includes(16)">-->
-<!--        <img src="@/assets/yonghu/icon2.png" alt="" />-->
-<!--        <span>抄表记录导⼊</span>-->
-<!--        <input ref="fileInput" type="file" accept=".xls,.xlsx" style="display: none" @change="handleImport" />-->
-<!--      </div>-->
+      <!--      <div class="tool-btn" @click="downloadTemplate" v-if="staffPermissionIds.includes(16)">-->
+      <!--        <img src="@/assets/yonghu/icon1.png" alt="" />-->
+      <!--        <span>抄表记录导⼊模版</span>-->
+      <!--      </div>-->
+      <!--      <div class="tool-btn" @click="triggerFileInput" v-if="staffPermissionIds.includes(16)">-->
+      <!--        <img src="@/assets/yonghu/icon2.png" alt="" />-->
+      <!--        <span>抄表记录导⼊</span>-->
+      <!--        <input ref="fileInput" type="file" accept=".xls,.xlsx" style="display: none" @change="handleImport" />-->
+      <!--      </div>-->
       <div class="tool-btn" @click="exportExcel">
         <img src="@/assets/yonghu/icon1.3.png" alt="" />
         <span>导出</span>
@@ -99,10 +99,18 @@
         aria-live="polite"
         title="当前用户和所选水表绑定保存的最大日均用水量，不受日期筛选和分页影响"
       >
-        <span class="max-daily-usage-label">最大日均用水量：</span>
+        <span class="max-daily-usage-label">近期最大用水量：</span>
         <span class="max-daily-usage-value" :class="{ 'is-error': maxDailyUsageState === 'error' }">
           {{ maxDailyUsageText }}
         </span>
+        <el-button
+          size="middle"
+          type="primary"
+          plain
+          :loading="recalcLoading"
+          @click="handleReCalcMaxDaily"
+          style="margin-left:10px;height:24px;padding:0 8px;font-size: 18px"
+        >更新</el-button>
       </div>
     </div>
 
@@ -145,17 +153,17 @@
         <el-table-column property="startRead" label="起码" min-width="100" align="center" />
         <el-table-column property="endRead" label="止码" min-width="100" align="center" />
         <el-table-column property="waterUse" label="结算量" min-width="100" align="center" />
-<!--        <el-table-column label="结算量" min-width="100" align="center">-->
-<!--          <template #default="scope">{{ scope.row.settleTon }}</template>-->
-<!--        </el-table-column>-->
-<!--        <el-table-column label="扣费吨值" min-width="100" align="center">-->
-<!--          <template #default="scope">{{ scope.row.deductTon }}</template>-->
-<!--        </el-table-column>-->
+        <!--        <el-table-column label="结算量" min-width="100" align="center">-->
+        <!--          <template #default="scope">{{ scope.row.settleTon }}</template>-->
+        <!--        </el-table-column>-->
+        <!--        <el-table-column label="扣费吨值" min-width="100" align="center">-->
+        <!--          <template #default="scope">{{ scope.row.deductTon }}</template>-->
+        <!--        </el-table-column>-->
         <el-table-column property="feeThisTime" label="扣费" min-width="100" align="center" />
         <el-table-column property="balanceThisTime" label="余额" min-width="100" align="center" />
         <el-table-column property="valveStatus" label="阀门" min-width="60" align="center" />
         <el-table-column property="createTime" label="抄表时间" min-width="150" align="center" />
-<!--        <el-table-column property="userPhone" label="手机号" min-width="180" align="center" />-->
+        <!--        <el-table-column property="userPhone" label="手机号" min-width="180" align="center" />-->
       </el-table>
     </div>
 
@@ -289,14 +297,14 @@
             style="width:100%"
           ></el-date-picker>
         </div>
-<!--        <div class="recharge-input" v-if="user.meterType === '普通水表'">-->
-<!--          <span>抄表状态</span>-->
-<!--          <el-select v-model="addForm.reportStatus" placeholder="请选择" style="width:100%">-->
-<!--            <el-option label="正常" value="正常"/>-->
-<!--            <el-option label="无人在家" value="无人在家"/>-->
-<!--            <el-option label="表埋" value="表埋"/>-->
-<!--          </el-select>-->
-<!--        </div>-->
+        <!--        <div class="recharge-input" v-if="user.meterType === '普通水表'">-->
+        <!--          <span>抄表状态</span>-->
+        <!--          <el-select v-model="addForm.reportStatus" placeholder="请选择" style="width:100%">-->
+        <!--            <el-option label="正常" value="正常"/>-->
+        <!--            <el-option label="无人在家" value="无人在家"/>-->
+        <!--            <el-option label="表埋" value="表埋"/>-->
+        <!--          </el-select>-->
+        <!--        </div>-->
       </div>
       <div class="btn">
         <div class="confirm-btn" @click="confirmAdd" :class="{loading:adding}">
@@ -361,7 +369,8 @@ export default {
         createTime: "",
         valveStatus: "",
         // reportStatus: "正常",
-      }
+      },
+      recalcLoading: false, // 【新增】重新计算接口loading状态
     };
   },
   computed: {
@@ -428,7 +437,7 @@ export default {
       // 直接显示后端从user_meter_bind.max_recent_water读取的值，不从抄表列表计算历史最大值。
       const maxWater = data.maxRecentWater == null ? null : Number(data.maxRecentWater);
       if (!Object.prototype.hasOwnProperty.call(data, 'maxRecentWater')
-          || (maxWater != null && (!Number.isFinite(maxWater) || maxWater <= 0))) {
+        || (maxWater != null && (!Number.isFinite(maxWater) || maxWater <= 0))) {
         this.maxDailyUsageState = "error";
         return;
       }
@@ -921,6 +930,43 @@ export default {
     //   // 结算量 = 止码 - 起码
     //   this.addForm.waterUse = endRead - startRead;
     // }
+
+    // ==========【新增：点击更新按钮，重新计算】==========
+    async handleReCalcMaxDaily() {
+      if (!this.user.userId || !this.user.meterCode || !this.user.companyId) {
+        ElMessage.warning("用户/水表信息不全，无法重新计算");
+        return;
+      }
+      this.recalcLoading = true;
+      try {
+        const params = {
+          userId: this.user.userId,
+          meterCode: this.user.meterCode,
+          companyId: this.user.companyId
+        };
+        const query = new URLSearchParams(params).toString();
+        const res = await service.get(`/userManage/userCharge/calc60DayMaxWater?${query}`);
+        if (res.code === 200) {
+          const newVal = res.data?.maxDailyWater;
+          if (newVal == null) {
+            this.maxRecentWater = null;
+            this.maxDailyUsageState = "error";
+            ElMessage.success("重新计算完成，暂无有效近期用水量最大值");
+          } else {
+            this.maxRecentWater = newVal;
+            this.maxDailyUsageState = "ready";
+            ElMessage.success(`重新计算完成，新近期用水量值：${newVal} 吨/日`);
+          }
+        } else {
+          ElMessage.error(res.msg || "重新计算失败");
+        }
+      } catch (err) {
+        console.error("handleReCalcMaxDaily异常", err);
+        ElMessage.error("调用重新计算接口异常");
+      } finally {
+        this.recalcLoading = false;
+      }
+    },
   }
 };
 </script>
@@ -1071,7 +1117,7 @@ export default {
   border: 1px solid #d9efe2;
   border-radius: 4px;
   background: #f7fbf8;
-  font-size: 15px;
+  font-size: 18px;
   line-height: 22px;
 }
 

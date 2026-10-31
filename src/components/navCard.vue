@@ -253,9 +253,9 @@ function buildMenu(userData) {
       arrowIcon1,
       arrowIcon2,
       children: [
-        { id: 71, name: "读数异常", icon: require("@/assets/menu/icon30.png"), icon2: require("@/assets/menu/icon31.png"), path: "/errorReportRecord/reading" },
-        { id: 72, name: "吨数过大", icon: require("@/assets/menu/icon30.png"), icon2: require("@/assets/menu/icon31.png"), path: "/errorReportRecord/usage" },
-      ],
+        { id: 71, name: "读数异常", permissionId: 51, icon: require("@/assets/menu/icon30.png"), icon2: require("@/assets/menu/icon31.png"), path: "/errorReportRecord/reading" },
+        { id: 72, name: "吨数过大", permissionId: 51, icon: require("@/assets/menu/icon30.png"), icon2: require("@/assets/menu/icon31.png"), path: "/errorReportRecord/usage" },
+      ].filter(child => !child.permissionId || staffPermissionIds.value.includes(child.permissionId)),
     });
   }
   if (staffPermissionIds.value.includes(50)) {

@@ -1,115 +1,119 @@
 <template>
   <div class="yuangong-container">
     <receive-exception-record
-        v-if="recordType !== 'report' && recordType !== 'usage'"
-        :exception-type="recordType"
-        @change-exception-type="recordType = $event"
+      v-if="recordType !== 'report' && recordType !== 'usage'"
+      :exception-type="recordType"
+      @change-exception-type="recordType = $event"
     />
     <template v-else>
-    <div class="search-box">
-      <div class="search-content">
-        <div class="search-input" v-if="companyId === 1">
-          <span>所属水厂</span>
-          <el-select v-model="params.company" placeholder="请选择所属水厂">
-            <el-option v-for="item in companyList" :key="item.id" :label="item.name" :value="item.id"></el-option>
-          </el-select>
+      <div class="search-box">
+        <div class="search-content">
+          <div class="search-input" v-if="companyId === 1">
+            <span>所属水厂</span>
+            <el-select v-model="params.company" placeholder="请选择所属水厂">
+              <el-option v-for="item in companyList" :key="item.id" :label="item.name" :value="item.id"></el-option>
+            </el-select>
+          </div>
+          <div class="search-input">
+            <span>表号</span>
+            <el-input v-model="params.meterCode" placeholder="请输入..." />
+          </div>
+          <div class="search-input">
+            <span>用户号</span>
+            <el-input v-model="params.userId" placeholder="请输入..." />
+          </div>
+          <div class="search-input">
+            <span>选择状态</span>
+            <el-select v-model="params.status" placeholder="选择状态">
+              <el-option label="未处理" :value="0" />
+              <el-option label="忽略" :value="1" />
+              <el-option label="有效" :value="2" />
+            </el-select>
+          </div>
+          <div class="search-input">
+            <span>品牌</span>
+            <el-select v-model="params.meterVendor" placeholder="请选择品牌" clearable>
+              <el-option label="信驰" value="信驰" />
+              <el-option label="圣鑫" value="圣鑫" />
+              <el-option label="旧信驰" value="旧信驰" />
+              <el-option label="旧信驰KF01" value="旧信驰KF01" />
+              <el-option label="旧圣鑫" value="旧圣鑫" />
+              <el-option label="集万讯" value="集万讯" />
+              <el-option label="千宝通" value="千宝通" />
+              <el-option label="太阳能" value="太阳能" />
+            </el-select>
+          </div>
+          <div class="search-input">
+            <span>电量</span>
+            <el-select v-model="params.battery" placeholder="请选择电量状态" clearable>
+              <el-option label="正常" value="正常" />
+              <el-option label="异常" value="异常" />
+            </el-select>
+          </div>
+          <div class="search-input">
+            <span>阀门</span>
+            <el-select v-model="params.valveStatus" placeholder="请选择阀门状态" clearable>
+              <el-option label="开阀" value="开阀" />
+              <el-option label="关阀" value="关阀" />
+              <el-option label="故障" value="故障" />
+            </el-select>
+          </div>
         </div>
-        <div class="search-input">
-          <span>表号</span>
-          <el-input v-model="params.meterCode" placeholder="请输入..." />
-        </div>
-        <div class="search-input">
-          <span>用户号</span>
-          <el-input v-model="params.userId" placeholder="请输入..." />
-        </div>
-        <div class="search-input">
-          <span>选择状态</span>
-          <el-select v-model="params.status" placeholder="选择状态">
-            <el-option label="未处理" :value="0" />
-            <el-option label="忽略" :value="1" />
-            <el-option label="有效" :value="2" />
-          </el-select>
-        </div>
-        <div class="search-input">
-          <span>品牌</span>
-          <el-select v-model="params.meterVendor" placeholder="请选择品牌" clearable>
-            <el-option label="信驰" value="信驰" />
-            <el-option label="圣鑫" value="圣鑫" />
-            <el-option label="旧信驰" value="旧信驰" />
-            <el-option label="旧信驰KF01" value="旧信驰KF01" />
-            <el-option label="旧圣鑫" value="旧圣鑫" />
-            <el-option label="集万讯" value="集万讯" />
-            <el-option label="千宝通" value="千宝通" />
-            <el-option label="太阳能" value="太阳能" />
-          </el-select>
-        </div>
-        <div class="search-input">
-          <span>电量</span>
-          <el-select v-model="params.battery" placeholder="请选择电量状态" clearable>
-            <el-option label="正常" value="正常" />
-            <el-option label="异常" value="异常" />
-          </el-select>
-        </div>
-        <div class="search-input">
-          <span>阀门</span>
-          <el-select v-model="params.valveStatus" placeholder="请选择阀门状态" clearable>
-            <el-option label="开阀" value="开阀" />
-            <el-option label="关阀" value="关阀" />
-            <el-option label="故障" value="故障" />
-          </el-select>
+        <div class="buttons">
+          <div class="sercah-btn" @click="search">
+            <img src="@/assets/yonghu/icon16.png" alt="" style="margin-left: 10px" />
+            <span style="margin-left: 10%">搜索</span>
+          </div>
+          <div class="clear-btn" @click="clear">
+            <img src="@/assets/yuangong/icon4.png" alt="" style="margin-left: 10px" />
+            <span style="margin-left: 10%; color: #5a5a5a">清空</span>
+          </div>
         </div>
       </div>
-      <div class="buttons">
-        <div class="sercah-btn" @click="search">
-          <img src="@/assets/yonghu/icon16.png" alt="" style="margin-left: 10px" />
-          <span style="margin-left: 10%">搜索</span>
+      <div class="yuangong-info" :class="{ 'usage-info': recordType === 'usage' }">
+        <div class="command-box">
+          <div class="export-out-btn" @click="exportExcel">
+            <img src="@/assets/yonghu/icon1.3.png" alt="" />
+            <span style="margin-left: 6px; color: #5a5a5a">导出</span>
+          </div>
+          <div class="reflush" @click="reflush">
+            <img src="@/assets/yonghu/icon15.png" alt="" />
+          </div>
+          <div v-if="recordType === 'usage'" class="usage-config" v-loading="usageConfigLoading">
+            <span class="config-status">当前登录水厂配置</span>
+            <template v-if="usageConfigError">
+              <span class="config-error">{{ usageConfigError }}</span>
+              <el-button style="font-size: 18px" @click="loadUsageConfig">重试</el-button>
+            </template>
+            <template v-else-if="usageConfigLoaded">
+              <label class="config-item">
+                <span>家庭用户/企业用户阈值（吨/日）</span>
+                <el-input v-model="usageConfigForm.edgeValue" :disabled="!usageConfigEditing || usageConfigSaving" size="small" placeholder="请输入" />
+              </label>
+              <label class="config-item">
+                <span>家庭用户拦截倍数</span>
+                <el-input v-model="usageConfigForm.homeMultiple" :disabled="!usageConfigEditing || usageConfigSaving" size="small" placeholder="请输入" />
+              </label>
+              <label class="config-item">
+                <span>企业用户拦截倍数</span>
+                <el-input v-model="usageConfigForm.companyMultiple" :disabled="!usageConfigEditing || usageConfigSaving" size="small" placeholder="请输入" />
+              </label>
+              <el-checkbox class="config-checkbox" v-model="usageConfigEditing" style="font-size: 18px" :disabled="usageConfigSaving" @change="onUsageConfigEditChange">编辑</el-checkbox>
+              <template v-if="usageConfigEditing">
+                <el-button type="success" size="middle" :loading="usageConfigSaving" @click="saveUsageConfig">保存</el-button>
+                <el-button size="middle" :disabled="usageConfigSaving" @click="cancelUsageConfigEdit">取消</el-button>
+              </template>
+              <!--            <span class="config-status">{{ savedUsageConfig && savedUsageConfig.id != null ? '最大日均值大于分界值用企业倍数，否则用家庭倍数。' : '当前使用默认配置：分界值2吨/日，家庭5倍，企业2倍。' }}</span>-->
+            </template>
+          </div>
+          <div v-else>
+          <span style="margin-left: 10px; color: #e04545">
+            说明：当本次上报吨数小于上次上报吨数，也即出现了用水读数倒转时，该上报读数异常，将被拦截并列入该异常数据列表
+          </span>
+          </div>
         </div>
-        <div class="clear-btn" @click="clear">
-          <img src="@/assets/yuangong/icon4.png" alt="" style="margin-left: 10px" />
-          <span style="margin-left: 10%; color: #5a5a5a">清空</span>
-        </div>
-      </div>
-    </div>
-    <div class="yuangong-info" :class="{ 'usage-info': recordType === 'usage' }">
-      <div v-if="recordType === 'usage'" class="usage-config" v-loading="usageConfigLoading">
-        <span class="config-status">当前登录水厂配置</span>
-        <template v-if="usageConfigError">
-          <span class="config-error">{{ usageConfigError }}</span>
-          <el-button size="small" @click="loadUsageConfig">重试</el-button>
-        </template>
-        <template v-else-if="usageConfigLoaded">
-          <label class="config-item">
-            <span>用水规模分界值（吨/日）</span>
-            <el-input v-model="usageConfigForm.edgeValue" :disabled="!usageConfigEditing || usageConfigSaving" size="small" placeholder="请输入" />
-          </label>
-          <label class="config-item">
-            <span>家庭用户倍数</span>
-            <el-input v-model="usageConfigForm.homeMultiple" :disabled="!usageConfigEditing || usageConfigSaving" size="small" placeholder="请输入" />
-          </label>
-          <label class="config-item">
-            <span>企业用户倍数</span>
-            <el-input v-model="usageConfigForm.companyMultiple" :disabled="!usageConfigEditing || usageConfigSaving" size="small" placeholder="请输入" />
-          </label>
-          <el-checkbox v-if="usageConfigCanEdit" v-model="usageConfigEditing" :disabled="usageConfigSaving" @change="onUsageConfigEditChange">编辑</el-checkbox>
-          <template v-if="usageConfigEditing && usageConfigCanEdit">
-            <el-button type="success" size="small" :loading="usageConfigSaving" @click="saveUsageConfig">保存</el-button>
-            <el-button size="small" :disabled="usageConfigSaving" @click="cancelUsageConfigEdit">取消</el-button>
-          </template>
-          <span class="config-status">{{ savedUsageConfig && savedUsageConfig.id != null ? '最大日均值大于分界值用企业倍数，否则用家庭倍数。' : '当前使用默认配置：分界值2吨/日，家庭5倍，企业2倍。' }}</span>
-        </template>
-      </div>
-      <div class="command-box">
-        <div class="export-out-btn" @click="exportExcel">
-          <img src="@/assets/yonghu/icon1.3.png" alt="" />
-          <span style="margin-left: 6px; color: #5a5a5a">导出</span>
-        </div>
-        <div class="reflush" @click="reflush">
-          <img src="@/assets/yonghu/icon15.png" alt="" />
-        </div>
-        <span style="margin-left: 10px; color: #e04545">{{ exceptionDescription }}</span>
-      </div>
-      <div class="yuangong-table">
-        <el-table
+        <div class="yuangong-table">
+          <el-table
             ref="multipleTableRef"
             :data="ErrorRecordData"
             row-key="id"
@@ -118,170 +122,170 @@
             :header-cell-style="{ background: '#46B97E', color: '#FFFFFF'}"
             @selection-change="handleSelectionChange"
             id="yuangong-table"
-        >
-          <!--
-                    <el-table-column property="meterCode" :width="indexWidth" label="表号" />
-                    <el-table-column property="userId" :width="indexWidth" label="用户号" />
-                    <el-table-column property="readingCount" :width="indexWidth" label="读数" width="120" />
-                    <el-table-column property="valveStatus" :width="indexWidth" label="阀门状态" width="100" />
-                    <el-table-column property="battery" :width="indexWidth" label="电量" width="100" />
-                    <el-table-column property="signalValue" :width="indexWidth" label="信号" width="80" /> -->
-          <!-- <el-table-column type="selection" :selectable="selectable" :width="selectionWidth" align="center" /> -->
-          <!-- <el-table-column label="序号" :width="indexWidth" align="center" fixed="left" #default="scope">
-                        {{ scope.$index + 1 + (params.pageNo - 1) * params.pageSize }}
-                    </el-table-column> -->
-          <el-table-column property="userId" label="用户号" :width="workerNameWidth" align="center" />
-          <el-table-column label="用户名" :width="workerNameWidth" align="center">
-            <template #default="scope">
+          >
+            <!--
+                      <el-table-column property="meterCode" :width="indexWidth" label="表号" />
+                      <el-table-column property="userId" :width="indexWidth" label="用户号" />
+                      <el-table-column property="readingCount" :width="indexWidth" label="读数" width="120" />
+                      <el-table-column property="valveStatus" :width="indexWidth" label="阀门状态" width="100" />
+                      <el-table-column property="battery" :width="indexWidth" label="电量" width="100" />
+                      <el-table-column property="signalValue" :width="indexWidth" label="信号" width="80" /> -->
+            <!-- <el-table-column type="selection" :selectable="selectable" :width="selectionWidth" align="center" /> -->
+            <!-- <el-table-column label="序号" :width="indexWidth" align="center" fixed="left" #default="scope">
+                          {{ scope.$index + 1 + (params.pageNo - 1) * params.pageSize }}
+                      </el-table-column> -->
+            <el-table-column property="userId" label="用户号" :width="workerNameWidth" align="center" />
+            <el-table-column label="用户名" :width="workerNameWidth" align="center">
+              <template #default="scope">
               <span @click="handleUserInfo(scope.row)"
-                style="color: #46b97e; display: block; width: 100%; text-align: center; cursor: pointer">
+                    style="color: #46b97e; display: block; width: 100%; text-align: center; cursor: pointer">
                 {{ scope.row.userName }}
               </span>
-            </template>
-          </el-table-column>
-          <el-table-column property="meterCode" label="表号" :width="lastLoginTimeWidth" align="center" />
-          <el-table-column property="companyName" label="水厂" :width="roleWidth" align="center" />
-          <el-table-column property="meterVendor" label="品牌" :width="companyWidth" align="center" />
-          <el-table-column property="valveStatus" label="阀门" :width="phoneWidth" align="center" />
-          <el-table-column property="battery" label="电量" :width="phoneWidth" align="center" />
-          <el-table-column label="最近换表" :width="lastLoginTimeWidth" align="center">
-            <template #default="scope">
-              <div v-if="scope.row.factoryDate">
-                {{ formatDateTime(scope.row.factoryDate) }}
-              </div>
-              <span v-else>-</span>
-            </template>
-          </el-table-column>
-          <el-table-column label="上次读数" :width="roleWidth" align="center">
-            <template #default="scope">
+              </template>
+            </el-table-column>
+            <el-table-column property="meterCode" label="表号" :width="lastLoginTimeWidth" align="center" />
+            <el-table-column property="companyName" label="水厂" :width="roleWidth" align="center" />
+            <el-table-column property="meterVendor" label="品牌" :width="companyWidth" align="center" />
+            <el-table-column property="valveStatus" label="阀门" :width="phoneWidth" align="center" />
+            <el-table-column property="battery" label="电量" :width="phoneWidth" align="center" />
+            <el-table-column label="最近换表" :width="lastLoginTimeWidth" align="center">
+              <template #default="scope">
+                <div v-if="scope.row.factoryDate">
+                  {{ formatDateTime(scope.row.factoryDate) }}
+                </div>
+                <span v-else>-</span>
+              </template>
+            </el-table-column>
+            <el-table-column label="上次读数" :width="roleWidth" align="center">
+              <template #default="scope">
               <span @click="handlePrevReadingClick(scope.row)" style="color: #46b97e; cursor: pointer; display: block; width: 100%; text-align: center;">
                 {{ scope.row.prevReadingCount !== null && scope.row.prevReadingCount !== undefined ? scope.row.prevReadingCount : '-' }}
               </span>
-            </template>
-          </el-table-column>
-          <el-table-column label="上次上报" :width="lastLoginTimeWidth" align="center" #default="scope">
-            <div v-if="scope.row.prevCreateTime">
-              {{ formatDateTime(scope.row.prevCreateTime) }}
-            </div>
-            <span v-else>-</span>
-          </el-table-column>
-          <el-table-column label="本次读数" :width="roleWidth" align="center">
-            <template #default="scope">
+              </template>
+            </el-table-column>
+            <el-table-column label="上次上报" :width="lastLoginTimeWidth" align="center" #default="scope">
+              <div v-if="scope.row.prevCreateTime">
+                {{ formatDateTime(scope.row.prevCreateTime) }}
+              </div>
+              <span v-else>-</span>
+            </el-table-column>
+            <el-table-column label="本次读数" :width="roleWidth" align="center">
+              <template #default="scope">
               <span @click="handlePrevReadingClick(scope.row)" style="color: #46b97e; cursor: pointer; display: block; width: 100%; text-align: center;">
                 {{ scope.row.readingCount !== null && scope.row.readingCount !== undefined ? scope.row.readingCount : '-' }}
               </span>
-            </template>
-          </el-table-column>
-          <el-table-column label="本次上报" :width="lastLoginTimeWidth" align="center">
-            <template #header>
-              <div class="sortable-header" @click="toggleSort('time')">
-                <span>本次上报</span>
-                <div class="sort-icons">
-                  <div :class="['asc-icon', { active: isSortActive('time', 'asc') }]" />
-                  <div :class="['desc-icon', { active: isSortActive('time', 'desc') }]" />
+              </template>
+            </el-table-column>
+            <el-table-column label="本次上报" :width="lastLoginTimeWidth" align="center">
+              <template #header>
+                <div class="sortable-header" @click="toggleSort('time')">
+                  <span>本次上报</span>
+                  <div class="sort-icons">
+                    <div :class="['asc-icon', { active: isSortActive('time', 'asc') }]" />
+                    <div :class="['desc-icon', { active: isSortActive('time', 'desc') }]" />
+                  </div>
                 </div>
+              </template>
+              <template #default="scope">
+                <div v-if="scope.row.createTime">
+                  {{ formatDateTime(scope.row.createTime) }}
+                </div>
+                <span v-else>-</span>
+              </template>
+
+            </el-table-column>
+            <el-table-column label="操作" :width="operationWidth" align="center" fixed="right" #default="scope">
+              <div v-if="scope.row._expired">
+                <el-tag type="warning" size="large">已失效</el-tag>
               </div>
-            </template>
-            <template #default="scope">
-              <div v-if="scope.row.createTime">
-                {{ formatDateTime(scope.row.createTime) }}
+              <div v-else-if="scope.row.status === 0 || scope.row.status === null">
+                <el-button type="danger" size="large" @click="showIgnoreDialog(scope.row)">忽略</el-button>
+
+                <el-button type="success" size="large" @click="showValidDialog(scope.row)">有效</el-button>
               </div>
-              <span v-else>-</span>
-            </template>
+              <div v-else>
+                <el-tag type="info" size="large" v-if="scope.row.status === 1">忽略</el-tag>
+                <el-tag type="success" size="large" v-else-if="scope.row.status === 2">有效</el-tag>
+                <el-tag type="warning" size="large" v-else-if="scope.row.status === 3">已失效</el-tag>
+              </div>
+            </el-table-column>
+          </el-table>
+        </div>
+        <div class="page-box">
+          <div class="demo-pagination-block">
+            <el-pagination v-model:current-page="params.pageNo" v-model:page-size="params.pageSize" :page-sizes="[5, 10, 15]" layout="total,  prev, pager, next, jumper" :total="total"
+                           @current-change="handlePageChange"/>
+          </div>
+        </div>
+      </div>
 
-          </el-table-column>
-          <el-table-column label="操作" :width="operationWidth" align="center" fixed="right" #default="scope">
-            <div v-if="scope.row._expired">
-              <el-tag type="warning" size="large">已失效</el-tag>
+      <!-- 忽略确认弹窗 -->
+      <div class="confirm-dialog" v-if="confirmDialog.visible && confirmDialog.type === 'ignore'" @click.self="closeConfirmDialog">
+        <div class="confirm-dialog-content">
+          <div class="dialog-title">
+            <span>忽略确认</span>
+            <img src="@/assets/yonghu/icon4.png" alt="close" @click="closeConfirmDialog" class="dialog-close-icon" />
+          </div>
+          <div class="dialog-body">
+            <p class="dialog-text">是否确认忽略此条异常上报？</p>
+            <p class="dialog-subtext">该读数将被视为错误数据，不作计费依据。有效读数保持不变，后续上报仍与上次有效读数比较；忽略不代表免除用水费用。</p>
+            <div class="dialog-info-row">
+              <span>用户号：{{ confirmDialog.row.userId }}</span>
+              <span>表号：{{ confirmDialog.row.meterCode }}</span>
             </div>
-            <div v-else-if="scope.row.status === 0 || scope.row.status === null">
-              <el-button type="danger" size="large" @click="showIgnoreDialog(scope.row)">忽略</el-button>
-
-              <el-button type="success" size="large" @click="showValidDialog(scope.row)">有效</el-button>
+            <div class="dialog-info-row">
+              <span>本次读数：{{ confirmDialog.row.readingCount }} 吨</span>
             </div>
-            <div v-else>
-              <el-tag type="info" size="large" v-if="scope.row.status === 1">忽略</el-tag>
-              <el-tag type="success" size="large" v-else-if="scope.row.status === 2">有效</el-tag>
-              <el-tag type="warning" size="large" v-else-if="scope.row.status === 3">已失效</el-tag>
+          </div>
+          <div class="dialog-footer">
+            <div class="dialog-btn-cancel" @click="closeConfirmDialog">取消</div>
+            <div class="dialog-btn-confirm-danger" @click="handleConfirm">{{ isSubmitting ? '处理中…' : '确认忽略' }}</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 有效确认弹窗 -->
+      <div class="confirm-dialog" v-if="confirmDialog.visible && confirmDialog.type === 'valid'" @click.self="closeConfirmDialog">
+        <div class="confirm-dialog-content confirm-dialog-content--valid">
+          <div class="dialog-title">
+            <span>有效确认</span>
+            <img src="@/assets/yonghu/icon4.png" alt="close" @click="closeConfirmDialog" class="dialog-close-icon" />
+          </div>
+          <div class="dialog-body">
+            <p class="dialog-text">确认此条上报为有效抄表记录？</p>
+            <p class="dialog-subtext" v-if="isUsageConfirmation">本次用水量按间隔天数向上取整折算的日均值，超过该水表最大日均用水量乘以适用的家庭或企业倍数。请核实后确认；正常计费仍按实际用水量，基准按原上报时刻的日均值维护。</p>
+            <p class="dialog-subtext" v-else>本次上报所产生的水表倒转 / 读数回退为有效抄表记录，出于某些原因水表的确发生了倒转。</p>
+            <div class="dialog-info-row">
+              <span>用户号：{{ confirmDialog.row.userId }}</span>
+              <span>表号：{{ confirmDialog.row.meterCode }}</span>
             </div>
-          </el-table-column>
-        </el-table>
-      </div>
-      <div class="page-box">
-        <div class="demo-pagination-block">
-          <el-pagination v-model:current-page="params.pageNo" v-model:page-size="params.pageSize" :page-sizes="[5, 10, 15]" layout="total,  prev, pager, next, jumper" :total="total"
-                         @current-change="handlePageChange"/>
+            <div class="dialog-info-row">
+              <span>上次读数：{{ confirmDialog.row.prevReadingCount != null ? confirmDialog.row.prevReadingCount : '-' }} 吨</span>
+              <span>本次读数：{{ confirmDialog.row.readingCount }} 吨</span>
+            </div>
+            <p class="dialog-highlight" v-if="isUsageConfirmation">确认后将按本次实际用水量执行正常计费并扣款。</p>
+            <p class="dialog-highlight" v-else>确认后将从 <strong>{{ confirmDialog.row.readingCount }}</strong> 吨开始重新计费。</p>
+            <div class="dialog-checkbox-row">
+              <el-checkbox v-model="confirmDialog.checked" class="confirm-checkbox">
+                <span class="checkbox-text" v-if="isUsageConfirmation">我已核实本次用水真实有效，同意按现有计费规则扣款</span>
+                <span class="checkbox-text" v-else>我已明确该水表将从 <strong>{{ confirmDialog.row.readingCount }}</strong> 吨开始重新计费</span>
+              </el-checkbox>
+            </div>
+          </div>
+          <div class="dialog-footer">
+            <div class="dialog-btn-cancel" @click="closeConfirmDialog">取消</div>
+            <div class="dialog-btn-confirm" :class="{ disabled: !confirmDialog.checked || isSubmitting }" @click="handleConfirm">{{ isSubmitting ? '处理中…' : '确认有效' }}</div>
+          </div>
         </div>
       </div>
-    </div>
 
-    <!-- 忽略确认弹窗 -->
-    <div class="confirm-dialog" v-if="confirmDialog.visible && confirmDialog.type === 'ignore'" @click.self="closeConfirmDialog">
-      <div class="confirm-dialog-content">
-        <div class="dialog-title">
-          <span>忽略确认</span>
-          <img src="@/assets/yonghu/icon4.png" alt="close" @click="closeConfirmDialog" class="dialog-close-icon" />
-        </div>
-        <div class="dialog-body">
-          <p class="dialog-text">是否确认忽略此条异常上报？</p>
-          <p class="dialog-subtext">该读数将被视为错误数据，不作计费依据。有效读数保持不变，后续上报仍与上次有效读数比较；忽略不代表免除用水费用。</p>
-          <div class="dialog-info-row">
-            <span>用户号：{{ confirmDialog.row.userId }}</span>
-            <span>表号：{{ confirmDialog.row.meterCode }}</span>
-          </div>
-          <div class="dialog-info-row">
-            <span>本次读数：{{ confirmDialog.row.readingCount }} 吨</span>
-          </div>
-        </div>
-        <div class="dialog-footer">
-          <div class="dialog-btn-cancel" @click="closeConfirmDialog">取消</div>
-          <div class="dialog-btn-confirm-danger" @click="handleConfirm">{{ isSubmitting ? '处理中…' : '确认忽略' }}</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- 有效确认弹窗 -->
-    <div class="confirm-dialog" v-if="confirmDialog.visible && confirmDialog.type === 'valid'" @click.self="closeConfirmDialog">
-      <div class="confirm-dialog-content confirm-dialog-content--valid">
-        <div class="dialog-title">
-          <span>有效确认</span>
-          <img src="@/assets/yonghu/icon4.png" alt="close" @click="closeConfirmDialog" class="dialog-close-icon" />
-        </div>
-        <div class="dialog-body">
-          <p class="dialog-text">确认此条上报为有效抄表记录？</p>
-          <p class="dialog-subtext" v-if="isUsageConfirmation">本次用水量按间隔天数向上取整折算的日均值，超过该水表最大日均用水量乘以适用的家庭或企业倍数。请核实后确认；正常计费仍按实际用水量，基准按原上报时刻的日均值维护。</p>
-          <p class="dialog-subtext" v-else>本次上报所产生的水表倒转 / 读数回退为有效抄表记录，出于某些原因水表的确发生了倒转。</p>
-          <div class="dialog-info-row">
-            <span>用户号：{{ confirmDialog.row.userId }}</span>
-            <span>表号：{{ confirmDialog.row.meterCode }}</span>
-          </div>
-          <div class="dialog-info-row">
-            <span>上次读数：{{ confirmDialog.row.prevReadingCount != null ? confirmDialog.row.prevReadingCount : '-' }} 吨</span>
-            <span>本次读数：{{ confirmDialog.row.readingCount }} 吨</span>
-          </div>
-          <p class="dialog-highlight" v-if="isUsageConfirmation">确认后将按本次实际用水量执行正常计费并扣款。</p>
-          <p class="dialog-highlight" v-else>确认后将从 <strong>{{ confirmDialog.row.readingCount }}</strong> 吨开始重新计费。</p>
-          <div class="dialog-checkbox-row">
-            <el-checkbox v-model="confirmDialog.checked" class="confirm-checkbox">
-              <span class="checkbox-text" v-if="isUsageConfirmation">我已核实本次用水真实有效，同意按现有计费规则扣款</span>
-              <span class="checkbox-text" v-else>我已明确该水表将从 <strong>{{ confirmDialog.row.readingCount }}</strong> 吨开始重新计费</span>
-            </el-checkbox>
-          </div>
-        </div>
-        <div class="dialog-footer">
-          <div class="dialog-btn-cancel" @click="closeConfirmDialog">取消</div>
-          <div class="dialog-btn-confirm" :class="{ disabled: !confirmDialog.checked || isSubmitting }" @click="handleConfirm">{{ isSubmitting ? '处理中…' : '确认有效' }}</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- 用户信息编辑弹窗 -->
-    <userInfoVue
-      v-if="user_info_dialogFormVisible"
-      :user_info_dialogFormVisible="user_info_dialogFormVisible"
-      :data="currentUserRow"
-      @close="closeUserInfoDialog"
-    />
+      <!-- 用户信息编辑弹窗 -->
+      <userInfoVue
+        v-if="user_info_dialogFormVisible"
+        :user_info_dialogFormVisible="user_info_dialogFormVisible"
+        :data="currentUserRow"
+        @close="closeUserInfoDialog"
+      />
 
     </template>
   </div>
@@ -312,7 +316,7 @@ export default {
       usageConfigLoading: false,
       usageConfigSaving: false,
       usageConfigEditing: false,
-      usageConfigCanEdit: false,
+      // usageConfigCanEdit: false,
       usageConfigError: '',
       usageConfigRequestVersion: 0,
       params: {
@@ -502,7 +506,7 @@ export default {
     },
     applyUsageConfig(data) {
       this.savedUsageConfig = data.config ?? null;
-      this.usageConfigCanEdit = data.canEdit === true;
+      // this.usageConfigCanEdit = data.canEdit === true;
       this.usageConfigLoaded = true;
       this.usageConfigEditing = false;
       this.resetUsageConfigForm();
@@ -513,7 +517,7 @@ export default {
       this.usageConfigLoading = true;
       this.usageConfigEditing = false;
       this.usageConfigSaving = false;
-      this.usageConfigCanEdit = false;
+      // this.usageConfigCanEdit = false;
       this.savedUsageConfig = null;
       this.usageConfigError = '';
       this.resetUsageConfigForm();
@@ -532,7 +536,7 @@ export default {
     onUsageConfigEditChange(editing) { if (!editing) this.resetUsageConfigForm(); },
     cancelUsageConfigEdit() { this.usageConfigEditing = false; this.resetUsageConfigForm(); },
     async saveUsageConfig() {
-      if (this.usageConfigSaving || !this.usageConfigCanEdit || !this.usageConfigLoaded || !this.usageConfigEditing) return;
+      if (this.usageConfigSaving || !this.usageConfigLoaded || !this.usageConfigEditing) return;
       const values = Object.fromEntries(Object.entries(this.usageConfigForm).map(([key, value]) => [key, String(value).trim()]));
       if (Object.values(values).some(value => !/^\d{1,16}(\.\d{1,2})?$/.test(value) || Number(value) <= 0)) {
         ElMessage.error('请完整填写三个正数，最多16位整数和2位小数');
@@ -630,37 +634,37 @@ export default {
       if (this.isSubmitting) return;
       this.isSubmitting = true;
       service
-          .post(`/meterReportErrorRecord/editErrorRecord?id=${id}&status=${status}`, {
-          }, {
-            headers: {
-              Authorization: this.token,
-              token: this.token,
-            },
-          })
-          .then((response) => {
-            this.isSubmitting = false;
-            if (response.code === 200) {
-              if (response.data && response.data.expired) {
-                // 该异常数据已过期，本地标记已失效
-                this.closeConfirmDialog();
-                const target = this.ErrorRecordData.find(r => r.id === id);
-                if (target) {
-                  target._expired = true;
-                }
-                ElMessage.info(response.data.message || "该记录已过期，水表读数已恢复正常");
-              } else {
-                ElMessage.success("修改成功");
-                this.closeConfirmDialog();
-                this.getErrorReportRecordData();
+        .post(`/meterReportErrorRecord/editErrorRecord?id=${id}&status=${status}`, {
+        }, {
+          headers: {
+            Authorization: this.token,
+            token: this.token,
+          },
+        })
+        .then((response) => {
+          this.isSubmitting = false;
+          if (response.code === 200) {
+            if (response.data && response.data.expired) {
+              // 该异常数据已过期，本地标记已失效
+              this.closeConfirmDialog();
+              const target = this.ErrorRecordData.find(r => r.id === id);
+              if (target) {
+                target._expired = true;
               }
+              ElMessage.info(response.data.message || "该记录已过期，水表读数已恢复正常");
             } else {
-              ElMessage.error(response.msg);
+              ElMessage.success("修改成功");
+              this.closeConfirmDialog();
+              this.getErrorReportRecordData();
             }
-          })
-          .catch((error) => {
-            this.isSubmitting = false;
-            ElMessage.error(error);
-          }).finally(() => { this.isSubmitting = false; });
+          } else {
+            ElMessage.error(response.msg);
+          }
+        })
+        .catch((error) => {
+          this.isSubmitting = false;
+          ElMessage.error(error);
+        }).finally(() => { this.isSubmitting = false; });
     },
     handleUserInfo(row) {
       if (this.staffPermissionIds.includes(17)) {
@@ -728,44 +732,44 @@ export default {
     getRegionData() {
       let url = `/getRegion?companyId=${this.deleteRegion.companyId}`;
       service
-          .get(`${url}`, {
-            headers: {
-              Authorization: this.token,
-            },
-          })
-          .then((response) => {
-            if (response.code === 200) {
-              this.regionList = response.data.map((item) => {
-                return {
-                  id: item.regionId,
-                  value: item.regionId,
-                  label: item.regionName,
-                };
-              });
-            }
-          })
-          .catch((error) => {
-            ElMessage.error("获取区域数据失败");
-          });
+        .get(`${url}`, {
+          headers: {
+            Authorization: this.token,
+          },
+        })
+        .then((response) => {
+          if (response.code === 200) {
+            this.regionList = response.data.map((item) => {
+              return {
+                id: item.regionId,
+                value: item.regionId,
+                label: item.regionName,
+              };
+            });
+          }
+        })
+        .catch((error) => {
+          ElMessage.error("获取区域数据失败");
+        });
     },
     getCompanyList() {
       service
-          .get("/getAllUnblockCompany")
-          .then((response) => {
-            if (response.code === 200) {
-              this.companyList = response.data.map((item) => {
-                return {
-                  id: item.companyId,
-                  name: item.companyName,
-                };
-              });
-            } else {
-              ElMessage.error(response.msg);
-            }
-          })
-          .catch((error) => {
-            console.error(error);
-          });
+        .get("/getAllUnblockCompany")
+        .then((response) => {
+          if (response.code === 200) {
+            this.companyList = response.data.map((item) => {
+              return {
+                id: item.companyId,
+                name: item.companyName,
+              };
+            });
+          } else {
+            ElMessage.error(response.msg);
+          }
+        })
+        .catch((error) => {
+          console.error(error);
+        });
     },
     getErrorReportRecordData() {
       if (this.recordType !== 'report' && this.recordType !== 'usage') return;
@@ -788,28 +792,28 @@ export default {
         }
       }
       service
-          .post("/meterReportErrorRecord/queryErrorRecord", {
-            ...this.params,
-            errorType: this.recordType === 'usage' ? 2 : 1,
-          }, {
-            headers: {
-              Authorization: token,
-              token: token,
-            },
-          })
-          .then((response) => {
-            if (requestId !== this.requestId) return;
-            if (response.code === 200) {
-              this.total = response.data.total;
-              this.ErrorRecordData = response.data.records;
-            } else {
-              ElMessage.error(response.msg);
-            }
-          })
-          .catch((error) => {
-            if (requestId !== this.requestId) return;
-            ElMessage.error(error);
-          }).finally(()=>{
+        .post("/meterReportErrorRecord/queryErrorRecord", {
+          ...this.params,
+          errorType: this.recordType === 'usage' ? 2 : 1,
+        }, {
+          headers: {
+            Authorization: token,
+            token: token,
+          },
+        })
+        .then((response) => {
+          if (requestId !== this.requestId) return;
+          if (response.code === 200) {
+            this.total = response.data.total;
+            this.ErrorRecordData = response.data.records;
+          } else {
+            ElMessage.error(response.msg);
+          }
+        })
+        .catch((error) => {
+          if (requestId !== this.requestId) return;
+          ElMessage.error(error);
+        }).finally(()=>{
         if (requestId === this.requestId) this.isLoading = false
       });
     },
@@ -1154,11 +1158,11 @@ export default {
   margin-bottom: 48px;
 }
 
-.usage-config { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; padding: 10px 0; border-bottom: 1px solid #edf0ed; flex-shrink: 0; min-height: 36px; }
-.config-item { display: flex; align-items: center; gap: 6px; color: #5a5a5a; font-size: 13px; }
-.config-item .el-input { width: 110px; }
-.config-status { font-size: 12px; color: #757575; }
-.config-error { font-size: 13px; color: #e04545; }
+.usage-config { display: flex; align-items: center; flex-wrap: wrap; gap: 15px; flex-shrink: 0; min-height: 36px; }
+.config-item { display: flex; align-items: center; gap: 6px; color: #5a5a5a; font-size: 18px; }
+.config-item .el-input { width: 80px; }
+.config-status { font-size: 18px; color: #757575; }
+.config-error { font-size: 18px; color: #e04545; }
 
 .page-box {
   height: 40px;
@@ -1522,6 +1526,14 @@ export default {
 .cancel-btn {
   background-color: #fff;
   margin-right: 5%;
+}
+.config-checkbox {
+  white-space: nowrap;
+  font-size: 18px;
+}
+
+:deep(.config-checkbox .el-checkbox__label) {
+  font-size: 18px;
 }
 </style>
 
