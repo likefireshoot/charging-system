@@ -110,6 +110,10 @@
           <img src="@/assets/yonghu/icon16.png" alt="" />
           <span style="margin-left:10%;">搜索</span>
         </el-button>
+          <div class="clear-btn" @click="clear">
+            <img src="@/assets/yonghu/icon4.png" alt="" style="margin-left: 10px" />
+            <span style="font-size: 18px; margin-left: 10%; color: #5a5a5a">清空</span>
+          </div>
         </div>
 
     </div>
@@ -288,7 +292,21 @@ import service from '@/api/request';
 import { useRoute } from 'vue-router'
 const route = useRoute()
 
-
+const clear = () => {
+  searchKeyword.value = ''
+  reportStatus.value = ''
+  waterCompareOpt.value = ''
+  waterCompareVal.value = null
+  searchParams.region = ''
+  searchParams.codeBook = ''
+  codeBookList.value = []
+  allCodeBookList.value = []
+  currentPage.value = 1
+  reportList.value = []
+  total.value = 0
+  summaryRow.value[0].totalDeltaWater = 0
+  summaryRow.value[0].totalFeeThisTime = 0
+}
 
 // 简易防抖：用于用户搜索输入
 let searchTimer = null;
@@ -1055,7 +1073,7 @@ onBeforeUnmount(() => {
 
 .buttons {
   display: flex;
-  width: 110px;
+  width: 240px;
   height: 100%;
   align-items: center;
   // 消除 ElementPlus 默认相邻按钮左边距

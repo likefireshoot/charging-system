@@ -57,30 +57,67 @@
 
           <el-table-column label="已审核" align="center">
           <el-table-column label="成功抄表" align="center">
-            <el-table-column prop="normalCount" label="正常" align="center" min-width="90"/>
-            <el-table-column prop="noChangeCount" label="表数未动" align="center" min-width="100"/>
-            <el-table-column prop="endNotReachCount" label="止码未到" align="center" min-width="100"/>
+            <el-table-column prop="normalCount" label="正常" align="center" min-width="90">
+              <template #default="scope">
+                <span class="link-num" @click="openStatusDialog(scope.row, '正常', '审核通过')">{{ scope.row.normalCount }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column prop="noChangeCount" label="表数未动" align="center" min-width="100">
+              <template #default="scope">
+                <span class="link-num" @click="openStatusDialog(scope.row, '表数未动', '审核通过')">{{ scope.row.noChangeCount }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column prop="endNotReachCount" label="止码未到" align="center" min-width="100">
+              <template #default="scope">
+                <span class="link-num" @click="openStatusDialog(scope.row, '止码未到', '审核通过')">{{ scope.row.endNotReachCount }}</span>
+              </template>
+            </el-table-column>
             <el-table-column prop="readTotalCount" label="合计" align="center" min-width="100"/>
           </el-table-column>
 
           <el-table-column label="异常抄表" align="center">
-            <el-table-column prop="meterUnclearCount" label="表不清" align="center" min-width="90"/>
-            <el-table-column prop="meterBrokenCount" label="表破" align="center" min-width="90"/>
-            <el-table-column prop="meterBuriedCount" label="表埋" align="center" min-width="90"/>
-            <el-table-column prop="tempRemoveCount" label="暂拆" align="center" min-width="90"/>
-            <el-table-column prop="otherCount" label="其它" align="center" min-width="90"/>
-            <el-table-column prop="noOneHomeCount" label="无人在家" align="center" min-width="100"/>
+            <el-table-column prop="meterUnclearCount" label="表不清" align="center" min-width="90">
+              <template #default="scope">
+                <span class="link-num" @click="openStatusDialog(scope.row, '表不清', '审核通过')">{{ scope.row.meterUnclearCount }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column prop="meterBrokenCount" label="表破" align="center" min-width="90">
+              <template #default="scope">
+                <span class="link-num" @click="openStatusDialog(scope.row, '表破', '审核通过')">{{ scope.row.meterBrokenCount }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column prop="meterBuriedCount" label="表埋" align="center" min-width="90">
+              <template #default="scope">
+                <span class="link-num" @click="openStatusDialog(scope.row, '表埋', '审核通过')">{{ scope.row.meterBuriedCount }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column prop="tempRemoveCount" label="暂拆" align="center" min-width="90">
+              <template #default="scope">
+                <span class="link-num" @click="openStatusDialog(scope.row, '暂拆', '审核通过')">{{ scope.row.tempRemoveCount }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column prop="otherCount" label="其它" align="center" min-width="90">
+              <template #default="scope">
+                <span class="link-num" @click="openStatusDialog(scope.row, '其他', '审核通过')">{{ scope.row.otherCount }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column prop="noOneHomeCount" label="无人在家" align="center" min-width="100">
+              <template #default="scope">
+                <span class="link-num" @click="openStatusDialog(scope.row, '无人在家', '审核通过')">{{ scope.row.noOneHomeCount }}</span>
+              </template>
+            </el-table-column>
             <el-table-column prop="unreadTotalCount" label="合计" align="center" min-width="100"/>
           </el-table-column>
           </el-table-column>
           <el-table-column prop="cacheReadCount" label="已抄表未审核" align="center" min-width="100">
             <template #header>已抄表<br>未审核</template>
+            <template #default="scope">
+              <span class="link-num" @click="openStatusDialog(scope.row, '已抄表未审核', '待审核')">{{ scope.row.cacheReadCount }}</span>
+            </template>
           </el-table-column>
           <el-table-column prop="noReadCount" label="未抄表" align="center" min-width="100">
             <template #default="scope">
-                <span class="link-num" @click="scope.row.noReadCount > 0 && openNoReadDialog(scope.row)">
-                  {{ scope.row.noReadCount }}
-                </span>
+                <span class="link-num" @click="scope.row.noReadCount > 0 && openStatusDialog(scope.row, '未抄表')">{{ scope.row.noReadCount }}</span>
             </template>
           </el-table-column>
 
@@ -129,7 +166,7 @@
       <div class="title">
         <div style="margin-left: 10px; display: flex; align-items: center">
           <img src="@/assets/yonghu/icon7.png" alt="" style="margin-right: 8px" />
-          <span style="font-size: 20px">未抄表明细</span>
+          <span style="font-size: 20px">抄表情况明细</span>
         </div>
         <div style="margin-right: 10px; cursor: pointer" @click="handleNoReadDialogClose">
           <img src="@/assets/close.png" alt="" />
@@ -151,7 +188,7 @@
           </div>
           <div class="noread-input" >
             <span>抄表状态</span>
-            <el-select v-model="noreadParams.reportStatus" clearable placeholder="选择抄表状态" @change="noreadSearch">
+            <el-select v-model="noreadParams.reportStatus" clearable placeholder="选择抄表状态" @change="handleReportStatusChange">
               <el-option label="正常" value="正常"></el-option>
               <el-option label="表数未动" value="表数未动" />
               <el-option label="止码未到" value="止码未到" />
@@ -164,6 +201,14 @@
               <el-option label="未抄表" value="未抄表" />
             </el-select>
           </div>
+<!--          <div class="noread-input" >-->
+<!--            <span>审核状态</span>-->
+<!--            <el-select v-model="noreadParams.processStatus" clearable placeholder="选择审核状态" @change="noreadSearch">-->
+<!--              <el-option label="待审核" value="0"></el-option>-->
+<!--              <el-option label="审核通过" value="1" />-->
+<!--              <el-option label="已拒绝" value="2" />-->
+<!--            </el-select>-->
+<!--          </div>-->
           <div class="noread-input" >
             <span>用户号</span>
             <el-input v-model="noreadParams.userId" placeholder="请输入用户号" />
@@ -341,6 +386,7 @@ export default {
         regionId: null,
         codeBookId: null,
         reportStatus: null,
+        processStatus: null,
         userId: "",
         userName: "",
         userAddr: "",
@@ -479,10 +525,29 @@ export default {
         this.isLoading = false;
       }
     },
-    // 打开未抄表明细弹窗，带入点击行的区域id + 当前报表月份
-    openNoReadDialog(row) {
+    // 打开明细弹窗，带入点击行的区域id + 当前报表月份
+    openStatusDialog(row, statusName, processStatusVal) {
+      // 数字是0的时候不点开
+      const numMap = {
+        '正常': row.normalCount,
+        '表数未动': row.noChangeCount,
+        '止码未到': row.endNotReachCount,
+        '表不清': row.meterUnclearCount,
+        '表破': row.meterBrokenCount,
+        '表埋': row.meterBuriedCount,
+        '暂拆': row.tempRemoveCount,
+        '其他': row.otherCount,
+        '无人在家': row.noOneHomeCount,
+        '已抄表未审核': row.cacheReadCount,
+        '未抄表': row.noReadCount
+      }
+      if(statusName && numMap[statusName] === 0){
+        ElMessage.warning('该状态暂无数据')
+        return
+      }
       this.noreadParams.regionId = row.regionId;
-      this.noreadParams.reportStatus = '未抄表';
+      this.noreadParams.reportStatus = statusName;
+      this.noreadParams.processStatus = processStatusVal;
       this.noreadParams.reportMonth = this.timeRange;
       if(this.companyId !== 1){
         this.noreadParams.companyId = this.companyId
@@ -504,6 +569,7 @@ export default {
         regionId: null,
         codeBookId: null,
         reportStatus: null,
+        processStatus: null,
         userId: "",
         userName: "",
         userAddr: "",
@@ -581,6 +647,7 @@ export default {
         regionId: null,
         codeBookId: null,
         reportStatus: null,
+        processStatus: null,
         userId: "",
         userName: "",
         userAddr: "",
@@ -621,6 +688,7 @@ export default {
           userName: this.noreadParams.userName,
           userAddr: this.noreadParams.userAddr,
           reportStatus: this.noreadParams.reportStatus,
+          processStatus: this.noreadParams.processStatus,
           page: this.noreadCurrentPage,
           pageSize: this.noreadPageSize
         }
@@ -673,6 +741,7 @@ export default {
             userName: this.noreadParams.userName,
             userAddr: this.noreadParams.userAddr,
             reportStatus: this.noreadParams.reportStatus,
+            processStatus: this.noreadParams.processStatus,
           },
           responseType: "blob",
           headers: { Authorization: token, token: token }
@@ -693,6 +762,16 @@ export default {
         console.error(err);
       }
     },
+    handleReportStatusChange(val) {
+      if (val === '未抄表') {
+        this.noreadParams.processStatus = null
+      } else if (val === '已抄表未审核') {
+        this.noreadParams.processStatus = '待审核'
+      } else {
+        this.noreadParams.processStatus = '审核通过'
+      }
+      this.noreadSearch()
+    }
   },
 };
 </script>
