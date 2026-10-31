@@ -335,7 +335,7 @@ export default {
       currentPage: 1,
       pageSize: 30,
       totalWater: 0,
-      maxWaterUsage: null,
+      maxRecentWater: null,
       maxDailyUsageState: "loading",
       meterRequestId: 0,
       loadingMeterScope: "",
@@ -371,8 +371,8 @@ export default {
     maxDailyUsageText() {
       if (this.maxDailyUsageState === "loading") return "加载中…";
       if (this.maxDailyUsageState === "error") return "获取失败";
-      if (this.maxWaterUsage == null) return "暂无基准";
-      return `${this.maxWaterUsage.toFixed(2)} 吨/日`;
+      if (this.maxRecentWater == null) return "暂无基准";
+      return `${this.maxRecentWater.toFixed(2)} 吨/日`;
     }
   },
   mounted() {
@@ -417,7 +417,7 @@ export default {
       this.loadingMeterScope = request.scope;
       this.isLoading = true;
       this.loading = true;
-      this.maxWaterUsage = null;
+      this.maxRecentWater = null;
       this.maxDailyUsageState = "loading";
       return request;
     },
@@ -425,14 +425,14 @@ export default {
       return request.id === this.meterRequestId && request.scope === this.meterScopeKey;
     },
     updateMaxDailyUsage(data) {
-      // 直接显示后端从user_meter_bind.max_water_usage读取的值，不从抄表列表计算历史最大值。
-      const maxWater = data.maxWaterUsage == null ? null : Number(data.maxWaterUsage);
-      if (!Object.prototype.hasOwnProperty.call(data, 'maxWaterUsage')
+      // 直接显示后端从user_meter_bind.max_recent_water读取的值，不从抄表列表计算历史最大值。
+      const maxWater = data.maxRecentWater == null ? null : Number(data.maxRecentWater);
+      if (!Object.prototype.hasOwnProperty.call(data, 'maxRecentWater')
           || (maxWater != null && (!Number.isFinite(maxWater) || maxWater <= 0))) {
         this.maxDailyUsageState = "error";
         return;
       }
-      this.maxWaterUsage = maxWater;
+      this.maxRecentWater = maxWater;
       this.maxDailyUsageState = "ready";
     },
     isCurrentMeter(row) {

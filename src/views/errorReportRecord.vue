@@ -88,7 +88,7 @@
             row-key="id"
             style="width: 100%; height: 100%; table-layout: fixed; overflow-y: auto;"
             border
-            :header-cell-style="{ background: '#46B97E', color: '#FFFFFF' }"
+            :header-cell-style="{ background: '#46B97E', color: '#FFFFFF', fontSize: '16px', height: '40px', padding: '8px 0' }"
             @selection-change="handleSelectionChange"
             id="yuangong-table"
         >
@@ -104,9 +104,6 @@
                         {{ scope.$index + 1 + (params.pageNo - 1) * params.pageSize }}
                     </el-table-column> -->
           <el-table-column property="userId" label="用户号" :width="workerNameWidth" align="center" />
-          <el-table-column label="异常类型" width="110" align="center">
-            <template #default="scope">{{ scope.row.errorType === 2 ? '吨数过大' : '读数异常' }}</template>
-          </el-table-column>
           <el-table-column label="用户名" :width="workerNameWidth" align="center">
             <template #default="scope">
               <span @click="handleUserInfo(scope.row)"
@@ -165,12 +162,6 @@
               <span v-else>-</span>
             </template>
 
-          </el-table-column>
-          <el-table-column v-if="recordType === 'usage'" label="本次用水量(吨)" width="140" align="center">
-            <template #default="scope">{{ formatUsage(scope.row.deltaWater) }}</template>
-          </el-table-column>
-          <el-table-column v-if="recordType === 'usage'" label="最大日均用水量(吨/日)" width="190" align="center">
-            <template #default="scope">{{ scope.row.maxWaterUsage == null ? '暂无基准' : formatUsage(scope.row.maxWaterUsage) }}</template>
           </el-table-column>
           <el-table-column label="操作" :width="operationWidth" align="center" fixed="right" #default="scope">
             <div v-if="scope.row._expired">
@@ -241,7 +232,7 @@
             <span>上次读数：{{ confirmDialog.row.prevReadingCount != null ? confirmDialog.row.prevReadingCount : '-' }} 吨</span>
             <span>本次读数：{{ confirmDialog.row.readingCount }} 吨</span>
           </div>
-          <p class="dialog-highlight" v-if="isUsageConfirmation">确认后将按本次实际用水量 <strong>{{ formatUsage(confirmDialog.row.deltaWater) }}</strong> 吨执行正常计费并扣款。</p>
+          <p class="dialog-highlight" v-if="isUsageConfirmation">确认后将按本次实际用水量执行正常计费并扣款。</p>
           <p class="dialog-highlight" v-else>确认后将从 <strong>{{ confirmDialog.row.readingCount }}</strong> 吨开始重新计费。</p>
           <div class="dialog-checkbox-row">
             <el-checkbox v-model="confirmDialog.checked" class="confirm-checkbox">
@@ -289,6 +280,7 @@ export default {
   data() {
     return {
       params: {
+        company: null,
         status: null,
         regionName: null,
         userId: null,
@@ -377,10 +369,14 @@ export default {
       this.recordType = recordType === 'usage' ? 'usage' : 'report';
     },
     recordType() {
-      this.params.pageNo = 1;
+      this.clear();
       this.ErrorRecordData = [];
       this.total = 0;
       this.getErrorReportRecordData();
+      this.$nextTick(() => {
+        this.calculateColumnWidths();
+        this.$refs.multipleTableRef?.doLayout();
+      });
     },
     // "params.pageNo": {
     //   handler() {
@@ -390,7 +386,7 @@ export default {
   },
   computed: {
     isUsageConfirmation() {
-      return this.confirmDialog.row && this.confirmDialog.row.errorType === 2;
+      return this.recordType === 'usage';
     },
     exceptionDescription() {
       return this.recordType === 'usage'
@@ -452,9 +448,6 @@ export default {
     }
   },
   methods: {
-    formatUsage(value) {
-      return value == null || !Number.isFinite(Number(value)) ? '-' : Number(value).toFixed(2);
-    },
     // ****** 手动处理分页变化，避免 watch 循环 ******
     handlePageChange(page) {
       if (this.isLoading) return;
@@ -668,9 +661,7 @@ export default {
       this.isLoading = true
       //this.params.companyId = this.params.company ? this.params.company : this.companyId;
       if (this.companyId === 1) {
-        if (this.params.company) {
-          this.params.companyId = this.params.company; // 所属水厂ID
-        }
+        this.params.companyId = this.params.company || null; // 所属水厂ID
       } else {
         this.params.companyId = this.companyId; // 所属水厂ID
       }
@@ -715,7 +706,10 @@ export default {
       this.getErrorReportRecordData();
     },
     clear() {
+      this.sortField = "time";
+      this.sortOrder = "desc";
       this.params = {
+        company: null,
         status: null,
         regionName: null,
         userId: null,
