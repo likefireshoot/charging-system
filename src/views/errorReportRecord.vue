@@ -70,7 +70,34 @@
         </div>
       </div>
     </div>
-    <div class="yuangong-info">
+    <div class="yuangong-info" :class="{ 'usage-info': recordType === 'usage' }">
+      <div v-if="recordType === 'usage'" class="usage-config" v-loading="usageConfigLoading">
+        <span class="config-status">当前登录水厂配置</span>
+        <template v-if="usageConfigError">
+          <span class="config-error">{{ usageConfigError }}</span>
+          <el-button size="small" @click="loadUsageConfig">重试</el-button>
+        </template>
+        <template v-else-if="usageConfigLoaded">
+          <label class="config-item">
+            <span>用水规模分界值（吨/日）</span>
+            <el-input v-model="usageConfigForm.edgeValue" :disabled="!usageConfigEditing || usageConfigSaving" size="small" placeholder="请输入" />
+          </label>
+          <label class="config-item">
+            <span>家庭用户倍数</span>
+            <el-input v-model="usageConfigForm.homeMultiple" :disabled="!usageConfigEditing || usageConfigSaving" size="small" placeholder="请输入" />
+          </label>
+          <label class="config-item">
+            <span>企业用户倍数</span>
+            <el-input v-model="usageConfigForm.companyMultiple" :disabled="!usageConfigEditing || usageConfigSaving" size="small" placeholder="请输入" />
+          </label>
+          <el-checkbox v-if="usageConfigCanEdit" v-model="usageConfigEditing" :disabled="usageConfigSaving" @change="onUsageConfigEditChange">编辑</el-checkbox>
+          <template v-if="usageConfigEditing && usageConfigCanEdit">
+            <el-button type="success" size="small" :loading="usageConfigSaving" @click="saveUsageConfig">保存</el-button>
+            <el-button size="small" :disabled="usageConfigSaving" @click="cancelUsageConfigEdit">取消</el-button>
+          </template>
+          <span class="config-status">{{ savedUsageConfig && savedUsageConfig.id != null ? '最大日均值大于分界值用企业倍数，否则用家庭倍数。' : '当前使用默认配置：分界值2吨/日，家庭5倍，企业2倍。' }}</span>
+        </template>
+      </div>
       <div class="command-box">
         <div class="export-out-btn" @click="exportExcel">
           <img src="@/assets/yonghu/icon1.3.png" alt="" />
@@ -88,7 +115,7 @@
             row-key="id"
             style="width: 100%; height: 100%; table-layout: fixed; overflow-y: auto;"
             border
-            :header-cell-style="{ background: '#46B97E', color: '#FFFFFF', fontSize: '16px', height: '40px', padding: '8px 0' }"
+            :header-cell-style="{ background: '#46B97E', color: '#FFFFFF'}"
             @selection-change="handleSelectionChange"
             id="yuangong-table"
         >
@@ -222,7 +249,7 @@
         </div>
         <div class="dialog-body">
           <p class="dialog-text">确认此条上报为有效抄表记录？</p>
-          <p class="dialog-subtext" v-if="isUsageConfirmation">本次用水量按间隔天数向上取整折算的日均值，超过该水表最大日均用水量的10倍。请核实后确认；正常计费仍按实际用水量，基准按原上报时刻的日均值维护。</p>
+          <p class="dialog-subtext" v-if="isUsageConfirmation">本次用水量按间隔天数向上取整折算的日均值，超过该水表最大日均用水量乘以适用的家庭或企业倍数。请核实后确认；正常计费仍按实际用水量，基准按原上报时刻的日均值维护。</p>
           <p class="dialog-subtext" v-else>本次上报所产生的水表倒转 / 读数回退为有效抄表记录，出于某些原因水表的确发生了倒转。</p>
           <div class="dialog-info-row">
             <span>用户号：{{ confirmDialog.row.userId }}</span>
@@ -279,6 +306,15 @@ export default {
   },
   data() {
     return {
+      usageConfigForm: { edgeValue: '2', homeMultiple: '5', companyMultiple: '2' },
+      savedUsageConfig: null,
+      usageConfigLoaded: false,
+      usageConfigLoading: false,
+      usageConfigSaving: false,
+      usageConfigEditing: false,
+      usageConfigCanEdit: false,
+      usageConfigError: '',
+      usageConfigRequestVersion: 0,
       params: {
         company: null,
         status: null,
@@ -369,6 +405,12 @@ export default {
       this.recordType = recordType === 'usage' ? 'usage' : 'report';
     },
     recordType() {
+      if (this.recordType === 'usage') {
+        this.loadUsageConfig();
+      } else {
+        this.usageConfigRequestVersion++;
+        this.usageConfigEditing = false;
+      }
       this.clear();
       this.ErrorRecordData = [];
       this.total = 0;
@@ -390,7 +432,7 @@ export default {
     },
     exceptionDescription() {
       return this.recordType === 'usage'
-        ? '说明：间隔≤24小时按1天、≤48小时按2天，以此类推；本次用水量÷折算天数严格大于最大日均用水量的10倍时，暂停本次计费并等待确认。'
+        ? '说明：间隔≤24小时按1天、≤48小时按2天，以此类推；本次日均用水量严格大于最大日均用水量×本水厂适用倍数时拦截，未配置时默认分界值2吨/日，家庭5倍、企业2倍；暂停本次计费并等待确认。'
         : '说明：当本次上报吨数小于上次上报吨数，也即出现了用水读数倒转时，该上报读数异常，将被拦截并列入该异常数据列表';
     },
     // 每列的百分比宽度（仅计算实际使用列，总计 100%）
@@ -437,17 +479,87 @@ export default {
     }
 
     this.getCompanyList();
+    if (this.recordType === 'usage') this.loadUsageConfig();
     this.getErrorReportRecordData();
     this.userData = sessionStorage.getItem("userData");
     console.log(this.userData);
   },
   beforeUnmount() {
+    this.usageConfigRequestVersion++;
     // 组件卸载时取消监听
     if (this.resizeObserver) {
       this.resizeObserver.disconnect();
     }
   },
   methods: {
+    resetUsageConfigForm() {
+      const config = this.savedUsageConfig;
+      this.usageConfigForm = {
+        edgeValue: String(config?.edgeValue ?? 2),
+        homeMultiple: String(config?.homeMultiple ?? 5),
+        companyMultiple: String(config?.companyMultiple ?? 2),
+      };
+    },
+    applyUsageConfig(data) {
+      this.savedUsageConfig = data.config ?? null;
+      this.usageConfigCanEdit = data.canEdit === true;
+      this.usageConfigLoaded = true;
+      this.usageConfigEditing = false;
+      this.resetUsageConfigForm();
+    },
+    async loadUsageConfig() {
+      const version = ++this.usageConfigRequestVersion;
+      this.usageConfigLoaded = false;
+      this.usageConfigLoading = true;
+      this.usageConfigEditing = false;
+      this.usageConfigSaving = false;
+      this.usageConfigCanEdit = false;
+      this.savedUsageConfig = null;
+      this.usageConfigError = '';
+      this.resetUsageConfigForm();
+      try {
+        // 与警告管理一致，后端从登录信息确定水厂，前端不提交水厂ID。
+        const response = await service.get('/meterReportErrorRecord/getUsageConfig');
+        if (version !== this.usageConfigRequestVersion) return;
+        if (response.code !== 200) throw new Error(response.msg || '配置读取失败');
+        this.applyUsageConfig(response.data);
+      } catch (error) {
+        if (version === this.usageConfigRequestVersion) this.usageConfigError = error.message || '配置读取失败，请重试';
+      } finally {
+        if (version === this.usageConfigRequestVersion) this.usageConfigLoading = false;
+      }
+    },
+    onUsageConfigEditChange(editing) { if (!editing) this.resetUsageConfigForm(); },
+    cancelUsageConfigEdit() { this.usageConfigEditing = false; this.resetUsageConfigForm(); },
+    async saveUsageConfig() {
+      if (this.usageConfigSaving || !this.usageConfigCanEdit || !this.usageConfigLoaded || !this.usageConfigEditing) return;
+      const values = Object.fromEntries(Object.entries(this.usageConfigForm).map(([key, value]) => [key, String(value).trim()]));
+      if (Object.values(values).some(value => !/^\d{1,16}(\.\d{1,2})?$/.test(value) || Number(value) <= 0)) {
+        ElMessage.error('请完整填写三个正数，最多16位整数和2位小数');
+        return;
+      }
+      if (Number(values.homeMultiple) <= 1 || Number(values.companyMultiple) <= 1) {
+        ElMessage.error('家庭和企业用户倍数必须大于1');
+        return;
+      }
+      if (Number(values.homeMultiple) < Number(values.companyMultiple)) {
+        ElMessage.error('家庭用户倍数不能小于企业用户倍数');
+        return;
+      }
+      const version = this.usageConfigRequestVersion;
+      this.usageConfigSaving = true;
+      try {
+        const response = await service.post('/meterReportErrorRecord/setUsageConfig', values);
+        if (version !== this.usageConfigRequestVersion) return;
+        if (response.code !== 200) throw new Error(response.msg || '保存失败');
+        this.applyUsageConfig(response.data);
+        ElMessage.success('吨数过大配置已保存');
+      } catch (error) {
+        if (version === this.usageConfigRequestVersion) ElMessage.error(error.message || '保存失败，请重试');
+      } finally {
+        if (version === this.usageConfigRequestVersion) this.usageConfigSaving = false;
+      }
+    },
     // ****** 手动处理分页变化，避免 watch 循环 ******
     handlePageChange(page) {
       if (this.isLoading) return;
@@ -1034,6 +1146,19 @@ export default {
   height: calc(100% - 100px);
   margin-top: 8px;
 }
+
+.usage-info .yuangong-table {
+  flex: 1;
+  min-height: 0;
+  height: auto;
+  margin-bottom: 48px;
+}
+
+.usage-config { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; padding: 10px 0; border-bottom: 1px solid #edf0ed; flex-shrink: 0; min-height: 36px; }
+.config-item { display: flex; align-items: center; gap: 6px; color: #5a5a5a; font-size: 13px; }
+.config-item .el-input { width: 110px; }
+.config-status { font-size: 12px; color: #757575; }
+.config-error { font-size: 13px; color: #e04545; }
 
 .page-box {
   height: 40px;
