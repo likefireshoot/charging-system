@@ -253,7 +253,7 @@ function buildMenu(userData) {
       arrowIcon1,
       arrowIcon2,
       children: [
-        { id: 71, name: "读数异常", icon: require("@/assets/menu/icon30.png"), icon2: require("@/assets/menu/icon31.png"), path: "/errorReportRecord/reading" },
+        { id: 71, name: "吨数倒转", icon: require("@/assets/menu/icon30.png"), icon2: require("@/assets/menu/icon31.png"), path: "/errorReportRecord/reading" },
         { id: 72, name: "吨数过大", icon: require("@/assets/menu/icon30.png"), icon2: require("@/assets/menu/icon31.png"), path: "/errorReportRecord/usage" },
       ],
     });

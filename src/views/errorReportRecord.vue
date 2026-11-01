@@ -72,14 +72,13 @@
     </div>
     <div class="yuangong-info" :class="{ 'usage-info': recordType === 'usage' }">
       <div v-if="recordType === 'usage'" class="usage-config" v-loading="usageConfigLoading">
-        <span class="config-status">当前登录水厂配置</span>
         <template v-if="usageConfigError">
           <span class="config-error">{{ usageConfigError }}</span>
           <el-button size="small" @click="loadUsageConfig">重试</el-button>
         </template>
         <template v-else-if="usageConfigLoaded">
           <label class="config-item">
-            <span>用水规模分界值（吨/日）</span>
+            <span>家庭/企业用户阈值（吨/日）</span>
             <el-input v-model="usageConfigForm.edgeValue" :disabled="!usageConfigEditing || usageConfigSaving" size="small" placeholder="请输入" />
           </label>
           <label class="config-item">
@@ -95,7 +94,7 @@
             <el-button type="success" size="small" :loading="usageConfigSaving" @click="saveUsageConfig">保存</el-button>
             <el-button size="small" :disabled="usageConfigSaving" @click="cancelUsageConfigEdit">取消</el-button>
           </template>
-          <span class="config-status">{{ savedUsageConfig && savedUsageConfig.id != null ? '最大日均值大于分界值用企业倍数，否则用家庭倍数。' : '当前使用默认配置：分界值2吨/日，家庭5倍，企业2倍。' }}</span>
+          <span class="config-status">{{ savedUsageConfig && savedUsageConfig.id != null ? '最大日均值大于分界值用企业倍数，否则用家庭倍数。' : '当前使用默认配置：分界值5吨/日，家庭10倍，企业2倍。' }}</span>
         </template>
       </div>
       <div class="command-box">
@@ -306,7 +305,7 @@ export default {
   },
   data() {
     return {
-      usageConfigForm: { edgeValue: '2', homeMultiple: '5', companyMultiple: '2' },
+      usageConfigForm: { edgeValue: '5', homeMultiple: '10', companyMultiple: '2' },
       savedUsageConfig: null,
       usageConfigLoaded: false,
       usageConfigLoading: false,
@@ -432,7 +431,7 @@ export default {
     },
     exceptionDescription() {
       return this.recordType === 'usage'
-        ? '说明：间隔≤24小时按1天、≤48小时按2天，以此类推；本次日均用水量严格大于最大日均用水量×本水厂适用倍数时拦截，未配置时默认分界值2吨/日，家庭5倍、企业2倍；暂停本次计费并等待确认。'
+        ? '说明：间隔≤24小时按1天、≤48小时按2天，以此类推；本次日均用水量严格大于最大日均用水量×本水厂适用倍数时拦截，未配置时默认分界值5吨/日，家庭10倍、企业2倍；暂停本次计费并等待确认。'
         : '说明：当本次上报吨数小于上次上报吨数，也即出现了用水读数倒转时，该上报读数异常，将被拦截并列入该异常数据列表';
     },
     // 每列的百分比宽度（仅计算实际使用列，总计 100%）
@@ -495,8 +494,8 @@ export default {
     resetUsageConfigForm() {
       const config = this.savedUsageConfig;
       this.usageConfigForm = {
-        edgeValue: String(config?.edgeValue ?? 2),
-        homeMultiple: String(config?.homeMultiple ?? 5),
+        edgeValue: String(config?.edgeValue ?? 5),
+        homeMultiple: String(config?.homeMultiple ?? 10),
         companyMultiple: String(config?.companyMultiple ?? 2),
       };
     },
