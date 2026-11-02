@@ -243,7 +243,20 @@ function buildMenu(userData) {
     tempMenus.push({ id: 6, name: "警告管理", icon: require("@/assets/menu/icon19.png"), icon2: require("@/assets/menu/icon20.png"), path: "/warningManage", ports: ["92", "93"] });
   }
   if (staffPermissionIds.value.includes(51)) {
-    tempMenus.push({ id: 7, name: "异常数据", icon: require("@/assets/menu/icon30.png"), icon2: require("@/assets/menu/icon31.png"), path: "/errorReportRecord", ports: ["92", "93"]});
+    tempMenus.push({
+      id: 7,
+      name: "异常数据",
+      icon: require("@/assets/menu/icon30.png"),
+      icon2: require("@/assets/menu/icon31.png"),
+      path: "/errorReportRecord",
+      ports: ["92", "93"],
+      arrowIcon1,
+      arrowIcon2,
+      children: [
+        { id: 71, name: "读数异常", permissionId: 51, icon: require("@/assets/menu/icon30.png"), icon2: require("@/assets/menu/icon31.png"), path: "/errorReportRecord/reading" },
+        { id: 72, name: "吨数过大", permissionId: 51, icon: require("@/assets/menu/icon30.png"), icon2: require("@/assets/menu/icon31.png"), path: "/errorReportRecord/usage" },
+      ].filter(child => !child.permissionId || staffPermissionIds.value.includes(child.permissionId)),
+    });
   }
   if (staffPermissionIds.value.includes(50)) {
     tempMenus.push({ id: 8, name: "命令状态", icon: require("@/assets/menu/icon30.png"), icon2: require("@/assets/menu/icon31.png"), path: "/commandLog", ports: ["92", "93"]});

@@ -6,6 +6,7 @@
           <span>异常类型</span>
           <el-select v-model="currentExceptionType" placeholder="请选择异常类型" @change="handleExceptionTypeChange">
             <el-option label="读数异常" value="report" />
+            <el-option label="吨数过大" value="usage" />
           </el-select>
         </div>
         <div class="search-input" style="margin-left: 10px">
