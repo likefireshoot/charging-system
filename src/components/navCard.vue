@@ -302,6 +302,7 @@ function buildMenu(userData) {
         { id: 49, name: "用户报表", icon: require("@/assets/menu/icon3.png"), icon2: require("@/assets/menu/icon4.png"), path: "/report/accountsReport" },
         { id: 136, name: "月回收报表", permissionId:98, icon: require("@/assets/menu/icon15.png"), icon2: require("@/assets/menu/icon16.png"), path: "/report/monthRecoveryReport" },
         { id: 139, name: "月实收报表", permissionId: 101, icon: require("@/assets/menu/icon15.png"), icon2: require("@/assets/menu/icon16.png"), path: "/meterReading/twoFeeMonthlyReport" },
+        { id: 141, name: "区域实收报表", permissionId: 115, icon: require("@/assets/menu/icon15.png"), icon2: require("@/assets/menu/icon16.png"), path: "/meterReading/twoFeeMonthlyRegionReport" },
         { id: 137, name: "月汇总报表", permissionId:99, icon: require("@/assets/menu/icon11.png"), icon2: require("@/assets/menu/icon12.png"), path: "/report/monthSummaryReport"},
         { id: 490, name: "收费明细表", icon: require("@/assets/menu/icon5.png"), icon2: require("@/assets/menu/icon6.png"), path: "/report/rechargeDetailReport" },
         // 下线：扣费明细表（不要随便删除，随时可能启用）
@@ -699,6 +700,9 @@ const slide = ref(true);
       border-radius: 10px;
       padding: 0 12px;
       transition: all 0.2s;
+      p {
+        white-space: nowrap;
+      }
       &:hover {
         background: #f5f5f5;
       }
@@ -760,6 +764,9 @@ const slide = ref(true);
       border-radius: 10px;
       padding: 0 12px;
       transition: all 0.2s;
+      p {
+        white-space: nowrap;
+      }
       &:hover {
         background: #f5f5f5;
       }
