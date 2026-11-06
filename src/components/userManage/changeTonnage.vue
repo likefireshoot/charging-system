@@ -11,6 +11,13 @@
         </div>
       </div>
       <div class="account-add-content">
+        <div class="reminder-banner">
+          <div class="reminder-title">温馨提示</div>
+          <div class="reminder-desc">
+            本功能仅修改系统内记录的水表吨数，该吨数同时作为用户重新计费的起始读数。
+            NB 智能水表远端的实际读数<b>不会随之改变</b>；如需同步修改表端读数，请使用「命令下发 - 设置读数」功能。
+          </div>
+        </div>
         <div class="edit-input" style="margin-right: 2%; width: 44%">
           <span>表号</span>
           <el-input
@@ -272,8 +279,9 @@ export default {
   z-index: 199;
   background-color: rgba(31, 33, 38, 0.6);
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
+  padding-top: 3vh;
 }
 
 .account-dialog-content {
@@ -303,6 +311,34 @@ export default {
   box-sizing: border-box;
   overflow-y: auto;
   max-height: 60vh;
+}
+
+.reminder-banner {
+  width: 100%;
+  box-sizing: border-box;
+  background: #fff7e6;
+  border: 1px solid #ffe0a3;
+  border-left: 4px solid #faad14;
+  border-radius: 6px;
+  padding: 12px 16px;
+  margin-bottom: 16px;
+}
+
+.reminder-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #d48806;
+  margin-bottom: 6px;
+}
+
+.reminder-desc {
+  font-size: 16px;
+  line-height: 1.7;
+  color: #8c6d1f;
+}
+
+.reminder-desc b {
+  color: #d4380d;
 }
 
 .edit-input {
