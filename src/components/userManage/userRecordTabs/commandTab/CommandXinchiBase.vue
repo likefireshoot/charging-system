@@ -177,6 +177,7 @@
 <script>
 import service from "@/api/request";
 import { ElMessage } from "element-plus";
+import { confirmTonnageChange } from "@/components/userManage/tonnageConfirm";
 
 export default {
   name: "CommandXinchiBase",
@@ -394,15 +395,17 @@ export default {
         if (!this.$refs.readCountForm) { ElMessage.error("表单未加载完成，请稍后重试"); return; }
         this.$refs.readCountForm.validate((valid) => {
           if (valid) {
-            const imei = this.meterData.imei;
-            const count = this.params_set_tai.count;
-            service
-              .get(`/command/${p}/${p}SetReadCount?imei=${imei}&readCount=${count}`)
-              .then((res) => {
-                if (res.code === 200) { ElMessage.success("表读数设置成功"); }
-                else { ElMessage.error(res.msg); }
-              })
-              .catch((error) => { ElMessage.error(error.msg); });
+            confirmTonnageChange().then(() => {
+              const imei = this.meterData.imei;
+              const count = this.params_set_tai.count;
+              service
+                .get(`/command/${p}/${p}SetReadCount?imei=${imei}&readCount=${count}`)
+                .then((res) => {
+                  if (res.code === 200) { ElMessage.success("表读数设置成功"); }
+                  else { ElMessage.error(res.msg); }
+                })
+                .catch((error) => { ElMessage.error(error.msg); });
+            }).catch(() => {});
           }
         });
       }

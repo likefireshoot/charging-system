@@ -99,6 +99,7 @@
 <script>
 import service from "@/api/request";
 import { ElMessage } from "element-plus";
+import { confirmTonnageChange } from "@/components/userManage/tonnageConfirm";
 
 export default {
   props: {
@@ -221,19 +222,21 @@ export default {
         }
         this.$refs.readCountForm.validate((valid) => {
           if (!valid) return;
-          service
-            .get(`/command/qianBaoTong/qianBaoTongSetReadCount?meterCode=${meterCode}&readCount=${this.params_set_tai.readCount}`)
-            .then((res) => {
-              if (res.code === 200) {
-                ElMessage.success("设置读数成功");
-                this.closeCommandDialog();
-              } else {
-                ElMessage.error(res.msg || res.code);
-              }
-            })
-            .catch((error) => {
-              ElMessage.error(error.message || "设置读数失败");
-            });
+          confirmTonnageChange().then(() => {
+            service
+              .get(`/command/qianBaoTong/qianBaoTongSetReadCount?meterCode=${meterCode}&readCount=${this.params_set_tai.readCount}`)
+              .then((res) => {
+                if (res.code === 200) {
+                  ElMessage.success("设置读数成功");
+                  this.closeCommandDialog();
+                } else {
+                  ElMessage.error(res.msg || res.code);
+                }
+              })
+              .catch((error) => {
+                ElMessage.error(error.message || "设置读数失败");
+              });
+          }).catch(() => {});
         });
       } else if (this.node.label === "阀门控制") {
         if (!this.$refs.valveControlForm) {

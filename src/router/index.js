@@ -38,6 +38,7 @@ import deviceManage from "@/views/deviceManage.vue";
 // import billDetailReport from "@/components/report/billDetailReport.vue";
 import abnormalChargeReport from "@/components/report/abnormalChargeReport.vue";
 import twoFeeMonthlyReport from "@/views/twoFeeMonthlyReport.vue";
+import twoFeeMonthlyRegionReport from "@/components/report/twoFeeMonthlyRegionReport.vue";
 import quickMeterReport from "@/views/quickMeterReport.vue";
 import rechargeDetailReport from "@/components/report/rechargeDetailReport.vue";
 import reviewMeterReport from "@/views/reviewMeterReport.vue";
@@ -146,6 +147,11 @@ const routes = [
             path: "twoFeeMonthlyReport",
             name: "twoFeeMonthlyReport",
             component: twoFeeMonthlyReport,
+          },
+          {
+            path: "twoFeeMonthlyRegionReport",
+            name: "twoFeeMonthlyRegionReport",
+            component: twoFeeMonthlyRegionReport,
           },
           {
             path: "monthBaseUserReport",

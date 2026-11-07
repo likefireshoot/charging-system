@@ -220,6 +220,7 @@
 <script>
 import service from "@/api/request";
 import { ElMessage } from "element-plus";
+import { confirmTonnageChange } from "@/components/userManage/tonnageConfirm";
 
 export default {
   props: {
@@ -581,20 +582,22 @@ export default {
         }
         this.$refs.readCountForm.validate((valid) => {
           if (valid) {
-            const imei = this.data.imei;
-            const count = this.params_set_tai.count;
-            service
-              .get(`/command/directXinChi/directXinChiSetReadCount?imei=${imei}&count=${count}`)
-              .then((res) => {
-                if (res.code === 200) {
-                  ElMessage.success("表读数设置成功");
-                } else {
-                  ElMessage.error(res.msg);
-                }
-              })
-              .catch((error) => {
-                ElMessage.error(error.msg);
-              });
+            confirmTonnageChange().then(() => {
+              const imei = this.data.imei;
+              const count = this.params_set_tai.count;
+              service
+                .get(`/command/directXinChi/directXinChiSetReadCount?imei=${imei}&count=${count}`)
+                .then((res) => {
+                  if (res.code === 200) {
+                    ElMessage.success("表读数设置成功");
+                  } else {
+                    ElMessage.error(res.msg);
+                  }
+                })
+                .catch((error) => {
+                  ElMessage.error(error.msg);
+                });
+            }).catch(() => {});
           }
         });
       }

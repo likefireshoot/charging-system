@@ -102,6 +102,7 @@
 <script>
 import service from "@/api/request";
 import { ElMessage } from "element-plus";
+import { confirmTonnageChange } from "@/components/userManage/tonnageConfirm";
 
 export default {
   name: "CommandShengxinBase",
@@ -192,16 +193,18 @@ export default {
         if (!this.$refs.trafficForm) { ElMessage.error("表单未加载完成，请稍后重试"); return; }
         this.$refs.trafficForm.validate((valid) => {
           if (!valid) return;
-          const meterCode = this.meterData.meterCode;
-          const cumulativeTraffic = this.params_set_tai.cumulativeTraffic;
-          const cap = p.charAt(0).toUpperCase() + p.slice(1);
-          service
-            .get(`/command/${p}/send${cap}CumulativeTrafficCommand?meterCode=${meterCode}&cumulativeTraffic=${cumulativeTraffic}`)
-            .then((res) => {
-              if (res.code === 200) { ElMessage.success("写累计流量成功"); }
-              else { ElMessage.error(res.msg || res.code); }
-            })
-            .catch((err) => { ElMessage.error(err.msg || "写累计流量失败"); console.log(err); });
+          confirmTonnageChange().then(() => {
+            const meterCode = this.meterData.meterCode;
+            const cumulativeTraffic = this.params_set_tai.cumulativeTraffic;
+            const cap = p.charAt(0).toUpperCase() + p.slice(1);
+            service
+              .get(`/command/${p}/send${cap}CumulativeTrafficCommand?meterCode=${meterCode}&cumulativeTraffic=${cumulativeTraffic}`)
+              .then((res) => {
+                if (res.code === 200) { ElMessage.success("写累计流量成功"); }
+                else { ElMessage.error(res.msg || res.code); }
+              })
+              .catch((err) => { ElMessage.error(err.msg || "写累计流量失败"); console.log(err); });
+          }).catch(() => {});
         });
       }
     },

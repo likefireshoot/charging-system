@@ -114,6 +114,7 @@
 <script>
 import service from "@/api/request";
 import { ElMessage } from "element-plus";
+import { confirmTonnageChange } from "@/components/userManage/tonnageConfirm";
 
 export default {
   props: {
@@ -270,23 +271,25 @@ export default {
         }
         this.$refs.trafficForm.validate((valid) => {
           if (!valid) return;
-          // 原有业务逻辑（未改动）
-          console.log(this.data);
-          const meterCode = this.data.meterCode;
-          const cumulativeTraffic = this.params_set_tai.cumulativeTraffic;
-          service
-            .get(`/command/shengXin/sendShengXinCumulativeTrafficCommand?meterCode=${meterCode}&cumulativeTraffic=${cumulativeTraffic}`)
-            .then((res) => {
-              if (res.code === 200) {
-                ElMessage.success("写累计流量成功");
-              } else {
-                ElMessage.error(res.code);
-              }
-            })
-            .catch((err) => {
-              ElMessage.error(err.msg);
-              console.log(err);
-            });
+          confirmTonnageChange().then(() => {
+            // 原有业务逻辑（未改动）
+            console.log(this.data);
+            const meterCode = this.data.meterCode;
+            const cumulativeTraffic = this.params_set_tai.cumulativeTraffic;
+            service
+              .get(`/command/shengXin/sendShengXinCumulativeTrafficCommand?meterCode=${meterCode}&cumulativeTraffic=${cumulativeTraffic}`)
+              .then((res) => {
+                if (res.code === 200) {
+                  ElMessage.success("写累计流量成功");
+                } else {
+                  ElMessage.error(res.code);
+                }
+              })
+              .catch((err) => {
+                ElMessage.error(err.msg);
+                console.log(err);
+              });
+          }).catch(() => {});
         });
       } else {
         ElMessage.warning("请选择命令");
