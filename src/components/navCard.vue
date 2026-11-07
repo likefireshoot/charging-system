@@ -253,7 +253,7 @@ function buildMenu(userData) {
       arrowIcon1,
       arrowIcon2,
       children: [
-        { id: 71, name: "读数异常", permissionId: 51, icon: require("@/assets/menu/icon30.png"), icon2: require("@/assets/menu/icon31.png"), path: "/errorReportRecord/reading" },
+        { id: 71, name: "吨数倒转", permissionId: 51, icon: require("@/assets/menu/icon30.png"), icon2: require("@/assets/menu/icon31.png"), path: "/errorReportRecord/reading" },
         { id: 72, name: "吨数过大", permissionId: 51, icon: require("@/assets/menu/icon30.png"), icon2: require("@/assets/menu/icon31.png"), path: "/errorReportRecord/usage" },
       ].filter(child => !child.permissionId || staffPermissionIds.value.includes(child.permissionId)),
     });
@@ -384,10 +384,10 @@ watch(
           { id: 133, name: "区域报表", permissionId: 83, icon: require("@/assets/menu/icon15.png"), icon2: require("@/assets/menu/icon16.png"), path: "/meterReading/regionMeterReport" },
           { id: 134, name: "抄表统计表", permissionId: 96, icon: require("@/assets/add/icon-10.png"), icon2: require("@/assets/add/icon-11.png"), path: "/meterReading/meterReadingReport" },
           { id: 135, name: "抄表册报表", permissionId: 97, icon: require("@/assets/menu/icon17.png"), icon2: require("@/assets/menu/icon18.png"), path: "/meterReading/meterBookReport" },
-          { id: 140, name: "表册排序", permissionId: 114, companyOnly: 95, icon: require("@/assets/menu/icon3.png"), icon2: require("@/assets/menu/icon4.png"), path: "/meterReading/codeBookSort" },
           // { id: 136, name: "月回收报表", permissionId: 98, icon: require("@/assets/menu/icon15.png"), icon2: require("@/assets/menu/icon16.png"), path: "/meterReading/monthRecoveryReport" },
           // { id: 137, name: "月汇总报表", permissionId: 99, icon: require("@/assets/menu/icon11.png"), icon2: require("@/assets/menu/icon12.png"), path: "/meterReading/monthSummaryReport"},
           { id: 138, name: "底数户报表", permissionId: 100, icon: require("@/assets/menu/icon3.png"), icon2: require("@/assets/menu/icon4.png"), path: "/meterReading/monthBaseUserReport"},
+          { id: 140, name: "表册排序", permissionId: 114, companyOnly: 95, icon: require("@/assets/menu/icon3.png"), icon2: require("@/assets/menu/icon4.png"), path: "/meterReading/codeBookSort" },
         ]
       };
 

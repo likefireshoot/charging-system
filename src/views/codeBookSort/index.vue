@@ -125,7 +125,8 @@
     <el-dialog
       v-model="adjustVisible"
       title="调整位置"
-      width="560px"
+      width="70%"
+      :lock-scroll="false"
       :close-on-click-modal="!saving"
       :close-on-press-escape="!saving"
       :show-close="!saving"
@@ -434,7 +435,7 @@ onMounted(() => {
 
     .search-content {
       display: flex;
-      width: 80%;
+      width: 70%;
       height: 100%;
     }
 
@@ -552,7 +553,7 @@ onMounted(() => {
   .adjust-body {
     .adjust-target {
       margin: 0 0 12px;
-      font-size: 15px;
+      font-size: 20px;
       color: #303133;
     }
 
@@ -560,7 +561,7 @@ onMounted(() => {
       display: flex;
       flex-direction: column;
       gap: 2px;
-      max-height: 50vh;
+      max-height: 60vh;
       overflow-y: auto;
       padding-right: 6px;
 
@@ -577,7 +578,7 @@ onMounted(() => {
 
       :deep(.el-radio__label) {
         white-space: normal;
-        font-size: 14px;
+        font-size: 18px;
       }
     }
   }

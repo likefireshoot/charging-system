@@ -66,7 +66,7 @@
         </el-select>
       </div>
       <div class="buttons">
-        <div class="sercah-btn" @click="getWaringData">
+        <div class="sercah-btn" @click="search">
           <img src="@/assets/yonghu/icon16.png" alt="" style="margin-left: 12px" />
           <span style="font-size: 18px; margin-left: 10%">搜索</span>
         </div>
@@ -852,6 +852,10 @@ export default {
         .catch((error) => {
           ElMessage.error("获取区域数据失败");
         });
+    },
+    search(){
+      this.params.pageNo = 1;
+      this.getWaringData();
     },
     getWaringData() {
       if(this.isLoading) return

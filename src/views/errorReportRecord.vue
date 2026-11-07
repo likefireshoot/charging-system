@@ -80,22 +80,21 @@
             <img src="@/assets/yonghu/icon15.png" alt="" />
           </div>
           <div v-if="recordType === 'usage'" class="usage-config" v-loading="usageConfigLoading">
-            <span class="config-status">当前登录水厂配置</span>
             <template v-if="usageConfigError">
               <span class="config-error">{{ usageConfigError }}</span>
               <el-button style="font-size: 18px" @click="loadUsageConfig">重试</el-button>
             </template>
             <template v-else-if="usageConfigLoaded">
               <label class="config-item">
-                <span>家庭用户/企业用户阈值（吨/日）</span>
+                <span>大用水量/小用水量区分值（吨/日）</span>
                 <el-input v-model="usageConfigForm.edgeValue" :disabled="!usageConfigEditing || usageConfigSaving" size="small" placeholder="请输入" />
               </label>
               <label class="config-item">
-                <span>家庭用户拦截倍数</span>
+                <span>小用水量拦截倍数</span>
                 <el-input v-model="usageConfigForm.homeMultiple" :disabled="!usageConfigEditing || usageConfigSaving" size="small" placeholder="请输入" />
               </label>
               <label class="config-item">
-                <span>企业用户拦截倍数</span>
+                <span>大用水量拦截倍数</span>
                 <el-input v-model="usageConfigForm.companyMultiple" :disabled="!usageConfigEditing || usageConfigSaving" size="small" placeholder="请输入" />
               </label>
               <el-checkbox class="config-checkbox" v-model="usageConfigEditing" style="font-size: 18px" :disabled="usageConfigSaving" @change="onUsageConfigEditChange">编辑</el-checkbox>
@@ -148,7 +147,7 @@
             <el-table-column property="meterVendor" label="品牌" :width="companyWidth" align="center" />
             <el-table-column property="valveStatus" label="阀门" :width="phoneWidth" align="center" />
             <el-table-column property="battery" label="电量" :width="phoneWidth" align="center" />
-            <el-table-column label="最近换表" :width="lastLoginTimeWidth" align="center">
+            <el-table-column v-if="recordType === 'report'" label="最近换表" :width="lastLoginTimeWidth" align="center">
               <template #default="scope">
                 <div v-if="scope.row.factoryDate">
                   {{ formatDateTime(scope.row.factoryDate) }}
@@ -156,14 +155,15 @@
                 <span v-else>-</span>
               </template>
             </el-table-column>
-            <el-table-column label="上次读数" :width="roleWidth" align="center">
+            <el-table-column v-if="recordType === 'usage'" property="compareMaxBaseline" label="历史最大日用水" :width="historyMaxWaterWidth" align="center" />
+            <el-table-column v-if="recordType === 'report'" label="上次读数" :width="roleWidth" align="center">
               <template #default="scope">
               <span @click="handlePrevReadingClick(scope.row)" style="color: #46b97e; cursor: pointer; display: block; width: 100%; text-align: center;">
                 {{ scope.row.prevReadingCount !== null && scope.row.prevReadingCount !== undefined ? scope.row.prevReadingCount : '-' }}
               </span>
               </template>
             </el-table-column>
-            <el-table-column label="上次上报" :width="lastLoginTimeWidth" align="center" #default="scope">
+            <el-table-column v-if="recordType === 'report'" label="上次上报" :width="lastLoginTimeWidth" align="center" #default="scope">
               <div v-if="scope.row.prevCreateTime">
                 {{ formatDateTime(scope.row.prevCreateTime) }}
               </div>
@@ -174,6 +174,24 @@
               <span @click="handlePrevReadingClick(scope.row)" style="color: #46b97e; cursor: pointer; display: block; width: 100%; text-align: center;">
                 {{ scope.row.readingCount !== null && scope.row.readingCount !== undefined ? scope.row.readingCount : '-' }}
               </span>
+              </template>
+            </el-table-column>
+<!--            <el-table-column v-if="recordType === 'usage'" property="dailyUsageCompare" label="本次用水量" :width="thisTimeWaterWidth"  align="center"-->
+<!--                             label-tooltip="单日内多次上报时，为该上报时段用水量；跨多日上报时，为区间用水量摊算的单日值"/>-->
+            <el-table-column
+              v-if="recordType === 'usage'"
+              property="dailyUsageCompare"
+              :width="thisTimeWaterWidth"
+              align="center"
+            >
+              <template #header>
+                <el-tooltip
+                  content="单日内多次上报时，为该上报时段用水量；跨多日上报时，为区间用水量摊算的单日值"
+                  placement="top"
+                  effect="dark"
+                >
+                  <span>本次日用水</span>
+                </el-tooltip>
               </template>
             </el-table-column>
             <el-table-column label="本次上报" :width="lastLoginTimeWidth" align="center">
@@ -310,7 +328,7 @@ export default {
   },
   data() {
     return {
-      usageConfigForm: { edgeValue: '2', homeMultiple: '5', companyMultiple: '2' },
+      usageConfigForm: { edgeValue: '5', homeMultiple: '10', companyMultiple: '2' },
       savedUsageConfig: null,
       usageConfigLoaded: false,
       usageConfigLoading: false,
@@ -361,6 +379,8 @@ export default {
       vendorWidth: 0,
       factoryDateWidth: 0,
       operationWidth: 0,  // 操作列宽
+      historyMaxWaterWidth: 0,
+      thisTimeWaterWidth: 0,
       // 父容器元素
       parentContainer: null,
       // ResizeObserver 实例
@@ -436,27 +456,48 @@ export default {
     },
     exceptionDescription() {
       return this.recordType === 'usage'
-        ? '说明：间隔≤24小时按1天、≤48小时按2天，以此类推；本次日均用水量严格大于最大日均用水量×本水厂适用倍数时拦截，未配置时默认分界值2吨/日，家庭5倍、企业2倍；暂停本次计费并等待确认。'
+        ? '说明：间隔≤24小时按1天、≤48小时按2天，以此类推；本次日均用水量严格大于最大日均用水量×本水厂适用倍数时拦截，未配置时默认分界值5吨/日，家庭10倍、企业2倍；暂停本次计费并等待确认。'
         : '说明：当本次上报吨数小于上次上报吨数，也即出现了用水读数倒转时，该上报读数异常，将被拦截并列入该异常数据列表';
     },
     // 每列的百分比宽度（仅计算实际使用列，总计 100%）
     columnPercentages() {
-      return {
-        selection: 0,
-        index: 0,
-        account: 8,
-        worker_name: 7,
-        company: 6,
-        address: 0,
-        phone: 4,
-        post: 0,
-        role: 8,
-        //password: 0,
-        last_login_time: 9,
-        vendor: 0,
-        factory_date: 0,
-        operation: 12,
-      };
+      if ( this.recordType === 'report') {
+        return {
+          selection: 0,
+          index: 0,
+          account: 8,
+          worker_name: 7,
+          company: 6,
+          address: 0,
+          phone: 4,
+          post: 0,
+          role: 8,
+          //password: 0,
+          last_login_time: 9,
+          vendor: 0,
+          factory_date: 0,
+          operation: 12,
+        };
+      }else {
+        return {
+          selection: 0,
+          index: 0,
+          account: 8,
+          worker_name: 7,
+          company: 6,
+          address: 0,
+          phone: 4,
+          post: 0,
+          role: 9,
+          //password: 0,
+          last_login_time: 10,
+          vendor: 0,
+          factory_date: 0,
+          operation: 12,
+          history_max_water: 12,
+          this_time_water: 10,
+        };
+      }
     },
   },
   mounted() {
@@ -499,8 +540,8 @@ export default {
     resetUsageConfigForm() {
       const config = this.savedUsageConfig;
       this.usageConfigForm = {
-        edgeValue: String(config?.edgeValue ?? 2),
-        homeMultiple: String(config?.homeMultiple ?? 5),
+        edgeValue: String(config?.edgeValue ?? 5),
+        homeMultiple: String(config?.homeMultiple ?? 10),
         companyMultiple: String(config?.companyMultiple ?? 2),
       };
     },
@@ -727,6 +768,8 @@ export default {
         this.vendorWidth = (this.columnPercentages.vendor / 100) * parentWidth;
         this.factoryDateWidth = (this.columnPercentages.factory_date / 100) * parentWidth;
         this.operationWidth = (this.columnPercentages.operation / 100) * parentWidth;
+        this.historyMaxWaterWidth = (this.columnPercentages.history_max_water / 100) * parentWidth;
+        this.thisTimeWaterWidth = (this.columnPercentages.this_time_water / 100) * parentWidth;
       }
     },
     getRegionData() {

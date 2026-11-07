@@ -135,16 +135,16 @@
           <template #default>合计</template>
         </el-table-column>
         <el-table-column label="总户数" min-width="100" align="center" prop="totalMeterSum" />
-        <el-table-column label="正常" min-width="90" align="center" prop="normalSum" />
-        <el-table-column label="表数未动" min-width="100" align="center" prop="noChangeSum" />
-        <el-table-column label="止码未到" min-width="100" align="center" prop="endNotReachSum" />
+        <el-table-column label="正常" min-width="90" align="center" prop="normalSum" class-name="little-column"/>
+        <el-table-column label="表数未动" min-width="100" align="center" prop="noChangeSum" class-name="little-column"/>
+        <el-table-column label="止码未到" min-width="100" align="center" prop="endNotReachSum" class-name="little-column"/>
         <el-table-column label="已抄合计" min-width="100" align="center" prop="readTotalSum" />
-        <el-table-column label="表不清" min-width="90" align="center" prop="meterUnclearSum" />
-        <el-table-column label="表破" min-width="90" align="center" prop="meterBrokenSum" />
-        <el-table-column label="表埋" min-width="90" align="center" prop="meterBuriedSum" />
-        <el-table-column label="暂拆" min-width="90" align="center" prop="tempRemoveSum" />
-        <el-table-column label="其它" min-width="90" align="center" prop="otherSum" />
-        <el-table-column label="无人在家" min-width="100" align="center" prop="noOneHomeSum" />
+        <el-table-column label="表不清" min-width="90" align="center" prop="meterUnclearSum" class-name="little-column"/>
+        <el-table-column label="表破" min-width="90" align="center" prop="meterBrokenSum" class-name="little-column"/>
+        <el-table-column label="表埋" min-width="90" align="center" prop="meterBuriedSum" class-name="little-column"/>
+        <el-table-column label="暂拆" min-width="90" align="center" prop="tempRemoveSum" class-name="little-column"/>
+        <el-table-column label="其它" min-width="90" align="center" prop="otherSum" class-name="little-column"/>
+        <el-table-column label="无人在家" min-width="100" align="center" prop="noOneHomeSum" class-name="little-column"/>
         <el-table-column label="未抄合计" min-width="100" align="center" prop="unreadTotalSum" />
         <el-table-column prop="cacheReadSum" label="已抄表未审核" align="center" min-width="100"/>
         <el-table-column prop="noReadSum" label="未抄表" align="center" min-width="100"/>
@@ -1152,6 +1152,9 @@ export default {
 }
 .command-buttons > * {
   margin-right: 10px;
+}
+:deep(.summary-row td.little-column) {
+  font-weight: 400 !important;
 }
 </style>
 
