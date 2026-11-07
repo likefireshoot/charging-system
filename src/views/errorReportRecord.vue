@@ -142,6 +142,7 @@
               </span>
               </template>
             </el-table-column>
+            <el-table-column v-if="recordType === 'report'" property="userAddr" label="地址" :width="addressWidth" align="center"/>
             <el-table-column property="meterCode" label="表号" :width="lastLoginTimeWidth" align="center" />
             <el-table-column property="companyName" label="水厂" :width="roleWidth" align="center" />
             <el-table-column property="meterVendor" label="品牌" :width="companyWidth" align="center" />
@@ -468,12 +469,12 @@ export default {
           account: 8,
           worker_name: 7,
           company: 6,
-          address: 0,
+          address: 8,
           phone: 4,
           post: 0,
           role: 8,
           //password: 0,
-          last_login_time: 9,
+          last_login_time: 7,
           vendor: 0,
           factory_date: 0,
           operation: 12,
@@ -918,7 +919,14 @@ export default {
           }
           const link = document.createElement('a');
           link.href = window.URL.createObjectURL(blob);
-          link.download = '异常数据列表.xlsx';
+          // link.download = '异常数据列表.xlsx';
+          if (exportParams.errorType === 1) {
+            link.download = '吨数倒转_异常数据列表.xlsx';
+          } else if (exportParams.errorType === 2) {
+            link.download = '吨数过大_异常数据列表.xlsx';
+          } else {
+            link.download = '异常数据列表.xlsx';
+          }
           document.body.appendChild(link);
           link.click();
           document.body.removeChild(link);
