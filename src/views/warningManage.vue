@@ -720,6 +720,7 @@ export default {
       return data.label.includes(value);
     },
     handleNodeClick(data) {
+      this.params.pageNo = 1;
       this.quyu_selected = data;
       this.region = this.quyu_selected.label;
       const region = this.quyu_selected.label;
