@@ -90,6 +90,15 @@
           <span>调账-记录删除</span>
         </div>
       </el-tooltip>
+      <div
+        class="tool-btn"
+        :class="{ 'disabled-btn': spotReadingLoading }"
+        @click="handleSpotReading"
+        v-if="canSpotReading"
+      >
+        <img src="@/assets/yonghu/icon1.png" alt="" />
+        <span>{{ spotReadingLoading ? '拉取中…' : '点抄-拉取最新数据' }}</span>
+      </div>
       <div class="refresh-btn" @click="handleRefresh">
         <img src="@/assets/yonghu/icon15.png" alt="" />
       </div>
@@ -331,6 +340,10 @@ export default {
     user: {
       type: Object,
       default: () => ({})
+    },
+    userMeters: {
+      type: Array,
+      default: () => []
     }
   },
   data() {
@@ -371,9 +384,17 @@ export default {
         // reportStatus: "正常",
       },
       recalcLoading: false, // 【新增】重新计算接口loading状态
+      spotReadingLoading: false,
     };
   },
   computed: {
+    selectedMeter() {
+      if (!this.userMeters.length || !this.user.meterCode) return {};
+      return this.userMeters.find(m => m.meterCode === this.user.meterCode) || {};
+    },
+    canSpotReading() {
+      return this.selectedMeter.meterVendor === "集万讯" && String(this.selectedMeter.status) === "0";
+    },
     meterScopeKey() {
       return JSON.stringify([this.user.companyId, this.user.userId, this.user.meterCode]);
     },
@@ -618,6 +639,28 @@ export default {
     },
     handleRefresh() {
       this.handleClear();
+    },
+    async handleSpotReading() {
+      if (this.spotReadingLoading) return;
+      if (!this.user.meterCode) {
+        ElMessage.warning("水表信息缺失，无法拉取");
+        return;
+      }
+      this.spotReadingLoading = true;
+      try {
+        const res = await service.get("/command/jiWanXun/jiWanXunSpotReading", {
+          params: { meterCode: this.user.meterCode }
+        });
+        if (res.code === 200) {
+          ElMessage.success(res.msg || "拉取成功");
+          this.handleRefresh();
+        }
+      } catch (error) {
+        // 业务失败已由响应拦截器统一提示
+        console.error("集万讯单表点抄失败", error);
+      } finally {
+        this.spotReadingLoading = false;
+      }
     },
     handlePageChange(page) {
       this.currentPage = page;
