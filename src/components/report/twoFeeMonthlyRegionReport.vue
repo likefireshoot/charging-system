@@ -816,7 +816,7 @@ export default {
 
 .region-name {
   overflow: hidden;
-  font-size: 19px;
+  font-size: 28.5px;
   font-weight: 600;
   color: #26332d;
   white-space: nowrap;
@@ -873,7 +873,7 @@ export default {
 .fee-table th,
 .fee-table td {
   padding: 8px 6px;
-  font-size: 15px;
+  font-size: 22.5px;
   text-align: center;
   border-bottom: 1px solid #eef4f1;
 }
@@ -887,7 +887,7 @@ export default {
 .fee-table th small {
   display: block;
   margin-top: 2px;
-  font-size: 11px;
+  font-size: 16.5px;
   font-weight: 400;
   color: #95a39c;
 }
