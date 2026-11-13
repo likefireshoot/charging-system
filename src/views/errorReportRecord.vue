@@ -26,7 +26,7 @@
             <span>选择状态</span>
             <el-select v-model="params.status" placeholder="选择状态">
               <el-option label="未处理" :value="0" />
-              <el-option label="忽略" :value="1" />
+              <el-option label="拦截" :value="1" />
               <el-option label="有效" :value="2" />
             </el-select>
           </div>
@@ -143,7 +143,7 @@
               </template>
             </el-table-column>
             <el-table-column v-if="recordType === 'report'" property="userAddr" label="地址" :width="addressWidth" align="center"/>
-            <el-table-column property="meterCode" label="表号" :width="lastLoginTimeWidth" align="center" />
+            <el-table-column property="meterCode" label="表号" :width="meterCodeWidth" align="center" />
             <el-table-column property="companyName" label="水厂" :width="roleWidth" align="center" />
             <el-table-column property="meterVendor" label="品牌" :width="companyWidth" align="center" />
             <el-table-column property="valveStatus" label="阀门" :width="phoneWidth" align="center" />
@@ -156,15 +156,14 @@
                 <span v-else>-</span>
               </template>
             </el-table-column>
-            <el-table-column v-if="recordType === 'usage'" property="compareMaxBaseline" label="历史最大日用水" :width="historyMaxWaterWidth" align="center" />
-            <el-table-column v-if="recordType === 'report'" label="上次读数" :width="roleWidth" align="center">
+            <el-table-column label="上次读数" :width="roleWidth" align="center">
               <template #default="scope">
               <span @click="handlePrevReadingClick(scope.row)" style="color: #46b97e; cursor: pointer; display: block; width: 100%; text-align: center;">
                 {{ scope.row.prevReadingCount !== null && scope.row.prevReadingCount !== undefined ? scope.row.prevReadingCount : '-' }}
               </span>
               </template>
             </el-table-column>
-            <el-table-column v-if="recordType === 'report'" label="上次上报" :width="lastLoginTimeWidth" align="center" #default="scope">
+            <el-table-column label="上次上报" :width="lastLoginTimeWidth" align="center" #default="scope">
               <div v-if="scope.row.prevCreateTime">
                 {{ formatDateTime(scope.row.prevCreateTime) }}
               </div>
@@ -179,22 +178,6 @@
             </el-table-column>
 <!--            <el-table-column v-if="recordType === 'usage'" property="dailyUsageCompare" label="本次用水量" :width="thisTimeWaterWidth"  align="center"-->
 <!--                             label-tooltip="单日内多次上报时，为该上报时段用水量；跨多日上报时，为区间用水量摊算的单日值"/>-->
-            <el-table-column
-              v-if="recordType === 'usage'"
-              property="dailyUsageCompare"
-              :width="thisTimeWaterWidth"
-              align="center"
-            >
-              <template #header>
-                <el-tooltip
-                  content="单日内多次上报时，为该上报时段用水量；跨多日上报时，为区间用水量摊算的单日值"
-                  placement="top"
-                  effect="dark"
-                >
-                  <span>本次日用水</span>
-                </el-tooltip>
-              </template>
-            </el-table-column>
             <el-table-column label="本次上报" :width="lastLoginTimeWidth" align="center">
               <template #header>
                 <div class="sortable-header" @click="toggleSort('time')">
@@ -213,17 +196,38 @@
               </template>
 
             </el-table-column>
+            <el-table-column
+              v-if="recordType === 'usage'"
+              property="dailyUsageCompare"
+              :width="thisTimeWaterWidth"
+              align="center"
+            >
+              <template #header>
+                <el-tooltip
+                  content="单日内多次上报时，为该上报时段用水量；跨多日上报时，为区间用水量摊算的单日值"
+                  placement="top"
+                  effect="dark"
+                >
+                  <span>本次<br>日均用水</span>
+                </el-tooltip>
+              </template>
+            </el-table-column>
+            <el-table-column v-if="recordType === 'usage'" property="compareMaxBaseline" label="历史最大日用水" :width="historyMaxWaterWidth" align="center" >
+              <template #header>
+                <div>历史最大<br/>日用水</div>
+              </template>
+            </el-table-column>
             <el-table-column label="操作" :width="operationWidth" align="center" fixed="right" #default="scope">
               <div v-if="scope.row._expired">
                 <el-tag type="warning" size="large">已失效</el-tag>
               </div>
               <div v-else-if="scope.row.status === 0 || scope.row.status === null">
-                <el-button type="danger" size="large" @click="showIgnoreDialog(scope.row)">忽略</el-button>
+                <el-button type="danger" size="large" @click="showIgnoreDialog(scope.row)">拦截</el-button>
 
                 <el-button type="success" size="large" @click="showValidDialog(scope.row)">有效</el-button>
               </div>
               <div v-else>
-                <el-tag type="info" size="large" v-if="scope.row.status === 1">忽略</el-tag>
+                <el-tag type="info" size="large" v-if="scope.row.status === 1">拦截</el-tag>
                 <el-tag type="success" size="large" v-else-if="scope.row.status === 2">有效</el-tag>
                 <el-tag type="warning" size="large" v-else-if="scope.row.status === 3">已失效</el-tag>
               </div>
@@ -238,16 +242,16 @@
         </div>
       </div>
 
-      <!-- 忽略确认弹窗 -->
+      <!-- 拦截确认弹窗 -->
       <div class="confirm-dialog" v-if="confirmDialog.visible && confirmDialog.type === 'ignore'" @click.self="closeConfirmDialog">
         <div class="confirm-dialog-content">
           <div class="dialog-title">
-            <span>忽略确认</span>
+            <span>拦截确认</span>
             <img src="@/assets/yonghu/icon4.png" alt="close" @click="closeConfirmDialog" class="dialog-close-icon" />
           </div>
           <div class="dialog-body">
-            <p class="dialog-text">是否确认忽略此条异常上报？</p>
-            <p class="dialog-subtext">该读数将被视为错误数据，不作计费依据。有效读数保持不变，后续上报仍与上次有效读数比较；忽略不代表免除用水费用。</p>
+            <p class="dialog-text">是否确认拦截此条异常上报？</p>
+            <p class="dialog-subtext">该读数将被视为错误数据，不作计费依据。有效读数保持不变，后续上报仍与上次有效读数比较；拦截不代表免除用水费用。</p>
             <div class="dialog-info-row">
               <span>用户号：{{ confirmDialog.row.userId }}</span>
               <span>表号：{{ confirmDialog.row.meterCode }}</span>
@@ -258,7 +262,7 @@
           </div>
           <div class="dialog-footer">
             <div class="dialog-btn-cancel" @click="closeConfirmDialog">取消</div>
-            <div class="dialog-btn-confirm-danger" @click="handleConfirm">{{ isSubmitting ? '处理中…' : '确认忽略' }}</div>
+            <div class="dialog-btn-confirm-danger" @click="handleConfirm">{{ isSubmitting ? '处理中…' : '确认拦截' }}</div>
           </div>
         </div>
       </div>
@@ -382,6 +386,7 @@ export default {
       operationWidth: 0,  // 操作列宽
       historyMaxWaterWidth: 0,
       thisTimeWaterWidth: 0,
+      meterCodeWidth: 0,
       // 父容器元素
       parentContainer: null,
       // ResizeObserver 实例
@@ -474,6 +479,7 @@ export default {
           post: 0,
           role: 8,
           //password: 0,
+          meter_code: 7,
           last_login_time: 7,
           vendor: 0,
           factory_date: 0,
@@ -489,14 +495,15 @@ export default {
           address: 0,
           phone: 4,
           post: 0,
-          role: 9,
+          role: 7,
           //password: 0,
-          last_login_time: 10,
+          meter_code: 7,
+          last_login_time: 9,
           vendor: 0,
           factory_date: 0,
           operation: 12,
-          history_max_water: 12,
-          this_time_water: 10,
+          history_max_water: 7,
+          this_time_water: 7,
         };
       }
     },
@@ -771,6 +778,7 @@ export default {
         this.operationWidth = (this.columnPercentages.operation / 100) * parentWidth;
         this.historyMaxWaterWidth = (this.columnPercentages.history_max_water / 100) * parentWidth;
         this.thisTimeWaterWidth = (this.columnPercentages.this_time_water / 100) * parentWidth;
+        this.meterCodeWidth = (this.columnPercentages.meter_code / 100) * parentWidth;
       }
     },
     getRegionData() {
