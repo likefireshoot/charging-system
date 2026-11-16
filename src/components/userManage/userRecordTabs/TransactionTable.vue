@@ -464,7 +464,6 @@ export default {
       }
       return selected.every(row =>
         row.rechargeType === '微信支付' &&
-        !row.hasShouju &&
         row.status == 1
       );
     },
@@ -818,7 +817,6 @@ export default {
 
             const firstRow = this.list[0];
             const canRefund = firstRow.rechargeType === '微信支付' &&
-                             !firstRow.hasShouju &&
                              firstRow.status == 1;
             console.log('第一条记录是否可退款:', canRefund);
             console.log('==============================');
@@ -1116,10 +1114,6 @@ export default {
       const refundableRecords = selectedRows.filter(row => {
         if (row.rechargeType !== '微信支付') {
           ElMessage.warning(`记录${row.recordId}不是微信支付，已跳过`);
-          return false;
-        }
-        if (row.hasShouju) {
-          ElMessage.warning(`记录${row.recordId}已开具收据，已跳过`);
           return false;
         }
         return true;

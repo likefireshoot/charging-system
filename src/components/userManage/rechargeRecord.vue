@@ -424,7 +424,6 @@ export default {
       }
       return selected.every(row =>
         row.rechargeType === '微信支付' &&
-        !row.hasShouju &&
         row.status == 1
       );
     },
@@ -1007,10 +1006,6 @@ export default {
       const refundableRecords = selectedRows.filter(row => {
         if (row.rechargeType !== '微信支付') {
           ElMessage.warning(`记录${row.rechargeRecordId}不是微信支付，已跳过`);
-          return false;
-        }
-        if (row.hasShouju) {
-          ElMessage.warning(`记录${row.rechargeRecordId}已开具收据，已跳过`);
           return false;
         }
         return true;
