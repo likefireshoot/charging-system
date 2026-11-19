@@ -26,7 +26,7 @@
             <span>选择状态</span>
             <el-select v-model="params.status" placeholder="选择状态">
               <el-option label="未处理" :value="0" />
-              <el-option label="拦截" :value="1" />
+              <el-option label="忽略" :value="1" />
               <el-option label="有效" :value="2" />
             </el-select>
           </div>
@@ -107,7 +107,7 @@
           </div>
           <div v-else>
           <span style="margin-left: 10px; color: #e04545">
-            说明：当本次上报吨数小于上次上报吨数，也即出现了用水读数倒转时，该上报读数异常，将被拦截并列入该异常数据列表
+            说明：当本次上报吨数小于上次上报吨数，也即出现了用水读数倒转时，该上报读数异常，将被忽略并列入该异常数据列表
           </span>
           </div>
         </div>
@@ -204,7 +204,7 @@
             >
               <template #header>
                 <el-tooltip
-                  content="单日内多次上报时，为该上报时段用水量；跨多日上报时，为区间用水量摊算的单日值"
+                  content="两次上报真实时间做差计算小数天数（间隔小时÷24），本次上报周期内日均用水量=总用水量÷真实小数天数"
                   placement="top"
                   effect="dark"
                 >
@@ -222,12 +222,12 @@
                 <el-tag type="warning" size="large">已失效</el-tag>
               </div>
               <div v-else-if="scope.row.status === 0 || scope.row.status === null">
-                <el-button type="danger" size="large" @click="showIgnoreDialog(scope.row)">拦截</el-button>
+                <el-button type="danger" size="large" @click="showIgnoreDialog(scope.row)">忽略</el-button>
 
                 <el-button type="success" size="large" @click="showValidDialog(scope.row)">有效</el-button>
               </div>
               <div v-else>
-                <el-tag type="info" size="large" v-if="scope.row.status === 1">拦截</el-tag>
+                <el-tag type="info" size="large" v-if="scope.row.status === 1">忽略</el-tag>
                 <el-tag type="success" size="large" v-else-if="scope.row.status === 2">有效</el-tag>
                 <el-tag type="warning" size="large" v-else-if="scope.row.status === 3">已失效</el-tag>
               </div>
@@ -242,16 +242,16 @@
         </div>
       </div>
 
-      <!-- 拦截确认弹窗 -->
+      <!-- 忽略确认弹窗 -->
       <div class="confirm-dialog" v-if="confirmDialog.visible && confirmDialog.type === 'ignore'" @click.self="closeConfirmDialog">
         <div class="confirm-dialog-content">
           <div class="dialog-title">
-            <span>拦截确认</span>
+            <span>忽略确认</span>
             <img src="@/assets/yonghu/icon4.png" alt="close" @click="closeConfirmDialog" class="dialog-close-icon" />
           </div>
           <div class="dialog-body">
-            <p class="dialog-text">是否确认拦截此条异常上报？</p>
-            <p class="dialog-subtext">该读数将被视为错误数据，不作计费依据。有效读数保持不变，后续上报仍与上次有效读数比较；拦截不代表免除用水费用。</p>
+            <p class="dialog-text">是否确认忽略此条异常上报？</p>
+            <p class="dialog-subtext">该读数将被视为错误数据，不作计费依据。有效读数保持不变，后续上报仍与上次有效读数比较；忽略不代表免除用水费用。</p>
             <div class="dialog-info-row">
               <span>用户号：{{ confirmDialog.row.userId }}</span>
               <span>表号：{{ confirmDialog.row.meterCode }}</span>
@@ -262,7 +262,7 @@
           </div>
           <div class="dialog-footer">
             <div class="dialog-btn-cancel" @click="closeConfirmDialog">取消</div>
-            <div class="dialog-btn-confirm-danger" @click="handleConfirm">{{ isSubmitting ? '处理中…' : '确认拦截' }}</div>
+            <div class="dialog-btn-confirm-danger" @click="handleConfirm">{{ isSubmitting ? '处理中…' : '确认忽略' }}</div>
           </div>
         </div>
       </div>
