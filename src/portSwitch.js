@@ -18,5 +18,6 @@ export function getEffectivePort() {
   if (hostname.startsWith("meter.")) return "92";
   if (hostname.startsWith("charge.")) return "93";
 
-  return window.location.port;
+  const port = window.location.port;
+  return port === "94" ? "93" : port;
 }
