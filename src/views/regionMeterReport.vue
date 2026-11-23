@@ -132,6 +132,11 @@
           <span>导出PDF</span>
         </div>
 
+        <div @click="exportReport('numeric')" class="command-btn">
+          <img src="@/assets/yonghu/icon1.3.png" alt="" />
+          <span>导出数控表</span>
+        </div>
+
         <div class="cmd-btn refresh-btn" @click="reflush" title="刷新">
           <img src="@/assets/yonghu/icon15.png" alt="" />
         </div>
@@ -720,32 +725,40 @@ const handleCurrentChange = (val) => {
 };
 
 // 导出：请求后端生成文件并下载
-// type: 'excel' | 'pdf'
+// type: 'excel' | 'pdf' | 'numeric'
 const exportReport = async (type) => {
-  if (!searchParams.region) {
+  if (type !== 'numeric' && !searchParams.region) {
     ElMessage.warning('请先选择区域');
     return;
   }
 
-  const path = type === 'excel'
-    ? '/manual/charge/exportRegionReportExcel'
-    : '/manual/charge/exportRegionReportPdf';
+  const exportPaths = {
+    excel: '/manual/charge/exportRegionReportExcel',
+    pdf: '/manual/charge/exportRegionReportPdf',
+    numeric: '/manual/charge/exportCompanyNumericMeterCsv'
+  };
+  const path = exportPaths[type];
 
-  // 本工程 request 拦截器会覆盖 GET 的 params，因此筛选参数拼进 URL 字符串
-  const query = new URLSearchParams({
-    regionId: searchParams.region,
-    keyword: searchKeyword.value || '',
-    reportStatus: reportStatus.value || '',
-    waterCompareOpt: waterCompareOpt.value || '',
-    waterCompareVal: waterCompareVal.value ?? 40,
-    regionName: regionName.value,
-    codeBookName: codeBookName.value,
-    companyName: currentCompanyName.value || ''  // 仅 PDF 用到，可始终传
-  });
+  // 数控表始终导出当前账号所属水厂的全部数控表，不带区域报表筛选条件。
+  const query = new URLSearchParams();
+  if (type !== 'numeric') {
+    query.set('regionId', searchParams.region);
+    query.set('keyword', searchKeyword.value || '');
+    query.set('reportStatus', reportStatus.value || '');
+    query.set('waterCompareOpt', waterCompareOpt.value || '');
+    query.set('waterCompareVal', waterCompareVal.value ?? 40);
+    query.set('regionName', regionName.value || '');
+    query.set('codeBookName', codeBookName.value || '');
+    query.set('companyName', currentCompanyName.value || '');
+    if (searchParams.codeBook) {
+      query.set('codeBookId', searchParams.codeBook);
+    }
+  }
 
   loading.value = true;
   try {
-    const resp = await service.get(`${path}?${query}`, { responseType: 'blob', skipAutoMsg: true });
+    const requestUrl = query.toString() ? `${path}?${query}` : path;
+    const resp = await service.get(requestUrl, { responseType: 'blob', skipAutoMsg: true });
     const headers = resp.headers || {};
 
     // 空数据处理：后端返回 X-Empty-Data: true，不保存文件
@@ -763,7 +776,8 @@ const exportReport = async (type) => {
     if (m) {
       fileName = decodeURIComponent(m[1]);
     } else {
-      const ext = type === 'excel' ? 'xlsx' : type;
+      const extensions = { excel: 'xlsx', pdf: 'pdf', numeric: 'csv' };
+      const ext = extensions[type];
       fileName = `区域抄表报表_${regionName.value}_${codeBookName.value}.${ext}`;
     }
 
